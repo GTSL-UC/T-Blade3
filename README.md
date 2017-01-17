@@ -8,40 +8,18 @@ This program is free software; you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.  For the complete terms of the GNU General Public License, please see this URL:
 http://www.gnu.org/licenses/gpl-2.0.html 
 
-'************************************************************'
-'************************************************************'
-'****  T-BLADE3:Turbomachinery BLADE 3D Geometry Builder ****'
-'****                                                    ****'
-'****  Version 0.0                                       ****'
-'****                                                    ****'
-'****  ...was also called as below till Aug 2016...      ****'
-'****  3DBGB: 3 Dimensional Blade Geometry Builder       ****'
-'****                                                    ****'
-'****  Version 1.3                                       ****'
-'****                                                    ****'
-'****  This software comes with ABSOLUTELY NO WARRANTY   ****'
-'****                                                    ****'
-'****  This is a program which generates a 3D blade...   ****'
-'****  ...shape and outputs 3D blade section files.      ****'
-'****                                                    ****'
-'****  Inputs: LE and TE curve(x,r), inlet angle,        ****'
-'****          exit angle, chord, tm/c, incidence,       ****'
-'****          deviation, secondary flow angles,         ****'
-'****          streamline coordinates:(x,r)              ****'
-'****          control points for sweep, lean,           ****'
-'****          blade scaling factor.                     ****'
-'****                                                    ****'
-'****  Outputs: 3D blade sections (x,y,z),               ****'
-'****           2D airfoils (mprime,theta).              ****'
-'****                                                    ****'
-'****  ---------------by Kiran Siddappaji         ----   ****'
-'****  ---------------by Mark G. Turner           ----   ****'
-'****  ------------------- turnermr@ucmail.uc.edu ----   ****'
-'****  ---------------by Karthik Balasubramanian  ----   ****'
-'****  ---------------by Syed Moez Hussain Mahmood----   ****'
-'****  ---------------by Ahmed Nemnem             ----   ****'
-'****  ---------------by Marshall C. Galbraith    ----   ****'
-'************************************************************'
-'************************************************************'
+Inputs: LE and TE curve(x,r), inlet and exit angles, chord, tm/c, incidence, deviation,construction line cordinates:(x,r),
+        control points for sweep, lean, blade scaling factor. 
+        
+Outputs: 3D blade sections (x,y,z), 2D airfoils (mprime,theta), 2D grids with periodic boundaries.
+
+Authors: 
+Kiran Siddappaji         
+Mark G. Turner (turnermr@ucmail.uc.edu)           
+Karthik Balasubramanian  
+Syed Moez Hussain Mahmood
+Ahmed Farid Nemnem             
+Marshall C. Galbraith  
+
 
 Please visit the website http://gtsl.ase.uc.edu/t-blade3/ for more information.
