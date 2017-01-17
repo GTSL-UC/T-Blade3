@@ -13,7 +13,7 @@ Inputs: LE and TE curve(x,r), inlet and exit angles, chord, tm/c, incidence, dev
         
 Outputs: 3D blade sections (x,y,z), 2D airfoils (mprime,theta), 2D grids with periodic boundaries.
 
-Authors: 
+Below are the authors:
 Kiran Siddappaji         
 Mark G. Turner (turnermr@ucmail.uc.edu)           
 Karthik Balasubramanian  
