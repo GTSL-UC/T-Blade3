@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['s809m',['s809m',['../airfoiltypes_8f90.html#aa84a13e1320fe2e1eab9152e7fdb2df0',1,'airfoiltypes.f90']]],
+  ['scalc',['scalc',['../spline_8f90.html#a66314c0d654eff147600d9151fe6ad43',1,'spline.f90']]],
+  ['scaled',['scaled',['../func_nsubs_8f90.html#a50bc8afe7f9e452ccb73514e97ca797a',1,'funcNsubs.f90']]],
+  ['section_5forientation',['section_orientation',['../lespline_8f90.html#a9f1575aba3ce85edb6fe922150251bcc',1,'lespline.f90']]],
+  ['segspl',['segspl',['../spline_8f90.html#a63ebe6afdb0157131dc4617fc9b2d088',1,'spline.f90']]],
+  ['seval',['seval',['../spline_8f90.html#ad1042233290c73d457f8ebb490d6cfb0',1,'spline.f90']]],
+  ['sevall',['sevall',['../spline_8f90.html#ae12b49d0c3950a8711e046df6dfc7ff5',1,'spline.f90']]],
+  ['sinvrt',['sinvrt',['../spline_8f90.html#ab5b0cf1547429c4a8ff7016b8e1f991c',1,'spline.f90']]],
+  ['span_5foutput',['span_output',['../spanwise__output_8f90.html#a86780b596d026f872dd8ede25a681430',1,'spanwise_output.f90']]],
+  ['span_5fvariation',['span_variation',['../spanwise__variation_8f90.html#a89815cd26dce4f527cda3888e6bd5e4b',1,'spanwise_variation.f90']]],
+  ['splina',['splina',['../spline_8f90.html#a3c878fa6b2e53140633297940a98e8bc',1,'spline.f90']]],
+  ['splind',['splind',['../spline_8f90.html#aa9246de3e5773632eb620cc4d151964b',1,'spline.f90']]],
+  ['spline',['spline',['../spline_8f90.html#a355599e71d0cfc3b5acbc54366521bb5',1,'spline.f90']]],
+  ['splinethick',['splinethick',['../splinethick_8f90.html#a33ce5218842ab375847d280e88cf257b',1,'splinethick.f90']]],
+  ['splinethick_5frefine',['splinethick_refine',['../lespline_8f90.html#aab54ab4bcec582541576e1500659f46f',1,'lespline.f90']]],
+  ['splinethickmult',['splinethickmult',['../splinethick_8f90.html#af049d9f2138cbb8bee82a58fec39a29e',1,'splinethick.f90']]],
+  ['st_5fline_5fintersection',['st_line_intersection',['../func_nsubs_8f90.html#ae926fe9b2bcad043feaf1b7e5f4e7ab6',1,'funcNsubs.f90']]],
+  ['stacking',['stacking',['../func_nsubs_8f90.html#ac45892d1114b6596d21635c8ff1c9429',1,'funcNsubs.f90']]],
+  ['stinglegrid',['stinglegrid',['../ellipgrid_8f90.html#ae47ef85c421748bee190d8cffa59a6cf',1,'ellipgrid.f90']]],
+  ['streamlines',['streamlines',['../func_nsubs_8f90.html#af36676ddada4a392f839d5884a3f0994',1,'funcNsubs.f90']]],
+  ['subdivide1d',['subdivide1d',['../ellipgrid_8f90.html#aacf8b315a6f9a55076d90c6548dfe96c',1,'ellipgrid.f90']]],
+  ['subdivide2d',['subdivide2d',['../ellipgrid_8f90.html#a42a928bec1247db70e46f617b4d7e0d3',1,'ellipgrid.f90']]],
+  ['sum_5falpha_5ffunction',['sum_alpha_function',['../lespline_8f90.html#ade014f34765a71df4c694a41bd94932a',1,'lespline.f90']]]
+];

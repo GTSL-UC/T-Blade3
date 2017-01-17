@@ -1,0 +1,88 @@
+\hypertarget{bsplinecam_8f90}{}\section{C\+:/\+Git3\+D\+B\+G\+B/source/bsplinecam.f90 File Reference}
+\label{bsplinecam_8f90}\index{C\+:/\+Git3\+D\+B\+G\+B/source/bsplinecam.\+f90@{C\+:/\+Git3\+D\+B\+G\+B/source/bsplinecam.\+f90}}
+\subsection*{Functions/\+Subroutines}
+\begin{DoxyCompactItemize}
+\item 
+subroutine \hyperlink{bsplinecam_8f90_a9b1c34e73d6eb153d605e06274effdae}{bsplinecam} (xcp, ycp, np, ncp, u, ainl, aext, sang, chrd, cam\+\_\+u, c
+\item 
+real $\ast$8 function \hyperlink{bsplinecam_8f90_af4379365bf9e92538191fcb377a6e7fa}{angle} (y\+\_\+cp, x\+\_\+cp, angle0, t)
+\item 
+real $\ast$8 function \hyperlink{bsplinecam_8f90_a5f344dd1ac7aa0679039a2bd0531aec6}{camber} (y\+\_\+cp, x\+\_\+cp, angle0, camber0, t)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function/\+Subroutine Documentation}
+\hypertarget{bsplinecam_8f90_af4379365bf9e92538191fcb377a6e7fa}{}\index{bsplinecam.\+f90@{bsplinecam.\+f90}!angle@{angle}}
+\index{angle@{angle}!bsplinecam.\+f90@{bsplinecam.\+f90}}
+\subsubsection[{angle(y\+\_\+cp, x\+\_\+cp, angle0, t)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function angle (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(4), intent(in)}]{y\+\_\+cp, }
+\item[{real$\ast$8, dimension(4), intent(in)}]{x\+\_\+cp, }
+\item[{real$\ast$8, intent(in)}]{angle0, }
+\item[{real$\ast$8, intent(in)}]{t}
+\end{DoxyParamCaption}
+)}\label{bsplinecam_8f90_af4379365bf9e92538191fcb377a6e7fa}
+
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{bsplinecam_8f90_af4379365bf9e92538191fcb377a6e7fa_icgraph}
+\end{center}
+\end{figure}
+
+
+\hypertarget{bsplinecam_8f90_a9b1c34e73d6eb153d605e06274effdae}{}\index{bsplinecam.\+f90@{bsplinecam.\+f90}!bsplinecam@{bsplinecam}}
+\index{bsplinecam@{bsplinecam}!bsplinecam.\+f90@{bsplinecam.\+f90}}
+\subsubsection[{bsplinecam(xcp, ycp, np, ncp, u, ainl, aext, sang, chrd, cam\+\_\+u, c}]{\setlength{\rightskip}{0pt plus 5cm}subroutine bsplinecam (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(ncp)}]{xcp, }
+\item[{real$\ast$8, dimension(ncp)}]{ycp, }
+\item[{integer}]{np, }
+\item[{integer}]{ncp, }
+\item[{real$\ast$8, dimension(np\+\_\+side)}]{u, }
+\item[{real$\ast$8}]{ainl, }
+\item[{real$\ast$8}]{aext, }
+\item[{real$\ast$8}]{sang, }
+\item[{real$\ast$8}]{chrd, }
+\item[{real$\ast$8, dimension(np)}]{cam\+\_\+u, }
+\item[{}]{c}
+\end{DoxyParamCaption}
+)}\label{bsplinecam_8f90_a9b1c34e73d6eb153d605e06274effdae}
+
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=317pt]{bsplinecam_8f90_a9b1c34e73d6eb153d605e06274effdae_icgraph}
+\end{center}
+\end{figure}
+
+
+\hypertarget{bsplinecam_8f90_a5f344dd1ac7aa0679039a2bd0531aec6}{}\index{bsplinecam.\+f90@{bsplinecam.\+f90}!camber@{camber}}
+\index{camber@{camber}!bsplinecam.\+f90@{bsplinecam.\+f90}}
+\subsubsection[{camber(y\+\_\+cp, x\+\_\+cp, angle0, camber0, t)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function camber (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(4), intent(in)}]{y\+\_\+cp, }
+\item[{real$\ast$8, dimension(4), intent(in)}]{x\+\_\+cp, }
+\item[{real$\ast$8, intent(in)}]{angle0, }
+\item[{real$\ast$8, intent(in)}]{camber0, }
+\item[{real$\ast$8, intent(in)}]{t}
+\end{DoxyParamCaption}
+)}\label{bsplinecam_8f90_a5f344dd1ac7aa0679039a2bd0531aec6}
+
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{bsplinecam_8f90_a5f344dd1ac7aa0679039a2bd0531aec6_icgraph}
+\end{center}
+\end{figure}
+
+

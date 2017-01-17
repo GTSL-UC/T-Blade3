@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['b',['b',['../namespaceglobvar.html#a8accedd2450a13e63eb70b05d0528797',1,'globvar::b()'],['../namespacegridvar.html#a88f13d276e07180f43279156c26a1c41',1,'gridvar::b()']]],
+  ['b1',['b1',['../namespaceglobvar.html#a957461f913a85866eb6d67bc8660bc5d',1,'globvar']]],
+  ['b2',['b2',['../namespaceglobvar.html#a6c6b282f127b3722eee82e9d331f535e',1,'globvar']]],
+  ['beta1star',['beta1star',['../namespaceglobvar.html#abb730f89383edc04d1631f6dc16ad5c6',1,'globvar']]],
+  ['beta1star_5fnew',['beta1star_new',['../namespaceglobvar.html#a9b66a28ec78457551885e4ad3091f8fe',1,'globvar']]],
+  ['beta2star',['beta2star',['../namespaceglobvar.html#a1504d995004c2c3cd93ac71f6c9028e0',1,'globvar']]],
+  ['beta2star_5fnew',['beta2star_new',['../namespaceglobvar.html#aa2687515a32abc133ab720b0690976ba',1,'globvar']]],
+  ['beta_5fswitch',['beta_switch',['../namespaceglobvar.html#ac2f0dd583ec6012e046c832b73410878',1,'globvar']]],
+  ['bf1',['bf1',['../namespaceglobvar.html#aed39a88b831b27b5b463d57a00a79f88',1,'globvar']]],
+  ['bf2',['bf2',['../namespaceglobvar.html#ac00ea6ddd54af474c45fe888882c8a54',1,'globvar']]],
+  ['bggrid_5fall',['bggrid_all',['../namespaceglobvar.html#a62db14137ca5f48f595e1008d33688ab',1,'globvar']]],
+  ['bladedata',['bladedata',['../namespaceglobvar.html#a19f797343d8c12180411f1e3f50c5209',1,'globvar']]],
+  ['bladerow',['bladerow',['../namespaceglobvar.html#ae77b9f21d86127ac705b4176dd89f3e7',1,'globvar']]],
+  ['blext',['blext',['../namespaceglobvar.html#afebc24dd143d18989fbeb7223a277ab8',1,'globvar']]],
+  ['blrow',['blrow',['../namespaceglobvar.html#ae058016a63919ba09dda0290e83e60a0',1,'globvar']]],
+  ['bspline_5fchord_5fcurv',['bspline_chord_curv',['../namespaceglobvar.html#ac2712a968280dc32e12e905f6cc3cc91',1,'globvar']]],
+  ['bspline_5fle',['bspline_le',['../namespaceglobvar.html#a5c6f14b2066b824a38b5a56803ec5c3a',1,'globvar']]],
+  ['bspline_5fthk',['bspline_thk',['../namespaceglobvar.html#af72c9cb4baffb66f0f81b68cef5018e8',1,'globvar']]],
+  ['bsv1',['bsv1',['../namespaceglobvar.html#af5f7b2251f75b81eeb565207d1b40aab',1,'globvar']]],
+  ['bsv2',['bsv2',['../namespaceglobvar.html#a50c172f04174a319fcbf69991adb2a97',1,'globvar']]]
+];

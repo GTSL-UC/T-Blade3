@@ -1,0 +1,363 @@
+\hypertarget{bspline3_8f90}{}\section{C\+:/\+Git3\+D\+B\+G\+B/source/bspline3.f90 File Reference}
+\label{bspline3_8f90}\index{C\+:/\+Git3\+D\+B\+G\+B/source/bspline3.\+f90@{C\+:/\+Git3\+D\+B\+G\+B/source/bspline3.\+f90}}
+\subsection*{Functions/\+Subroutines}
+\begin{DoxyCompactItemize}
+\item 
+subroutine \hyperlink{bspline3_8f90_a92250bb4e8b3cc6a081d56e982d5bfd7}{bspline3} (xcp, ycp, ncp, x, y, nspan, ia)
+\item 
+real $\ast$8 function \hyperlink{bspline3_8f90_a876b80c737790ddcd8cd93e9cf0c3d90}{bspline} (cp, t)
+\item 
+real $\ast$8 function \hyperlink{bspline3_8f90_a0a37f176ebc11541781e38f68f4d1a3e}{d\+\_\+bspline} (cp, t)
+\item 
+real $\ast$8 function \hyperlink{bspline3_8f90_a799109ca306b9e7ba96828dfb26a7608}{dd\+\_\+bspline} (cp, t)
+\item 
+real $\ast$8 function \hyperlink{bspline3_8f90_a0a51c311a84359ce64857be35fd49e26}{d3\+\_\+bspline} (cp, t)
+\item 
+subroutine \hyperlink{bspline3_8f90_a68f8db1f5c1e4f4e0784106fd195b1c0}{bspline\+\_\+arclength} (arclength, xcp, ycp, ncp, degree)
+\item 
+subroutine \hyperlink{bspline3_8f90_a4039b2d4eb7420c4db088018084c788e}{bspline\+\_\+jt} (j, t, arclength, ncp, degree, s)
+\item 
+real $\ast$8 function \hyperlink{bspline3_8f90_ad4747234d29e2a5f5b03a0093d9892cf}{bspline\+\_\+cp} (cp, arclength, ncp, degree, s)
+\item 
+real $\ast$8 function \hyperlink{bspline3_8f90_a8b69f577b0915d1c813ec5ef9f1d83e2}{d\+\_\+bspline\+\_\+cp} (cp, arclength, ncp, degree, s)
+\item 
+real $\ast$8 function \hyperlink{bspline3_8f90_aa631f1850271138144a5d22fc3399862}{dd\+\_\+bspline\+\_\+cp} (cp, arclength, ncp, degree, s)
+\item 
+real $\ast$8 function \hyperlink{bspline3_8f90_a4d0df1205efee4866b9e3c35eee96933}{d3\+\_\+bspline\+\_\+cp} (cp, arclength, ncp, degree, s)
+\item 
+real $\ast$8 function \hyperlink{bspline3_8f90_a30559a73ceea14913f355464954bb790}{d4\+\_\+bspline\+\_\+cp} (cp, arclength, ncp, degree, s)
+\item 
+subroutine \hyperlink{bspline3_8f90_ad414cab3eccec4d68ab800b9a676a921}{bspline\+\_\+y\+\_\+of\+\_\+x} (y, x, np, xcp, ycp, ncp, degree)
+\item 
+subroutine \hyperlink{bspline3_8f90_a7d2ef241d68f7850542865be9f217e5d}{bspline\+\_\+y\+\_\+of\+\_\+x\+\_\+refine} (y, x, np, xcp, ycp, ncp, degree)
+\item 
+real $\ast$8 function \hyperlink{bspline3_8f90_a47edcf85274770c2973d5ca6269e1c55}{bspline\+\_\+t\+\_\+newton} (cp, u)
+\item 
+real $\ast$8 function \hyperlink{bspline3_8f90_a32608cdb4f2dd2cddbcd585ea2e11622}{bspline4} (cp, t)
+\item 
+real $\ast$8 function \hyperlink{bspline3_8f90_aa5de7850f01068d93f8eb0c5890572e8}{d\+\_\+bspline4} (cp, t)
+\item 
+real $\ast$8 function \hyperlink{bspline3_8f90_aabbe2d5490d3ed9c6517877ff5148435}{dd\+\_\+bspline4} (cp, t)
+\item 
+real $\ast$8 function \hyperlink{bspline3_8f90_abc5eac4abfe9bd8a76820bc8e7a651f5}{d3\+\_\+bspline4} (cp, t)
+\item 
+real $\ast$8 function \hyperlink{bspline3_8f90_a6eb3c01da1c6fd0f74e36296f66746f4}{d4\+\_\+bspline4} (cp, t)
+\item 
+real $\ast$8 function \hyperlink{bspline3_8f90_a49900949e51d31c78d83ea2634d5bc8a}{bspline4\+\_\+t\+\_\+newton} (cp, u)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function/\+Subroutine Documentation}
+\hypertarget{bspline3_8f90_a876b80c737790ddcd8cd93e9cf0c3d90}{}\index{bspline3.\+f90@{bspline3.\+f90}!bspline@{bspline}}
+\index{bspline@{bspline}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{bspline(cp, t)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function bspline (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(4), intent(in)}]{cp, }
+\item[{real$\ast$8, intent(in)}]{t}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_a876b80c737790ddcd8cd93e9cf0c3d90}
+\hypertarget{bspline3_8f90_a92250bb4e8b3cc6a081d56e982d5bfd7}{}\index{bspline3.\+f90@{bspline3.\+f90}!bspline3@{bspline3}}
+\index{bspline3@{bspline3}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{bspline3(xcp, ycp, ncp, x, y, nspan, ia)}]{\setlength{\rightskip}{0pt plus 5cm}subroutine bspline3 (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(ncp)}]{xcp, }
+\item[{real$\ast$8, dimension(ncp)}]{ycp, }
+\item[{integer}]{ncp, }
+\item[{real$\ast$8, dimension(nspan)}]{x, }
+\item[{real$\ast$8, dimension(nspan)}]{y, }
+\item[{integer}]{nspan, }
+\item[{integer}]{ia}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_a92250bb4e8b3cc6a081d56e982d5bfd7}
+\hypertarget{bspline3_8f90_a32608cdb4f2dd2cddbcd585ea2e11622}{}\index{bspline3.\+f90@{bspline3.\+f90}!bspline4@{bspline4}}
+\index{bspline4@{bspline4}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{bspline4(cp, t)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function bspline4 (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(5), intent(in)}]{cp, }
+\item[{real$\ast$8, intent(in)}]{t}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_a32608cdb4f2dd2cddbcd585ea2e11622}
+\hypertarget{bspline3_8f90_a49900949e51d31c78d83ea2634d5bc8a}{}\index{bspline3.\+f90@{bspline3.\+f90}!bspline4\+\_\+t\+\_\+newton@{bspline4\+\_\+t\+\_\+newton}}
+\index{bspline4\+\_\+t\+\_\+newton@{bspline4\+\_\+t\+\_\+newton}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{bspline4\+\_\+t\+\_\+newton(cp, u)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function bspline4\+\_\+t\+\_\+newton (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(5), intent(in)}]{cp, }
+\item[{real$\ast$8, intent(in)}]{u}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_a49900949e51d31c78d83ea2634d5bc8a}
+\hypertarget{bspline3_8f90_a68f8db1f5c1e4f4e0784106fd195b1c0}{}\index{bspline3.\+f90@{bspline3.\+f90}!bspline\+\_\+arclength@{bspline\+\_\+arclength}}
+\index{bspline\+\_\+arclength@{bspline\+\_\+arclength}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{bspline\+\_\+arclength(arclength, xcp, ycp, ncp, degree)}]{\setlength{\rightskip}{0pt plus 5cm}subroutine bspline\+\_\+arclength (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(ncp-\/degree+1), intent(out)}]{arclength, }
+\item[{real$\ast$8, dimension(ncp), intent(in)}]{xcp, }
+\item[{real$\ast$8, dimension(ncp), intent(in)}]{ycp, }
+\item[{integer, intent(in)}]{ncp, }
+\item[{integer, intent(in)}]{degree}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_a68f8db1f5c1e4f4e0784106fd195b1c0}
+
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{bspline3_8f90_a68f8db1f5c1e4f4e0784106fd195b1c0_icgraph}
+\end{center}
+\end{figure}
+
+
+\hypertarget{bspline3_8f90_ad4747234d29e2a5f5b03a0093d9892cf}{}\index{bspline3.\+f90@{bspline3.\+f90}!bspline\+\_\+cp@{bspline\+\_\+cp}}
+\index{bspline\+\_\+cp@{bspline\+\_\+cp}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{bspline\+\_\+cp(cp, arclength, ncp, degree, s)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function bspline\+\_\+cp (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(ncp), intent(in)}]{cp, }
+\item[{real$\ast$8, dimension(ncp-\/2), intent(in)}]{arclength, }
+\item[{integer, intent(in)}]{ncp, }
+\item[{integer, intent(in)}]{degree, }
+\item[{real$\ast$8, intent(in)}]{s}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_ad4747234d29e2a5f5b03a0093d9892cf}
+
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=237pt]{bspline3_8f90_ad4747234d29e2a5f5b03a0093d9892cf_cgraph}
+\end{center}
+\end{figure}
+
+
+\hypertarget{bspline3_8f90_a4039b2d4eb7420c4db088018084c788e}{}\index{bspline3.\+f90@{bspline3.\+f90}!bspline\+\_\+jt@{bspline\+\_\+jt}}
+\index{bspline\+\_\+jt@{bspline\+\_\+jt}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{bspline\+\_\+jt(j, t, arclength, ncp, degree, s)}]{\setlength{\rightskip}{0pt plus 5cm}subroutine bspline\+\_\+jt (
+\begin{DoxyParamCaption}
+\item[{integer, intent(out)}]{j, }
+\item[{real$\ast$8, intent(out)}]{t, }
+\item[{real$\ast$8, dimension(ncp-\/degree+1), intent(in)}]{arclength, }
+\item[{integer, intent(in)}]{ncp, }
+\item[{integer, intent(in)}]{degree, }
+\item[{real$\ast$8, intent(in)}]{s}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_a4039b2d4eb7420c4db088018084c788e}
+
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=253pt]{bspline3_8f90_a4039b2d4eb7420c4db088018084c788e_icgraph}
+\end{center}
+\end{figure}
+
+
+\hypertarget{bspline3_8f90_a47edcf85274770c2973d5ca6269e1c55}{}\index{bspline3.\+f90@{bspline3.\+f90}!bspline\+\_\+t\+\_\+newton@{bspline\+\_\+t\+\_\+newton}}
+\index{bspline\+\_\+t\+\_\+newton@{bspline\+\_\+t\+\_\+newton}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{bspline\+\_\+t\+\_\+newton(cp, u)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function bspline\+\_\+t\+\_\+newton (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(4), intent(in)}]{cp, }
+\item[{real$\ast$8, intent(in)}]{u}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_a47edcf85274770c2973d5ca6269e1c55}
+\hypertarget{bspline3_8f90_ad414cab3eccec4d68ab800b9a676a921}{}\index{bspline3.\+f90@{bspline3.\+f90}!bspline\+\_\+y\+\_\+of\+\_\+x@{bspline\+\_\+y\+\_\+of\+\_\+x}}
+\index{bspline\+\_\+y\+\_\+of\+\_\+x@{bspline\+\_\+y\+\_\+of\+\_\+x}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{bspline\+\_\+y\+\_\+of\+\_\+x(y, x, np, xcp, ycp, ncp, degree)}]{\setlength{\rightskip}{0pt plus 5cm}subroutine bspline\+\_\+y\+\_\+of\+\_\+x (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(np), intent(out)}]{y, }
+\item[{real$\ast$8, dimension(np), intent(in)}]{x, }
+\item[{integer, intent(in)}]{np, }
+\item[{real$\ast$8, dimension(ncp), intent(in)}]{xcp, }
+\item[{real$\ast$8, dimension(ncp), intent(in)}]{ycp, }
+\item[{integer, intent(in)}]{ncp, }
+\item[{integer, intent(in)}]{degree}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_ad414cab3eccec4d68ab800b9a676a921}
+
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{bspline3_8f90_ad414cab3eccec4d68ab800b9a676a921_icgraph}
+\end{center}
+\end{figure}
+
+
+\hypertarget{bspline3_8f90_a7d2ef241d68f7850542865be9f217e5d}{}\index{bspline3.\+f90@{bspline3.\+f90}!bspline\+\_\+y\+\_\+of\+\_\+x\+\_\+refine@{bspline\+\_\+y\+\_\+of\+\_\+x\+\_\+refine}}
+\index{bspline\+\_\+y\+\_\+of\+\_\+x\+\_\+refine@{bspline\+\_\+y\+\_\+of\+\_\+x\+\_\+refine}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{bspline\+\_\+y\+\_\+of\+\_\+x\+\_\+refine(y, x, np, xcp, ycp, ncp, degree)}]{\setlength{\rightskip}{0pt plus 5cm}subroutine bspline\+\_\+y\+\_\+of\+\_\+x\+\_\+refine (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(np), intent(out)}]{y, }
+\item[{real$\ast$8, dimension(np), intent(in)}]{x, }
+\item[{integer, intent(in)}]{np, }
+\item[{real$\ast$8, dimension(ncp), intent(in)}]{xcp, }
+\item[{real$\ast$8, dimension(ncp), intent(in)}]{ycp, }
+\item[{integer, intent(in)}]{ncp, }
+\item[{integer, intent(in)}]{degree}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_a7d2ef241d68f7850542865be9f217e5d}
+
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{bspline3_8f90_a7d2ef241d68f7850542865be9f217e5d_icgraph}
+\end{center}
+\end{figure}
+
+
+\hypertarget{bspline3_8f90_a0a51c311a84359ce64857be35fd49e26}{}\index{bspline3.\+f90@{bspline3.\+f90}!d3\+\_\+bspline@{d3\+\_\+bspline}}
+\index{d3\+\_\+bspline@{d3\+\_\+bspline}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{d3\+\_\+bspline(cp, t)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function d3\+\_\+bspline (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(4), intent(in)}]{cp, }
+\item[{real$\ast$8, intent(in)}]{t}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_a0a51c311a84359ce64857be35fd49e26}
+\hypertarget{bspline3_8f90_abc5eac4abfe9bd8a76820bc8e7a651f5}{}\index{bspline3.\+f90@{bspline3.\+f90}!d3\+\_\+bspline4@{d3\+\_\+bspline4}}
+\index{d3\+\_\+bspline4@{d3\+\_\+bspline4}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{d3\+\_\+bspline4(cp, t)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function d3\+\_\+bspline4 (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(5), intent(in)}]{cp, }
+\item[{real$\ast$8, intent(in)}]{t}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_abc5eac4abfe9bd8a76820bc8e7a651f5}
+\hypertarget{bspline3_8f90_a4d0df1205efee4866b9e3c35eee96933}{}\index{bspline3.\+f90@{bspline3.\+f90}!d3\+\_\+bspline\+\_\+cp@{d3\+\_\+bspline\+\_\+cp}}
+\index{d3\+\_\+bspline\+\_\+cp@{d3\+\_\+bspline\+\_\+cp}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{d3\+\_\+bspline\+\_\+cp(cp, arclength, ncp, degree, s)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function d3\+\_\+bspline\+\_\+cp (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(ncp), intent(in)}]{cp, }
+\item[{real$\ast$8, dimension(ncp-\/2), intent(in)}]{arclength, }
+\item[{integer, intent(in)}]{ncp, }
+\item[{integer, intent(in)}]{degree, }
+\item[{real$\ast$8, intent(in)}]{s}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_a4d0df1205efee4866b9e3c35eee96933}
+
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=253pt]{bspline3_8f90_a4d0df1205efee4866b9e3c35eee96933_cgraph}
+\end{center}
+\end{figure}
+
+
+\hypertarget{bspline3_8f90_a6eb3c01da1c6fd0f74e36296f66746f4}{}\index{bspline3.\+f90@{bspline3.\+f90}!d4\+\_\+bspline4@{d4\+\_\+bspline4}}
+\index{d4\+\_\+bspline4@{d4\+\_\+bspline4}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{d4\+\_\+bspline4(cp, t)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function d4\+\_\+bspline4 (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(5), intent(in)}]{cp, }
+\item[{real$\ast$8, intent(in)}]{t}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_a6eb3c01da1c6fd0f74e36296f66746f4}
+\hypertarget{bspline3_8f90_a30559a73ceea14913f355464954bb790}{}\index{bspline3.\+f90@{bspline3.\+f90}!d4\+\_\+bspline\+\_\+cp@{d4\+\_\+bspline\+\_\+cp}}
+\index{d4\+\_\+bspline\+\_\+cp@{d4\+\_\+bspline\+\_\+cp}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{d4\+\_\+bspline\+\_\+cp(cp, arclength, ncp, degree, s)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function d4\+\_\+bspline\+\_\+cp (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(ncp), intent(in)}]{cp, }
+\item[{real$\ast$8, dimension(ncp-\/2), intent(in)}]{arclength, }
+\item[{integer, intent(in)}]{ncp, }
+\item[{integer, intent(in)}]{degree, }
+\item[{real$\ast$8, intent(in)}]{s}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_a30559a73ceea14913f355464954bb790}
+
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=253pt]{bspline3_8f90_a30559a73ceea14913f355464954bb790_cgraph}
+\end{center}
+\end{figure}
+
+
+\hypertarget{bspline3_8f90_a0a37f176ebc11541781e38f68f4d1a3e}{}\index{bspline3.\+f90@{bspline3.\+f90}!d\+\_\+bspline@{d\+\_\+bspline}}
+\index{d\+\_\+bspline@{d\+\_\+bspline}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{d\+\_\+bspline(cp, t)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function d\+\_\+bspline (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(4), intent(in)}]{cp, }
+\item[{real$\ast$8, intent(in)}]{t}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_a0a37f176ebc11541781e38f68f4d1a3e}
+\hypertarget{bspline3_8f90_aa5de7850f01068d93f8eb0c5890572e8}{}\index{bspline3.\+f90@{bspline3.\+f90}!d\+\_\+bspline4@{d\+\_\+bspline4}}
+\index{d\+\_\+bspline4@{d\+\_\+bspline4}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{d\+\_\+bspline4(cp, t)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function d\+\_\+bspline4 (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(5), intent(in)}]{cp, }
+\item[{real$\ast$8, intent(in)}]{t}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_aa5de7850f01068d93f8eb0c5890572e8}
+\hypertarget{bspline3_8f90_a8b69f577b0915d1c813ec5ef9f1d83e2}{}\index{bspline3.\+f90@{bspline3.\+f90}!d\+\_\+bspline\+\_\+cp@{d\+\_\+bspline\+\_\+cp}}
+\index{d\+\_\+bspline\+\_\+cp@{d\+\_\+bspline\+\_\+cp}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{d\+\_\+bspline\+\_\+cp(cp, arclength, ncp, degree, s)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function d\+\_\+bspline\+\_\+cp (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(ncp), intent(in)}]{cp, }
+\item[{real$\ast$8, dimension(ncp-\/2), intent(in)}]{arclength, }
+\item[{integer, intent(in)}]{ncp, }
+\item[{integer, intent(in)}]{degree, }
+\item[{real$\ast$8, intent(in)}]{s}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_a8b69f577b0915d1c813ec5ef9f1d83e2}
+
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=248pt]{bspline3_8f90_a8b69f577b0915d1c813ec5ef9f1d83e2_cgraph}
+\end{center}
+\end{figure}
+
+
+\hypertarget{bspline3_8f90_a799109ca306b9e7ba96828dfb26a7608}{}\index{bspline3.\+f90@{bspline3.\+f90}!dd\+\_\+bspline@{dd\+\_\+bspline}}
+\index{dd\+\_\+bspline@{dd\+\_\+bspline}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{dd\+\_\+bspline(cp, t)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function dd\+\_\+bspline (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(4), intent(in)}]{cp, }
+\item[{real$\ast$8, intent(in)}]{t}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_a799109ca306b9e7ba96828dfb26a7608}
+\hypertarget{bspline3_8f90_aabbe2d5490d3ed9c6517877ff5148435}{}\index{bspline3.\+f90@{bspline3.\+f90}!dd\+\_\+bspline4@{dd\+\_\+bspline4}}
+\index{dd\+\_\+bspline4@{dd\+\_\+bspline4}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{dd\+\_\+bspline4(cp, t)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function dd\+\_\+bspline4 (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(5), intent(in)}]{cp, }
+\item[{real$\ast$8, intent(in)}]{t}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_aabbe2d5490d3ed9c6517877ff5148435}
+\hypertarget{bspline3_8f90_aa631f1850271138144a5d22fc3399862}{}\index{bspline3.\+f90@{bspline3.\+f90}!dd\+\_\+bspline\+\_\+cp@{dd\+\_\+bspline\+\_\+cp}}
+\index{dd\+\_\+bspline\+\_\+cp@{dd\+\_\+bspline\+\_\+cp}!bspline3.\+f90@{bspline3.\+f90}}
+\subsubsection[{dd\+\_\+bspline\+\_\+cp(cp, arclength, ncp, degree, s)}]{\setlength{\rightskip}{0pt plus 5cm}real$\ast$8 function dd\+\_\+bspline\+\_\+cp (
+\begin{DoxyParamCaption}
+\item[{real$\ast$8, dimension(ncp), intent(in)}]{cp, }
+\item[{real$\ast$8, dimension(ncp-\/2), intent(in)}]{arclength, }
+\item[{integer, intent(in)}]{ncp, }
+\item[{integer, intent(in)}]{degree, }
+\item[{real$\ast$8, intent(in)}]{s}
+\end{DoxyParamCaption}
+)}\label{bspline3_8f90_aa631f1850271138144a5d22fc3399862}
+
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=253pt]{bspline3_8f90_aa631f1850271138144a5d22fc3399862_cgraph}
+\end{center}
+\end{figure}
+
+

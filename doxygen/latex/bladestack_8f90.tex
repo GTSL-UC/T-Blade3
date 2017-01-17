@@ -1,0 +1,95 @@
+\hypertarget{bladestack_8f90}{}\section{C\+:/\+Git3\+D\+B\+G\+B/source/bladestack.f90 File Reference}
+\label{bladestack_8f90}\index{C\+:/\+Git3\+D\+B\+G\+B/source/bladestack.\+f90@{C\+:/\+Git3\+D\+B\+G\+B/source/bladestack.\+f90}}
+\subsection*{Functions/\+Subroutines}
+\begin{DoxyCompactItemize}
+\item 
+subroutine \hyperlink{bladestack_8f90_a5dab74068855acf2e6917b70290ac7ec}{bladestack} (nspn, X\+\_\+le, X\+\_\+te, R\+\_\+le, R\+\_\+te, nsec, scf, xcg, ycg, msle, stk\+\_\+u, stk\+\_\+v, xb\+\_\+stack, yb\+\_\+stack, np, iile, stack, cpdeltam, spanmp, xcpdelm, cpdeltheta, spantheta, xcpdeltheta, cpinbeta, spaninbeta, xcpinbeta, cpoutbeta, spanoutbeta, xcpoutbeta, hub, tip, xm, rm, xms, rms, mp, nsp, bladedata, amount\+\_\+data, intersec\+\_\+coord, throat\+\_\+3\+D, mouth\+\_\+3\+D, exit\+\_\+3\+D, casename, nbls, L\+E, axchrd, mble,                                                                           mbte, units, stagger, chrdsweep, chrdlean, axial\+\_\+\+L\+E, radial\+\_\+\+L\+E)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function/\+Subroutine Documentation}
+\hypertarget{bladestack_8f90_a5dab74068855acf2e6917b70290ac7ec}{}\index{bladestack.\+f90@{bladestack.\+f90}!bladestack@{bladestack}}
+\index{bladestack@{bladestack}!bladestack.\+f90@{bladestack.\+f90}}
+\subsubsection[{bladestack(nspn, X\+\_\+le, X\+\_\+te, R\+\_\+le, R\+\_\+te, nsec, scf, xcg, ycg, msle, stk\+\_\+u, stk\+\_\+v, xb\+\_\+stack, yb\+\_\+stack, np, iile, stack, cpdeltam, spanmp, xcpdelm, cpdeltheta, spantheta, xcpdeltheta, cpinbeta, spaninbeta, xcpinbeta, cpoutbeta, spanoutbeta, xcpoutbeta, hub, tip, xm, rm, xms, rms, mp, nsp, bladedata, amount\+\_\+data, intersec\+\_\+coord, throat\+\_\+3\+D, mouth\+\_\+3\+D, exit\+\_\+3\+D, casename, nbls, L\+E, axchrd, mble,                                                                           mbte, units, stagger, chrdsweep, chrdlean, axial\+\_\+\+L\+E, radial\+\_\+\+L\+E)}]{\setlength{\rightskip}{0pt plus 5cm}subroutine bladestack (
+\begin{DoxyParamCaption}
+\item[{integer}]{nspn, }
+\item[{real, dimension(nspan)}]{X\+\_\+le, }
+\item[{real, dimension(nspan)}]{X\+\_\+te, }
+\item[{real, dimension(nspan)}]{R\+\_\+le, }
+\item[{real, dimension(nspan)}]{R\+\_\+te, }
+\item[{integer}]{nsec, }
+\item[{real}]{scf, }
+\item[{real, dimension(nspan)}]{xcg, }
+\item[{real, dimension(nspan)}]{ycg, }
+\item[{real, dimension(nspan)}]{msle, }
+\item[{integer}]{stk\+\_\+u, }
+\item[{integer}]{stk\+\_\+v, }
+\item[{real, dimension(nspan)}]{xb\+\_\+stack, }
+\item[{real, dimension(nspan)}]{yb\+\_\+stack, }
+\item[{integer}]{np, }
+\item[{integer}]{iile, }
+\item[{integer}]{stack, }
+\item[{integer}]{cpdeltam, }
+\item[{real$\ast$8, dimension(100)}]{spanmp, }
+\item[{real$\ast$8, dimension(100)}]{xcpdelm, }
+\item[{integer}]{cpdeltheta, }
+\item[{real$\ast$8, dimension(100)}]{spantheta, }
+\item[{real$\ast$8, dimension(100)}]{xcpdeltheta, }
+\item[{integer}]{cpinbeta, }
+\item[{real$\ast$8, dimension(100)}]{spaninbeta, }
+\item[{real$\ast$8, dimension(100)}]{xcpinbeta, }
+\item[{integer}]{cpoutbeta, }
+\item[{real$\ast$8, dimension(100)}]{spanoutbeta, }
+\item[{real$\ast$8, dimension(100)}]{xcpoutbeta, }
+\item[{real}]{hub, }
+\item[{real}]{tip, }
+\item[{real, dimension(nx,nax)}]{xm, }
+\item[{real, dimension(nx,nax)}]{rm, }
+\item[{real, dimension(nx,nax)}]{xms, }
+\item[{real, dimension(nx,nax)}]{rms, }
+\item[{real, dimension(nx,nax)}]{mp, }
+\item[{integer, dimension(nspan)}]{nsp, }
+\item[{real$\ast$4, dimension(amount\+\_\+data,nspn)}]{bladedata, }
+\item[{integer}]{amount\+\_\+data, }
+\item[{real, dimension(12,nspn)}]{intersec\+\_\+coord, }
+\item[{real, dimension(nspn)}]{throat\+\_\+3\+D, }
+\item[{real, dimension(nspn)}]{mouth\+\_\+3\+D, }
+\item[{real, dimension(nspn)}]{exit\+\_\+3\+D, }
+\item[{character$\ast$32}]{casename, }
+\item[{integer}]{nbls, }
+\item[{integer}]{L\+E, }
+\item[{real$\ast$8, dimension(nspan)}]{axchrd, }
+\item[{real$\ast$8, dimension(nspan)}]{mble, }
+\item[{real$\ast$8, dimension(nspan)}]{mbte, }
+\item[{character(len=2)}]{units, }
+\item[{real, dimension(nspan)}]{stagger, }
+\item[{integer}]{chrdsweep, }
+\item[{integer}]{chrdlean, }
+\item[{logical}]{axial\+\_\+\+L\+E, }
+\item[{logical}]{radial\+\_\+\+L\+E}
+\end{DoxyParamCaption}
+)}\label{bladestack_8f90_a5dab74068855acf2e6917b70290ac7ec}
+
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{bladestack_8f90_a5dab74068855acf2e6917b70290ac7ec_cgraph}
+\end{center}
+\end{figure}
+
+
+
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=223pt]{bladestack_8f90_a5dab74068855acf2e6917b70290ac7ec_icgraph}
+\end{center}
+\end{figure}
+
+

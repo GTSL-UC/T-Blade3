@@ -1,0 +1,105 @@
+\hypertarget{bladegen_8f90}{}\section{C\+:/\+Git3\+D\+B\+G\+B/source/bladegen.f90 File Reference}
+\label{bladegen_8f90}\index{C\+:/\+Git3\+D\+B\+G\+B/source/bladegen.\+f90@{C\+:/\+Git3\+D\+B\+G\+B/source/bladegen.\+f90}}
+\subsection*{Functions/\+Subroutines}
+\begin{DoxyCompactItemize}
+\item 
+subroutine \hyperlink{bladegen_8f90_abe1d53034e73a0fd4caf61124de7e6eb}{bladegen} (nspn, thkc, mr1, sinl, sext, chrdx, js, fext, xcen, ycen, airfoil,                                                                           stagger, stack, chord\+\_\+switch, stk\+\_\+u, stk\+\_\+v, xb\+\_\+stk, yb\+\_\+stk, stack\+\_\+switch,                                                                           nsl, nbls, curv\+\_\+camber, thick, L\+E, np, ncp\+\_\+curv, ncp\+\_\+thk, curv\+\_\+cp, thk\+\_\+cp,                                                                           lethk\+\_\+all, tethk\+\_\+all, s\+\_\+all, ee\+\_\+all, thick\+\_\+distr, umxthk\+\_\+all,                                                       C\+\_\+le\+\_\+x\+\_\+top\+\_\+all, C\+\_\+le\+\_\+x\+\_\+bot\+\_\+all, C\+\_\+le\+\_\+y\+\_\+top\+\_\+all, C\+\_\+le\+\_\+y\+\_\+bot\+\_\+all,                                                       L\+E\+\_\+vertex\+\_\+ang\+\_\+all, L\+E\+\_\+vertex\+\_\+dis\+\_\+all, sting\+\_\+l\+\_\+all, sting\+\_\+h\+\_\+all, L\+Edegree, no\+\_\+\+L\+E\+\_\+segments,                                                       sec\+\_\+radius, bladedata, amount\+\_\+data, scf, intersec\+\_\+coord, throat\+\_\+index,                                                                           n\+\_\+normal\+\_\+distance, casename, develop, isdev, mble, mbte, msle, mste, i\+\_\+slope, jcellblade\+\_\+all,                                                                           etawidth\+\_\+all, B\+Ggrid\+\_\+all, thk\+\_\+tm\+\_\+c\+\_\+spl, isxygrid)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function/\+Subroutine Documentation}
+\hypertarget{bladegen_8f90_abe1d53034e73a0fd4caf61124de7e6eb}{}\index{bladegen.\+f90@{bladegen.\+f90}!bladegen@{bladegen}}
+\index{bladegen@{bladegen}!bladegen.\+f90@{bladegen.\+f90}}
+\subsubsection[{bladegen(nspn, thkc, mr1, sinl, sext, chrdx, js, fext, xcen, ycen, airfoil,                                                                           stagger, stack, chord\+\_\+switch, stk\+\_\+u, stk\+\_\+v, xb\+\_\+stk, yb\+\_\+stk, stack\+\_\+switch,                                                                           nsl, nbls, curv\+\_\+camber, thick, L\+E, np, ncp\+\_\+curv, ncp\+\_\+thk, curv\+\_\+cp, thk\+\_\+cp,                                                                           lethk\+\_\+all, tethk\+\_\+all, s\+\_\+all, ee\+\_\+all, thick\+\_\+distr, umxthk\+\_\+all,                                                       C\+\_\+le\+\_\+x\+\_\+top\+\_\+all, C\+\_\+le\+\_\+x\+\_\+bot\+\_\+all, C\+\_\+le\+\_\+y\+\_\+top\+\_\+all, C\+\_\+le\+\_\+y\+\_\+bot\+\_\+all,                                                       L\+E\+\_\+vertex\+\_\+ang\+\_\+all, L\+E\+\_\+vertex\+\_\+dis\+\_\+all, sting\+\_\+l\+\_\+all, sting\+\_\+h\+\_\+all, L\+Edegree, no\+\_\+\+L\+E\+\_\+segments,                                                       sec\+\_\+radius, bladedata, amount\+\_\+data, scf, intersec\+\_\+coord, throat\+\_\+index,                                                                           n\+\_\+normal\+\_\+distance, casename, develop, isdev, mble, mbte, msle, mste, i\+\_\+slope, jcellblade\+\_\+all,                                                                           etawidth\+\_\+all, B\+Ggrid\+\_\+all, thk\+\_\+tm\+\_\+c\+\_\+spl, isxygrid)}]{\setlength{\rightskip}{0pt plus 5cm}subroutine bladegen (
+\begin{DoxyParamCaption}
+\item[{integer}]{nspn, }
+\item[{real}]{thkc, }
+\item[{real}]{mr1, }
+\item[{real}]{sinl, }
+\item[{real}]{sext, }
+\item[{real}]{chrdx, }
+\item[{integer}]{js, }
+\item[{character$\ast$32}]{fext, }
+\item[{real}]{xcen, }
+\item[{real}]{ycen, }
+\item[{character$\ast$20}]{airfoil, }
+\item[{real}]{stagger, }
+\item[{integer}]{stack, }
+\item[{integer}]{chord\+\_\+switch, }
+\item[{real, dimension(1)}]{stk\+\_\+u, }
+\item[{real, dimension(1)}]{stk\+\_\+v, }
+\item[{real}]{xb\+\_\+stk, }
+\item[{real}]{yb\+\_\+stk, }
+\item[{integer}]{stack\+\_\+switch, }
+\item[{integer}]{nsl, }
+\item[{integer}]{nbls, }
+\item[{integer}]{curv\+\_\+camber, }
+\item[{integer}]{thick, }
+\item[{integer}]{L\+E, }
+\item[{integer}]{np, }
+\item[{integer, dimension(nsl)}]{ncp\+\_\+curv, }
+\item[{integer, dimension(nsl)}]{ncp\+\_\+thk, }
+\item[{real, dimension(20,2$\ast$nsl)}]{curv\+\_\+cp, }
+\item[{real, dimension(20,2$\ast$nsl)}]{thk\+\_\+cp, }
+\item[{real, dimension(nsl)}]{lethk\+\_\+all, }
+\item[{real, dimension(nsl)}]{tethk\+\_\+all, }
+\item[{real, dimension(nsl)}]{s\+\_\+all, }
+\item[{real, dimension(nsl)}]{ee\+\_\+all, }
+\item[{integer}]{thick\+\_\+distr, }
+\item[{real, dimension(nsl)}]{umxthk\+\_\+all, }
+\item[{real, dimension(nsl)}]{C\+\_\+le\+\_\+x\+\_\+top\+\_\+all, }
+\item[{real, dimension(nsl)}]{C\+\_\+le\+\_\+x\+\_\+bot\+\_\+all, }
+\item[{real, dimension(nsl)}]{C\+\_\+le\+\_\+y\+\_\+top\+\_\+all, }
+\item[{real, dimension(nsl)}]{C\+\_\+le\+\_\+y\+\_\+bot\+\_\+all, }
+\item[{real, dimension(nsl)}]{L\+E\+\_\+vertex\+\_\+ang\+\_\+all, }
+\item[{real, dimension(nsl)}]{L\+E\+\_\+vertex\+\_\+dis\+\_\+all, }
+\item[{real, dimension(nsl)}]{sting\+\_\+l\+\_\+all, }
+\item[{real, dimension(nsl,2)}]{sting\+\_\+h\+\_\+all, }
+\item[{integer}]{L\+Edegree, }
+\item[{integer}]{no\+\_\+\+L\+E\+\_\+segments, }
+\item[{real, dimension(nsl,2)}]{sec\+\_\+radius, }
+\item[{real$\ast$4, dimension(amount\+\_\+data,nsl)}]{bladedata, }
+\item[{integer}]{amount\+\_\+data, }
+\item[{real}]{scf, }
+\item[{real, dimension(12,nsl)}]{intersec\+\_\+coord, }
+\item[{integer, dimension(nspn)}]{throat\+\_\+index, }
+\item[{integer}]{n\+\_\+normal\+\_\+distance, }
+\item[{character$\ast$32}]{casename, }
+\item[{character$\ast$32}]{develop, }
+\item[{logical}]{isdev, }
+\item[{real}]{mble, }
+\item[{real}]{mbte, }
+\item[{real}]{msle, }
+\item[{real}]{mste, }
+\item[{integer}]{i\+\_\+slope, }
+\item[{real, dimension(nspn)}]{jcellblade\+\_\+all, }
+\item[{real, dimension(nspn)}]{etawidth\+\_\+all, }
+\item[{integer, dimension(nspn)}]{B\+Ggrid\+\_\+all, }
+\item[{real, dimension(nsl)}]{thk\+\_\+tm\+\_\+c\+\_\+spl, }
+\item[{logical}]{isxygrid}
+\end{DoxyParamCaption}
+)}\label{bladegen_8f90_abe1d53034e73a0fd4caf61124de7e6eb}
+
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=550pt]{bladegen_8f90_abe1d53034e73a0fd4caf61124de7e6eb_cgraph}
+\end{center}
+\end{figure}
+
+
+
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=215pt]{bladegen_8f90_abe1d53034e73a0fd4caf61124de7e6eb_icgraph}
+\end{center}
+\end{figure}
+
+

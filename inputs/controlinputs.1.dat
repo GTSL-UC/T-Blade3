@@ -1,0 +1,283 @@
+Transfan:
+Curvature sections control points:
+Section 1:
+Number of control points:
+		9
+u and v coordinates:
+	0		,0
+	0.1		,0
+	0.3		,0.1
+	0.40	,0.15
+	0.5		,0.17
+	0.6		,0.2
+	0.75	,0.5
+	0.90	,0.1
+	1		,0
+Section 3:
+Number of control points:
+		9
+u and v coordinates:
+	0		,0
+	0.1		,0
+	0.3		,0.1
+	0.40	,0.15
+	0.5		,0.17
+	0.6		,0.2
+	0.75	,0.5
+	0.90	,0.1
+	1		,0
+Section 5:
+Number of control points:
+		9
+u and v coordinates:
+	0		,0
+	0.1		,0
+	0.3		,0.1
+	0.40	,0.15
+	0.5		,0.17
+	0.6		,0.2
+	0.75	,0.5
+	0.90	,0.1
+	1		,0
+Section 7:
+Number of control points:
+		9
+u and v coordinates:
+	0		,0
+	0.1		,0
+	0.3		,0.1
+	0.40	,0.15
+	0.5		,0.17
+	0.6		,0.2
+	0.75	,0.5
+	0.90	,0.1
+	1		,0
+Section 9:
+Number of control points:
+		9
+u and v coordinates:
+	0		,0
+	0.1		,0
+	0.3		,0.1
+	0.40	,0.15
+	0.5		,0.17
+	0.6		,0.2
+	0.75	,0.5
+	0.90	,0.1
+	1		,0
+Section 11:
+Number of control points:
+		9
+u and v coordinates:
+	0		,0
+	0.1		,0
+	0.3		,0.1
+	0.40	,0.15
+	0.5		,0.17
+	0.6		,0.2
+	0.75	,0.5
+	0.90	,0.1
+	1		,0
+Section 13:
+Number of control points:
+		9
+u and v coordinates:
+	0		,0
+	0.1		,0
+	0.3		,0.1
+	0.40	,0.15
+	0.5		,0.17
+	0.6		,0.2
+	0.75	,0.5
+	0.90	,0.1
+	1		,0
+Section 15:
+Number of control points:
+		9
+u and v coordinates:
+	0		,0
+	0.1		,0
+	0.3		,0.1
+	0.40	,0.15
+	0.5		,0.17
+	0.6		,0.2
+	0.75	,0.5
+	0.90	,0.1
+	1		,0
+Section 17:
+Number of control points:
+		9
+u and v coordinates:
+	0		,0
+	0.1		,0
+	0.3		,0.1
+	0.40	,0.15
+	0.5		,0.17
+	0.6		,0.2
+	0.75	,0.5
+	0.90	,0.1
+	1		,0
+Section 19:
+Number of control points:
+		9
+u and v coordinates:
+	0		,0
+	0.1		,0
+	0.3		,0.1
+	0.40	,0.15
+	0.5		,0.18
+	0.6		,0.2
+	0.75	,0.5
+	0.90	,0.1
+	1		,0
+Section 21:
+Number of control points:
+		9
+u and v coordinates:
+	0		,0
+	0.1		,0
+	0.3		,0.1
+	0.40	,0.15
+	0.5		,0.19
+	0.6		,0.2
+	0.75	,0.5
+	0.90	,0.1
+	1		,0
+
+Thickness modifier control points:
+Section 1:
+Number of control points:
+	 5
+u and v coordinates:
+	0		,0
+	0.3		,0
+	0.5		,0
+	0.80	,0
+	1		,0
+Section 3:
+Number of control points:
+	 5
+u and v coordinates:
+	0		,0
+	0.3		,0
+	0.5		,0
+	0.80	,0
+	1		,0
+Section 5:
+Number of control points:
+	 5
+u and v coordinates:
+	0		,0
+	0.3		,0
+	0.5		,0
+	0.80	,0
+	1		,0
+Section 7:
+Number of control points:
+	 5
+u and v coordinates:
+	0		,0
+	0.3		,0
+	0.5		,0
+	0.80	,0
+	1		,0
+Section 9:
+Number of control points:
+	 5
+u and v coordinates:
+	0		,0
+	0.3		,0
+	0.5		,0
+	0.80	,0
+	1		,0
+Section 11:
+Number of control points:
+	 5
+u and v coordinates:
+	0		,0
+	0.3		,0
+	0.5		,0
+	0.80	,0
+	1		,0
+Section 13:
+Number of control points:
+	 5
+u and v coordinates:
+	0		,0
+	0.3		,0
+	0.5		,0
+	0.80	,0
+	1		,0
+Section 15:
+Number of control points:
+	 5
+u and v coordinates:
+	0		,0
+	0.3		,0
+	0.5		,0
+	0.80	,0
+	1		,0
+Section 17:
+Number of control points:
+	 5
+u and v coordinates:
+	0		,0
+	0.3		,0
+	0.5		,0
+	0.80	,0
+	1		,0
+Section 19:
+Number of control points:
+	 5
+u and v coordinates:
+	0		,0
+	0.3		,0
+	0.5		,0
+	0.80	,0
+	1		,0
+Section 21:
+Number of control points:
+	 5
+u and v coordinates:
+	0		,0
+	0.3		,0
+	0.5		,0
+	0.80	,0
+	1		,0
+	
+Leading Edge control Parameters: C_le_y_top and bot optimized in code for LEdeg=4, no_Le_segments=5
+	LE degree(3 or 4)	no_Le_segments(4 or 5)
+	4					5
+Section 1:
+	lethk	tethk	s (-1<defl.<1)	ee (elongation)		C_le_x_top(0:1)		C_le_x_bot		C_le_y_top		C_le_y_bot		LE_vertex_ang	LE_vertex_dis	sting_l		sting_h_top		sting_h_bot
+	0.01780	0.025	0.00		 	0.80				0.00				0.00			0.00			0.00			120.			0.35			4.0 		0.4				0.8
+Section 3:
+	lethk	tethk	s (-1<defl.<1)	ee (elongation)		C_le_x_top(0:1)		C_le_x_bot		C_le_y_top		C_le_y_bot		LE_vertex_ang	LE_vertex_dis	sting_l		sting_h_top		sting_h_bot
+	0.01700	0.025	0.00		 	0.80				0.00				0.00			0.00			0.00			120				0.35			4.0 		0.4				0.8
+Section 5:
+	lethk	tethk	s (-1<defl.<1)	ee (elongation)		C_le_x_top(0:1)		C_le_x_bot		C_le_y_top		C_le_y_bot		LE_vertex_ang	LE_vertex_dis	sting_l		sting_h_top		sting_h_bot
+	0.01617	0.024	0.00		 	0.80				0.00				0.00			0.00			0.00			120				0.35			4.0 		0.4				0.8
+Section 7:
+	lethk	tethk	s (-1<defl.<1)	ee (elongation)		C_le_x_top(0:1)		C_le_x_bot		C_le_y_top		C_le_y_bot		LE_vertex_ang	LE_vertex_dis	sting_l		sting_h_top		sting_h_bot
+	0.01542	0.024	0.00		 	0.80				0.00				0.00			0.00			0.00			120				0.35			4.0 		0.4				0.8
+Section 9:
+	lethk	tethk	s (-1<defl.<1)	ee (elongation)		C_le_x_top(0:1)		C_le_x_bot		C_le_y_top		C_le_y_bot		LE_vertex_ang	LE_vertex_dis	sting_l		sting_h_top		sting_h_bot
+	0.01472	0.023	0.00		 	0.80				0.00				0.00			0.00			0.00			120				0.35			4.0 		0.4				0.8
+Section 11:
+	lethk	tethk	s (-1<defl.<1)	ee (elongation)		C_le_x_top(0:1)		C_le_x_bot		C_le_y_top		C_le_y_bot		LE_vertex_ang	LE_vertex_dis	sting_l		sting_h_top		sting_h_bot
+	0.01416	0.023	0.00		 	0.80				0.00				0.00			0.00			0.00			120				0.35			4.0 		0.4				0.8
+Section 13:
+	lethk	tethk	s (-1<defl.<1)	ee (elongation)		C_le_x_top(0:1)		C_le_x_bot		C_le_y_top		C_le_y_bot		LE_vertex_ang	LE_vertex_dis	sting_l		sting_h_top		sting_h_bot
+	0.01366	0.022	0.00		 	0.90				0.00				0.00			0.00			0.00			120				0.35			4.0 		0.4				0.8
+Section 15:
+	lethk	tethk	s (-1<defl.<1)	ee (elongation)		C_le_x_top(0:1)		C_le_x_bot		C_le_y_top		C_le_y_bot		LE_vertex_ang	LE_vertex_dis	sting_l		sting_h_top		sting_h_bot
+	0.01317	0.022	0.00		 	1.20				0.00				0.00			0.00			0.00			120				0.35			4.0 		0.4				0.8
+Section 17:
+	lethk	tethk	s (-1<defl.<1)	ee (elongation)		C_le_x_top(0:1)		C_le_x_bot		C_le_y_top		C_le_y_bot		LE_vertex_ang	LE_vertex_dis	sting_l		sting_h_top		sting_h_bot
+	0.01274	0.021	0.00		 	1.70				0.00				0.00			0.00			0.00			120				0.35			4.0 		0.4				0.8
+Section 19:
+	lethk	tethk	s (-1<defl.<1)	ee (elongation)		C_le_x_top(0:1)		C_le_x_bot		C_le_y_top		C_le_y_bot		LE_vertex_ang	LE_vertex_dis	sting_l		sting_h_top		sting_h_bot
+	0.01229	0.02	0.00		 	1.80				0.00				0.00			0.00			0.00			120				0.35			4.0 		0.4				0.8
+Section 21:
+	lethk	tethk	s (-1<defl.<1)	ee (elongation)		C_le_x_top(0:1)		C_le_x_bot		C_le_y_top		C_le_y_bot		LE_vertex_ang	LE_vertex_dis	sting_l		sting_h_top		sting_h_bot
+	0.01177	0.02	0.00		 	2.00				0.00				0.00			0.00			0.00			120				0.35			4.0 		0.4				0.8

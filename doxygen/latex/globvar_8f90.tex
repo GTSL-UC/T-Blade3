@@ -1,0 +1,998 @@
+\hypertarget{globvar_8f90}{}\section{C\+:/\+Git3\+D\+B\+G\+B/source/globvar.f90 File Reference}
+\label{globvar_8f90}\index{C\+:/\+Git3\+D\+B\+G\+B/source/globvar.\+f90@{C\+:/\+Git3\+D\+B\+G\+B/source/globvar.\+f90}}
+\subsection*{Modules}
+\begin{DoxyCompactItemize}
+\item 
+module \hyperlink{namespaceglobvar}{globvar}
+\item 
+module \hyperlink{namespacegridvar}{gridvar}
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+integer \hyperlink{namespaceglobvar_a074233db9e9693042a79a9e4cd4f84e2}{globvar\+::ibrow}
+\item 
+integer \hyperlink{namespaceglobvar_aefeb81e8846810feb44bb79f95cac5c2}{globvar\+::ile}
+\item 
+integer \hyperlink{namespaceglobvar_a67308a23e61fb67077fcb6216e72bc84}{globvar\+::ite}
+\item 
+integer \hyperlink{namespaceglobvar_aa6b683519cf0d2993847908919dd2d72}{globvar\+::j}
+\item 
+integer \hyperlink{namespaceglobvar_ab47e00ad68c86a9aac86e082da7398f1}{globvar\+::ledegree}
+\item 
+integer \hyperlink{namespaceglobvar_a64988ba2eed57cebc3d95939e33ee75e}{globvar\+::no\+\_\+le\+\_\+segments}
+\item 
+integer \hyperlink{namespaceglobvar_a5c850302345bc4b2d45af2d4bb80f58f}{globvar\+::csng}
+\item 
+character $\ast$256 \hyperlink{namespaceglobvar_a91c6656f75994719c2ef6ca7d7b88ded}{globvar\+::fext}
+\item 
+character $\ast$256 \hyperlink{namespaceglobvar_a1620db6ffc17c057934b90f70421dd96}{globvar\+::line2}
+\item 
+character $\ast$256 \hyperlink{namespaceglobvar_a3ee916788a2f55473d7d6dd7ba5137f7}{globvar\+::argp1}
+\item 
+character $\ast$256 \hyperlink{namespaceglobvar_a61ebbf94ac2ff67042612526d08b69f5}{globvar\+::ok}
+\item 
+character $\ast$16 \hyperlink{namespaceglobvar_ae058016a63919ba09dda0290e83e60a0}{globvar\+::blrow}
+\item 
+character $\ast$16 \hyperlink{namespaceglobvar_a62eb55ad192fba73ef6d49482206212e}{globvar\+::radialsec}
+\item 
+character $\ast$32, dimension(100) \hyperlink{namespaceglobvar_afebc24dd143d18989fbeb7223a277ab8}{globvar\+::blext}
+\item 
+character $\ast$32 \hyperlink{namespaceglobvar_a0a6c526cbc0a41ebd6f3667a0a9183ba}{globvar\+::casename}
+\item 
+character $\ast$32 \hyperlink{namespaceglobvar_a6a1dfe25b49d1fa165e1f63466b92629}{globvar\+::spanwise\+\_\+spline}
+\item 
+character $\ast$256 \hyperlink{namespaceglobvar_a35d25dc36b9abbf2f578dcdb231ba86d}{globvar\+::anglespline}
+\item 
+character $\ast$10 \hyperlink{namespaceglobvar_a893ea8284df7ea110ea93d673cf237f9}{globvar\+::ibrowc}
+\item 
+character $\ast$10 \hyperlink{namespaceglobvar_a0a7f8083468e94d2d3aae1f309fb2dd4}{globvar\+::ibrowc1}
+\item 
+character $\ast$20, dimension(100) \hyperlink{namespaceglobvar_ae69735f940091c76c32c20b4cd90ebb4}{globvar\+::airfoil}
+\item 
+character $\ast$20, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a8e9e3ba0b38e35c9b6b0c02e62ffc1f8}{globvar\+::throat\+\_\+pos}
+\item 
+character $\ast$32 \hyperlink{namespaceglobvar_acc5999ee5e843ad4d03a5047a316e813}{globvar\+::develop}
+\item 
+character $\ast$32 \hyperlink{namespaceglobvar_a32441db96414a17de3451c8789d1edb3}{globvar\+::xygrid}
+\item 
+character $\ast$32 \hyperlink{namespaceglobvar_a683af9844336d830d4c99a6f542260ad}{globvar\+::xyzstreamlines}
+\item 
+character $\ast$80 \hyperlink{namespaceglobvar_a914ee6e2252c7098aff0eb09f1646f79}{globvar\+::file1}
+\item 
+character $\ast$80 \hyperlink{namespaceglobvar_a95f5c32d6cc281292091a3f0c77928e2}{globvar\+::file2}
+\item 
+character $\ast$80 \hyperlink{namespaceglobvar_a50a9cac1bfd7e2b8ba993f2e494e61af}{globvar\+::file3}
+\item 
+character $\ast$80 \hyperlink{namespaceglobvar_ad37b1da3092de9a9a76be4f2f8c97231}{globvar\+::file4}
+\item 
+character $\ast$80 \hyperlink{namespaceglobvar_a2cf5ea09c434891e0a0154c05a3a55dc}{globvar\+::file5}
+\item 
+character $\ast$80 \hyperlink{namespaceglobvar_a1f007a363d48ae7b896f7303fb7b94c9}{globvar\+::file6}
+\item 
+character $\ast$80 \hyperlink{namespaceglobvar_aedb6df66bd85d51a0e7a4abaf0833074}{globvar\+::file7}
+\item 
+character $\ast$80 \hyperlink{namespaceglobvar_afe69a24b80357a46880b963d07e777f4}{globvar\+::file8}
+\item 
+character $\ast$80 \hyperlink{namespaceglobvar_ae35b72b87d0bb3063a6a44013250ce2a}{globvar\+::file9}
+\item 
+character $\ast$80 \hyperlink{namespaceglobvar_a6581bd3170639009e3b516cfef2969cf}{globvar\+::file10}
+\item 
+character $\ast$80 \hyperlink{namespaceglobvar_a8150c7754f44712fdeb69767f63ac557}{globvar\+::file11}
+\item 
+character(len=2) \hyperlink{namespaceglobvar_a5a48d5b0df94151f6ccff35f89d832ed}{globvar\+::units}
+\item 
+character(len=1) \hyperlink{namespaceglobvar_a113718364777f5700503cc4655ea8a36}{globvar\+::trueleansweep}
+\item 
+integer \hyperlink{namespaceglobvar_ad587987756a26ab8482d669091aa11e2}{globvar\+::f1}
+\item 
+integer \hyperlink{namespaceglobvar_ab013958d5d057b8aca4e06ba0daa8406}{globvar\+::f2}
+\item 
+integer \hyperlink{namespaceglobvar_a22ec31cd077818915aa449475242ebc1}{globvar\+::f3}
+\item 
+integer \hyperlink{namespaceglobvar_ac3c062c849a3ecf6de129ae085a265ae}{globvar\+::f4}
+\item 
+integer \hyperlink{namespaceglobvar_aef4e41982e8eb0e0436d5261df60a5ba}{globvar\+::f5}
+\item 
+integer \hyperlink{namespaceglobvar_a9bcf733cb3d2746a17a750550de00730}{globvar\+::f6}
+\item 
+integer \hyperlink{namespaceglobvar_ad5518ff994222c6d414b1ab14ec5ff3b}{globvar\+::f7}
+\item 
+integer \hyperlink{namespaceglobvar_a81a49408c447c53cabc16ec197a0520f}{globvar\+::f8}
+\item 
+integer \hyperlink{namespaceglobvar_ae5c9f355184c5007c6fd6e3e77ff5006}{globvar\+::f9}
+\item 
+integer \hyperlink{namespaceglobvar_a31893a074cdc83965ae93c821376be2b}{globvar\+::f10}
+\item 
+integer \hyperlink{namespaceglobvar_a8107e26d71f5d153179d812a2060f289}{globvar\+::f11}
+\item 
+integer \hyperlink{namespaceglobvar_a9b05c54fac739f587c870e529b2216f9}{globvar\+::i}
+\item 
+integer \hyperlink{namespaceglobvar_a0f5c9c2384e0fd1c79c5e07df615661f}{globvar\+::js}
+\item 
+integer \hyperlink{namespaceglobvar_ac3085057e6f2d3302a5046006457c547}{globvar\+::k}
+\item 
+integer \hyperlink{namespaceglobvar_ae7c4dc9c253893de2f413b45f223f1a9}{globvar\+::p}
+\item 
+integer \hyperlink{namespaceglobvar_a4bcc489e884542bc5eb30f17d5773278}{globvar\+::nsec}
+\item 
+integer \hyperlink{namespaceglobvar_a505145f479910632ea341b88c8333e04}{globvar\+::switch}
+\item 
+integer \hyperlink{namespaceglobvar_ae4e17de7f28c6c5fa62413a151e30d71}{globvar\+::ia}
+\item 
+integer \hyperlink{namespaceglobvar_a3153e29591fc002f684b857f0517a322}{globvar\+::na}
+\item 
+integer \hyperlink{namespaceglobvar_a63113b636acdd2b247b3e2df6cdac555}{globvar\+::jk}
+\item 
+integer \hyperlink{namespaceglobvar_af2a9883201aae595b762ba7ca329a73e}{globvar\+::stack}
+\item 
+integer \hyperlink{namespaceglobvar_ab96395218a22f28f54d4972183ff613b}{globvar\+::current}
+\item 
+integer \hyperlink{namespaceglobvar_a3b61c37b105aa02078586405cc370389}{globvar\+::narg}
+\item 
+integer \hyperlink{namespaceglobvar_a800cf6c01b61ed57a87bd315e1d9efa2}{globvar\+::nrow}
+\item 
+integer \hyperlink{namespaceglobvar_a893893112c0ec18c6931ce39f595fd96}{globvar\+::nspn}
+\item 
+integer \hyperlink{namespaceglobvar_ae4d2e4d1bd4180999afe29337165e1e6}{globvar\+::nx}
+\item 
+integer \hyperlink{namespaceglobvar_acff3033374e6d73d14fb06fc53fc205c}{globvar\+::nax}
+\item 
+integer \hyperlink{namespaceglobvar_ae2a801b02d21360936653383c17f8310}{globvar\+::n}
+\item 
+integer \hyperlink{namespaceglobvar_a5ffdff1f4afd2fecd622bee9fbe37442}{globvar\+::nsl}
+\item 
+integer \hyperlink{namespaceglobvar_adeb7d084c25deee7802eab03d40830c5}{globvar\+::nspan}
+\item 
+integer \hyperlink{namespaceglobvar_a2102305906fb17109fa9be746d11cf64}{globvar\+::nsp\+\_\+hub}
+\item 
+integer \hyperlink{namespaceglobvar_a0fe2d3e9a20697e0e419f91d67295872}{globvar\+::nsp\+\_\+tip}
+\item 
+integer \hyperlink{namespaceglobvar_a14eadfde6f84c7aec720cf0c0e828e3a}{globvar\+::nwork}
+\item 
+integer \hyperlink{namespaceglobvar_a00121cf01b80ef938df02e8b6a38231c}{globvar\+::lenc}
+\item 
+integer \hyperlink{namespaceglobvar_abefec70ea6b9f0d35b7cc330cd8ed601}{globvar\+::nd}
+\item 
+integer \hyperlink{namespaceglobvar_ab80f0f7f25dc40712c12c67edf2c7112}{globvar\+::np}
+\item 
+integer \hyperlink{namespaceglobvar_aee337eea7ab22193aa48bfd1dfe306d1}{globvar\+::ndep}
+\item 
+integer \hyperlink{namespaceglobvar_aff92f6272423850960736a1d45667121}{globvar\+::radial}
+\item 
+integer \hyperlink{namespaceglobvar_a43852fe59e4847373e97ec738fcd12cf}{globvar\+::chord\+\_\+switch}
+\item 
+integer \hyperlink{namespaceglobvar_a795725a0e45ccc9a453ce62e4311aa86}{globvar\+::stack\+\_\+switch}
+\item 
+integer \hyperlink{namespaceglobvar_ac2f0dd583ec6012e046c832b73410878}{globvar\+::beta\+\_\+switch}
+\item 
+integer \hyperlink{namespaceglobvar_afae25681092536554c592050d73058fb}{globvar\+::curv}
+\item 
+integer \hyperlink{namespaceglobvar_afed76bd4905177b5881960ecfcc1e706}{globvar\+::thick}
+\item 
+integer \hyperlink{namespaceglobvar_acb71a0210b9caf3ad597c781aa0fdbda}{globvar\+::le}
+\item 
+integer \hyperlink{namespaceglobvar_a025b952856d8a23aaaf7b150c59fd537}{globvar\+::thick\+\_\+distr}
+\item 
+integer \hyperlink{namespaceglobvar_ad4f4c8cbe26bb1d58d242e5ea327bd8f}{globvar\+::cpbsv}
+\item 
+integer \hyperlink{namespaceglobvar_af5f7b2251f75b81eeb565207d1b40aab}{globvar\+::bsv1}
+\item 
+integer \hyperlink{namespaceglobvar_a50c172f04174a319fcbf69991adb2a97}{globvar\+::bsv2}
+\item 
+integer, dimension(100) \hyperlink{namespaceglobvar_aed39a88b831b27b5b463d57a00a79f88}{globvar\+::bf1}
+\item 
+integer, dimension(100) \hyperlink{namespaceglobvar_ac00ea6ddd54af474c45fe888882c8a54}{globvar\+::bf2}
+\item 
+integer \hyperlink{namespaceglobvar_ace5a9b2d41e77ec26c678a7755174bf2}{globvar\+::amount\+\_\+data}
+\item 
+integer \hyperlink{namespaceglobvar_ae3ba2421a9e1256590002f63d594e18b}{globvar\+::n\+\_\+normal\+\_\+distance}
+\item 
+integer \hyperlink{namespaceglobvar_a5564253dd9ebb8998b6205940d9419d7}{globvar\+::chrdsweep}
+\item 
+integer \hyperlink{namespaceglobvar_a227f30590ee8d9741dfbdb6a81b7bbfa}{globvar\+::chrdlean}
+\item 
+integer \hyperlink{namespaceglobvar_ad09e0e97534b13d507e3e376b768ace2}{globvar\+::m}
+\item 
+integer \hyperlink{namespaceglobvar_a748fd3a637b62037c6e23eb9b0b8b75e}{globvar\+::ncp\+\_\+span\+\_\+curv}
+\item 
+integer \hyperlink{namespaceglobvar_a93851f6aad4a96c2042f054b33fb2735}{globvar\+::ncp\+\_\+span\+\_\+curv1}
+\item 
+integer \hyperlink{namespaceglobvar_ac5be283a8db34f8a815db02152694f0e}{globvar\+::ncp\+\_\+span\+\_\+thk}
+\item 
+integer \hyperlink{namespaceglobvar_aeb3dab07da1184657a2306f02e490440}{globvar\+::ncp\+\_\+span\+\_\+thk1}
+\item 
+integer \hyperlink{namespaceglobvar_a644232d8ada9b288e16c29d61dbebf0d}{globvar\+::ncp\+\_\+span\+\_\+le}
+\item 
+integer \hyperlink{namespaceglobvar_a72b833451c2098e8e8b37605581558bd}{globvar\+::ncp\+\_\+span\+\_\+le1}
+\item 
+integer \hyperlink{namespaceglobvar_a6d8ea5ccd5fef3d661bbfae6de774947}{globvar\+::ncp\+\_\+thickness}
+\item 
+integer \hyperlink{namespaceglobvar_a092659d30270778769fb935306344024}{globvar\+::ncp\+\_\+le}
+\item 
+integer \hyperlink{namespaceglobvar_a8f6b996198f130f39452bc1a69c68081}{globvar\+::ncp\+\_\+chord}
+\item 
+integer \hyperlink{namespaceglobvar_a3dba06f407815715cf5e3ed177d016f0}{globvar\+::ncp\+\_\+curvature}
+\item 
+integer \hyperlink{namespaceglobvar_a909bbc8bd8371d224674230c41fbe759}{globvar\+::ncp\+\_\+chord\+\_\+curv}
+\item 
+integer \hyperlink{namespaceglobvar_a32ba7d06170614a028f4f4a10dd42764}{globvar\+::num\+\_\+points}
+\item 
+integer \hyperlink{namespaceglobvar_a0095cc9c0afc3e8507882537e5702411}{globvar\+::num\+\_\+sec}
+\item 
+integer \hyperlink{namespaceglobvar_a061aab1c7287a8dc09f346eee4a8bfc5}{globvar\+::delta1}
+\item 
+integer \hyperlink{namespaceglobvar_ae77b9f21d86127ac705b4176dd89f3e7}{globvar\+::bladerow}
+\item 
+integer \hyperlink{namespaceglobvar_a2f6ef0024a0f62256df6e067000712be}{globvar\+::le\+\_\+deg}
+\item 
+integer \hyperlink{namespaceglobvar_af945ae82373f900b43e4b1cad0b4c634}{globvar\+::le\+\_\+seg}
+\item 
+integer, dimension(nspan) \hyperlink{namespaceglobvar_adba3978116210cab68543d6d1bed200e}{globvar\+::nsp}
+\item 
+integer \hyperlink{namespaceglobvar_a6f236c2395c2e66434a26a568bbe2e08}{globvar\+::curve}
+\item 
+integer \hyperlink{namespaceglobvar_aa41d6163f0ff719597e6db196ee482eb}{globvar\+::npoints}
+\item 
+integer \hyperlink{namespaceglobvar_a4c99273223ac940ff134ea785b89c7a8}{globvar\+::nbls}
+\item 
+integer \hyperlink{namespaceglobvar_aa918e1748c88e365a2bc9905e000fab4}{globvar\+::i\+\_\+slope}
+\item 
+integer \hyperlink{namespaceglobvar_a605576db34c829b3b1cdb2d8d549c1d3}{globvar\+::i\+\_\+slope\+\_\+nonoffset\+\_\+hub}
+\item 
+integer \hyperlink{namespaceglobvar_aca6734951fdbc5f2aa5cc26370f409b8}{globvar\+::ii}
+\item 
+integer \hyperlink{namespaceglobvar_a7e351eabe5e835869229e46300647b6f}{globvar\+::nspline}
+\item 
+integer \hyperlink{namespaceglobvar_aa5e3baef2345be01a1a377da45671712}{globvar\+::ncp1}
+\item 
+integer \hyperlink{namespaceglobvar_a2132ac685f6964bb8749df5018e28dec}{globvar\+::k\+\_\+tip}
+\item 
+integer \hyperlink{namespaceglobvar_a30666fa979088a7b9518a10063cd3ec6}{globvar\+::cpdeltam}
+\item 
+integer \hyperlink{namespaceglobvar_a4ec3f324cc8dbfe8e5a71b25b9df4227}{globvar\+::cpdeltheta}
+\item 
+integer \hyperlink{namespaceglobvar_ab36694d6866f8a68163d4475a325ae7c}{globvar\+::cpinbeta}
+\item 
+integer \hyperlink{namespaceglobvar_a65a328c5bd187b50f70674225e880191}{globvar\+::cpoutbeta}
+\item 
+integer \hyperlink{namespaceglobvar_a23b2b2fc255df014f0e8b7ab565c4001}{globvar\+::cpchord}
+\item 
+integer \hyperlink{namespaceglobvar_ae33599a3354a040c2dbac01b154afc1f}{globvar\+::cptm\+\_\+c}
+\item 
+integer, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a4b18ca71c05db91ed78552377e4e0aa4}{globvar\+::ncp\+\_\+curv}
+\item 
+integer, dimension(\+:), allocatable \hyperlink{namespaceglobvar_ac94874cf7f449d0711f2b40bce778862}{globvar\+::ncp\+\_\+thk}
+\item 
+integer, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a63d910cfc844949f7d789af4f16e6695}{globvar\+::throat\+\_\+index}
+\item 
+integer, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a62db14137ca5f48f595e1008d33688ab}{globvar\+::bggrid\+\_\+all}
+\item 
+integer \hyperlink{namespaceglobvar_ab00be7b1445612bf4318ec5e6f4ccce5}{globvar\+::n\+\_\+inter\+\_\+intervals}
+\item 
+integer \hyperlink{namespaceglobvar_ae37107e062abef0f5d095fbb2691aa3b}{globvar\+::nsp\+\_\+interpolated\+\_\+hub}
+\item 
+real $\ast$4, dimension(\+:,\+:), allocatable \hyperlink{namespaceglobvar_a19f797343d8c12180411f1e3f50c5209}{globvar\+::bladedata}
+\item 
+real $\ast$4, dimension(\+:,\+:), allocatable \hyperlink{namespaceglobvar_ae19ac4fbce29d3ec8bdd4a274023361f}{globvar\+::splinedata}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a9ed7026c367a81340ec32f8feac5d8b9}{globvar\+::sinl}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a8773a7a4d47bf7edb84938ff38c3e302}{globvar\+::sext}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a23dd44d4f0c8b5be47685d9c5ee98041}{globvar\+::thkc}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a64b336f7ef2076d0b30fb86f6fe0ba1c}{globvar\+::chrdx}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_aef87425714082b77e0f5f6fce2787666}{globvar\+::mr1}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a4f016b27bfa551903a9ff434167e63bb}{globvar\+::stak\+\_\+u}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_af534fe32dd8a023b0311416cbffea2f7}{globvar\+::stak\+\_\+v}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a97e3fd0f031b96c6a64f2b048bd344f6}{globvar\+::x1hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_ae73d73414e05c7ff4485109025aebb8b}{globvar\+::x1tip}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a23bf2eee6718016ef422ea6f1a96774a}{globvar\+::r1hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a925bcdc500de307bc4848f7ddc9a2574}{globvar\+::r1tip}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_af4daba9dc0eb452ca6d91e10550fa072}{globvar\+::xb}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a77b51c294ee3b20cb6e14dcbf4cb6b3d}{globvar\+::yb}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_a4616d2799c88911e5e46e57902cfa3a2}{globvar\+::mp}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a578ffe411cb075eda2ae3cf7781d1cb0}{globvar\+::xstk}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a6b041a8fbed932e28a5d0426dc9dc20a}{globvar\+::xstk1}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a2ffa8ff8b7b664c43c8c171090806037}{globvar\+::abs\+\_\+zero}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_a8fc7e5c4a3ef5051faf2730bf96a2dd1}{globvar\+::xa}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_a53530e27d02ce2d76dafdca13f4b8ed7}{globvar\+::ya}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_a955f6af8ca3ef2d2ad1dc152f84503a6}{globvar\+::xms}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_aad49b3042db6c69206144f3ad9ea8192}{globvar\+::rms}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_afad18bcdd2851c42afdc9ace1240fad7}{globvar\+::xxa}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a8226618dfb2a1887783a72d33a768b30}{globvar\+::yya}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a7089ef5d62767168aa5fe9700d53846e}{globvar\+::scf}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_afb77a410f2b53e316ddde5d09eed140e}{globvar\+::lref}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a6952feddb2848759567dd3a4a3f464b8}{globvar\+::tempr}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a0f0a537e4026bb8d0df6ff2fac7b4071}{globvar\+::xstck}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a117b11c9bdd95f9e6a9c27dc6ac426a1}{globvar\+::xmsle}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a464f621e496fe27197a4d513b4e72599}{globvar\+::rmsle}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a111fb1194bc2c6bcc780a4b7bcd10d25}{globvar\+::xmste}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a74bf48252c7df2668280317e7f2054de}{globvar\+::rmste}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a5bd9849f460d93b2cb26f60fd2b04791}{globvar\+::span}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a6448057e4ac1ead4b9b9fa353a168a08}{globvar\+::del\+\_\+out\+\_\+beta}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a07729166d5dd2b6a73e99fa9f7f4c3fc}{globvar\+::out\+\_\+beta\+\_\+new}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a4f0ab349408ce25b662d33a12ec6993e}{globvar\+::mste}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_aca622d395a1e0e4edb15a47f52e6352f}{globvar\+::stgr}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a97f6e6fb7adb402ab21940c4d160585c}{globvar\+::x\+\_\+le}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a68ad26d59e4d62a30908beaf98bdb89d}{globvar\+::x\+\_\+te}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_acdf6123c5a99341b8318439c395573a5}{globvar\+::r\+\_\+le}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_aa65d26a2d56169f3f2c0ad70408868f2}{globvar\+::r\+\_\+te}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a3b0ba34304a646f87d0ee37d4b8d8618}{globvar\+::in\+\_\+beta}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_ac973fc13b42ddc6cb1c35762966c4f96}{globvar\+::out\+\_\+beta}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_afc0c5598225e6044c065125b3a4abb11}{globvar\+::phi\+\_\+s\+\_\+in}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a9a3ae0b7ec948af43ece3fee824e7da2}{globvar\+::phi\+\_\+s\+\_\+out}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a5aa8f63b0ed7052d09ff37dd0a505100}{globvar\+::msle}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a7b5f7850dbc4bf45b1c0477fe23101fd}{globvar\+::chord}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a0678586794cf430f0626766f74f99789}{globvar\+::mrel1}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a82469b82bd578f446472dd30088714f0}{globvar\+::thk\+\_\+c}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_aa012253fe6b7a8b294e3e65bad3c31e8}{globvar\+::inci}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_abfd9d4eb33cd8633c8aad2c1d7678bb2}{globvar\+::devn}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a208ad9b136524be1d4393b67f071b5eb}{globvar\+::sec\+\_\+flow\+\_\+ang}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_adf510f84d1bfa9c2e369c105376b1009}{globvar\+::stagger}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_aea4b21a5810c0b0a15759b11536d0a7e}{globvar\+::chordm}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a3f70e26ad6e5208ef5da2f77d96a7e55}{globvar\+::sang}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_afbf780b139c39ff8db75247ee75175f6}{globvar\+::stk\+\_\+u}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a9d8a1cb2fc5fe27167d0e136347140cd}{globvar\+::stk\+\_\+v}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_adecbf51d76538b4b226fcaa88b8d2c10}{globvar\+::jcellblade\+\_\+all}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_af0124c85b1f11468ffb36b627963bf6a}{globvar\+::etawidth\+\_\+all}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_aca0371a5b6c784a105a1c64ced0e28f5}{globvar\+::axchrd}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a69a510c5294264ed214fd28b3eb2c837}{globvar\+::total\+\_\+camber}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a2261b8999031669b2d4002de587e1017}{globvar\+::xcp}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_aceb6425a62e3d2fa8d2f17f17d83e558}{globvar\+::ycp}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_ae10e04d6629f2c844f1e0613142003da}{globvar\+::mprime\+\_\+ble}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a6efd6498d9aae9dcb41000cdd23ddf73}{globvar\+::mprime\+\_\+bte}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespaceglobvar_a533758dc33d13c7f7d7fc3b2c1b14f2b}{globvar\+::curv\+\_\+cp}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespaceglobvar_a621e5e0db93b47d60b4a804c9fe96ac2}{globvar\+::thk\+\_\+cp}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespaceglobvar_aca37141a129c261c28872a486944fece}{globvar\+::sec\+\_\+radius}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespaceglobvar_afab867a5ed560efb35549138a3645ead}{globvar\+::sting\+\_\+h\+\_\+all}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_ac8f321181d3578817641ebd2f3ecfce3}{globvar\+::lethk\+\_\+all}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a0e616405e514a293d4730e14ff716027}{globvar\+::tethk\+\_\+all}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_ad577edfa4a4ef2f6d3bb184a4e0931b1}{globvar\+::s\+\_\+all}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a7037a7dd30b11e09190ebb70e483c63f}{globvar\+::ee\+\_\+all}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a1e3e80a1760c544775d54a22dc950fef}{globvar\+::umxthk\+\_\+all}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a598b9f7682973868c54d34e1a05ad030}{globvar\+::sting\+\_\+l\+\_\+all}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a402f13249e098adf069fdb47247cc952}{globvar\+::c\+\_\+le\+\_\+x\+\_\+top\+\_\+all}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_aec9bec955f6acfec428227dba9b7853d}{globvar\+::c\+\_\+le\+\_\+x\+\_\+bot\+\_\+all}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a3675f2363320e97186b54bdf83c57fe0}{globvar\+::c\+\_\+le\+\_\+y\+\_\+top\+\_\+all}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a1e99d4cf7e322ee5f4febfa67e23249a}{globvar\+::c\+\_\+le\+\_\+y\+\_\+bot\+\_\+all}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a7d4d625f7e3e19483e2e9c240a928d2e}{globvar\+::le\+\_\+vertex\+\_\+ang\+\_\+all}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a21aa33a09bc33a7e6c7fcb16ca4b9ecf}{globvar\+::le\+\_\+vertex\+\_\+dis\+\_\+all}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespaceglobvar_ad35c726e5eed845b38c59490c65bd02e}{globvar\+::intersec\+\_\+coord}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a96fc48391a183ef7111ef81f05d289a5}{globvar\+::throat\+\_\+3d}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_aca439d842ea97d1d7e30e6e925fddd19}{globvar\+::mouth\+\_\+3d}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a76a4a0e1d9be5d28829cd29c3e41a533}{globvar\+::exit\+\_\+3d}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_ae3e1714c3ebebc9e95b28edd32df9f8e}{globvar\+::hub\+\_\+slope}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_ae2d9b98958aa2b453bdcb189a5b8b140}{globvar\+::le\+\_\+throat}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a9eef0dca95de0a13eb716ae8aef154c5}{globvar\+::te\+\_\+throat}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a201c98f02f6744953f40e1c007630bc0}{globvar\+::pi}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a3346ec2679bdcc117cc6b09e8eb2a7dd}{globvar\+::dtor}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a7e4a1b87658252043b32443ffafb3ddf}{globvar\+::xcg}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a7c65a1d76a91eab0217e09e6be6d2eb0}{globvar\+::ycg}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a55febb83fd05cacf2e926878777e3515}{globvar\+::chrd}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_afe183ce32de3adfc403b0f269a275676}{globvar\+::xcen}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_ac64739121560b1c588700a14f6bc9cae}{globvar\+::ycen}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_ab9824c9f8dcc0e337df800037acfff86}{globvar\+::xb\+\_\+stk}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a50b0561e08ecd21444c8d0138e8f23f8}{globvar\+::yb\+\_\+stk}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_ac7d10e840db27451a3d4f7281e998936}{globvar\+::xb\+\_\+stack}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_ab911e9efe95d91973d67032e07c25b6e}{globvar\+::yb\+\_\+stack}
+\item 
+real $\ast$8, dimension(jk) \hyperlink{namespaceglobvar_abb730f89383edc04d1631f6dc16ad5c6}{globvar\+::beta1star}
+\item 
+real $\ast$8, dimension(jk) \hyperlink{namespaceglobvar_a1504d995004c2c3cd93ac71f6c9028e0}{globvar\+::beta2star}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a9b66a28ec78457551885e4ad3091f8fe}{globvar\+::beta1star\+\_\+new}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_aa2687515a32abc133ab720b0690976ba}{globvar\+::beta2star\+\_\+new}
+\item 
+real $\ast$8, dimension(jk) \hyperlink{namespaceglobvar_a66d44e4ebb72e4d0700987fd6cff1e02}{globvar\+::rad}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_aa830e5df47d2204dc7cfc6ad28e887df}{globvar\+::rbar}
+\item 
+real $\ast$8, dimension(jk) \hyperlink{namespaceglobvar_a72f67f1398b816e48706e6277e566566}{globvar\+::thk}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a6e2bc84f532e605dfbeec7244ae6a981}{globvar\+::thkc\+\_\+new}
+\item 
+real $\ast$8, dimension(100) \hyperlink{namespaceglobvar_a6d99aeec6935f58b70f503a823d5f085}{globvar\+::spanbsv}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_acec26aa18c34a950efbf95fbe83fb5e3}{globvar\+::xm\+\_\+slope}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a7c5baea908b3455982aa5e0919c52887}{globvar\+::rm\+\_\+slope}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a6e2e677a1248884a0beaf14ef03a7d1e}{globvar\+::xslope\+\_\+le}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a1a3ff3ff118aab96696dca2da144a415}{globvar\+::xslope\+\_\+te}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a3f456fc3a0cf242d08ec86f9105644be}{globvar\+::rslope\+\_\+le}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a0669c0da9b37b2db9ee462980dc9df12}{globvar\+::rslope\+\_\+te}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_aa5ba5cdfdecc13b0a215ac7e8bee5b9f}{globvar\+::xm}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_abafcefbd5ca40029995e377b3763583a}{globvar\+::rm}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_ab4afb7fee7167606b28de64b112f336c}{globvar\+::xi}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_ab051d7b38899c922098ea01a71759a7b}{globvar\+::xsle}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a175236fc826dcd7229a2bc77e347288a}{globvar\+::xste}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a12aec4b3d6dfcab1523c9d90f90da9b9}{globvar\+::ri}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a672ec2d03f2dd0aabce80877d9183dd0}{globvar\+::rsle}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a7de91c05fa9558d6a5e2a2abf5a2b0eb}{globvar\+::rste}
+\item 
+real $\ast$8, dimension(3) \hyperlink{namespaceglobvar_a0256e20cf8e4b736584fce52a2be89ad}{globvar\+::trarray}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a3597b44b373a600eb4d077e55967c69d}{globvar\+::a1}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a957461f913a85866eb6d67bc8660bc5d}{globvar\+::b1}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a83f42557544a90cc620fc38150229baa}{globvar\+::a2}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a6c6b282f127b3722eee82e9d331f535e}{globvar\+::b2}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a1ccb279a7cd37dd73fbd7b0e07033e12}{globvar\+::xi1}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_af44048ca90b116b55e4b210a748fb9fd}{globvar\+::ri1}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a2b6fa2e27e00de6d45f740070d260fd0}{globvar\+::xle\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a931dc7aa3dcd2482c0788547aacdfd40}{globvar\+::xte\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_aa7b9d1ee9e6007aabeaeeacdaa0f3544}{globvar\+::rle\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a43b488138b555f60d355edd22a416753}{globvar\+::rte\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a4774d9677c832856ce10a0773f0bafef}{globvar\+::xles\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_aae34d48eb8f1d7c8720c099222880643}{globvar\+::xtes\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a3a4e993f098764c396ac8df346106120}{globvar\+::rles\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a4f08772533a642a2ae689a4e83b8e0e7}{globvar\+::rtes\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a01ec65d098c5cf6f7396ff80126eb25e}{globvar\+::sle\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a06fc43eda669fded7f4d926b2c06d517}{globvar\+::ste\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a43680257555ebbaba3cd4de3408e11cf}{globvar\+::xm\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a95b82ec95a1e3b3f2b9bbd53364a6fdc}{globvar\+::rm\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a4fce94b892f139d05a7972fbea0d4a8c}{globvar\+::xms\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a598d438487e1d0e98107a657635f77b7}{globvar\+::rms\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a9cc33a73476cd269f28f4637663baa64}{globvar\+::mp\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_ad09cdd70dbe671871fe37e6f4784fc13}{globvar\+::s1le\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a8eb69430dd19178f5b03bdb675e37743}{globvar\+::s2le\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a56eebc89ec38db33a07e5123a3ebee11}{globvar\+::x\+\_\+le\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_aa647142f05c00b609672eb515f611e3a}{globvar\+::r\+\_\+le\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_af297468b9676c6972847e41f78de2d25}{globvar\+::s1te\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a339922829843baa5c9b7602f44111b2a}{globvar\+::s2te\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_abbf81b644dde8fac9df2a6f46bfb1709}{globvar\+::x\+\_\+te\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a2a458742e93da2e7da417d4e0e787cc1}{globvar\+::r\+\_\+te\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_ab5a7740414d3a3f3b79672f336f4ed83}{globvar\+::msle\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_af4bd45dc8527c82a602975482604fdb1}{globvar\+::mste\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a6cfba7e55403bb754be3f594a4d00d32}{globvar\+::span\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a0af19e0c5bd151072f235940d7e08b48}{globvar\+::chordm\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_ac7ab2bdf56cf49943a096e1376844993}{globvar\+::xmsle\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a5237bcbafe8fc6ccd929edfff7448b15}{globvar\+::rmsle\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_aafc2848897bd0aa446e292955157bb99}{globvar\+::xmste\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_ac10c9231253c0f30759eab0d2614b736}{globvar\+::rmste\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a1f20572185fb4ba6325b2158c570f2b8}{globvar\+::phi\+\_\+s\+\_\+in\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_ae4db55071c0a99b6d91729452cf5e5bc}{globvar\+::phi\+\_\+s\+\_\+out\+\_\+nonoffset\+\_\+hub}
+\item 
+real $\ast$8, dimension(100) \hyperlink{namespaceglobvar_a7da205f9d2f93c70b889e9da9c9ac03a}{globvar\+::xcpdelm}
+\item 
+real $\ast$8, dimension(100) \hyperlink{namespaceglobvar_a53a66282b3eaeda7202704473994f279}{globvar\+::xcpdeltheta}
+\item 
+real $\ast$8, dimension(100) \hyperlink{namespaceglobvar_ade9c76fcb375c4e5d05a6d9c04c1dbfe}{globvar\+::xcpinbeta}
+\item 
+real $\ast$8, dimension(100) \hyperlink{namespaceglobvar_aa9e6a5ee3e0ace429ff2ebc6f8c04ed2}{globvar\+::xcpoutbeta}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_abf2b9f230322f087169e3c845b003237}{globvar\+::staggspline}
+\item 
+real $\ast$8, dimension(100) \hyperlink{namespaceglobvar_a9e37b92991bd90ec55563a14f0405156}{globvar\+::spanmp}
+\item 
+real $\ast$8, dimension(100) \hyperlink{namespaceglobvar_ad1fdc8c08d0045d1d9088325d56d0a7f}{globvar\+::xcpdelmp}
+\item 
+real $\ast$8, dimension(100) \hyperlink{namespaceglobvar_a9b67a74e3faac41a7e1cc636aa467efb}{globvar\+::spaninbeta}
+\item 
+real $\ast$8, dimension(100) \hyperlink{namespaceglobvar_a7ce1073506dd3e70987eab670a28928d}{globvar\+::spanoutbeta}
+\item 
+real $\ast$8, dimension(100) \hyperlink{namespaceglobvar_a9a59ebb9cb5ab3b30e153f7b8c129c09}{globvar\+::spantheta}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a103f2629767cb895acfd77c69b4fdcd2}{globvar\+::chords}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_ac564ea1048d771da8ef902ab237e6cd4}{globvar\+::inbeta\+\_\+s}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a7c178a712e3c274e2a3496efbea3f9e7}{globvar\+::outbeta\+\_\+s}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_ae980d61bc1b36665a6e34c2550f78542}{globvar\+::thk\+\_\+tm\+\_\+c\+\_\+spl}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_abe8aad5ab0f38bb4ec7e960415ced26a}{globvar\+::inci\+\_\+s}
+\item 
+real $\ast$8, dimension(nspan) \hyperlink{namespaceglobvar_a03bd2d274fd38f87435439d86e0f92c2}{globvar\+::dev\+\_\+s}
+\item 
+real $\ast$8, dimension(100) \hyperlink{namespaceglobvar_a7d3222448b640704a89fa6cdc07a4331}{globvar\+::xcpchord}
+\item 
+real $\ast$8, dimension(100) \hyperlink{namespaceglobvar_a8553c7b87c906988c811df4d4b810bbf}{globvar\+::xcptm\+\_\+c}
+\item 
+real $\ast$8, dimension(100) \hyperlink{namespaceglobvar_ad2c20e4194dda60c8e4a46ad62a24099}{globvar\+::spanchord}
+\item 
+real $\ast$8, dimension(100) \hyperlink{namespaceglobvar_ad0a1491128c64a390fc1925c63c43a9a}{globvar\+::spantm\+\_\+c}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_afe5a2fb0a1ae94505f2ade324addffd6}{globvar\+::hub}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_ae899a4ed69eab45967a2e360c288f62f}{globvar\+::tip}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a2d93dde71ed9b4b71b5640624a2dba82}{globvar\+::sweep1}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_ab9d0a77e6b65126e97f664a07018fbd9}{globvar\+::radius\+\_\+tolerance}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_acf2d15a74c6397bfde89f463fd847958}{globvar\+::xle}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a8f63012c2466eb1bb44ecf69fbec3f8c}{globvar\+::xte}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_ad03d6f3d23b278acc643ea493cf17fa5}{globvar\+::rle}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a25e9da91b03e68d6849d46ceaa05ffb3}{globvar\+::rte}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a836c8bf8d7637655fc19c4c13b925a62}{globvar\+::xles}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a62fe8af457ae0993ea2e29369284a43c}{globvar\+::xtes}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a94cb0237ff6d0453b0beb753150747e5}{globvar\+::rles}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_ae7e75a0af87d0417e4bdfbb7b813ea99}{globvar\+::rtes}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a347bdab2ae7c615cda2ac9b23ac6f511}{globvar\+::sle}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a27a2971e4137e1ce57e0f3241a027b28}{globvar\+::ste}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a600638b0ac89d9ce06362b3e345a247f}{globvar\+::rrle}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a6ca5b58308ba043d9dd929b77a5be5f6}{globvar\+::rrte}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a13851f46e6899d97ecaf2610a1d6f301}{globvar\+::a}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a8accedd2450a13e63eb70b05d0528797}{globvar\+::b}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a8d862a934e23da5ae319710a879706ba}{globvar\+::xii}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_aab6536b56504cc8d4eafd8e083c061b3}{globvar\+::xmm}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a69c8e6a82732e6c3845873852cc473cb}{globvar\+::rii}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_ab216d846edeea68aa1a53f31d84b33c0}{globvar\+::rmm}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_ac2cc4848cc474dd9b462d3afc303ee1a}{globvar\+::xxle}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a126df8300f71cf717dece199b0a5478d}{globvar\+::xxte}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_aabbafc0271d82fa75c53362dae7fd8e2}{globvar\+::xx1}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a2e507bd95b509159a6effc2df430ab18}{globvar\+::rr1}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a6b2d075e483f21e7f6949da41ccf8cf0}{globvar\+::xx2}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a7f8c759616a63ffb90fff7d59c3b86df}{globvar\+::rr2}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a061d2d5ab0ada1bf7d569fc739a0a606}{globvar\+::res1}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a790f59208130ab4a445361a5da0d3d02}{globvar\+::res2}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_abb2a2320c8ef742d4a1a19b3b8ce1864}{globvar\+::j11}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a6dfce235cdc192123bf42b21e53f41d9}{globvar\+::j12}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a9d00e21e59370e3169e0b653c79172be}{globvar\+::j21}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_af0f613b41460f29b7c3d35ea0a0c25b6}{globvar\+::j22}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a3325ded52e870c164b21a3c720bbe1b6}{globvar\+::detj}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a2e4dc380073673328e48ca1cc486e306}{globvar\+::dels1}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a76bb9ea1cf09a1a5737acf2a57ffaa74}{globvar\+::dels2}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a017229d1a37091ea8dac7e17f605f980}{globvar\+::s1le}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a56cea75eae9b813c72f7b81943739f7a}{globvar\+::s2le}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a2c17a89a6df336f0e78a4ec060a7af98}{globvar\+::s1te}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_aecd5a79b6e1e9b517f57dcd7a03a513c}{globvar\+::s2te}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a5512ca98f844211a8ecb85b0be7168cc}{globvar\+::y\+\_\+spl\+\_\+end}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a69b897237929c1e1095f61f9da69c152}{globvar\+::xc}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_aa12e45433bb052d282ad478af9f88e3a}{globvar\+::yc}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_a9ae5763e77ebfcbe371431bd4f1eeb7e}{globvar\+::xbs}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespaceglobvar_aabf35f2f56582d00668fde51696a4701}{globvar\+::ybs}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_ae18c6278744d9db850158672b4cbd5ea}{globvar\+::pitch}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a60e1f3c0590fe494deaaa98bde27c96f}{globvar\+::mble}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a9f55e62c22dc5aef4a6167ef140b95d4}{globvar\+::mbte}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_aadf047ab1c784bfc190712db2f3d8500}{globvar\+::mles}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_abca0ebe31fa026de505bf14e3b3555ec}{globvar\+::mtes}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a077a5c5d840711646184a5e2f499a2d3}{globvar\+::mslehub}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_ab440a94bbb0e22d41835056ae7c0ec08}{globvar\+::xnorm}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_a1c81ec5abec812f5f2b8f01ca55a6b50}{globvar\+::rnorm}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a1f0ea87252716c9166c350308acd4289}{globvar\+::deltan}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_a35cf297d0ef47b9b767c8840cd2e943c}{globvar\+::dxn}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_a0544b64f4820db57c4ed8336dd2f6614}{globvar\+::drn}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_a775a153351e6ee6aa485883756a69374}{globvar\+::xhub}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_a0b0a00223529e708d5a7f66cc140e50d}{globvar\+::rhub}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_a7278f73f6facd43ef016ecdef108b3b8}{globvar\+::mphub}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_adeaf213bc236c950b34c4e2fb10cf12d}{globvar\+::xtip}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_a4e1a21e3c393a1e8a669dfc2ba04d5d7}{globvar\+::rtip}
+\item 
+real $\ast$8, dimension(nx, nax) \hyperlink{namespaceglobvar_a31a35cf7209d884eb1891745486853f5}{globvar\+::mptip}
+\item 
+real $\ast$8, dimension(nx, 1) \hyperlink{namespaceglobvar_aee98d6758bfc663151ebb025dc270fa3}{globvar\+::xt}
+\item 
+real $\ast$8, dimension(nx, 1) \hyperlink{namespaceglobvar_a1f58904a75cc5add66afa721914c4eb7}{globvar\+::rt}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespaceglobvar_a96dfca1007470c8ba8a1d5a54678775f}{globvar\+::cp\+\_\+chord\+\_\+curv}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespaceglobvar_ac2712a968280dc32e12e905f6cc3cc91}{globvar\+::bspline\+\_\+chord\+\_\+curv}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespaceglobvar_a3959c8a967075c593a747c5c54b50a53}{globvar\+::cp\+\_\+thk}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespaceglobvar_af72c9cb4baffb66f0f81b68cef5018e8}{globvar\+::bspline\+\_\+thk}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespaceglobvar_aedf6762d5f8bc876b3c01afd7e8e6b41}{globvar\+::cp\+\_\+le}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespaceglobvar_a5c6f14b2066b824a38b5a56803ec5c3a}{globvar\+::bspline\+\_\+le}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespaceglobvar_a7ae731b4717928e79d30248e180567de}{globvar\+::section}
+\item 
+real $\ast$8 \hyperlink{namespaceglobvar_a9378a0ca5bc1638562a71eb8e31b439d}{globvar\+::delta}
+\item 
+character $\ast$15 \hyperlink{namespaceglobvar_a8188fa7b4bc004641487eec2f8a46276}{globvar\+::istr1}
+\item 
+character $\ast$15 \hyperlink{namespaceglobvar_a96979fe04e2455f86ca3dbb38cc4aac1}{globvar\+::istr2}
+\item 
+character $\ast$15, dimension(13) \hyperlink{namespaceglobvar_a05ffe1b752c11acb73ba6f8a4a854e94}{globvar\+::h}
+\item 
+logical \hyperlink{namespaceglobvar_a06009d87ddfdfce921d7c631e307aa1e}{globvar\+::isdev}
+\item 
+logical \hyperlink{namespaceglobvar_a7ef07561b1935adec053ae70c03ec46f}{globvar\+::tm\+\_\+c\+\_\+spline}
+\item 
+logical \hyperlink{namespaceglobvar_a2432df148a05363a1a9054a0401bc8ac}{globvar\+::isxygrid}
+\item 
+logical \hyperlink{namespaceglobvar_ac05346905a5106a2caa9e00cbee2e308}{globvar\+::is\+\_\+xyzstreamlines}
+\item 
+logical \hyperlink{namespaceglobvar_abac88288cb1b27c8e386787aaf593171}{globvar\+::spanwise\+\_\+angle\+\_\+spline}
+\item 
+logical \hyperlink{namespaceglobvar_a5669ea00f010c1d3530ecb52446dd4fb}{globvar\+::spanwise\+\_\+inci\+\_\+dev\+\_\+spline}
+\item 
+integer \hyperlink{namespacegridvar_a82471622d62aa32eee56a7b6be0cde37}{gridvar\+::r1cell}
+\item 
+integer \hyperlink{namespacegridvar_a3203ed7e5fd550ecd3db28a984a98e67}{gridvar\+::r2cell}
+\item 
+integer \hyperlink{namespacegridvar_a9f25f936a91b900f3c0e92756b058baf}{gridvar\+::r3cell}
+\item 
+integer \hyperlink{namespacegridvar_a95fdf111ad0de8db538800047d39fe2c}{gridvar\+::r4cell}
+\item 
+integer \hyperlink{namespacegridvar_a8b64d7e709991664741ab52bd2cc4b0b}{gridvar\+::jcells}
+\item 
+integer \hyperlink{namespacegridvar_ac50c143a371abc586b838320ddc88fdc}{gridvar\+::nx}
+\item 
+integer \hyperlink{namespacegridvar_a8fa1d0ca6197d12780fa0fae9b209c07}{gridvar\+::ny}
+\item 
+integer \hyperlink{namespacegridvar_ab9c5f3a5fcee79ab6ab60e5eeeddba0b}{gridvar\+::ng}
+\item 
+integer \hyperlink{namespacegridvar_aa21ca71efd849f646cd7117ae4548ba3}{gridvar\+::i\+\_\+thetamax}
+\item 
+integer, dimension(1) \hyperlink{namespacegridvar_aa2cdf2ef709244cb5a8170e1d0a75e6f}{gridvar\+::i\+\_\+loc}
+\item 
+integer \hyperlink{namespacegridvar_a07e7022df38416a6d673644deb5b1c9e}{gridvar\+::p1}
+\item 
+integer \hyperlink{namespacegridvar_a533dcfeb986dc18e2b0db537c859c6b7}{gridvar\+::p2}
+\item 
+integer \hyperlink{namespacegridvar_a86eca560e31b5be73bfcdd95c5b4be72}{gridvar\+::p3}
+\item 
+integer \hyperlink{namespacegridvar_af879defcd34121964abce7fb5f06c1e5}{gridvar\+::p4}
+\item 
+integer \hyperlink{namespacegridvar_aeeca5c7ff039fec86cfa5159ba5dfaa9}{gridvar\+::p5}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_ad36217840661114bf87efd88b8e0ef9f}{gridvar\+::xline}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_a50e8fc927e6dd816267bc2eb8e20283f}{gridvar\+::yline}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_ac19951c0ef8b36fd21139054f5e224e2}{gridvar\+::xb1}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_a330cf63f1dec7b8eb31c4d643cfa9c07}{gridvar\+::yb1}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_a66083c9a2a9d76f40ec6db31fe43e4aa}{gridvar\+::xb2}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_af5cc21dee8d110e0ae7ce0e1370920cc}{gridvar\+::yb2}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_ad19621a7f5affe93e33f8a58730527ca}{gridvar\+::xmeanline}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_a7fb5eedd8e1bc9b66181f2cc2e461c0c}{gridvar\+::ymeanline}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_a53c057251ce468ac480e633a8872773a}{gridvar\+::xbnew1}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_a3f092d48897bcc3226b7c2fe84823bea}{gridvar\+::ybnew1}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_af05e411d94cae29c5a5ac414c9d43621}{gridvar\+::xbnew2}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_a8f285d1c92532af25a64aa36f934796e}{gridvar\+::ybnew2}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_acee1a1e22370f51e5af53bda6cdececc}{gridvar\+::xbmean}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_ae4e494722edb427de657fb301c02d39b}{gridvar\+::ybmean}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a2c69cc1685bd31d1e8722319a417957f}{gridvar\+::theta\+\_\+le}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a60dbce3589b06c139cdf4d3ea77ba514}{gridvar\+::theta\+\_\+te}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_ac18957e46fd4763e6c2b1e08acc72714}{gridvar\+::theta\+\_\+max}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_ae90ed2e3a99be8961302612c1df8c598}{gridvar\+::dtheta1}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_ad0f5aa5081590596dff14679cc98c7b4}{gridvar\+::dtheta2}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a58ea5ff8ac54ffb8b243dd41dc5f14af}{gridvar\+::value1}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a65d2fa425cf459b253a54d267df8cad0}{gridvar\+::value2}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a622406656271f2f246f84f97829821c2}{gridvar\+::value3}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a2095a361bc90411a064b20d9ae56fed1}{gridvar\+::value4}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a883f353750cac83a1357c0703986263d}{gridvar\+::value5}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a109fb1faedc36b43ce61bd38477d6e89}{gridvar\+::mprime\+\_\+le}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a5c94ce635053a47af93223354eb0df0c}{gridvar\+::mprime\+\_\+te}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_aa20ece35147167b59e43c622c6bc0216}{gridvar\+::mprime\+\_\+thetamax}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a3baa2aa24a6ccc7d56e3a1fb2c053d2d}{gridvar\+::dmprime1}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a4d01dbdf0f12e4c8dda949d59470ef8a}{gridvar\+::dmprime2}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_aaf7ab9a465673cc6de7235ca2790a0d8}{gridvar\+::atan2}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a03c8e52b6729ce5c1acc022a80473142}{gridvar\+::valuemax}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_ae7488a3ae2a3eaff4a9e9ed253fb361e}{gridvar\+::maxcurv}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a6fe39b1ddaaf457d61c6458b903a961f}{gridvar\+::mincurv}
+\item 
+integer \hyperlink{namespacegridvar_a7e34959aea544968408485c12ae2ec2d}{gridvar\+::nstingtop}
+\item 
+integer \hyperlink{namespacegridvar_aa2e254a9039742bb411848f9e96a4257}{gridvar\+::nstingbot}
+\item 
+integer \hyperlink{namespacegridvar_a1a9d890d3962056407f065bee6fd2739}{gridvar\+::nsting1}
+\item 
+integer \hyperlink{namespacegridvar_ad662ce2bebfd96b4b3220629dbb0b5b6}{gridvar\+::nsting2}
+\item 
+integer \hyperlink{namespacegridvar_ad3dfef715cafcf310b1a7c5a297d162c}{gridvar\+::njoint}
+\item 
+integer \hyperlink{namespacegridvar_ae3d6123e7025443a7d76ea994104734f}{gridvar\+::nstinggrid}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a0a1d150b576fa8e1243bb1aa8ab04fa0}{gridvar\+::xgtrans}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a31d3c65a0c90f341f558413f1f4386a6}{gridvar\+::xoffset}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_af659082800429edb283c62f245146f28}{gridvar\+::yoffset}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a4e437e8bc140d7b17868d060514b7d59}{gridvar\+::delx}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a6da2f560ec3e950efa0855d27d01fe86}{gridvar\+::stingtop\+\_\+cellsize}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_aa8b31ebbf73c3df1aa56e327142bcab5}{gridvar\+::stingbot\+\_\+cellsize}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a0325ce2437768ded8f8819e05a341433}{gridvar\+::slopetop}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a241785fa73202eb4a891ece68ffa4fd1}{gridvar\+::slopebot}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a6ab302a8157787da35aa4bef702ce7db}{gridvar\+::ctop}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a4dbed8798130fc3925a584d911eb397b}{gridvar\+::cbot}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_a679d95eb858c82d2409d67d8c7defa5b}{gridvar\+::xbstingtop}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_a0639e46ae56097b6f054ec6ec8fa5929}{gridvar\+::ybstingtop}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_a7b37df25204691373d89716e5f39a528}{gridvar\+::xbstingbot}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_a3f89618ccfbc9f5f8b2fef3e844fde54}{gridvar\+::ybstingbot}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_abda87534e29c12083ccea2d949c300e9}{gridvar\+::xbot}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_ad952a63f5ae1d8ed5480c9670ac9ecff}{gridvar\+::ybot}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_a2f9709ea33206d334446b47b7e2ca726}{gridvar\+::xst}
+\item 
+real $\ast$8, dimension(\+:), allocatable \hyperlink{namespacegridvar_addb37740c3b5b897fb0e5a34bfbcf08c}{gridvar\+::yst}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespacegridvar_a13592c5c62fa4125e18fa8df3f64a43b}{gridvar\+::xgstingtop}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespacegridvar_a7ca6b72f5d1eb6a91685b56d93b936c6}{gridvar\+::ygstingtop}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespacegridvar_a280b9f2c74950beb202cb0aae123fb8a}{gridvar\+::xgstingbot}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespacegridvar_a819dd42b0469aff2373b237be7d72b84}{gridvar\+::ygstingbot}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespacegridvar_a995496c4b06b80179c34232029a8c471}{gridvar\+::xgstingdash}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespacegridvar_a000b3ae1934c0e65a9b3c6d914ba6339}{gridvar\+::ygstingdash}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespacegridvar_adc4e81d08a89fa23d69d38d5128e0e97}{gridvar\+::xgstingblade}
+\item 
+real $\ast$8, dimension(\+:,\+:), allocatable \hyperlink{namespacegridvar_a11c63db6c8ecfb576129fdd9eedeb158}{gridvar\+::ygstingblade}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespacegridvar_a8501e472d9155bb35061c43281ef6ba5}{gridvar\+::s}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespacegridvar_a4e7a599ab9b156f0b92fcae94441b1df}{gridvar\+::dxds}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespacegridvar_ab83e7e8b7f1369a60b1ae1877ebd02b2}{gridvar\+::dyds}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespacegridvar_a0982bf7134515b2e97db0842a978bdcb}{gridvar\+::xnorm}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespacegridvar_ac91a158f48b7fda45b049e434e3c1147}{gridvar\+::ynorm}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a314572d3cf48c6611fe18f0c35f14aa2}{gridvar\+::xn1}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_aae5cbf9885ae6ff5abebd0b9768a574d}{gridvar\+::yn1}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a62f11262a634086d3483618aff305ad6}{gridvar\+::xn2}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_adfe4b86cb9e6418fe49ea8441e612530}{gridvar\+::yn2}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a44d97aa52c240db97de12d4e36c6b5c5}{gridvar\+::a}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a88f13d276e07180f43279156c26a1c41}{gridvar\+::b}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a7fe3c8c80f1312a7f4236d8673422436}{gridvar\+::offset}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_aa3ec4b56c55b261b07d99a0087d8e431}{gridvar\+::deltan}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_aca6bbeece732654bf9a01b443eabf0ad}{gridvar\+::dr}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespacegridvar_a1ce05db2c1a334cd361b4c8f96df509d}{gridvar\+::dxn}
+\item 
+real $\ast$8, dimension(nx) \hyperlink{namespacegridvar_ad38d62b5127d5c104db8eb449c05a2f2}{gridvar\+::dyn}
+\item 
+real $\ast$8 \hyperlink{namespacegridvar_a549d685a2b1afd1a9cd81342258cead5}{gridvar\+::hyp}
+\end{DoxyCompactItemize}
