@@ -48,57 +48,6 @@ open(1, file = fname, status = 'unknown')
 !write(*, *) 'Reading inputs from 3dbgbinput file'
 !write(*, *)
 !---reading parameters from input file----
-<<<<<<< HEAD
-  read(1,*)temp
-  !reading the casename
-  read(1,*)fext
-  !write(*,*)'case:',fext
-  casename = trim(fext)
-  read(1,*)temp
-  read(1,*)ibrow
-  !write(*,*)'bladerow #:',ibrow
-  write(ibrowc,'(i3)')ibrow
-  !print*,ibrowc
-  !write(*,*)
-  read(1,*)temp
-  read(1,*)nbls ! number of blades in this row
-  !print*,'Number of blades in this row:',nbls
-  read(1,'(A)'),temp
-  units = temp(24:25)
-  read(1,*)scf
-  !write(*,*)'bsf:',scf
-  !write(*,*) 
-  read(1,*)temp
-  read(1,*)nsl
-  !print*,'Number of streamlines:',nsl
-  !write(*,*)
-  read(1,*)temp
-  spanwise_angle_spline = .False.
-  read(1,*)beta_switch, temp2  ! Input angle switch (0 = BetaZ; 1 = BetaR)
-  anglespline = temp2 
-  if ((anglespline .eq. 'inletspline').or.(anglespline .eq. 'outletspline').or.(anglespline .eq. 'inoutspline')) then
-    spanwise_angle_spline = .True.
-    print*," "
-    print*,"Angles defined spanwise as a B-spline using control points..."
-    print*," "
-    print*,trim(anglespline)
-    read(1,*)temp
-  endif
-  read(1,*)curv, spanwise_spline     !  Airfoil curvature control switch
-  if (trim(spanwise_spline).eq.'spanwise_spline')then
-   read(1,*)temp
-  endif
-  read(1,*)thick_distr  ! Airfoil thickness distribution switch
-  read(1,*)temp
-  read(1,*)thick        ! Airfoil thickness multiplier switch
-  read(1,*)temp
-  read(1,*)LE           ! Airfoil LE control switch
-  read(1,*)temp
-  read(1,*)chord_switch ! non-dimensional actual chord switch
-  read(1,*)temp
-  read(1,*)temp
-  !
-=======
 read(1, *)temp
 !reading the casename
 read(1, *)fext
@@ -163,7 +112,6 @@ read(1, *)chord_switch ! non-dimensional actual chord switch
 read(1, *)temp
 read(1, *)temp
 !
->>>>>>> develop
 !---- blade file names
 do i = 1, nsl
 	write(ibrowc1, '(i3)')i
