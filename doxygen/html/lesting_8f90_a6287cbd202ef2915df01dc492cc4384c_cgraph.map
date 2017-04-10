@@ -1,9 +1,0 @@
-<map id="lesting" name="lesting">
-<area shape="rect" id="node2" href="$lespline_8f90.html#a4b77dc5a915f06c52c632e253dbeba5b" title="vector_rotation" alt="" coords="121,5,228,32"/>
-<area shape="rect" id="node3" href="$spline_8f90.html#a355599e71d0cfc3b5acbc54366521bb5" title="spline" alt="" coords="147,56,203,83"/>
-<area shape="rect" id="node5" href="$bsplinecam_8f90.html#a5f344dd1ac7aa0679039a2bd0531aec6" title="camber" alt="" coords="142,107,207,133"/>
-<area shape="rect" id="node6" href="$bsplinecam_8f90.html#af4379365bf9e92538191fcb377a6e7fa" title="angle" alt="" coords="148,157,201,184"/>
-<area shape="rect" id="node7" href="$dmat__solve_8f90.html#ad79706b7f3c6b3339baccb3a798e9a92" title="dmat_solve" alt="" coords="131,208,218,235"/>
-<area shape="rect" id="node8" href="$bspline3_8f90.html#a68f8db1f5c1e4f4e0784106fd195b1c0" title="bspline_arclength" alt="" coords="113,259,236,285"/>
-<area shape="rect" id="node4" href="$spline_8f90.html#ae6a1dfc9c3debfa756430e1f779a3f95" title="trisol" alt="" coords="284,56,335,83"/>
-</map>

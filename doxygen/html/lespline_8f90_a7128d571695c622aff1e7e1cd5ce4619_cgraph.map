@@ -1,8 +1,0 @@
-<map id="fini_diff_refine" name="fini_diff_refine">
-<area shape="rect" id="node2" href="$airfoiltypes_8f90.html#ac00357f2293141bd7a6d9fbf23e9f03c" title="cambmix" alt="" coords="188,5,263,32"/>
-<area shape="rect" id="node4" href="$lespline_8f90.html#accf5f109c904f84a99a5ff98f9e81985" title="bsplinecam_refine" alt="" coords="162,56,289,83"/>
-<area shape="rect" id="node5" href="$bspline3_8f90.html#a7d2ef241d68f7850542865be9f217e5d" title="bspline_y_of_x_refine" alt="" coords="152,107,299,133"/>
-<area shape="rect" id="node6" href="$lespline_8f90.html#aab54ab4bcec582541576e1500659f46f" title="splinethick_refine" alt="" coords="164,157,287,184"/>
-<area shape="rect" id="node7" href="$airfoiltypes_8f90.html#a4716e42043a5cad663238ac57e9662ef" title="thickellip" alt="" coords="189,208,262,235"/>
-<area shape="rect" id="node3" href="$spline_8f90.html#a8c85076bce8a99e3edcf74aad65acbd0" title="curv" alt="" coords="347,5,392,32"/>
-</map>

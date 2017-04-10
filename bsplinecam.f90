@@ -191,15 +191,16 @@ endif
 ! Calculating both possible roots to solve for k
 k1 = (-intg_d2v_end(ncp-2) + sqrt(det))/(2*P*tan(tot_cam))
 k2 = (-intg_d2v_end(ncp-2) - sqrt(det))/(2*P*tan(tot_cam))
-! Choosing root with minimum magnitude
-knew = k2
-if (abs(k2).gt.abs(k1)) knew = k1
-
+! Choosing appropriate root
 write (*, '(A, 2F20.15)'), 'Possible values of scaling factor are: ', k1, k2
-write (*, '(A, F20.15)'), 'Camber line second derivative scaling factor: ', knew
-
+knew = min(abs(k1), abs(k2))
 d1v_end = knew*(intg_d2v_end-intg_d1v_end(ncp-2))
+if (atan(d1v_end(ncp-2))-atan(d1v_end(1)) .ne. tot_cam) then
+	knew = max(abs(k1), abs(k2))
+	d1v_end = knew*(intg_d2v_end-intg_d1v_end(ncp-2))
+endif
 v_end = knew*(intg_d1v_end-(u_end*intg_d1v_end(ncp-2)))
+write (*, '(A, F20.15)'), 'Camber line second derivative scaling factor: ', knew
 write (*, '(A, F20.15, /, A, F20.15)'), 'Inlet u-v metal angle in deg: ', atan(d1v_end(1))/dtor, &
 'Exit u-v metal angle in deg: ', atan(d1v_end(ncp-2))/dtor
 

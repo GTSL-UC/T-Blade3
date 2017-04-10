@@ -1,8 +1,0 @@
-<map id="bladestack" name="bladestack">
-<area shape="rect" id="node2" href="$spline_8f90.html#ab5b0cf1547429c4a8ff7016b8e1f991c" title="sinvrt" alt="" coords="197,31,249,57"/>
-<area shape="rect" id="node5" href="$cubicspline_8f90.html#a0d7ea172c4dd062e3e0cc2a4dc93a5b3" title="cubicspline" alt="" coords="180,81,267,108"/>
-<area shape="rect" id="node6" href="$cubicspline_8f90.html#a61e3967b950c5647c24960902402617b" title="cubicbspline_intersec" alt="" coords="150,132,297,159"/>
-<area shape="rect" id="node7" href="$func_nsubs_8f90.html#a0e9c807d58ef2f7306cf94646c7f307d" title="constantslopemeanline3d" alt="" coords="139,183,308,209"/>
-<area shape="rect" id="node3" href="$spline_8f90.html#ad1042233290c73d457f8ebb490d6cfb0" title="seval" alt="" coords="356,5,407,32"/>
-<area shape="rect" id="node4" href="$spline_8f90.html#abe45afb5f9ac2c9238b4b954ba21b75a" title="deval" alt="" coords="356,56,407,83"/>
-</map>

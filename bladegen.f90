@@ -568,10 +568,10 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
 		write (*, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
 		call splinethickcontrol(umxthk, thkc, ncp, xcp_thk, ycp_thk, np, u, thickness, thick_distr_3_flag)
 		if(isdev) then
-			open (unit = 81, file = 'thk_CP_' // trim(casename) // '.dat')
+			open (unit = 81, file = 'thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
 			write (81, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
 			close (81)
-			open (unit = 81, file = 'thk_dist_' // trim(casename) // '.dat')
+			open (unit = 81, file = 'thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
 			write (81, '(2F20.16)') (u(i), thickness(i), i = 1, np)
 			close (81)
 		endif
