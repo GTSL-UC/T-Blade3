@@ -44,6 +44,7 @@ do i=1,na
   end if
 end do
 
+if(thick .ne. 0) then
 !-------------------------------------------------------------------------------
 !writing Thickness control points
  Allocate(thk_cp(20,2*na))
@@ -86,7 +87,9 @@ do i=1,na
 
   end if
 end do
+endif
 
+if(LE .ne. 0) then
 !-----------------------------------------------------------------------------
 !Defining LE ontrol points
 Allocate(sting_l_all(na))
@@ -125,6 +128,7 @@ Allocate(sting_l_all(na))
 		end if
 	end do
 end if
+endif
 !############################################
 !This part of the program writes down the data points for the Bspline created using
 !the control points

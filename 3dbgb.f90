@@ -908,15 +908,19 @@ do js = 1, nspn
    endif ! endif for stagger options
    !
    !----------------------------------------------------------------------
-   if(curv.ne.0.and.LE.ne.2)then
-     ! Deallocate(sting_l_all)
-     !Allocate(sting_l_all(nsl))
-     sting_l_all(1:nsl) = 0.
-     ! print*, sting_l_all
-   elseif(curv.eq.0.and.LE.ne.2)then
+   ! if(curv.ne.0 .and. LE.ne.2)then
+     ! ! Deallocate(sting_l_all)
+	 ! if(allocated(sting_l_all)) deallocate(sting_l_all)
+     ! Allocate(sting_l_all(nsl))
+     ! sting_l_all(1:nsl) = 0.
+     ! ! print*, sting_l_all
+   ! elseif(curv.eq.0 .and. LE.ne.2)then
+     ! Allocate(sting_l_all(nsl))
+     ! sting_l_all(1:nsl) = 0.
+   ! endif
+   	 if(allocated(sting_l_all)) deallocate(sting_l_all)
      Allocate(sting_l_all(nsl))
      sting_l_all(1:nsl) = 0.
-   endif
    
    !----------------------------------------------------------------------
    !----------------------------------------------------------------------

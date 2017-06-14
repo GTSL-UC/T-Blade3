@@ -31,33 +31,37 @@ do i=2,ncp_chord_curv
 	end do
 end do
 
-!creating cubic spline for Thickness
-!-----------------------------------------------------------------------------------------------
-do j=1,na
-	bspline_thk(j,1)=span(j)
-end do
-
-do i=2,ncp_chord_thk
-	call cubicspline(cp_chord_thk(:,i),cp_chord_thk(:,1),ncp_span_thk,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
-	call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,intersec,na,xbs,ybs)
+if(thick .ne. 0) then
+	!creating cubic spline for Thickness
+	!-----------------------------------------------------------------------------------------------
 	do j=1,na
-		bspline_thk(j,i)=intersec(j)
+		bspline_thk(j,1)=span(j)
 	end do
-end do
 
-!creating cubic spline for LE
-!------------------------------------------------------------------------------------------------
-do j=1,na
-	bspline_LE(j,1)=span(j)
-end do
+	do i=2,ncp_chord_thk
+		call cubicspline(cp_chord_thk(:,i),cp_chord_thk(:,1),ncp_span_thk,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
+		call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,intersec,na,xbs,ybs)
+		do j=1,na
+			bspline_thk(j,i)=intersec(j)
+		end do
+	end do
+endif
 
-do i=2,ncp_LE
-	call cubicspline(cp_LE(:,i),cp_LE(:,1),ncp_span_LE,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
-	call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,intersec,na,xbs,ybs)
+if(LE .ne. 0) then
+	!creating cubic spline for LE
+	!------------------------------------------------------------------------------------------------
 	do j=1,na
-		bspline_LE(j,i)=intersec(j)
+		bspline_LE(j,1)=span(j)
 	end do
-end do
+
+	do i=2,ncp_LE
+		call cubicspline(cp_LE(:,i),cp_LE(:,1),ncp_span_LE,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
+		call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,intersec,na,xbs,ybs)
+		do j=1,na
+			bspline_LE(j,i)=intersec(j)
+		end do
+	end do
+endif
 
 print*, 'bspline created successfully'
 

@@ -505,55 +505,60 @@ read(10, *)
 do i = 1, ncp_span_curv
 	read(10, *) cp_chord_curv(i, 1:ncp_chord_curv)
 end do
-!--------------------------------------------------------------------------
-!Reading thickness control points
-read(10, *)
-read(10, *)
-read(10, *)ncp_span_thk, ncp_chord_thickness
-!number of chord and thickness control points will always be the same
-ncp_thickness = ncp_chord_thickness
-ncp_span_thk1 = ncp_span_thk+2
 
-ncp_chord_thk = ncp_chord_thickness-2+ncp_thickness-2+1
+if(thick .ne. 0 .or. LE .ne. 0) then
+	!--------------------------------------------------------------------------
+	!Reading thickness control points
+	read(10, *)
+	read(10, *)
+	read(10, *)ncp_span_thk, ncp_chord_thickness
+	!number of chord and thickness control points will always be the same
+	ncp_thickness = ncp_chord_thickness
+	ncp_span_thk1 = ncp_span_thk+2
 
-!Initializing values for variables defined by Ahmed
-Allocate(ncp_thk(nsl))
-do i = 1, nsl
-	ncp_thk(i) = ncp_thickness+4
-end do
+	ncp_chord_thk = ncp_chord_thickness-2+ncp_thickness-2+1
 
-allocate(cp_chord_thk(ncp_span_thk, ncp_chord_thk))
+	!Initializing values for variables defined by Ahmed
+	Allocate(ncp_thk(nsl))
+	do i = 1, nsl
+		ncp_thk(i) = ncp_thickness+4
+	end do
 
-
-read(10, *)
-print*, ncp_chord_thk, ncp_chord_thickness, ncp_thickness
-do i = 1, ncp_span_thk
-	read(10, *)cp_chord_thk(i, 1:ncp_chord_thickness)
-end do
-!--------------------------------------------------------------------------
-!Reading LE control points
-do i = 1, 3
-	read(10, *)  
-end do
-read(10, *)LE_deg, LE_seg
-read(10, *)
-read(10, *)ncp_span_LE
-
-ncp_LE = 13 !there are 13 different control points
-!Giving the same variable name as in controlinputs
-LEdegree = LE_deg
-no_LE_segments = LE_seg
-
-ncp_span_LE1 = ncp_span_LE+2
-
-allocate(cp_LE(ncp_span_LE, ncp_LE+1))
+	allocate(cp_chord_thk(ncp_span_thk, ncp_chord_thk))
 
 
-read(10, *)
-do i = 1, ncp_span_LE
-	read(10, *)cp_LE(i, 1:ncp_LE+1)
-end do
-close(10)
+	read(10, *)
+	print*, ncp_chord_thk, ncp_chord_thickness, ncp_thickness
+	do i = 1, ncp_span_thk
+		read(10, *)cp_chord_thk(i, 1:ncp_chord_thickness)
+	end do
+	if (LE .ne. 0) then
+		!--------------------------------------------------------------------------
+		!Reading LE control points
+		do i = 1, 3
+			read(10, *)  
+		end do
+		read(10, *)LE_deg, LE_seg
+		read(10, *)
+		read(10, *)ncp_span_LE
+
+		ncp_LE = 13 !there are 13 different control points
+		!Giving the same variable name as in controlinputs
+		LEdegree = LE_deg
+		no_LE_segments = LE_seg
+
+		ncp_span_LE1 = ncp_span_LE+2
+
+		allocate(cp_LE(ncp_span_LE, ncp_LE+1))
+
+
+		read(10, *)
+		do i = 1, ncp_span_LE
+			read(10, *)cp_LE(i, 1:ncp_LE+1)
+		end do
+		close(10)
+	endif
+endif
 !---------------------------------------------------------------------------
 
 print*, 'spanwise input file read successfully'
