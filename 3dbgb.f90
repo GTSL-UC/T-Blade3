@@ -918,9 +918,11 @@ do js = 1, nspn
      ! Allocate(sting_l_all(nsl))
      ! sting_l_all(1:nsl) = 0.
    ! endif
+   if (LE.ne.2) then
    	 if(allocated(sting_l_all)) deallocate(sting_l_all)
      Allocate(sting_l_all(nsl))
      sting_l_all(1:nsl) = 0.
+	endif
    
    !----------------------------------------------------------------------
    !----------------------------------------------------------------------
