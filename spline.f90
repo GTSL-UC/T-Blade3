@@ -317,7 +317,17 @@ real, intent (inout) :: tt
 
 !!		Other local variables
 integer :: iter, maxiter
-real :: spl_eval, dspl_eval, dt_newt, y_newt, dy_newt, tol
+real :: spl_eval, dspl_eval, dt_newt, y_newt, dy_newt, tol, mint, maxt
+
+mint = minval(t)
+maxt = maxval(t)
+if (tt .lt. mint) then
+	write (*, *) 'SPL_INV WARNING: Bad initial guess provided. Using minimum value.'
+	tt = mint
+elseif (tt .gt. maxt) then
+	write (*, *) 'SPL_INV WARNING: Bad initial guess provided. Using maximum value.'
+	tt = maxt
+endif
 
 tol = 1.0e-5
 maxiter = 25 ! increased from 10 for radial cases
@@ -325,7 +335,14 @@ do iter = 1, maxiter
 	y_newt = spl_eval(tt, y, dydt, t, n) - yy
 	dy_newt = dspl_eval(tt, y, dydt, t, n)
 	dt_newt = -y_newt/dy_newt
-	tt = tt + dt_newt
+	tt = tt + 0.8*dt_newt
+	if (tt < mint) then
+		write(*, *) 'SPL_INV WARNING: Spline parameter clipped at spline begin.'
+		tt = mint
+	elseif(tt > maxt) then
+		write(*, *) 'SPL_INV WARNING: Spline parameter clipped at spline end.'
+		tt = maxt
+	endif
 	if(abs(dt_newt/(t(n)-t(1))) .lt. tol) return
 enddo
 
@@ -413,9 +430,27 @@ real, intent (inout) :: tt1, tt2
 real, parameter :: GR = 0.5*(3.-sqrt(5.)), tol = 1.0e-12
 logical :: GS_flag, trunc1knt1, trunc1kntn, trunc2knt1, trunc2kntn
 real :: dt1, dt2, r, ra, rb, rt1, rt2, F, Fa, Fb, Ft1, Ft2, &
-	F1, F2, J11, J12, J21, J22, xx1, xx2, yy1, yy2, tt1old, tt2old
+	F1, F2, J11, J12, J21, J22, xx1, xx2, yy1, yy2, tt1old, tt2old, &
+	mint1, mint2, maxt1, maxt2
 integer :: iter, i, l
 real :: dspl_eval
+
+mint1 = minval(t1); maxt1 = maxval(t1)
+mint2 = minval(t2); maxt2 = maxval(t2)
+if (tt1 .lt. mint1) then
+	write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 1. Using minimum value.'
+	tt1 = mint1
+elseif (tt1 .gt. maxt1) then
+	write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 1. Using maximum value.'
+	tt1 = maxt1
+endif
+if (tt2 .lt. mint2) then
+	write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 2. Using minimum value.'
+	tt2 = mint2
+elseif (tt2 .gt. maxt2) then
+	write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 2. Using maximum value.'
+	tt2 = maxt2
+endif
 
 dt1 = 0.0
 dt2 = 0.0

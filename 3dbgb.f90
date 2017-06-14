@@ -464,10 +464,10 @@ write(*, *)'xLE    rLE     xTE     rTE'
 print*, 'Calculating LE x, r points... '
 
 do ia = 1, na
-	if (npoints.eq.nsl)then ! LE, TE points same as no. of streamlines
-		x_le(ia) = xle(ia)
-		r_le(ia) = rle(ia)
-	else ! when interpolation of LE, TE coordinates is required
+	! if (npoints.eq.nsl)then ! LE, TE points same as no. of streamlines
+		! x_le(ia) = xle(ia)
+		! r_le(ia) = rle(ia)
+	! else ! when interpolation of LE, TE coordinates is required
 	   s1le(ia) = mp(2, ia)
 	   s2le(1) = rle(1)
 		if(ia.eq.1)then
@@ -485,7 +485,7 @@ do ia = 1, na
 				   rles(1), sle(1), npoints)
 		x_le(ia) = spl_eval(s1le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
 		r_le(ia) = spl_eval(s1le(ia), rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))
-	endif   
+	! endif   
 enddo
 
 ! TE curve intersection with the streamline curve---------
@@ -493,10 +493,10 @@ enddo
 print*, 'Calculating TE x, r points...'
 
 do ia = 1, na
-	if (npoints.eq.nsl)then ! LE, TE points same as no. of streamlines
-		x_te(ia) = xte(ia)
-		r_te(ia) = rte(ia)
-	else ! when interpolation of LE, TE coordinates is required
+	! if (npoints.eq.nsl)then ! LE, TE points same as no. of streamlines
+		! x_te(ia) = xte(ia)
+		! r_te(ia) = rte(ia)
+	! else ! when interpolation of LE, TE coordinates is required
 		s1te(ia) = s1le(ia)
 		s2te(1) = rte(1)
 		if(ia.eq.1)then
@@ -510,7 +510,9 @@ do ia = 1, na
 					rtes(1), ste(1), npoints)
 		x_te(ia) = spl_eval(s1te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
 		r_te(ia) = spl_eval(s1te(ia), rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))
-	endif
+	! endif
+	!!KB
+	! write(*, *) 'Initial msle = ', s1le(ia), ' Initial mste = ', s1te(ia)
 enddo
 
 !-------------------------------------------------------
@@ -586,12 +588,12 @@ do ia = 1, na
 		endif     
 	enddo
 	print*, 'ile:', ile
-	if(ile.le.2)then
-	 msle(ia) = 0.
-	else
-	 msle(ia) = mp(ile-2, ia)
-	endif
-	print*, 'msle-initial guess', msle(ia)
+	! if(ile.le.2)then
+	 ! msle(ia) = 0.
+	! else
+	 ! msle(ia) = mp(ile-2, ia)
+	! endif
+	! print*, 'msle-initial guess', msle(ia)
 	!--------------------------------------------------------------------
 	!
 	! Trailing Edge index -----------------------------------------------
@@ -616,8 +618,8 @@ do ia = 1, na
 	  endif     
 	enddo
 	print*, 'ite:', ite
-	mste(ia) = mp(ite+2, ia)
-	print*, 'mste-initial guess', mste(ia)
+	! mste(ia) = mp(ite+2, ia)
+	! print*, 'mste-initial guess', mste(ia)
 	! write(*, *) 
 enddo
 
@@ -627,18 +629,21 @@ enddo
 !!Determining purely axial, purely radial, mixed flow
 !--------------------------------------------------------------------
 do ia = 1, na
+	!!KB
+	msle(ia) = s1le(ia)
+	mste(ia) = s1te(ia)
+	! print*, msle(ia), s1le(ia)
    if(i_slope.eq.0)then ! purely axial flow
-   
      print*, 'Using x values for msLE due to a purely axial flow.'
 		!print*, 'msle(ia), x_le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia) before'
 		!print*, msle(ia), x_le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia)
-     call spl_inv(msle(ia), x_le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
+     ! call spl_inv(msle(ia), x_le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
 		!print*, 'msle(ia), x_le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia) after'
 		!print*, msle(ia), x_le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia)
      print*, 'Using x values for msTE due to a purely axial flow.'
 		!print*, 'mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia) before'
 		!print*, mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia)
-     call spl_inv(mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
+     ! call spl_inv(mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
 		!print*, 'mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia) after'
 		!print*, mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia)
      
@@ -652,7 +657,7 @@ do ia = 1, na
      if(axial_LE)then ! axial flow at LE
      
        print*, 'Using x values for msLE due to axial flow at LE.'
-       call spl_inv(msle(ia), x_le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
+       ! call spl_inv(msle(ia), x_le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
        
        !---Evaluating span  for an axial blade
        lref = abs(r_le(na) - r_le(1))
@@ -661,7 +666,7 @@ do ia = 1, na
      elseif(radial_LE)then! non-axial flow at LE
      
        print*, 'Using r values for msLE due to non-axial flow at LE.'
-       call spl_inv(msle(ia), r_le(ia), rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))
+       ! call spl_inv(msle(ia), r_le(ia), rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))
        
        !---Evaluating span for a non-axial blade
        xdiff = abs(x_le(na) - x_le(1))
@@ -674,12 +679,12 @@ do ia = 1, na
      if(axial_TE)then ! axial flow at TE
      
        print*, 'Using x values for msTE due to axial flow at TE.'
-       call spl_inv(mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
+       ! call spl_inv(mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
  
      elseif(radial_TE)then ! non-axial flow at TE
      
        print*, 'Using r values for msTE due to non-axial flow at TE.'
-       call spl_inv(mste(ia), r_te(ia), rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))
+       ! call spl_inv(mste(ia), r_te(ia), rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))
 
      endif ! end if for TE  
      

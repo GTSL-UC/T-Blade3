@@ -192,10 +192,10 @@ endif
 k1 = (-intg_d2v_end(ncp-2) + sqrt(det))/(2*P*tan(tot_cam))
 k2 = (-intg_d2v_end(ncp-2) - sqrt(det))/(2*P*tan(tot_cam))
 ! Choosing appropriate root
-write (*, '(A, 2F20.15)'), 'Possible values of scaling factor are: ', k1, k2
+write (*, '(A, 2F25.15)'), 'Possible values of scaling factor are: ', k1, k2
 knew = min(k1, k2)
 d1v_end = knew*(intg_d2v_end-intg_d1v_end(ncp-2))
-if (atan(d1v_end(ncp-2))-atan(d1v_end(1)) .ne. tot_cam) then
+if (abs((atan(d1v_end(ncp-2))-atan(d1v_end(1)) - tot_cam)/tot_cam) .gt. 1E-7) then
 	knew = max(k1, k2)
 	d1v_end = knew*(intg_d2v_end-intg_d1v_end(ncp-2))
 endif

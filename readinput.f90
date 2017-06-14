@@ -528,7 +528,7 @@ allocate(cp_chord_thk(ncp_span_thk, ncp_chord_thk))
 read(10, *)
 print*, ncp_chord_thk, ncp_chord_thickness, ncp_thickness
 do i = 1, ncp_span_thk
-	read(10, *)cp_chord_thk(i, 1:ncp_chord_thk)
+	read(10, *)cp_chord_thk(i, 1:ncp_chord_thickness)
 end do
 !--------------------------------------------------------------------------
 !Reading LE control points
