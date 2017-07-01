@@ -97,6 +97,8 @@ dtor = PI/180.
 err = 0.000001
 !
 print*,'Creating the grid...'
+if (allocated(xblade)) deallocate(xblade)
+if (allocated(yblade)) deallocate(yblade)
 allocate(xblade(np),yblade(np))
 do i = 1, np
  xblade(i) = xb(i)
@@ -183,6 +185,10 @@ endif  ! endif for background grid option to create upstream + meanline + downst
 ! Creating the background grid points by offsetting the gridline obtained.
 ! gridline = upstream line + meanline (curved or linear) + downstream line
 !-----------------------------------------------------------------
+if (allocated(Xbg )) deallocate(Xbg )
+if (allocated(Ybg )) deallocate(Ybg )
+if (allocated(Xbg2)) deallocate(Xbg2)
+if (allocated(Ybg2)) deallocate(Ybg2)
 Allocate(Xbg(imax,jmax),Ybg(imax,jmax))
 Allocate(Xbg2(imax,jmax),Ybg2(imax,jmax))
 !-----------------------------------------------------------------
@@ -212,6 +218,8 @@ Allocate(Xbg2(imax,jmax),Ybg2(imax,jmax))
 !-----------------------------------------------------------------
 !Filling the arrays to the background grid points
 !-----------------------------------------------------------------
+if (allocated(Xg1)) deallocate(Xg1)
+if (allocated(Yg1)) deallocate(Yg1)
 ALLOCATE( Xg1(imax,jmax), Yg1(imax,jmax))
 do j = 1, j1  ! starting from the bottom offset curve, growing upwards.
   do i = 1, imax
@@ -272,7 +280,8 @@ if(LE.eq.2)then
        imaxnew = imaxnew - 2
       endif
   endif
-  !
+  if (allocated(Xg11)) deallocate(Xg11)
+  if (allocated(Yg11)) deallocate(Yg11)
   ALLOCATE( Xg11(imaxnew,jmax), Yg11(imaxnew,jmax))
   do j = 1, jmax
     do i = 1, imaxnew
@@ -318,12 +327,18 @@ do i = 1, np
    yblade(i) = yb(i)
 enddo
 ! Memory allocation
+if (allocated(Xg)) deallocate(Xg)
+if (allocated(Yg)) deallocate(Yg)
+if (allocated(Xx)) deallocate(Xx)
+if (allocated(Yy)) deallocate(Yy)
 ALLOCATE( Xg(imax1,jmax1), Yg(imax1,jmax1))
 ALLOCATE( Xx(imax1,jmax1), Yy(imax1,jmax1))
 !ALLOCATE( Xxrot(imax1,jmax1), Yyrot(imax1,jmax1))
 !-------------------------------------------------------- 
 ! Filling the inner boundary grid points with Blade coordinates
 !-------------------------------------------------------- 
+if (allocated(xbase)) deallocate(xbase)
+if (allocated(ybase)) deallocate(ybase)
 allocate(xbase(imax1),ybase(imax1))
 do i = 1, imax1
  	Xg(i,1) = xblade(imax1+1-i)
@@ -414,6 +429,8 @@ endif
 !******************************************************* 
 ! C grid for the blade
 !******************************************************* 
+if (allocated(xbnew)) deallocate(xbnew)
+if (allocated(ybnew)) deallocate(ybnew)
 allocate(xbnew(imax1 + 2*cgrid),ybnew(imax1 + 2*cgrid))
 cgrid = 40 ! nodes for the linear grid at the start and end of the C grid.
 ! New imax for the Grid.
@@ -458,6 +475,8 @@ if(thick_distr == 2)then ! sharp TE
   enddo
   DEALLOCATE(Xg,Yg) ! deallocating the memory from blunt TE allocation
   ALLOCATE( Xg(imax2,jmax1), Yg(imax2,jmax1))
+  if (allocated(Xx1)) deallocate(Xx1)
+  if (allocated(Yy1)) deallocate(Yy1)
   ALLOCATE( Xx1(imax2,jmax1), Yy1(imax2,jmax1))
   !
   do i = 1, imax2
@@ -475,6 +494,9 @@ if(thick_distr == 2)then ! sharp TE
   ! Calculating x'(s) and y'(s)
   call spline(xbnew(1),dxds(1),s(1),imax2, 999.0, -999.0)
   call spline(ybnew(1),dyds(1),s(1),imax2, 999.0, -999.0)
+  if (allocated(phi )) deallocate(phi )
+  if (allocated(xrot)) deallocate(xrot)
+  if (allocated(yrot)) deallocate(yrot)
   Allocate (phi(2),xrot(1),yrot(1))
   do k = 1, jmax1-1
      write(temp,*)k
@@ -523,6 +545,7 @@ if(thick_distr == 2)then ! sharp TE
   ! ! Translating the 1st and last eta grid lines in the C grid section
   ! !...on the extruded line from TE.  
   ! Clustering for the C grid in Xi direction
+  if (allocated(cluster)) deallocate(cluster)
   Allocate (cluster(cgrid))
   do t = 1,cgrid
      deltac = 1 - tanh((pi/4.0)*(1 - real(t)/(cgrid)))/tanh(pi/4.0) ! hyperbolic stretching

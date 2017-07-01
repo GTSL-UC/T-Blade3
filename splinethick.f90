@@ -527,6 +527,8 @@ do i = 1, np
 enddo
 
 !print*, "xbs ybs"
+if (allocated(xbs)) deallocate(xbs)
+if (allocated(ybs)) deallocate(ybs)
 Allocate (xbs((np)*(ncp-3)))
 Allocate (ybs((np)*(ncp-3)))
 5	do j = 1, ncp-3

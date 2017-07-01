@@ -73,7 +73,73 @@
 !****************************************************************************************
 
 !****************************************************************************************
+!!#define STAND_ALONE 1
+#ifdef  STAND_ALONE
 program bgb3d ! 3d blade geometry builder
+use globvar
+implicit none
+
+character*256 :: fname, row_type
+character*32  :: arg2, arg3
+ 
+call getarg(1, fname)
+narg = iargc()
+if(narg.ge.2)then
+	call getarg(2, arg2)
+else
+	arg2 = ''
+endif
+if(narg.eq.3)then
+	call getarg(3, arg3)
+else
+	arg3 = ''
+endif
+k = (index(fname, '.')+1)
+do i = k, len(trim(fname))
+	if (fname(i:i) == '.') then
+		j = i-1
+		continue
+	endif
+enddo
+row_type = fname(k:j)
+!call bgb3d_sub(fname, 'controlinputs.'//trim(row_type)//'.dat', arg2, arg3)
+call bgb3d_sub(fname, 'spancontrolinputs.'//trim(row_type)//'.dat', arg2, arg3)
+end program bgb3d
+subroutine     override_chord(n, a)
+   real*8 a(*)
+end subroutine override_chord
+subroutine     override_thk_c(n, a)
+   real*8 a(*)
+end subroutine override_thk_c
+subroutine     override_inci(n, a)
+   real*8 a(*)
+end subroutine override_inci
+subroutine     override_devn(n, a)
+   real*8 a(*)
+end subroutine override_devn
+subroutine     override_cur2(n, a)
+   real*8 a(*)
+end subroutine override_cur2
+subroutine     override_cur3(n, a)
+   real*8 a(*)
+end subroutine override_cur3
+subroutine     override_cur4(n, a)
+   real*8 a(*)
+end subroutine override_cur4
+subroutine     override_cur5(n, a)
+   real*8 a(*)
+end subroutine override_cur5
+subroutine     override_cur6(n, a)
+   real*8 a(*)
+end subroutine override_cur6
+subroutine     override_cur7(n, a)
+   real*8 a(*)
+end subroutine override_cur7
+#endif
+!****************************************************************************************
+
+subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3) ! 3d blade geometry builder
+
 use globvar
 implicit none
 !
@@ -81,8 +147,9 @@ real spl_eval, dspl_eval
 real*8 xdiff, rdiff
 real*8 inBetaInci, outBetaDevn
 ! !
+character*(*) :: fname_in, aux_in
 character*256 :: fname, temp, tempr1, fname1, fname2, fname3, fname4, row_type
-character*32 :: arg2, arg3
+character*(*) :: arg2, arg3
 ! !
 logical axial_LE, radial_LE, axial_TE, radial_TE
 axial_LE = .False.
@@ -103,14 +170,7 @@ call displayMessage
 !****************************************************************************
 
 !--------counting the number of command line arguments passed: --------------
-narg = iargc()
-call getarg(1, fname)
-if(narg.ge.2)then
-	call getarg(2, arg2)
-endif
-if(narg.eq.3)then
-	call getarg(3, arg3)
-endif
+fname = fname_in
 
 ! Types of 2nd argument
 if (trim(arg2).eq.'dev') then
@@ -166,6 +226,7 @@ if((curv.ne.0.or.thick.ne.0.or.LE.ne.0&
 	write(*, *)
 	print*, 'Reading the controlinput file ....'
 	write(*, *)
+	! call readcontrolinput(aux_in)
 	call readcontrolinput(row_type)
 elseif((curv.ne.0.or.thick.ne.0.or.LE.ne.0&
 .or.thick_distr.ne.0).and.trim(spanwise_spline).eq.'spanwise_spline')then
@@ -173,6 +234,7 @@ elseif((curv.ne.0.or.thick.ne.0.or.LE.ne.0&
 	write(*, *)
 	print*, 'Reading the spanwise_input file ....'
 	write(*, *)
+	! call read_spanwise_input(aux_in)
 	call read_spanwise_input(row_type)
 endif
 
@@ -310,6 +372,7 @@ if (hub.ne.0) then
 	k = 1
 	xm_nonoffset_hub(k) = xm(1, 1)
 	rm_nonoffset_hub(k) = rm(1, 1)
+	if (allocated(hub_slope)) deallocate(hub_slope)
 	Allocate(hub_slope(nsp(1)-1))
 	! interpolate hub streamline xm rm:
 		do i = 1, nsp(1)-1 !number of hub segments
@@ -520,6 +583,7 @@ enddo
 fname1 = 'LE_TE_intersection.'//trim(casename)//'.dat'
 open(3, file = fname1, status = 'unknown')
 
+if (allocated(sec_radius)) deallocate(sec_radius)
 Allocate(sec_radius(nsl, 2))
 do ia = 1, na
 	! write(*, *)x_le(ia), r_le(ia), x_te(ia), r_te(ia)
@@ -837,6 +901,13 @@ endif
 ! Allocating variables for further calculations
 !!-------------------------------------------------------------
 !000000000000000000000000000000000000000000000000000000000000
+if (allocated(bladedata     )) deallocate(bladedata     )
+if (allocated(intersec_coord)) deallocate(intersec_coord)
+if (allocated(throat_3D     )) deallocate(throat_3D     )
+if (allocated(mouth_3D      )) deallocate(mouth_3D      )
+if (allocated(exit_3D       )) deallocate(exit_3D       )
+if (allocated(throat_pos    )) deallocate(throat_pos    )
+if (allocated(throat_index  )) deallocate(throat_index  )
 Allocate(bladedata(amount_data, nsl))
 Allocate(intersec_coord(12, nsl))
 Allocate(throat_3D(nsl))
@@ -915,6 +986,7 @@ do js = 1, nspn
      ! sting_l_all(1:nsl) = 0.
      ! ! print*, sting_l_all
    ! elseif(curv.eq.0 .and. LE.ne.2)then
+     if (allocated(sting_l_all)) deallocate(sting_l_all)
      ! Allocate(sting_l_all(nsl))
      ! sting_l_all(1:nsl) = 0.
    ! endif
@@ -936,7 +1008,6 @@ do js = 1, nspn
    endif
    
    !----------------------------------------------------------------------
-				
    call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js), &
                 stgr,stack,chord_switch,stak_u,stak_v,xb_stk,yb_stk,stack_switch, &
 		        nsl,nbls,curv,thick,LE,np,ncp_curv,ncp_thk,curv_cp,thk_cp, wing_flag, &
@@ -1045,5 +1116,5 @@ deallocate (phi_s_in, phi_s_out, stagger, chordm, msle, s1le, s2le, s1te)
 deallocate (sang, stk_u, stk_v, total_camber, mprime_ble, mprime_bte, sec_radius)
 !-------------------------------------------------------------------------------------
 
-end program bgb3d
+end subroutine bgb3d_sub
 !**************************************************************************************

@@ -116,6 +116,7 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
 	
 	cam_le = camber_le(1)
 	! test :
+        if (allocated(theta)) deallocate(theta)
 	allocate(theta(1))
 	 theta = -camber_ang(1)
 	u_vec = uin_le; cam_vec = cam_le
@@ -407,6 +408,7 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
 	 call vector_rotation(xtop,ytop,dimen,camber_ang,xtop,ytop)
 	 call vector_rotation(xbot,ybot,dimen,camber_ang,xbot,ybot)
 	 
+         if (allocated(theta)) deallocate(theta)
 	 Allocate (theta(ncp-(degree-1)))
 	 do i= 1, (ncp-(degree-1))
 		theta(i) = theta_rad
@@ -480,10 +482,14 @@ subroutine vector_rotation(x,y,dimen,theta_rad,x_rot,y_rot)
  integer dimen,i
  real *8 ,dimension(dimen), intent (in) :: x,y,theta_rad 
  real *8 ,dimension(dimen), intent (out) :: x_rot,y_rot
-  
+ real *8 :: x_in, y_in
+
   do i= 1,dimen
-	x_rot(i) = x(i)*cos(theta_rad(i))-y(i)*sin(theta_rad(i))
-	y_rot(i) = x(i)*sin(theta_rad(i))+y(i)*cos(theta_rad(i))
+	x_in = x(i)
+	y_in = y(i)
+
+	x_rot(i) = x_in*cos(theta_rad(i))-y_in*sin(theta_rad(i))
+	y_rot(i) = x_in*sin(theta_rad(i))+y_in*cos(theta_rad(i))
   enddo
   return
   end subroutine

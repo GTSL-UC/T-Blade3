@@ -163,6 +163,10 @@ pi = 4.*atan(1.0)
 dtor = PI/180.
 ! -----------------------------------------------------------------------------
 
+! needed to protect write(33) if values are not otherwise defined
+ucp_top = 0
+vcp_top = 0
+
 !*******************************************************************************************
 ! Printing Messages to Screen and assigning airfoil type
 !*******************************************************************************************
@@ -189,6 +193,22 @@ np_side = np
 !*******************************************************************************************
 ! Allocation of variables and initialization
 !*******************************************************************************************
+if (allocated(splinedata)) deallocate(splinedata)
+if (allocated(xtop      )) deallocate(xtop      )
+if (allocated(ytop      )) deallocate(ytop      )
+if (allocated(xbot      )) deallocate(xbot      )
+if (allocated(ybot      )) deallocate(ybot      )
+if (allocated(u         )) deallocate(u         )
+if (allocated(splthick  )) deallocate(splthick  )
+if (allocated(thickness )) deallocate(thickness )
+if (allocated(angle     )) deallocate(angle     )
+if (allocated(camber    )) deallocate(camber    )
+if (allocated(slope     )) deallocate(slope     )
+if (allocated(xb        )) deallocate(xb        )
+if (allocated(yb        )) deallocate(yb        )
+if (allocated(ueq       )) deallocate(ueq       )
+if (allocated(xmean     )) deallocate(xmean     )
+if (allocated(ymean     )) deallocate(ymean     )
 ! Allocating all the blade data arrays:
 Allocate(splinedata(spline_data, np_side)) 
 Allocate(xtop(np))
@@ -484,12 +504,17 @@ elseif (curv_camber.eq.1) then ! using curvature control for camber instead of m
 	aext = atan(sext)
 	! Reading the section control points:
 	ncp = ncp_curv(js)
+if (allocated(xcp_curv)) deallocate(xcp_curv)
+if (allocated(ycp_curv)) deallocate(ycp_curv)
 	Allocate(xcp_curv(ncp))
 	Allocate(ycp_curv(ncp))
 	do i = 1, ncp
 		xcp_curv(i) = curv_cp(i, 2*js-1)
 		ycp_curv(i) = curv_cp(i, 2*js)
 	enddo
+if (allocated(init_angles   )) deallocate(init_angles   )
+if (allocated(init_cambers  )) deallocate(init_cambers  )
+if (allocated(x_spl_end_curv)) deallocate(x_spl_end_curv)
 	Allocate(init_angles(ncp-2))
 	Allocate(init_cambers(ncp-2))
 	Allocate(x_spl_end_curv(ncp-2))
@@ -510,6 +535,8 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
 		!---- generate a spline multiplier thickness: =============================== 
 		! -----------------------------------------------------------------------------  
 		ncp = ncp_thk(js)
+                if (allocated(xcp_thk)) deallocate(xcp_thk)
+                if (allocated(ycp_thk)) deallocate(ycp_thk)
 		Allocate(xcp_thk(ncp)) 
 		Allocate(ycp_thk(ncp)) 
 		do i = 1, ncp
@@ -558,6 +585,8 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
 		! Added by Karthik Balasubramanian
 		write (*, '(/, A)') 'Implementing direct thickness control'
 		ncp = ncp_thk(js)
+                if (allocated(xcp_thk)) deallocate(xcp_thk)
+                if (allocated(ycp_thk)) deallocate(ycp_thk)
 		Allocate(xcp_thk(ncp)) 
 		Allocate(ycp_thk(ncp)) 
 		do i = 1, ncp
@@ -642,6 +671,14 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
 		!print*, 'le_camber_ang in radian = ', camber_ang(1), 'in Degree = ', 1/dtor*camber_ang(1)
 		!print*, 'cam_le = ', camber_le(1)
 		!00000000000000000000000000000000000000000000000000000000000000000
+		if (allocated(x_le_spl   )) deallocate(x_le_spl   )
+		if (allocated(y_le_spl   )) deallocate(y_le_spl   )
+		if (allocated(xtop_refine)) deallocate(xtop_refine)
+		if (allocated(ytop_refine)) deallocate(ytop_refine)
+		if (allocated(xbot_refine)) deallocate(xbot_refine)
+		if (allocated(ybot_refine)) deallocate(ybot_refine)
+		if (allocated(cam_refine )) deallocate(cam_refine )
+		if (allocated(u_refine   )) deallocate(u_refine   )
 		Allocate(x_le_spl(2*le_pos-1))
 		Allocate(y_le_spl(2*le_pos-1))  
 		!---- For spline leading edge:
@@ -848,6 +885,7 @@ if(curv_camber.ne.0) then ! only for curvature control airfoils. 11 20 2013
 	enddo
 	close(33)
 	!---------------------------------------------------------  
+        if (allocated(curvature)) deallocate(curvature)
 	Allocate(curvature(np_side))
 	do i = 1, np_side
 		curvature(i) = splinedata(4, i)

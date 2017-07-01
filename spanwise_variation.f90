@@ -8,6 +8,9 @@ subroutine span_variation()
 use globvar
 implicit none
 
+if (allocated(bspline_chord_curv)) deallocate(bspline_chord_curv)
+if (allocated(bspline_thk       )) deallocate(bspline_thk       )
+if (allocated(bspline_LE        )) deallocate(bspline_LE        )
 allocate(bspline_chord_curv(nsl,ncp_chord_curv))
 allocate(bspline_thk(nsl,ncp_chord_thk))
 allocate(bspline_LE(nsl,ncp_LE+1))

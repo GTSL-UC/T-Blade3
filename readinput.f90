@@ -8,6 +8,37 @@ character*256 :: fname, temp, temp2, tempr1, fname1, fname2, fname3
 
 real*8 inBetaInci, outBetaDevn
 
+if (allocated(x_le          )) deallocate(x_le          )
+if (allocated(x_te          )) deallocate(x_te          )
+if (allocated(r_le          )) deallocate(r_le          )
+if (allocated(r_te          )) deallocate(r_te          )
+if (allocated(in_beta       )) deallocate(in_beta       )
+if (allocated(out_beta      )) deallocate(out_beta      )
+if (allocated(mrel1         )) deallocate(mrel1         )
+if (allocated(chord         )) deallocate(chord         )
+if (allocated(thk_c         )) deallocate(thk_c         )
+if (allocated(inci          )) deallocate(inci          )
+if (allocated(devn          )) deallocate(devn          )
+if (allocated(sec_flow_ang  )) deallocate(sec_flow_ang  )
+if (allocated(phi_s_in      )) deallocate(phi_s_in      )
+if (allocated(phi_s_out     )) deallocate(phi_s_out     )
+if (allocated(stagger       )) deallocate(stagger       )
+if (allocated(chordm        )) deallocate(chordm        )
+if (allocated(msle          )) deallocate(msle          )
+if (allocated(s1le          )) deallocate(s1le          )
+if (allocated(s2le          )) deallocate(s2le          )
+if (allocated(s1te          )) deallocate(s1te          )
+if (allocated(s2te          )) deallocate(s2te          )
+if (allocated(sang          )) deallocate(sang          )
+if (allocated(stk_u         )) deallocate(stk_u         )
+if (allocated(stk_v         )) deallocate(stk_v         )
+if (allocated(total_camber  )) deallocate(total_camber  )
+if (allocated(mprime_ble    )) deallocate(mprime_ble    )
+if (allocated(mprime_bte    )) deallocate(mprime_bte    )
+if (allocated(BGgrid_all    )) deallocate(BGgrid_all    )
+if (allocated(jcellblade_all)) deallocate(jcellblade_all)
+if (allocated(etawidth_all  )) deallocate(etawidth_all  )
+if (allocated(axchrd        )) deallocate(axchrd        )
 allocate (x_le(nspan))
 allocate (x_te(nspan))
 allocate (r_le(nspan))
@@ -44,6 +75,7 @@ allocate(axchrd(nspan))
 abs_zero = 0.0000000000000000
 
 open(1, file = fname, status = 'unknown')
+rewind(1)
 !write(*, *)
 !write(*, *) 'Reading inputs from 3dbgbinput file'
 !write(*, *)
@@ -129,11 +161,23 @@ do js = 1, nspn
 	else ! Reading the inlet and outlet angles from this table
 		read(1, *, end = 35)tempr, in_beta(js), out_beta(js), mrel1(js), chord(js), thk_c(js), inci(js), devn(js), sec_flow_ang(js)
 		!Adding incidence and deviation angles-------------------3/10/11
-		in_beta(js) = inBetaInci(in_beta(js), inci(js))
-		out_beta(js) = outBetaDevn(in_beta(js), out_beta(js), devn(js))
 		!print*, in_beta(js), out_beta(js)   
 	endif
 enddo
+
+!! override the inputs
+call override_chord(nspn, chord)
+call override_thk_c(nspn, thk_c)
+call override_inci( nspn, inci )
+call override_devn( nspn, devn )
+
+if (.not.spanwise_angle_spline .and. .not.spanwise_inci_dev_spline) then
+   do js = 1, nspn
+      in_beta( js) =  inBetaInci(in_beta(js),               inci(js))
+      out_beta(js) = outBetaDevn(in_beta(js), out_beta(js), devn(js))
+   enddo
+endif
+
 !write(*, *)
 ! Reading the LE/TE curve definition---------
 read(1, *)temp
@@ -152,6 +196,7 @@ read(1, *)temp
 read(1, *)temp
 read(1, *)stack_switch
 read(1, *)temp
+if (allocated(umxthk_all)) deallocate(umxthk_all)
 Allocate(umxthk_all(nsl))
 if (LE.ne.0) then
 	do js = 1, nspn
@@ -159,6 +204,8 @@ if (LE.ne.0) then
 		!print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
 	enddo
 elseif (LE == 0) then
+        if (allocated(lethk_all)) deallocate(lethk_all)
+        if (allocated(tethk_all)) deallocate(tethk_all)
 	Allocate(lethk_all(nsl))
 	Allocate(tethk_all(nsl))
 	do js = 1, nspn
@@ -296,6 +343,7 @@ end subroutine readinput
 
 !**********************************************************************************
 !**********************************************************************************
+! subroutine readcontrolinput(fname5)
 subroutine readcontrolinput(row_type)
 !**********************************************************************************
 ! reads the controlinput.dat when the appropriate swittches are activated.
@@ -303,7 +351,9 @@ use globvar
 
 implicit none
 
-character*256 temp, fname4, fname5, row_type
+! character*(*) fname5
+character*256 temp, fname4, row_type
+character*256 fname5
 integer :: phantom_n
 
 !if(curv.ne.0.or.thick.ne.0.or.LE.ne.0.or.thick_distr.ne.0)then
@@ -313,9 +363,12 @@ print*
 fname5 = 'controlinputs.'//trim(row_type)//'.dat'
 print*, fname5
 open(11, file = fname5)
+rewind(11)
 !----------------------------------------------------------------------
 ! Reading curvature:
 !----------------------------------------------------------------------
+if (allocated(ncp_curv)) deallocate(ncp_curv)
+if (allocated(curv_cp )) deallocate(curv_cp )
 Allocate(ncp_curv(nsl))
 Allocate(curv_cp(20, 2*nsl))
 read (11, *), temp	! the test case name (added 6 23 2013)
@@ -326,6 +379,8 @@ do i = 1, nsl
 	read (11, *), temp
 	read (11, *), ncp_curv(i)
 	ncp_curv(i) = ncp_curv(i) + 2
+        if (allocated(xcp)) deallocate(xcp)
+        if (allocated(ycp)) deallocate(ycp)
 	Allocate(xcp(ncp_curv(i)))
 	Allocate(ycp(ncp_curv(i)))
 	!print*, 'xcp = ', xcp
@@ -368,6 +423,8 @@ enddo
 !----------------------------------------------------------------------
 ! Reading Thickness
 !----------------------------------------------------------------------
+if (allocated(ncp_thk)) deallocate(ncp_thk)
+if (allocated(thk_cp )) deallocate(thk_cp )
 Allocate(ncp_thk(nsl))
 Allocate(thk_cp(20, 2*nsl))
 if (thick_distr.eq.3) then
@@ -381,6 +438,8 @@ do i = 1, nsl
 	read (11, *), temp
 	read (11, *), ncp_thk(i)
 	ncp_thk(i) = ncp_thk(i) + phantom_n
+        if (allocated(xcp)) deallocate(xcp)
+        if (allocated(ycp)) deallocate(ycp)
 	Allocate(xcp(ncp_thk(i)))
 	Allocate(ycp(ncp_thk(i)))
 	read (11, *), temp
@@ -423,8 +482,20 @@ enddo
 !----------------------------------------------------------------------
 ! Reading Leading edge parameters:
 !----------------------------------------------------------------------
+if (allocated(sting_l_all)) deallocate(sting_l_all)
 Allocate(sting_l_all(nsl))
 if(LE .ne.0) then
+	if (allocated(lethk_all        )) deallocate(lethk_all        )
+	if (allocated(tethk_all        )) deallocate(tethk_all        )
+	if (allocated(s_all            )) deallocate(s_all            )
+	if (allocated(ee_all           )) deallocate(ee_all           )
+	if (allocated(C_le_x_top_all   )) deallocate(C_le_x_top_all   )
+	if (allocated(C_le_x_bot_all   )) deallocate(C_le_x_bot_all   )
+	if (allocated(C_le_y_top_all   )) deallocate(C_le_y_top_all   )
+	if (allocated(C_le_y_bot_all   )) deallocate(C_le_y_bot_all   )
+	if (allocated(LE_vertex_ang_all)) deallocate(LE_vertex_ang_all)
+	if (allocated(LE_vertex_dis_all)) deallocate(LE_vertex_dis_all)
+	if (allocated(sting_h_all      )) deallocate(sting_h_all      )
 	Allocate(lethk_all(nsl))
 	Allocate(tethk_all(nsl))
 	Allocate(s_all(nsl))
@@ -463,6 +534,7 @@ end subroutine readcontrolinput
 
 !**********************************************************************************
 !**********************************************************************************
+! subroutine read_spanwise_input(file_name)
 subroutine read_spanwise_input(row_type)
 !Description(Syed Moez 03/02/2014):-------------------------------------------------------------------------
 !This subroutine is used to used to read the input file called
@@ -471,12 +543,17 @@ subroutine read_spanwise_input(row_type)
 !after the curvature switch.
 use globvar
 implicit none
-character*256 row_type, file_name
-file_name = 'spancontrolinputs.'//trim(row_type)//'.dat'
+character*256 row_type
+! character*(*) file_name
+character*256 file_name
 !opening files to read inputs
 
-open(10, file = file_name)
+real*8, allocatable, dimension(:) :: temp
+integer jj
 
+file_name = 'spancontrolinputs.'//trim(row_type)//'.dat'
+open(10, file = file_name)
+rewind(10)
 
 do i = 1, 5
 	read(10, *)
@@ -487,6 +564,7 @@ read(10, *) ncp_span_curv, ncp_chord
 !number of chord and curvature control points will always be the same
 ncp_curvature = ncp_chord
 !Initializing values for variables defined by Ahmed
+if (allocated(ncp_curv)) deallocate(ncp_curv)
 Allocate(ncp_curv(nsl))
 do i = 1, nsl
 	ncp_curv(i) = ncp_curvature+2
@@ -498,6 +576,7 @@ ncp_span_curv1 = ncp_span_curv+2
 ncp_chord_curv = ncp_chord-2+ncp_curvature-1+1
 
 !Allocating arrays
+if (allocated(cp_chord_curv)) deallocate(cp_chord_curv)
 allocate(cp_chord_curv(ncp_span_curv, ncp_chord_curv))
 
 !LINE 7
@@ -505,6 +584,75 @@ read(10, *)
 do i = 1, ncp_span_curv
 	read(10, *) cp_chord_curv(i, 1:ncp_chord_curv)
 end do
+allocate(temp(ncp_span_curv))
+
+if (ncp_curvature >= 1) then
+   jj = 1 + ncp_chord-2 + 2-1
+   do i = 1, ncp_span_curv
+      temp(i) = cp_chord_curv(i,jj)
+   enddo
+   call override_cur2(ncp_span_curv, temp)
+   do i = 1, ncp_span_curv
+      cp_chord_curv(i,jj) = temp(i)
+   enddo
+endif
+
+if (ncp_curvature >= 2) then
+   jj = 1 + ncp_chord-2 + 3-1
+   do i = 1, ncp_span_curv
+      temp(i) = cp_chord_curv(i,jj)
+   enddo
+   call override_cur3(ncp_span_curv, temp)
+   do i = 1, ncp_span_curv
+      cp_chord_curv(i,jj) = temp(i)
+   enddo
+endif
+
+if (ncp_curvature >= 3) then
+   jj = 1 + ncp_chord-2 + 4-1
+   do i = 1, ncp_span_curv
+      temp(i) = cp_chord_curv(i,jj)
+   enddo
+   call override_cur4(ncp_span_curv, temp)
+   do i = 1, ncp_span_curv
+      cp_chord_curv(i,jj) = temp(i)
+   enddo
+endif
+
+if (ncp_curvature >= 4) then
+   jj = 1 + ncp_chord-2 + 5-1
+   do i = 1, ncp_span_curv
+      temp(i) = cp_chord_curv(i,jj)
+   enddo
+   call override_cur5(ncp_span_curv, temp)
+   do i = 1, ncp_span_curv
+      cp_chord_curv(i,jj) = temp(i)
+   enddo
+endif
+
+if (ncp_curvature >= 5) then
+   jj = 1 + ncp_chord-2 + 6-1
+   do i = 1, ncp_span_curv
+      temp(i) = cp_chord_curv(i,jj)
+   enddo
+   call override_cur6(ncp_span_curv, temp)
+   do i = 1, ncp_span_curv
+      cp_chord_curv(i,jj) = temp(i)
+   enddo
+endif
+
+if (ncp_curvature >= 6) then
+   jj = 1 + ncp_chord-2 + 7-1
+   do i = 1, ncp_span_curv
+      temp(i) = cp_chord_curv(i,jj)
+   enddo
+   call override_cur7(ncp_span_curv, temp)
+   do i = 1, ncp_span_curv
+      cp_chord_curv(i,jj) = temp(i)
+   enddo
+endif
+
+deallocate(temp)
 
 if(thick .ne. 0 .or. LE .ne. 0) then
 	!--------------------------------------------------------------------------
@@ -519,12 +667,14 @@ if(thick .ne. 0 .or. LE .ne. 0) then
 	ncp_chord_thk = ncp_chord_thickness-2+ncp_thickness-2+1
 
 	!Initializing values for variables defined by Ahmed
+	if (allocated(ncp_thk)) deallocate(ncp_thk)
 	Allocate(ncp_thk(nsl))
 	do i = 1, nsl
 		ncp_thk(i) = ncp_thickness+4
 	end do
 
-	allocate(cp_chord_thk(ncp_span_thk, ncp_chord_thk))
+		if (allocated(cp_chord_thk)) deallocate(cp_chord_thk)
+		allocate(cp_chord_thk(ncp_span_thk, ncp_chord_thk))
 
 
 	read(10, *)
@@ -549,6 +699,8 @@ if(thick .ne. 0 .or. LE .ne. 0) then
 
 		ncp_span_LE1 = ncp_span_LE+2
 
+				if (allocated(cp_LE)) deallocate(cp_LE)
+		
 		allocate(cp_LE(ncp_span_LE, ncp_LE+1))
 
 

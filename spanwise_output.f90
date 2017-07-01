@@ -8,6 +8,7 @@ subroutine span_output ()
 use globvar
 implicit none
 
+if (allocated(curv_cp)) deallocate(curv_cp)
 Allocate(curv_cp(20,2*na))
 
 k=1
@@ -47,6 +48,7 @@ end do
 if(thick .ne. 0) then
 !-------------------------------------------------------------------------------
 !writing Thickness control points
+ if (allocated(thk_cp)) deallocate(thk_cp)
  Allocate(thk_cp(20,2*na))
 k=1
 do i=1,na
@@ -92,8 +94,20 @@ endif
 if(LE .ne. 0) then
 !-----------------------------------------------------------------------------
 !Defining LE ontrol points
+if (allocated(sting_l_all)) deallocate(sting_l_all)
 Allocate(sting_l_all(na))
   if(LE .ne.0) then
+   if (allocated(lethk_all        )) deallocate(lethk_all        )
+   if (allocated(tethk_all        )) deallocate(tethk_all        )
+   if (allocated(s_all            )) deallocate(s_all            )
+   if (allocated(ee_all           )) deallocate(ee_all           )
+   if (allocated(C_le_x_top_all   )) deallocate(C_le_x_top_all   )
+   if (allocated(C_le_x_bot_all   )) deallocate(C_le_x_bot_all   )
+   if (allocated(C_le_y_top_all   )) deallocate(C_le_y_top_all   )
+   if (allocated(C_le_y_bot_all   )) deallocate(C_le_y_bot_all   )
+   if (allocated(LE_vertex_ang_all)) deallocate(LE_vertex_ang_all)
+   if (allocated(LE_vertex_dis_all)) deallocate(LE_vertex_dis_all)
+   if (allocated(sting_h_all      )) deallocate(sting_h_all      )
     Allocate(lethk_all(na))
     Allocate(tethk_all(na))
     Allocate(s_all(na))

@@ -136,6 +136,12 @@ dtor = pi/180.
 !*******************************************************************************************
 ! Allocation of variables
 !*******************************************************************************************
+if (allocated(xa)) deallocate(xa)
+if (allocated(ya)) deallocate(ya)
+if (allocated(xb)) deallocate(xb)
+if (allocated(yb)) deallocate(yb)
+if (allocated(zb)) deallocate(zb)
+if (allocated(rb)) deallocate(rb)
 allocate(xa(np,nspn),ya(np,nspn))
 allocate(xb(np,nspn),yb(np,nspn),zb(np,nspn),rb(np,nspn))
 
@@ -351,6 +357,12 @@ print*,''
 !---------  y = r sin(theta + delta(theta)) --------------
 !---------  z = r cos(theta + delta(theta))--------------
 !*******************************************************************************************
+if (allocated(xposlean)) deallocate(xposlean)
+if (allocated(yposlean)) deallocate(yposlean)
+if (allocated(zposlean)) deallocate(zposlean)
+if (allocated(xneglean)) deallocate(xneglean)
+if (allocated(yneglean)) deallocate(yneglean)
+if (allocated(zneglean)) deallocate(zneglean)
 allocate(xposlean(iap,na),yposlean(iap,na),zposlean(iap,na))
 allocate(xneglean(iap,na),yneglean(iap,na),zneglean(iap,na))
 

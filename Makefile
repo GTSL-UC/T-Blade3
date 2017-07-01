@@ -6,8 +6,8 @@ UNAME := $(shell uname)
 
 DEFINE = 
 FCOMP  = gfortran
-FOPTS  = -fdefault-real-8 -g -fbounds-check -fbacktrace -O2 -Wline-truncation
-F90OPTS = -ffree-form -ffree-line-length-none
+FOPTS  = -fdefault-real-8 -g -fbounds-check -fbacktrace -O2 -Wline-truncation -cpp -DSTAND_ALONE
+F90OPTS = -ffree-form -ffree-line-length-none -fPIC
 #FOPTS = -fPIC -g
 
 OBJS =  globvar.o spline.o readinput.o funcNsubs.o 3dbgb.o bladegen.o b3d2sec.o bladestack.o bspline3.o lesting.o \
@@ -20,7 +20,7 @@ OBJS =  globvar.o spline.o readinput.o funcNsubs.o 3dbgb.o bladegen.o b3d2sec.o 
 XLIBS  = -L/usr/X11R6/lib64 -lX11 -lpthread
 GLIBS  = -L/usr/X11R6/lib64 -lGLU -lGL -lX11 -lXext -lpthread
 
-#default:	3dbgb techop
+#all: $(OBJS)
 all: 3dbgb tblade3 techop
 
 ifeq ($(UNAME),Darwin)

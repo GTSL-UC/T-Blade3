@@ -396,6 +396,8 @@ np_side = uplmt
   !-----------------------------------------------------
   !Meanline with uniform clustering.
   !-----------------------------------------------------
+  if (allocated(xbmean)) deallocate(xbmean)
+  if (allocated(ybmean)) deallocate(ybmean)
   allocate(xbmean(np_side))
   allocate(ybmean(np_side))
   xbmean = 0.;ybmean = 0.
@@ -410,6 +412,14 @@ np_side = uplmt
   !-----------------------------------------------------
   xbmean(1) = xblade(uplmt)
   xbmean(np_side) = xblade(1)
+  if (allocated(xb1   )) deallocate(xb1   )
+  if (allocated(yb1   )) deallocate(yb1   )
+  if (allocated(xb2   )) deallocate(xb2   )
+  if (allocated(yb2   )) deallocate(yb2   )
+  if (allocated(xbnew1)) deallocate(xbnew1)
+  if (allocated(ybnew1)) deallocate(ybnew1)
+  if (allocated(xbnew2)) deallocate(xbnew2)
+  if (allocated(ybnew2)) deallocate(ybnew2)
   allocate(xb1(np_side),yb1(np_side),xb2(np_side),yb2(np_side))
   allocate(xbnew1(np_side),ybnew1(np_side),xbnew2(np_side),ybnew2(np_side))
   xb1 = 0.; yb1 = 0.; xb2 = 0.; yb2 = 0.; 
@@ -536,6 +546,8 @@ np_side = uplmt
   print*,'imax x jmax begin: ',imax, jmax
   print*,'np_side,j1,j2 :',np_side,j1,j2
   !print*,'j1 + np_side + (dwnstrm*j1)',j1 + np_side + (dwnstrm*j1)
+  if (allocated(xmeanline)) deallocate(xmeanline)
+  if (allocated(ymeanline)) deallocate(ymeanline)
   Allocate(xmeanline(j1 + np_side + (dwnstrm*j1)),ymeanline(j1 + np_side + (dwnstrm*j1)))
   if (allocated(xline)) deallocate(xline)
   if (allocated(yline)) deallocate(yline)
@@ -647,6 +659,10 @@ character*32 fname5,fname6,fext,temp,casename,file1,develop
   if(allocated(xline).and.allocated(yline))then
     deallocate(xline,yline)
   endif
+  if (allocated(xmeanline)) deallocate(xmeanline)
+  if (allocated(ymeanline)) deallocate(ymeanline)
+  if (allocated(xline    )) deallocate(xline    )
+  if (allocated(yline    )) deallocate(yline    )
   Allocate(xmeanline(j1 + uplmt + (dwnstrm*j1)),ymeanline(j1 + uplmt + (dwnstrm*j1)))
   Allocate(xline(j1 + uplmt + (dwnstrm*j1)),yline(j1 + uplmt + (dwnstrm*j1)))
   !---------------------------------------
@@ -776,6 +792,8 @@ character*32 fname5,fname6,fext,temp,casename,file1,develop
     print*,'j1 + (R2cell+1) + (R3cell+1) + (dwnstrm*j1)',j1,(R2cell+1),(R3cell+1),(dwnstrm*j1)
     print*,'new imax: ',imax
     !-----------------------------------------
+    if (allocated(xline)) deallocate(xline)
+    if (allocated(yline)) deallocate(yline)
     Allocate(xline(imax),yline(imax))
     !Allocate(Xbg(imax,jmax),Ybg(imax,jmax))
     !Allocate(Xbg2(imax,jmax),Ybg2(imax,jmax))
@@ -815,6 +833,8 @@ character*32 fname5,fname6,fext,temp,casename,file1,develop
     print*,'j1 + (R3cell+1) + 1 + (dwnstrm*j1)',j1,(R3cell+1),(dwnstrm*j1)
     print*,'new imax: ',imax
     !-----------------------------------------
+    if (allocated(xline)) deallocate(xline)
+    if (allocated(yline)) deallocate(yline)
     Allocate(xline(imax),yline(imax))
     !Allocate(Xbg(imax,jmax),Ybg(imax,jmax))
     !Allocate(Xbg2(imax,jmax),Ybg2(imax,jmax))
@@ -873,6 +893,8 @@ logical isdev
 !Constants
 pi = 4.*atan(1.0)
 !
+if (allocated(xblade)) deallocate(xblade)
+if (allocated(yblade)) deallocate(yblade)
 allocate(xblade(np),yblade(np))
 do i = 1, np
  xblade(i) = xb(i)
@@ -998,6 +1020,8 @@ xblade(uplmt) = mble
  ! write(*,*)
  ! print*,'Writing the modified blade...'
  ! write(*,*)
+if (allocated(xst)) deallocate(xst)
+if (allocated(yst)) deallocate(yst)
  allocate(xst(le_pos-1),yst(le_pos-1))
  do i = 1,le_pos-1
     xst(i) = xb(uplmt-i)
@@ -1045,6 +1069,8 @@ xblade(uplmt) = mble
  !---------------------------------------------------------------------------
  !Offsetting the coordinates of STINGTOP for the C grid
  !---------------------------------------------------------------------------
+if (allocated(Xgstingtop)) deallocate(Xgstingtop)
+if (allocated(Ygstingtop)) deallocate(Ygstingtop)
  allocate(Xgstingtop(nsting1,jmax1),Ygstingtop(nsting1,jmax1))
  !Splining the blade coordinates
  call arclength(xbstingtop(1),ybstingtop(1),s(1),nsting1)
@@ -1098,6 +1124,10 @@ xblade(uplmt) = mble
  print*,'nstingbot:',nstingbot
  njoint = nsting1!-nstingtop+2
  print*,njoint
+ if (allocated(Xgstingdash)) deallocate(Xgstingdash)
+ if (allocated(Ygstingdash)) deallocate(Ygstingdash)
+ if (allocated(xnew       )) deallocate(xnew       )
+ if (allocated(ynew       )) deallocate(ynew       )
  allocate(Xgstingdash(njoint,jmax1),Ygstingdash(njoint,jmax1))
  allocate(xnew(1),ynew(1))
  yoffset = (Ygstingtop(nsting1,jmax1) - Ygstingtop(nsting1,1))/(jmax1-1)
@@ -1140,6 +1170,8 @@ xblade(uplmt) = mble
  !---------------------------------------------------------------------------
  !Offsetting the coordinates of STINGBOT for the C grid
  !---------------------------------------------------------------------------
+if (allocated(Xgstingbot)) deallocate(Xgstingbot)
+if (allocated(Ygstingbot)) deallocate(Ygstingbot)
  allocate(Xgstingbot(nsting2,jmax1),Ygstingbot(nsting2,jmax1))
  !Splining the blade coordinates
  call arclength(xbstingbot(1),ybstingbot(1),s(1),nsting2)
@@ -1195,9 +1227,11 @@ xblade(uplmt) = mble
  ! print*,'nstingbot:',nstingbot
  njoint = nsting2!-nstingbot+2
  ! print*,njoint
+if (allocated(Xgstingdash)) deallocate(Xgstingdash)
+if (allocated(Ygstingdash)) deallocate(Ygstingdash)
  allocate(Xgstingdash(njoint,jmax1),Ygstingdash(njoint,jmax1))
  yoffset = (Ygstingbot(nsting2,jmax1) - Ygstingbot(nsting2,1))/(jmax1-1)
- do j = 1, jmax1
+   do j = 1, jmax1
     xgtrans = Xgstingbot(nsting2,1) - Xgstingbot(nsting2,j)
     do i = 1, njoint
        Xgstingdash(i,j) = Xgstingbot(nsting2+1-i,1) - xgtrans + msle - mble

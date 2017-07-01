@@ -11,7 +11,7 @@ write(*,*)'************************************************************'
 write(*,*)'************************************************************'
 write(*,*)'****  T-BLADE3:Turbomachinery BLADE 3D Geometry Builder ****'
 write(*,*)'****                                                    ****' 
-write(*,*)'****  Version 0.4                                       ****' 
+write(*,*)'****  Version 0.5                                       ****' 
 write(*,*)'****                                                    ****'
 write(*,*)'****  ...was also called as below till Aug 2016...      ****' 
 write(*,*)'****  3DBGB: 3 Dimensional Blade Geometry Builder       ****'
@@ -969,6 +969,7 @@ exit_coord = inter_coord(:,n_normal_distance)
 
 print*,'number of intersection points (k) =',k-1,'from np_side of',np_sidee
 
+if (allocated(throat)) deallocate(throat)
 Allocate (throat(n_normal_distance))
 ! Calculation of the throat:
 throat(1) = sqrt((inter_coord(1,1)-inter_coord(3,1))**2+(inter_coord(2,1)-inter_coord(4,1))**2) ! Nondimensional

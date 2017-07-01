@@ -1778,6 +1778,8 @@ xTEnew = xcenter + radius
 yTEnew = ymean
 ! Calculating ncirc-1 equidistant points between the mid point and the new TE point
 ncirc = 5
+if (allocated(xcirc)) deallocate(xcirc)
+if (allocated(ycirc)) deallocate(ycirc)
 allocate(xcirc(ncirc-1),ycirc(ncirc-1))
 deltax = (xTEnew - xmean)/ncirc
 do i = 1 , ncirc - 1

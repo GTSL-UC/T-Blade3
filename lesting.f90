@@ -112,6 +112,7 @@
 	
 	cam_le = camber_le(1)
 	! test :
+        if (allocated(theta)) deallocate(theta)
 	allocate(theta(1))
 	 theta = -camber_ang(1)
 	u_vec = uin_le; cam_vec = cam_le
@@ -389,6 +390,7 @@
 			y_le_spl_top(j) = bspline_cp(ycp_top,arclength,ncp,degree,s)	
 		enddo
 	 
+         if (allocated(theta)) deallocate(theta)
 	 Allocate (theta(ncp-(degree-1)))
 	 do i= 1, (ncp-(degree-1))
 		theta(i) = theta_rad
@@ -446,6 +448,7 @@
 			y_le_spl_bot(j) = bspline_cp(ycp_bot,arclength,ncp,degree,s)	
 		enddo
 	 
+         if (allocated(theta)) deallocate(theta)
 	 Allocate (theta(ncp-(degree-1)))
 	 do i= 1, (ncp-(degree-1))
 		theta(i) = theta_rad
@@ -480,6 +483,7 @@
 	
 		
  ! sting rotation to camber 
+         if (allocated(theta)) deallocate(theta)
  	 Allocate (theta(3))
 	 do i= 1, 3
 		theta(i) = -theta_rad-sang
