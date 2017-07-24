@@ -1562,7 +1562,8 @@ end subroutine datafile
       !print*,'rr1 =',rr1
       !print*,'rr2 =',rr2
 
-
+	  i_le = 0
+	  i_te = 0
       if(umxthin.lt.0.5) then
        thk1 = tethk
        thk2 = lethk

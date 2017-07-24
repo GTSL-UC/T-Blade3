@@ -95,7 +95,7 @@ real mpstack(nspan),dmpstack(nspan),zstack(nspan)
 real xb_stack(nspan),yb_stack(nspan),xstack(nspan),ystack(nspan),rstack(nspan),delttheta1(nspan)
 real ysle(nspan),yste(nspan), sweep(100),mp_stack(nspan)
 real xm_slope,rm_slope
-real*4 bladedata(amount_data,nspn)
+real bladedata(amount_data,nspn)
 real intersec_coord(12,nspn),mps_inter
 real inter_xb(6,nspn),inter_rb(6,nspn),inter_yb(6,nspn),inter_zb(6,nspn)
 real throat_3D(nspn),mouth_3D(nspn),exit_3D(nspn)

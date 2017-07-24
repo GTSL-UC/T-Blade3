@@ -86,7 +86,7 @@ integer interval, pt2, throat_index(nspn), spline_data, i_slope, BGgrid_all(nspn
 parameter(nspan = 200, nx = 500, nxx = 1000, nrow = 1, nax = 50, nb = 300, spline_data = 6)
 parameter(interval = 6, pt2 = 1, TE_del = 0) 	! parameter to choose the position of the second point on the blade
 ! interval is the number of intervals for the LE spline values refinement process
-real*4 bladedata(amount_data, nsl)
+real*8 bladedata(amount_data, nsl)
 real sec_radius(nsl, 2)
 
 real :: sinl, sext, tempr, chrdx, chrd, stagger, pitch, radius_pitch
@@ -152,6 +152,9 @@ character*16 thick_distr_3_flag
 logical error, ellip, isdev, isxygrid
 
 common / BladeSectionPoints /xxa(nxx, nax), yya(nxx, nax) 
+
+i_le = 0
+i_te = 0
 
 !******************************************************************************************
 ! Building 2D blade section using mean camber & thickness profile or other defined airfoils
@@ -688,6 +691,7 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
 		Allocate(ybot_refine(interval+1))
 		Allocate(cam_refine(interval+1))
 		Allocate(u_refine(interval+1))
+		print*, '!! KB reached fini_diff_refine in bladegen'
 		call fini_diff_refine(curv_camber, thick, thick_distr, &
 							xcp_curv, ycp_curv, ncp_curv(js), xcp_thk, ycp_thk, ncp_thk(js), &
 							u(le_pos), interval, ucp_top, vcp_top, ucp_bot, vcp_bot, &

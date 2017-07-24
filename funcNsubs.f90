@@ -11,7 +11,7 @@ write(*,*)'************************************************************'
 write(*,*)'************************************************************'
 write(*,*)'****  T-BLADE3:Turbomachinery BLADE 3D Geometry Builder ****'
 write(*,*)'****                                                    ****' 
-write(*,*)'****  Version 0.5                                       ****' 
+write(*,*)'****  Version 0.6                                       ****' 
 write(*,*)'****                                                    ****'
 write(*,*)'****  ...was also called as below till Aug 2016...      ****' 
 write(*,*)'****  3DBGB: 3 Dimensional Blade Geometry Builder       ****'
@@ -342,7 +342,7 @@ END subroutine
 !*******************************************************
 subroutine outputfiledata(bladedata,nsl,amount_data,throat_pos,casename,units)
 integer nsl,amount_data,js
-real*4 bladedata(amount_data,nsl)
+real*8 bladedata(amount_data,nsl)
 real*8 in_beta(nsl),out_beta(nsl)
 character*20 throat_pos(nsl)
 character*32 casename

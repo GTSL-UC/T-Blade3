@@ -148,7 +148,7 @@ real*8 xdiff, rdiff
 real*8 inBetaInci, outBetaDevn
 ! !
 character*(*) :: fname_in, aux_in
-character*256 :: fname, temp, tempr1, fname1, fname2, fname3, fname4, row_type
+character*256 :: fname, temp, tempr1, fname1, fname2, fname3, fname4, row_type, path
 character*(*) :: arg2, arg3
 ! !
 logical axial_LE, radial_LE, axial_TE, radial_TE
@@ -202,13 +202,33 @@ elseif ((trim(arg3).eq.'2d') .or. (trim(arg3).eq.'2D')) then
 	is2d = .True.
 endif
 
+j = -1
+! Finding path
+do i = len(trim(fname)), 1, -1
+	if ((fname(i:i) .eq. '/') .or. (fname(i:i) .eq. '\')) then
+		j = i
+		exit
+	endif
+enddo
+if (j == -1) then
+	path = ''
+else
+	path = fname(1:j)
+endif
+
 ! indicating the row number and type of blade from input file name:
 !-----------------------------------------------------------------
-k = (index(fname, '.')+1)
-do i = k, len(trim(fname))
-	if (fname(i:i) == '.') then
-		j = i-1
-		continue
+k = 0
+do i = len(trim(fname)), 1, -1
+	if (fname(i:i) .eq. '.') then
+		k = k+1
+		if (k .eq. 1) then
+			j = i-1
+		endif
+		if (k .eq. 2) then
+			k = i+1
+			exit
+		endif
 	endif
 enddo
 row_type = fname(k:j)
@@ -227,7 +247,7 @@ if((curv.ne.0.or.thick.ne.0.or.LE.ne.0&
 	print*, 'Reading the controlinput file ....'
 	write(*, *)
 	! call readcontrolinput(aux_in)
-	call readcontrolinput(row_type)
+	call readcontrolinput(row_type, path)
 elseif((curv.ne.0.or.thick.ne.0.or.LE.ne.0&
 .or.thick_distr.ne.0).and.trim(spanwise_spline).eq.'spanwise_spline')then
 	!---reading secondary input file (spancontrolinputdat)-----------------------
@@ -235,7 +255,7 @@ elseif((curv.ne.0.or.thick.ne.0.or.LE.ne.0&
 	print*, 'Reading the spanwise_input file ....'
 	write(*, *)
 	! call read_spanwise_input(aux_in)
-	call read_spanwise_input(row_type)
+	call read_spanwise_input(row_type, path)
 endif
 
 !****************************************************************************

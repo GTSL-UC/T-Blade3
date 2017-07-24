@@ -344,7 +344,7 @@ end subroutine readinput
 !**********************************************************************************
 !**********************************************************************************
 ! subroutine readcontrolinput(fname5)
-subroutine readcontrolinput(row_type)
+subroutine readcontrolinput(row_type, path)
 !**********************************************************************************
 ! reads the controlinput.dat when the appropriate swittches are activated.
 use globvar
@@ -352,6 +352,7 @@ use globvar
 implicit none
 
 ! character*(*) fname5
+character*(*) path
 character*256 temp, fname4, row_type
 character*256 fname5
 integer :: phantom_n
@@ -360,7 +361,7 @@ integer :: phantom_n
 print*
 !print*, 'using the controlinput file ....'
 ! Reading the input file of curv, thk, and LE for the bladegen:
-fname5 = 'controlinputs.'//trim(row_type)//'.dat'
+fname5 = trim(path)//'controlinputs.'//trim(row_type)//'.dat'
 print*, fname5
 open(11, file = fname5)
 rewind(11)
@@ -535,7 +536,7 @@ end subroutine readcontrolinput
 !**********************************************************************************
 !**********************************************************************************
 ! subroutine read_spanwise_input(file_name)
-subroutine read_spanwise_input(row_type)
+subroutine read_spanwise_input(row_type, path)
 !Description(Syed Moez 03/02/2014):-------------------------------------------------------------------------
 !This subroutine is used to used to read the input file called
 !spancontrolinputs. It is triggered if any of the switches for LE, 
@@ -545,13 +546,14 @@ use globvar
 implicit none
 character*256 row_type
 ! character*(*) file_name
+character*(*) path
 character*256 file_name
 !opening files to read inputs
 
 real*8, allocatable, dimension(:) :: temp
 integer jj
 
-file_name = 'spancontrolinputs.'//trim(row_type)//'.dat'
+file_name = trim(path)//'spancontrolinputs.'//trim(row_type)//'.dat'
 open(10, file = file_name)
 rewind(10)
 
