@@ -171,9 +171,9 @@ end subroutine bspline3
 !----------------------------------------------------------------------
         subroutine bspline_arclength(arclength,xcp,ycp,ncp,degree)
         implicit none
+        integer, intent(in) :: ncp,degree
         real*8 ,dimension(ncp-degree+1), intent (out) :: arclength 
         real*8 ,dimension(ncp), intent (in) :: xcp,ycp
-        integer, intent(in) :: ncp,degree
         real*8 ,dimension(29) :: GQx, GQw
         real*8 d_bspline4, d_bspline, dxdt, dydt, S
         integer i, j
@@ -215,10 +215,10 @@ end subroutine bspline3
 !-----------------------------------------------------------------------
         subroutine bspline_jt(j,t,arclength,ncp,degree,s)  
         implicit none
+        integer, intent(in) :: ncp, degree
         integer, intent(out) :: j
         real*8 ,intent (out) :: t
         real*8 , dimension(ncp-degree+1) ,intent (in) :: arclength
-        integer, intent(in) :: ncp, degree
         real*8 ,intent (in) :: s
         real*8 :: bspline
         integer :: ns
