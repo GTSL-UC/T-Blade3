@@ -270,12 +270,16 @@ read(1, *)temp
 do i = 1, cpinbeta
 	read(1, *)spaninbeta(i), xcpinbeta(i)
 enddo
+call override_in_beta(cpinbeta,xcpinbeta)
+call override_span_in_beta(cpinbeta, spaninbeta)
 read(1, *)temp
 read(1, *)cpoutbeta ! control points for outBeta*
 read(1, *)temp
 do i = 1, cpoutbeta
 	read(1, *)spanoutbeta(i), xcpoutbeta(i)
 enddo
+call override_out_beta(cpoutbeta, xcpoutbeta)
+call override_span_out_beta(cpoutbeta, spanoutbeta)
 read(1, *)temp
 read(1, *)cpchord ! control points for chord
 read(1, *)temp
@@ -588,6 +592,17 @@ do i = 1, ncp_span_curv
 end do
 allocate(temp(ncp_span_curv))
 
+jj = 1
+do i = 1, ncp_span_curv
+   temp(i) = cp_chord_curv(i,jj)
+enddo
+call override_span_curv_ctrl(ncp_span_curv, temp)
+do i = 1, ncp_span_curv
+   cp_chord_curv(i,jj) = temp(i)
+enddo
+
+! Variable override subroutine calls for ESP integration
+! Added by Simon Livingston
 if (ncp_curvature >= 1) then
    jj = 1 + ncp_chord-2 + 2-1
    do i = 1, ncp_span_curv
@@ -649,6 +664,61 @@ if (ncp_curvature >= 6) then
       temp(i) = cp_chord_curv(i,jj)
    enddo
    call override_cur7(ncp_span_curv, temp)
+   do i = 1, ncp_span_curv
+      cp_chord_curv(i,jj) = temp(i)
+   enddo
+endif
+
+if (ncp_chord >= 1) then
+   jj = 1 + 2-1
+   do i = 1, ncp_span_curv
+      temp(i) = cp_chord_curv(i,jj)
+   enddo
+   call override_u2(ncp_span_curv, temp)
+   do i = 1, ncp_span_curv
+      cp_chord_curv(i,jj) = temp(i)
+   enddo
+endif
+
+if (ncp_chord >= 2) then
+   jj = 1 + 3-1
+   do i = 1, ncp_span_curv
+      temp(i) = cp_chord_curv(i,jj)
+   enddo
+   call override_u3(ncp_span_curv, temp)
+   do i = 1, ncp_span_curv
+      cp_chord_curv(i,jj) = temp(i)
+   enddo
+endif
+
+if (ncp_chord >= 3) then
+   jj = 1 + 4-1
+   do i = 1, ncp_span_curv
+      temp(i) = cp_chord_curv(i,jj)
+   enddo
+   call override_u4(ncp_span_curv, temp)
+   do i = 1, ncp_span_curv
+      cp_chord_curv(i,jj) = temp(i)
+   enddo
+endif
+
+if (ncp_chord >= 4) then
+   jj = 1 +5-1
+   do i = 1, ncp_span_curv
+      temp(i) = cp_chord_curv(i,jj)
+   enddo
+   call override_u5(ncp_span_curv, temp)
+   do i = 1, ncp_span_curv
+      cp_chord_curv(i,jj) = temp(i)
+   enddo
+endif
+
+if (ncp_chord >= 5) then
+   jj = 1 +6-1
+   do i = 1, ncp_span_curv
+      temp(i) = cp_chord_curv(i,jj)
+   enddo
+   call override_u6(ncp_span_curv, temp)
    do i = 1, ncp_span_curv
       cp_chord_curv(i,jj) = temp(i)
    enddo

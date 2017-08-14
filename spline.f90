@@ -322,10 +322,10 @@ real :: spl_eval, dspl_eval, dt_newt, y_newt, dy_newt, tol, mint, maxt
 mint = minval(t)
 maxt = maxval(t)
 if (tt .lt. mint) then
-	write (*, *) 'SPL_INV WARNING: Bad initial guess provided. Using minimum value.'
+	!write (*, *) 'SPL_INV WARNING: Bad initial guess provided. Using minimum value.'
 	tt = mint
 elseif (tt .gt. maxt) then
-	write (*, *) 'SPL_INV WARNING: Bad initial guess provided. Using maximum value.'
+	!write (*, *) 'SPL_INV WARNING: Bad initial guess provided. Using maximum value.'
 	tt = maxt
 endif
 
@@ -438,17 +438,17 @@ real :: dspl_eval
 mint1 = minval(t1); maxt1 = maxval(t1)
 mint2 = minval(t2); maxt2 = maxval(t2)
 if (tt1 .lt. mint1) then
-	write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 1. Using minimum value.'
+	!write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 1. Using minimum value.'
 	tt1 = mint1
 elseif (tt1 .gt. maxt1) then
-	write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 1. Using maximum value.'
+	!write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 1. Using maximum value.'
 	tt1 = maxt1
 endif
 if (tt2 .lt. mint2) then
-	write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 2. Using minimum value.'
+	!write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 2. Using minimum value.'
 	tt2 = mint2
 elseif (tt2 .gt. maxt2) then
-	write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 2. Using maximum value.'
+	!write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 2. Using maximum value.'
 	tt2 = maxt2
 endif
 

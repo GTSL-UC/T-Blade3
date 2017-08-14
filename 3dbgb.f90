@@ -105,6 +105,8 @@ row_type = fname(k:j)
 !call bgb3d_sub(fname, 'controlinputs.'//trim(row_type)//'.dat', arg2, arg3)
 call bgb3d_sub(fname, 'spancontrolinputs.'//trim(row_type)//'.dat', arg2, arg3)
 end program bgb3d
+! Variable override subroutines for ESP intergation
+! Added by Simon Livingston
 subroutine     override_chord(n, a)
    real*8 a(*)
 end subroutine override_chord
@@ -135,6 +137,36 @@ end subroutine override_cur6
 subroutine     override_cur7(n, a)
    real*8 a(*)
 end subroutine override_cur7
+subroutine     override_in_beta(n, a)
+   real*8 a(*)
+end subroutine override_in_beta
+subroutine     override_out_beta(n, a)
+   real*8 a(*)
+end subroutine override_out_beta
+subroutine     override_u2(n, a)
+   real*8 a(*)
+end subroutine override_u2
+subroutine     override_u3(n, a)
+   real*8 a(*)
+end subroutine override_u3
+subroutine     override_u4(n, a)
+   real*8 a(*)
+end subroutine override_u4
+subroutine     override_u5(n, a)
+   real*8 a(*)
+end subroutine override_u5
+subroutine     override_u6(n, a)
+   real*8 a(*)
+end subroutine override_u6
+subroutine     override_span_in_beta(n, a)
+   real*8 a(*)
+end subroutine override_span_in_beta
+subroutine     override_span_out_beta(n, a)
+   real*8 a(*)
+end subroutine override_span_out_beta
+subroutine     override_span_curv_ctrl(n, a)
+   real*8 a(*)
+end subroutine override_span_curv_ctrl
 #endif
 !****************************************************************************************
 
