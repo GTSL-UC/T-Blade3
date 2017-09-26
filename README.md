@@ -15,11 +15,11 @@ Outputs: 3D blade sections (x,y,z), 2D airfoils (mprime,theta), 2D grids with pe
 
 Below are the authors:
 
-Kiran Siddappaji         
-Mark G. Turner (turnermr@ucmail.uc.edu)           
-Karthik Balasubramanian  
-Syed Moez Hussain Mahmood 
-Ahmed Farid Nemnem             
+Kiran Siddappaji,         
+Mark G. Turner (turnermr@ucmail.uc.edu),           
+Karthik Balasubramanian,  
+Syed Moez Hussain Mahmood, 
+Ahmed Farid Nemnem,             
 Marshall C. Galbraith  
 
 
