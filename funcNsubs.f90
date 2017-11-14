@@ -43,9 +43,9 @@ write(*,*)'****  ---------------by Marshall C. Galbraith    ----   ****'
 write(*,*)'************************************************************'
 write(*,*)'************************************************************'
 write(*,*)
-write(*,*) 'T-Blade3 Copyright (C) 2017 University of Cincinnati, developed by Dr. Mark Turner,' 
-write(*,*) 'Karthik  Balasubramanian, Syed Moez Hussain, Ahmed Farid Nemnem, '
-write(*,*) 'Kiran Siddappaji and Marshall C. Galbraith.'
+write(*,*) 'T-Blade3 Copyright (C) 2017 University of Cincinnati, developed by Kiran Siddappaji,' 
+write(*,*) 'Dr. Mark G. Turner, Karthik  Balasubramanian, Syed Moez Hussain, Ahmed Farid Nemnem '
+write(*,*) ' and Marshall C. Galbraith.'
 write(*,*)
 write(*,*) 'This program is free software; you can redistribute it and/or modify it under the '
 write(*,*) 'terms of the GNU General Public License as published by the Free Software Foundation; '
