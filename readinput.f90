@@ -5,7 +5,7 @@ use globvar
 implicit none
 
 character*256 :: fname, temp, temp2, tempr1, fname1, fname2, fname3
-
+integer :: er
 real*8 inBetaInci, outBetaDevn
 
 if (allocated(x_le          )) deallocate(x_le          )
@@ -92,11 +92,20 @@ write(ibrowc, '(i3)')ibrow
 !print*, ibrowc
 !write(*, *)
 read(1, *)temp
-read(1, *)nbls ! number of blades in this row
+read(1, *) nbls ! number of blades in this row
 !print*, 'Number of blades in this row:', nbls
 read(1, '(A)'), temp
 units = temp(24:25)
-read(1, *)scf
+read(1, *)scf, temp
+temp = adjustl(trim(temp))
+read(temp, *, iostat = er) theta_offset
+if (er .ne. 0) then
+	theta_offset = 0.
+	rewind(1)
+	do i = 1, 8
+		read(1, *) temp
+	enddo
+endif
 !write(*, *)'bsf:', scf
 !write(*, *) 
 read(1, *)temp

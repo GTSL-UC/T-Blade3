@@ -42,7 +42,7 @@ real*8 xxa,yya,scf,lref
 real*8 tempr,xstck
 real*8 xmsle(nspan),rmsle(nspan),xmste(nspan),rmste(nspan)
 real*8 span(nspan),del_out_beta(nspan),out_beta_new(nspan)
-real*8 mste(nspan),stgr
+real*8 mste(nspan),stgr, theta_offset
 real*8, allocatable, dimension(:) :: x_le,x_te,r_le,r_te,in_beta,out_beta,phi_s_in,phi_s_out,msle
 real*8, allocatable, dimension(:) :: chord,mrel1,thk_c,inci,devn,sec_flow_ang,stagger,chordm,sang,stk_u,stk_v
 real*8, allocatable, dimension(:) :: jcellblade_all, etawidth_all,axchrd

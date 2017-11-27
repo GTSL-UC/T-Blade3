@@ -608,6 +608,7 @@ enddo
 print*, 'Calculating TE x, r points...'
 
 do ia = 1, na
+	!!	Modified by Karthik Balasubramanian
 	! if (npoints.eq.nsl)then ! LE, TE points same as no. of streamlines
 		! x_te(ia) = xte(ia)
 		! r_te(ia) = rte(ia)
@@ -626,7 +627,6 @@ do ia = 1, na
 		x_te(ia) = spl_eval(s1te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
 		r_te(ia) = spl_eval(s1te(ia), rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))
 	! endif
-	!!KB
 	! write(*, *) 'Initial msle = ', s1le(ia), ' Initial mste = ', s1te(ia)
 enddo
 
@@ -745,7 +745,7 @@ enddo
 !!Determining purely axial, purely radial, mixed flow
 !--------------------------------------------------------------------
 do ia = 1, na
-	!!KB
+	!!	Modified by Karthik Balasubramanian
 	msle(ia) = s1le(ia)
 	mste(ia) = s1te(ia)
 	! print*, msle(ia), s1le(ia)
@@ -1068,7 +1068,7 @@ do js = 1, nspn
 		        LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments, &
 		        sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
                 n_normal_distance,casename,develop,isdev,mble,mbte,mles,mtes,i_slope,jcellblade_all, &
-                etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid)				
+                etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset)				
 
    mprime_ble(js) = mble
    mprime_bte(js) = mbte

@@ -7,7 +7,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, &
 	                LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments,&
 	                sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
                     n_normal_distance,casename,develop,isdev,mble,mbte,msle,mste,i_slope,jcellblade_all, &
-                    etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid)
+                    etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset)
 
 !-----------------------------------------
 ! Input:
@@ -95,7 +95,7 @@ real :: sinl, sext, tempr, chrdx, chrd, stagger, pitch, radius_pitch
 !real splthick(nb), thickness(nb), angle(nb), camber(nb), slope(nb)
 real, allocatable, dimension(:) :: xtop, ytop, xbot, ybot, u, xb, yb
 real, allocatable, dimension(:) :: splthick, thickness, angle, camber, slope
-real umin, umax, scaling, deltau
+real umin, umax, scaling, deltau, theta_offset
 real vtop_stack, vbot_stack, xb_stk, yb_stk
 real, allocatable, dimension(:, :) :: in_beta, out_beta
 real*8, allocatable, dimension(:, :) :: splinedata
@@ -817,6 +817,7 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
 			xb(i) = scaled(xi, chrd)! using the value of chord calculated internally .
 			yb(i) = scaled(yi, chrd)
 		endif
+		yb(i) = yb(i) + theta_offset*dtor
 		xxa(i, js) = xb(i)
 		yya(i, js) = yb(i)
 	enddo
