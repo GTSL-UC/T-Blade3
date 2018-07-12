@@ -8,6 +8,8 @@ subroutine span_output ()
 use globvar
 implicit none
 
+integer cp_start
+
 if (allocated(curv_cp)) deallocate(curv_cp)
 Allocate(curv_cp(20,2*na))
 
@@ -30,11 +32,16 @@ do i=1,na
 	
 	!Defining control points for curvature
 	!Defining fixed control points (not varied in new input file)
-	curv_cp(2,2*k)=0.0
+	if (isold) then
+		curv_cp(2,2*k)=0.0
+		cp_start = 3
+	else
+		cp_start = 2
+	endif
 	
 	!defining Cubic B-splined control points from the new input file	
-	do j=3,ncp_curvature+1
-	curv_cp(j,2*k)=bspline_chord_curv(i,ncp_chord+j-3)
+	do j = cp_start, ncp_curvature+1
+		curv_cp(j,2*k)=bspline_chord_curv(i,ncp_chord+j-cp_start)
 	end do
 	
 	!Adding two phantom points required for cubic Bspline
@@ -89,6 +96,38 @@ do i=1,na
 
   end if
 end do
+elseif (thick_distr .eq. 3) then
+	!writing Thickness control points
+	if (allocated(thk_cp)) deallocate(thk_cp)
+	Allocate(thk_cp(20,2*na))
+	k=1
+	do i=1,na
+		if (k<=na)then
+			!Defining Cubic B-splined control points from the new input file	
+			do j=1,ncp_chord_thickness-2
+				thk_cp(j,2*k-1)=bspline_thk(i,j+1)
+			end do
+			!Defining Cubic B-splined control points from the new input file
+			do j=1,ncp_thickness-2
+				thk_cp(j,2*k)=bspline_thk(i,ncp_chord_thickness+j-1)
+			end do
+			k=k+1
+		end if
+	end do
+elseif(thick_distr .eq. 4) then
+	!writing Thickness control points
+	if (allocated(thk_cp)) deallocate(thk_cp)
+	Allocate(thk_cp(20, 2*na))
+	k = 1
+	do i = 1, na
+		if (k .le. na)then
+			do j = 1, ncp_thickness
+				thk_cp(j,2*k-1) = bspline_thk(i, 2*j)
+				thk_cp(j,2*k) = bspline_thk(i, 2*j+1)
+			enddo
+			k = k + 1
+		endif
+	enddo
 endif
 
 if(LE .ne. 0) then
@@ -146,15 +185,16 @@ endif
 !############################################
 !This part of the program writes down the data points for the Bspline created using
 !the control points
-!open(150,file='curv_cp.dat')
-!	do i=1,20
-!		write(150,200)curv_cp(i,1:na*2)
-!	end do
+open(150,file='curv_cp.dat')
+	do i=1,20
+		write(150,200)curv_cp(i,1:na*2)
+	end do
+close(150)
 !	
 !open(160,file='thk_cp.dat')
 !	do i=1,20
 !		write(160,200)thk_cp(i,1:na*2)
 !	end do	
-!200 format(22f15.2)
+200 format(22f15.2)
 
 end subroutine span_output

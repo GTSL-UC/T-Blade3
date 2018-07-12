@@ -11,7 +11,7 @@ write(*,*)'************************************************************'
 write(*,*)'************************************************************'
 write(*,*)'****  T-BLADE3:Turbomachinery BLADE 3D Geometry Builder ****'
 write(*,*)'****                                                    ****' 
-write(*,*)'****  Version 0.9                                       ****' 
+write(*,*)'****  Version 1.0	                                   ****' 
 write(*,*)'****                                                    ****'
 write(*,*)'****  ...was also called as below till Aug 2016...      ****' 
 write(*,*)'****  3DBGB: 3 Dimensional Blade Geometry Builder       ****'
@@ -604,7 +604,7 @@ implicit none
 
 integer i,j,k,nx,np_side,np,nphalf,ny,LE
 integer, intent(in)::js,stack,stack_switch
-parameter (nx=500,ny=300)
+parameter (nx = 1000,ny=300)
 
 !real, intent (inout):: xb(nx),yb(nx),xbot(ny),ybot(ny),xtop(ny),ytop(ny)
 real, intent (inout):: xb(np),yb(np),xbot((np+1)/2),ybot((np+1)/2),xtop((np+1)/2),ytop((np+1)/2)
@@ -768,7 +768,7 @@ end
 subroutine bladesection(xb,yb,np,nbls,TE_del,sinls,sexts,chrdd,fext,js,pitch,mble,mbte,airfoil)
 implicit none
 integer TE_del,nx,nbls,ii,i,js,np,np_side
-parameter(nx=500)
+parameter(nx = 1000)
 character*32 fname,fext,blext(100)
 character*20 airfoil
 real*8 sexts,sinls,chrdd,pitch,pi,x1,y1,x2,y2
@@ -1101,7 +1101,7 @@ implicit none
 integer i,ia, nx, nax
 integer, intent(in):: iap,nsec,uplmt
 
-parameter (nx = 500, nax = 500)
+parameter (nx = 1000, nax = 1000)
 
 real*8, intent(in):: xb(iap,nsec),yb(iap,nsec),zb(iap,nsec),scf
 real*8, intent(in):: xposlean(iap,nsec),yposlean(iap,nsec),zposlean(iap,nsec)
@@ -1356,7 +1356,7 @@ implicit none
 integer i,ia,j, nx, nax, npts, npts_slope, npts_axial
 integer, intent(in):: iap,nsec,uplmt
 
-parameter (nx = 500, nax = 500)
+parameter (nx = 1000, nax = 1000)
 
 real*8, intent(in):: xb(iap,nsec),yb(iap,nsec),zb(iap,nsec),scf
 real*8, intent(in):: xposlean(iap,nsec),yposlean(iap,nsec),zposlean(iap,nsec)

@@ -384,14 +384,15 @@ do i = 2, n-2
 		n0 = i-seg_start+1
 		seg_end = seg_start+n0-1
 		! Implementing zero second derivative segment end conditions
-		call spline(y(seg_start:seg_end), dydt(seg_start:seg_end), t(seg_start:seg_end), n0, 999.0, 999.0)
+		call spline(y(seg_start), dydt(seg_start), t(seg_start), n0, 999.0, 999.0)
 		seg_start = i+1
 	endif
 enddo
 
 n0 = n-seg_start+1
-! Implementing zero second derivative segment end conditions
-call spline(y(seg_start:seg_end), dydt(seg_start:seg_end), t(seg_start:seg_end), n0, 999.0, 999.0)
+! Implementing zero second derivative segment and zero third derivative end conditions
+! print*, 'seg_start, seg_end', seg_start, seg_end
+call spline(y(seg_start), dydt(seg_start), t(seg_start), n0, 999.0, -999.0)
 
 return
 

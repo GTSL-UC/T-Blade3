@@ -76,6 +76,7 @@ abs_zero = 0.0000000000000000
 
 open(1, file = fname, status = 'unknown')
 rewind(1)
+print*, fname
 !write(*, *)
 !write(*, *) 'Reading inputs from 3dbgbinput file'
 !write(*, *)
@@ -375,7 +376,7 @@ print*
 !print*, 'using the controlinput file ....'
 ! Reading the input file of curv, thk, and LE for the bladegen:
 fname5 = trim(path)//'controlinputs.'//trim(row_type)//'.dat'
-print*, fname5
+! print*, fname5
 open(11, file = fname5)
 rewind(11)
 !----------------------------------------------------------------------
@@ -441,7 +442,9 @@ if (allocated(ncp_thk)) deallocate(ncp_thk)
 if (allocated(thk_cp )) deallocate(thk_cp )
 Allocate(ncp_thk(nsl))
 Allocate(thk_cp(20, 2*nsl))
-if (thick_distr.eq.3) then
+if (thick_distr.eq.4) then
+	phantom_n = 0
+elseif (thick_distr.eq.3) then
 	phantom_n = 2
 else
 	phantom_n = 4
@@ -464,7 +467,8 @@ do i = 1, nsl
 		read(11, *), xcp(j+(phantom_n/2)), ycp(j+(phantom_n/2))	! for quartic spline
 		!print*, xcp(j+1), ycp(j+1)
 	enddo
-	if (thick_distr.eq.3) then
+	if (thick_distr.eq.4) then
+	elseif (thick_distr.eq.3) then
 		xcp(1) = 0.
 		ycp(1) = 0.
 		xcp(ncp_thk(i)) = 0.
@@ -535,7 +539,30 @@ if(LE .ne.0) then
 		sting_l_all(i), sting_h_all(i, 1), sting_h_all(i, 2)
 		! print*, 'C_le_y_top_all(i), C_le_y_bot_all(i), LE_vertex_ang_all(i), LE_vertex_dis_all(i)', C_le_y_top_all(i), C_le_y_bot_all(i), LE_vertex_ang_all(i), LE_vertex_dis_all(i)
 	enddo
-endif ! end if for LE spline parameters
+	if (thick_distr .eq. 4) then
+		if (allocated(te_angle_cp)) deallocate(te_angle_cp)
+		Allocate(te_angle_cp(nsl))
+		read (11, *), temp
+		read (11, *), te_flag
+		read (11, *), temp
+		do i = 1, nsl
+			read(11, *), te_angle_cp(i)
+		enddo
+		print*, 'TE Angle'
+		write(*, '(F10.5)'), (te_angle_cp(i), i = 1, nsl)		
+	endif
+elseif (thick_distr .eq. 4) then ! end if for LE spline parameters
+	if (allocated(te_angle_cp)) deallocate(te_angle_cp)
+	Allocate(te_angle_cp(nsl))
+	read (11, *), temp
+	read (11, *), te_flag
+	read (11, *), temp
+	do i = 1, nsl
+		read(11, *), te_angle_cp(i)
+	enddo
+	print*, 'TE Angle'
+	write(*, '(F10.5)'), (te_angle_cp(i), i = 1, nsl)	
+endif
 close(11)
 !endif ! end if for curvature, thickness, thickness dist and LE spline definition.
 
@@ -562,7 +589,7 @@ character*256 row_type
 character*(*) path
 character*256 file_name
 !opening files to read inputs
-
+real :: span_dum
 real*8, allocatable, dimension(:) :: temp
 integer jj
 
@@ -573,34 +600,67 @@ rewind(10)
 do i = 1, 5
 	read(10, *)
 end do
+
 !--------------------------------------------------------------------------
 !Reading curvature and chord control points
 read(10, *) ncp_span_curv, ncp_chord
+if(control_inp_flag .eq. 1 .and. ncp_span_curv .ne. nsl) then
+	print*, 'Error in auxiliary file inputs: Number of spanwise curvature specifications must equal number of streamlines if spanwise spline is not used.'
+endif
 !number of chord and curvature control points will always be the same
 ncp_curvature = ncp_chord
 !Initializing values for variables defined by Ahmed
 if (allocated(ncp_curv)) deallocate(ncp_curv)
+if (allocated(curv_cp )) deallocate(curv_cp )
+! If either one of curv, thick, LE ot thickn_distr are not zero:
 Allocate(ncp_curv(nsl))
+if(control_inp_flag .eq. 1) then
+	Allocate(curv_cp(20, 2*nsl))
+endif
 do i = 1, nsl
-	ncp_curv(i) = ncp_curvature+2
-end do
+	ncp_curv(i) = ncp_curvature + 2
+enddo
 
 !Including phantom points												
 ncp_span_curv1 = ncp_span_curv+2
 
-ncp_chord_curv = ncp_chord-2+ncp_curvature-1+1
-
-!Allocating arrays
+if (isold) then
+	ncp_chord_curv = ncp_chord-2+ncp_curvature+1-1
+else
+	ncp_chord_curv = ncp_chord-2+ncp_curvature+1
+endif
 if (allocated(cp_chord_curv)) deallocate(cp_chord_curv)
 allocate(cp_chord_curv(ncp_span_curv, ncp_chord_curv))
-
 !LINE 7
 read(10, *)
 do i = 1, ncp_span_curv
 	read(10, *) cp_chord_curv(i, 1:ncp_chord_curv)
-end do
-allocate(temp(ncp_span_curv))
+	if(control_inp_flag .eq. 1) then
+		if (allocated(xcp)) deallocate(xcp)
+		if (allocated(ycp)) deallocate(ycp)
+		Allocate(xcp(ncp_curv(i)))
+		Allocate(ycp(ncp_curv(i)))
+		! read(10, *) span_dum, xcp(3:ncp_curv(i)-2), ycp(2:ncp_curv(i)-1)
+		span_dum = cp_chord_curv(i, 1)
+		xcp(3:ncp_curv(i)-2) = cp_chord_curv(i, 2:ncp_chord-1)
+		ycp(2:ncp_curv(i)-1) = cp_chord_curv(i, ncp_chord:ncp_chord_curv)
+		xcp(1) = 2*xcp(2)-xcp(3)
+		xcp(2) = 0.
+		ycp(1) = 2*ycp(2)-ycp(3)
+		xcp(ncp_curv(i)-1) = 1.
+		xcp(ncp_curv(i)) = 2*xcp(ncp_curv(i)-1)-xcp(ncp_curv(i)-2) 	
+		ycp(ncp_curv(i)) = 2*ycp(ncp_curv(i)-1)-ycp(ncp_curv(i)-2) 		
+		do k = 1, ncp_curv(i)
+			curv_cp(k, 2*i-1) = xcp(k)
+			curv_cp(k, 2*i) = ycp(k)
+		enddo
+		deallocate(xcp)
+		deallocate(ycp)
+	endif	
+enddo
 
+if(control_inp_flag .eq. 2) then
+allocate(temp(ncp_span_curv))
 jj = 1
 do i = 1, ncp_span_curv
    temp(i) = cp_chord_curv(i,jj)
@@ -612,157 +672,223 @@ enddo
 
 ! Variable override subroutine calls for ESP integration
 ! Added by Simon Livingston
-if (ncp_curvature >= 1) then
-   jj = 1 + ncp_chord-2 + 2-1
-   do i = 1, ncp_span_curv
-      temp(i) = cp_chord_curv(i,jj)
-   enddo
-   call override_cur2(ncp_span_curv, temp)
-   do i = 1, ncp_span_curv
-      cp_chord_curv(i,jj) = temp(i)
-   enddo
-endif
+! if (ncp_curvature >= 1) then
+   ! jj = 1 + ncp_chord-2 + 2-1
+   ! do i = 1, ncp_span_curv
+      ! temp(i) = cp_chord_curv(i,jj)
+   ! enddo
+   ! call override_cur2(ncp_span_curv, temp)
+   ! do i = 1, ncp_span_curv
+      ! cp_chord_curv(i,jj) = temp(i)
+   ! enddo
+! endif
 
-if (ncp_curvature >= 2) then
-   jj = 1 + ncp_chord-2 + 3-1
-   do i = 1, ncp_span_curv
-      temp(i) = cp_chord_curv(i,jj)
-   enddo
-   call override_cur3(ncp_span_curv, temp)
-   do i = 1, ncp_span_curv
-      cp_chord_curv(i,jj) = temp(i)
-   enddo
-endif
+! if (ncp_curvature >= 2) then
+   ! jj = 1 + ncp_chord-2 + 3-1
+   ! do i = 1, ncp_span_curv
+      ! temp(i) = cp_chord_curv(i,jj)
+   ! enddo
+   ! call override_cur3(ncp_span_curv, temp)
+   ! do i = 1, ncp_span_curv
+      ! cp_chord_curv(i,jj) = temp(i)
+   ! enddo
+! endif
 
-if (ncp_curvature >= 3) then
-   jj = 1 + ncp_chord-2 + 4-1
-   do i = 1, ncp_span_curv
-      temp(i) = cp_chord_curv(i,jj)
-   enddo
-   call override_cur4(ncp_span_curv, temp)
-   do i = 1, ncp_span_curv
-      cp_chord_curv(i,jj) = temp(i)
-   enddo
-endif
+! if (ncp_curvature >= 3) then
+   ! jj = 1 + ncp_chord-2 + 4-1
+   ! do i = 1, ncp_span_curv
+      ! temp(i) = cp_chord_curv(i,jj)
+   ! enddo
+   ! call override_cur4(ncp_span_curv, temp)
+   ! do i = 1, ncp_span_curv
+      ! cp_chord_curv(i,jj) = temp(i)
+   ! enddo
+! endif
 
-if (ncp_curvature >= 4) then
-   jj = 1 + ncp_chord-2 + 5-1
-   do i = 1, ncp_span_curv
-      temp(i) = cp_chord_curv(i,jj)
-   enddo
-   call override_cur5(ncp_span_curv, temp)
-   do i = 1, ncp_span_curv
-      cp_chord_curv(i,jj) = temp(i)
-   enddo
-endif
+! if (ncp_curvature >= 4) then
+   ! jj = 1 + ncp_chord-2 + 5-1
+   ! do i = 1, ncp_span_curv
+      ! temp(i) = cp_chord_curv(i,jj)
+   ! enddo
+   ! call override_cur5(ncp_span_curv, temp)
+   ! do i = 1, ncp_span_curv
+      ! cp_chord_curv(i,jj) = temp(i)
+   ! enddo
+! endif
 
-if (ncp_curvature >= 5) then
-   jj = 1 + ncp_chord-2 + 6-1
-   do i = 1, ncp_span_curv
-      temp(i) = cp_chord_curv(i,jj)
-   enddo
-   call override_cur6(ncp_span_curv, temp)
-   do i = 1, ncp_span_curv
-      cp_chord_curv(i,jj) = temp(i)
-   enddo
-endif
+! if (ncp_curvature >= 5) then
+   ! jj = 1 + ncp_chord-2 + 6-1
+   ! do i = 1, ncp_span_curv
+      ! temp(i) = cp_chord_curv(i,jj)
+   ! enddo
+   ! call override_cur6(ncp_span_curv, temp)
+   ! do i = 1, ncp_span_curv
+      ! cp_chord_curv(i,jj) = temp(i)
+   ! enddo
+! endif
 
-if (ncp_curvature >= 6) then
-   jj = 1 + ncp_chord-2 + 7-1
-   do i = 1, ncp_span_curv
-      temp(i) = cp_chord_curv(i,jj)
-   enddo
-   call override_cur7(ncp_span_curv, temp)
-   do i = 1, ncp_span_curv
-      cp_chord_curv(i,jj) = temp(i)
-   enddo
-endif
+! if (ncp_curvature >= 6) then
+   ! jj = 1 + ncp_chord-2 + 7-1
+   ! do i = 1, ncp_span_curv
+      ! temp(i) = cp_chord_curv(i,jj)
+   ! enddo
+   ! call override_cur7(ncp_span_curv, temp)
+   ! do i = 1, ncp_span_curv
+      ! cp_chord_curv(i,jj) = temp(i)
+   ! enddo
+! endif
 
-if (ncp_chord >= 1) then
-   jj = 1 + 2-1
-   do i = 1, ncp_span_curv
-      temp(i) = cp_chord_curv(i,jj)
-   enddo
-   call override_u2(ncp_span_curv, temp)
-   do i = 1, ncp_span_curv
-      cp_chord_curv(i,jj) = temp(i)
-   enddo
-endif
+! if (ncp_chord >= 1) then
+   ! jj = 1 + 2-1
+   ! do i = 1, ncp_span_curv
+      ! temp(i) = cp_chord_curv(i,jj)
+   ! enddo
+   ! call override_u2(ncp_span_curv, temp)
+   ! do i = 1, ncp_span_curv
+      ! cp_chord_curv(i,jj) = temp(i)
+   ! enddo
+! endif
 
-if (ncp_chord >= 2) then
-   jj = 1 + 3-1
-   do i = 1, ncp_span_curv
-      temp(i) = cp_chord_curv(i,jj)
-   enddo
-   call override_u3(ncp_span_curv, temp)
-   do i = 1, ncp_span_curv
-      cp_chord_curv(i,jj) = temp(i)
-   enddo
-endif
+! if (ncp_chord >= 2) then
+   ! jj = 1 + 3-1
+   ! do i = 1, ncp_span_curv
+      ! temp(i) = cp_chord_curv(i,jj)
+   ! enddo
+   ! call override_u3(ncp_span_curv, temp)
+   ! do i = 1, ncp_span_curv
+      ! cp_chord_curv(i,jj) = temp(i)
+   ! enddo
+! endif
 
-if (ncp_chord >= 3) then
-   jj = 1 + 4-1
-   do i = 1, ncp_span_curv
-      temp(i) = cp_chord_curv(i,jj)
-   enddo
-   call override_u4(ncp_span_curv, temp)
-   do i = 1, ncp_span_curv
-      cp_chord_curv(i,jj) = temp(i)
-   enddo
-endif
+! if (ncp_chord >= 3) then
+   ! jj = 1 + 4-1
+   ! do i = 1, ncp_span_curv
+      ! temp(i) = cp_chord_curv(i,jj)
+   ! enddo
+   ! call override_u4(ncp_span_curv, temp)
+   ! do i = 1, ncp_span_curv
+      ! cp_chord_curv(i,jj) = temp(i)
+   ! enddo
+! endif
 
-if (ncp_chord >= 4) then
-   jj = 1 +5-1
-   do i = 1, ncp_span_curv
-      temp(i) = cp_chord_curv(i,jj)
-   enddo
-   call override_u5(ncp_span_curv, temp)
-   do i = 1, ncp_span_curv
-      cp_chord_curv(i,jj) = temp(i)
-   enddo
-endif
+! if (ncp_chord >= 4) then
+   ! jj = 1 +5-1
+   ! do i = 1, ncp_span_curv
+      ! temp(i) = cp_chord_curv(i,jj)
+   ! enddo
+   ! call override_u5(ncp_span_curv, temp)
+   ! do i = 1, ncp_span_curv
+      ! cp_chord_curv(i,jj) = temp(i)
+   ! enddo
+! endif
 
-if (ncp_chord >= 5) then
-   jj = 1 +6-1
-   do i = 1, ncp_span_curv
-      temp(i) = cp_chord_curv(i,jj)
-   enddo
-   call override_u6(ncp_span_curv, temp)
-   do i = 1, ncp_span_curv
-      cp_chord_curv(i,jj) = temp(i)
-   enddo
-endif
+! if (ncp_chord >= 5) then
+   ! jj = 1 +6-1
+   ! do i = 1, ncp_span_curv
+      ! temp(i) = cp_chord_curv(i,jj)
+   ! enddo
+   ! call override_u6(ncp_span_curv, temp)
+   ! do i = 1, ncp_span_curv
+      ! cp_chord_curv(i,jj) = temp(i)
+   ! enddo
+! endif
 
 deallocate(temp)
+endif
 
-if(thick .ne. 0 .or. LE .ne. 0) then
+if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4) then
 	!--------------------------------------------------------------------------
 	!Reading thickness control points
 	read(10, *)
 	read(10, *)
-	read(10, *)ncp_span_thk, ncp_chord_thickness
+	if (thick_distr .eq. 4) then
+		read(10, *) ncp_span_thk, ncp_chord_thickness, te_flag, le_opt_flag, te_opt_flag
+		print*, 'TE flag:', te_flag
+		print*, 'LE optimization flag:', le_opt_flag
+		print*, 'TE optimization flag:', te_opt_flag	
+	else		
+		read(10, *)ncp_span_thk, ncp_chord_thickness
+	endif
+	if(control_inp_flag .eq. 1 .and. ncp_span_thk .ne. nsl) then
+		print*, 'Error in auxiliary file inputs: Number of spanwise thickness specifications must equal number of streamlines if spanwise spline is not used.'
+	endif
 	!number of chord and thickness control points will always be the same
 	ncp_thickness = ncp_chord_thickness
 	ncp_span_thk1 = ncp_span_thk+2
 
 	ncp_chord_thk = ncp_chord_thickness-2+ncp_thickness-2+1
+	if (thick_distr .eq. 3) ncp_chord_thk = ncp_chord_thickness-2+ncp_thickness+2+1
+	if (thick_distr .eq. 4) ncp_chord_thk = ncp_chord_thickness+ncp_thickness+1
 
 	!Initializing values for variables defined by Ahmed
 	if (allocated(ncp_thk)) deallocate(ncp_thk)
+	if (allocated(thk_cp )) deallocate(thk_cp )
 	Allocate(ncp_thk(nsl))
-	do i = 1, nsl
-		ncp_thk(i) = ncp_thickness+4
-	end do
+	Allocate(thk_cp(20, 2*nsl))
+	if (thick_distr .eq. 3) then
+		do i = 1, nsl
+			ncp_thk(i) = ncp_thickness+4
+		enddo
+	elseif (thick_distr .eq. 4) then
+		do i = 1, nsl
+			ncp_thk(i) = ncp_thickness
+		enddo	
+	else
+		do i = 1, nsl
+			ncp_thk(i) = ncp_thickness+4
+		enddo
+	endif
 
-		if (allocated(cp_chord_thk)) deallocate(cp_chord_thk)
-		allocate(cp_chord_thk(ncp_span_thk, ncp_chord_thk))
-
+	if (allocated(cp_chord_thk)) deallocate(cp_chord_thk)
+	allocate(cp_chord_thk(ncp_span_thk, ncp_chord_thk))
+	
+	if (allocated(le_angle_cp)) deallocate(le_angle_cp)
+	Allocate(le_angle_cp(ncp_span_thk))
+	if (allocated(te_angle_cp)) deallocate(te_angle_cp)
+	Allocate(te_angle_cp(ncp_span_thk))	
 
 	read(10, *)
-	print*, ncp_chord_thk, ncp_chord_thickness, ncp_thickness
 	do i = 1, ncp_span_thk
-		read(10, *)cp_chord_thk(i, 1:ncp_chord_thickness)
-	end do
+		if (allocated(xcp)) deallocate(xcp)
+		if (allocated(ycp)) deallocate(ycp)	
+		Allocate(xcp(ncp_thk(i)))
+		Allocate(ycp(ncp_thk(i)))	
+		if (thick_distr .eq. 4) then
+			read(10, *) cp_chord_thk(i, 1:ncp_chord_thk), le_angle_cp(i), te_angle_cp(i)
+			if(control_inp_flag .eq. 1) then			
+				xcp = cp_chord_thk(i, 2:ncp_chord_thickness+1)
+				ycp = cp_chord_thk(i, ncp_chord_thickness+2:ncp_chord_thk)
+			endif
+		elseif (thick_distr .eq. 3) then
+			read(10, *) cp_chord_thk(i, 1:ncp_chord_thk)
+			if(control_inp_flag .eq. 1) then
+				xcp(1) = 0.
+				xcp(2) = 0.
+				xcp(3:ncp_thk(i)-2) = cp_chord_thk(i, 2:ncp_chord_thickness-1)
+				xcp(ncp_thk(i)-1) = 1.
+				xcp(ncp_thk(i)) = 0.			
+				ycp(1) = 0.
+				ycp(2:ncp_thk(i)-1) = cp_chord_thk(i, ncp_chord_thickness:ncp_chord_thk)
+				ycp(ncp_thk(i)) = 0.
+			endif
+		else
+			read(10, *) cp_chord_thk(i, 1:ncp_chord_thickness)
+			if(control_inp_flag .eq. 1) then
+				xcp(1) = 2*xcp(3)-xcp(5)
+				ycp(1) = 2*ycp(3)-ycp(5)
+				xcp(2) = 2*xcp(3)-xcp(4)
+				ycp(2) = 2*ycp(3)-ycp(4)
+				xcp(ncp_thk(i)) = 2*xcp(ncp_thk(i)-2)-xcp(ncp_thk(i)-4) 	
+				ycp(ncp_thk(i)) = 2*ycp(ncp_thk(i)-2)-ycp(ncp_thk(i)-4)
+				xcp(ncp_thk(i)-1) = 2*xcp(ncp_thk(i)-2)-xcp(ncp_thk(i)-3) 	
+				ycp(ncp_thk(i)-1) = 2*ycp(ncp_thk(i)-2)-ycp(ncp_thk(i)-3)
+			endif
+		endif
+		do k = 1, ncp_thk(i)
+			thk_cp(k, 2*i-1) = xcp(k)
+			thk_cp(k, 2*i) = ycp(k)
+		enddo		
+	enddo
 	if (LE .ne. 0) then
 		!--------------------------------------------------------------------------
 		!Reading LE control points
@@ -780,7 +906,7 @@ if(thick .ne. 0 .or. LE .ne. 0) then
 
 		ncp_span_LE1 = ncp_span_LE+2
 
-				if (allocated(cp_LE)) deallocate(cp_LE)
+		if (allocated(cp_LE)) deallocate(cp_LE)
 		
 		allocate(cp_LE(ncp_span_LE, ncp_LE+1))
 
@@ -789,9 +915,19 @@ if(thick .ne. 0 .or. LE .ne. 0) then
 		do i = 1, ncp_span_LE
 			read(10, *)cp_LE(i, 1:ncp_LE+1)
 		end do
-		close(10)
 	endif
+	! if (thick_distr .eq. 4) then
+		! if (allocated(te_angle_cp)) deallocate(te_angle_cp)
+		! Allocate(te_angle_cp(nsl))
+		! read (10, *), temp
+		! read (10, *), te_flag
+		! read (10, *), temp
+		! do i = 1, nsl
+			! read(10, *), te_angle_cp(i)
+		! enddo
+	! endif
 endif
+close(10)
 !---------------------------------------------------------------------------
 
 print*, 'spanwise input file read successfully'

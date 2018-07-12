@@ -80,7 +80,7 @@ use globvar
 implicit none
 
 character*256 :: fname, row_type
-character*32  :: arg2, arg3
+character*32  :: arg2, arg3, arg4
  
 call getarg(1, fname)
 narg = iargc()
@@ -94,6 +94,11 @@ if(narg.eq.3)then
 else
 	arg3 = ''
 endif
+if(narg.eq.4)then
+	call getarg(4, arg4)
+else
+	arg4 = ''
+endif
 k = (index(fname, '.')+1)
 do i = k, len(trim(fname))
 	if (fname(i:i) == '.') then
@@ -103,7 +108,7 @@ do i = k, len(trim(fname))
 enddo
 row_type = fname(k:j)
 !call bgb3d_sub(fname, 'controlinputs.'//trim(row_type)//'.dat', arg2, arg3)
-call bgb3d_sub(fname, 'spancontrolinputs.'//trim(row_type)//'.dat', arg2, arg3)
+call bgb3d_sub(fname, 'spancontrolinputs.'//trim(row_type)//'.dat', arg2, arg3, arg4)
 end program bgb3d
 ! Variable override subroutines for ESP intergation
 ! Added by Simon Livingston
@@ -170,7 +175,7 @@ end subroutine override_span_curv_ctrl
 #endif
 !****************************************************************************************
 
-subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3) ! 3d blade geometry builder
+subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4) ! 3d blade geometry builder
 
 use globvar
 implicit none
@@ -181,14 +186,16 @@ real*8 inBetaInci, outBetaDevn
 ! !
 character*(*) :: fname_in, aux_in
 character*256 :: fname, temp, tempr1, fname1, fname2, fname3, fname4, row_type, path
-character*(*) :: arg2, arg3
+character*(*) :: arg2, arg3, arg4
 ! !
 logical axial_LE, radial_LE, axial_TE, radial_TE
 axial_LE = .False.
 radial_LE = .False.
 axial_TE = .False.
 radial_TE = .False.
+is_xyzstreamlines = .False.
 is2d = .False.
+isold = .False.
 wing_flag = 0
 !-------constants-----------------------------------------------------------
 pi = 4.*atan(1.0)
@@ -200,7 +207,6 @@ abs_zero = 0.0000000000000000
 !Displays the welcome message and some info about the code capabilities
 call displayMessage
 !****************************************************************************
-
 !--------counting the number of command line arguments passed: --------------
 fname = fname_in
 
@@ -217,6 +223,9 @@ elseif (trim(arg2).eq.'xyzstreamlines') then ! only when you want the xyz stream
 elseif ((trim(arg2).eq.'2d') .or. (trim(arg2).eq.'2D')) then
 	print*, '2nd Argument:', '2D'
 	is2d = .True.
+elseif ((trim(arg2).eq.'v0') .or. (trim(arg2).eq.'V0')) then
+	print*, '2nd Argument:', 'V0'
+	isold = .True.
 endif
 
 ! Types of 3rd argument
@@ -232,8 +241,30 @@ elseif (trim(arg3).eq.'xyzstreamlines') then ! only when you want the xyz stream
 elseif ((trim(arg3).eq.'2d') .or. (trim(arg3).eq.'2D')) then
 	print*, '3rd Argument:', '2D'
 	is2d = .True.
+elseif ((trim(arg3).eq.'v0') .or. (trim(arg3).eq.'V0')) then
+	print*, '3rd Argument:', 'V0'
+	isold = .True.	
 endif
 
+! Types of 4th argument
+if (trim(arg4).eq.'dev') then
+	print*, '4th Argument:', 'develop'
+	isdev = .true.
+elseif (trim(arg4).eq.'xygrid') then ! Only for the 2d grids in xy
+	print*, '4th Argument:', 'xygrid'
+	isxygrid = .true.
+elseif (trim(arg4).eq.'xyzstreamlines') then ! only when you want the xyz streamlines.sldcrv
+	print*, '4th Argument:', 'xyzstreamlines'
+	is_xyzstreamlines = .true.
+elseif ((trim(arg4).eq.'2d') .or. (trim(arg4).eq.'2D')) then
+	print*, '4th Argument:', '2D'
+	is2d = .True.
+elseif ((trim(arg4).eq.'v0') .or. (trim(arg4).eq.'V0')) then
+	print*, '4th Argument:', 'V0'
+	isold = .True.	
+endif
+
+control_inp_flag = 0
 j = -1
 ! Finding path
 do i = len(trim(fname)), 1, -1
@@ -274,14 +305,26 @@ write(*,*) 'Reading inputs from file : ', fname
 
 if((curv.ne.0.or.thick.ne.0.or.LE.ne.0&
 .or.thick_distr.ne.0).and.trim(spanwise_spline).ne.'spanwise_spline')then
+	control_inp_flag = 1
+elseif((curv.ne.0.or.thick.ne.0.or.LE.ne.0&
+.or.thick_distr.ne.0).and.trim(spanwise_spline).eq.'spanwise_spline')then
+	control_inp_flag = 2
+endif
+if (control_inp_flag .eq. 1 .and. isold) then
 	!---reading secondary input file (controlinputdat)-----------------------
 	write(*, *)
 	print*, 'Reading the controlinput file ....'
 	write(*, *)
 	! call readcontrolinput(aux_in)
 	call readcontrolinput(row_type, path)
-elseif((curv.ne.0.or.thick.ne.0.or.LE.ne.0&
-.or.thick_distr.ne.0).and.trim(spanwise_spline).eq.'spanwise_spline')then
+elseif (control_inp_flag .eq. 1 .and. .not. isold) then
+	!---reading secondary input file (spancontrolinputdat)-----------------------
+	write(*, *)
+	print*, 'Reading the spanwise_input file ....'
+	write(*, *)
+	! call read_spanwise_input(aux_in)
+	call read_spanwise_input(row_type, path)
+elseif (control_inp_flag .eq. 2) then
 	!---reading secondary input file (spancontrolinputdat)-----------------------
 	write(*, *)
 	print*, 'Reading the spanwise_input file ....'
@@ -289,6 +332,7 @@ elseif((curv.ne.0.or.thick.ne.0.or.LE.ne.0&
 	! call read_spanwise_input(aux_in)
 	call read_spanwise_input(row_type, path)
 endif
+
 
 !****************************************************************************
 
@@ -386,6 +430,26 @@ write(*, *)
 ! endif
 
 !
+
+do ia = 1, nsl
+	rad_in_flag(ia) = 1
+	rad_out_flag(ia) = 1
+	do i = 2, nsp(ia)
+		if (xm(i-1, ia) .ne. xm(i, ia)) then
+			rad_in_flag(ia) = 0
+			rad_out_flag(ia) = 0
+			exit
+		endif
+	enddo
+enddo
+do ia = 1, nsl
+	if (rm(1, ia) .gt. xm(nsp(ia), ia)) then
+		rad_out_flag(ia) = 0
+	elseif (rm(1, ia) .lt. xm(nsp(ia), ia)) then
+		rad_in_flag(ia) = 0
+	endif
+enddo
+	
 do ia = 1, nsl
 	mp(1, ia) = 0.
 	k = 0
@@ -399,7 +463,15 @@ do ia = 1, nsl
 			print*, 'xm(1, ia)', xm(1, ia), 'rm(1, ia)', rm(1, ia)
 		else
 			!print*, 'i-k, nsp(ia)', i-k, nsp(ia)
-			mp(i-k, ia) = mp(i-k-1, ia) + 2.*sqrt((rm(i, ia)-rm(i-1, ia))**2 + (xm(i, ia)-xm(i-1, ia))**2)/(rm(i, ia)+rm(i-1, ia))
+			! if (rad_in_flag(ia) .eq. 1) then
+				! print*, 'rad_in_flag is 1	', rad_in_flag(ia), rad_out_flag(ia)
+				! mp(i-k, ia) = log(1./rm(i, ia)) - log(1./rm(1, ia))
+			! elseif (rad_out_flag(ia) .eq. 1) then
+				! print*, 'rad_out_flag is 1		', rad_in_flag(ia), rad_out_flag(ia)
+				! mp(i-k, ia) = log(rm(i, ia)) - log(rm(1, ia))
+			! else
+				mp(i-k, ia) = mp(i-k-1, ia) + 2.*sqrt((rm(i, ia)-rm(i-1, ia))**2 + (xm(i, ia)-xm(i-1, ia))**2)/(rm(i, ia)+rm(i-1, ia))
+			! endif
 			xm(i-k, ia) = xm(i, ia)   ! Reindex the mp, xm, rm for hub
 			rm(i-k, ia) = rm(i, ia)	! Reindex the mp, xm, rm for hub
 		endif
@@ -410,7 +482,7 @@ do ia = 1, nsl
 		print*, 'nsp for streamline', ia, 'changed from', nsp_hub, 'to', nsp(ia)
 	endif
 	if (is_xyzstreamlines) then
-		if ((ia > 1).and.(ia < nsl)) then
+		if ((ia .ge. 1).and.(ia .le. nsl)) then
 			call streamlines(xm(:, ia), rm(:, ia), nsp(ia), scf, casename, ia) ! Ahmed nemnem 4 23 2014 extracting streamlines
 		endif
 	endif
@@ -480,13 +552,8 @@ endif
 ! to create mprime spline coeffs.
 na = nsl
 do ia = 1, na
-	if(fext.eq.'e3c-des')then
-		call spl_discjoint(xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
-		call spl_discjoint(rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))
-	else
-		call spline(xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia), 999.0, -999.0)
-		call spline(rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia), 999.0, -999.0)
-	endif
+	call spl_discjoint(xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia), 999.0, -999.0)
+	call spl_discjoint(rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia), 999.0, -999.0)
 enddo
 ! print*, "xm(i, ia), rm(i, ia), mp(i, ia), xms(i, ia), rms(i, ia)"
 ! do ia = 1, na
@@ -842,16 +909,12 @@ enddo
 !*****Adding new inputs from spancontrolinputs(Syed Moez 03/02/2014) ********************
 !**************************************************************************************
 
-if((curv.ne.0.or.thick.ne.0.or.LE.ne.0&
-.or.thick_distr.ne.0).and.trim(spanwise_spline).eq.'spanwise_spline')then
+if (control_inp_flag .eq. 2) then
 !This program is being called to create cubic bspline
 !between the inputs from spancontrolinputs and
 !incorporate those values into 3dbgb.
   call span_variation(nsl)
 end if
-
-
-
 
 !**************************************************************************************
 !*****input parameters for blade generation (2D airfoils) *****************************
@@ -1068,7 +1131,8 @@ do js = 1, nspn
 		        LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments, &
 		        sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
                 n_normal_distance,casename,develop,isdev,mble,mbte,mles,mtes,i_slope,jcellblade_all, &
-                etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset)				
+                etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset, te_flag, &
+				le_opt_flag, te_opt_flag, le_angle_all, te_angle_all)	
 
    mprime_ble(js) = mble
    mprime_bte(js) = mbte

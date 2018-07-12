@@ -151,7 +151,8 @@ real :: scalefactor, P, knew, det, k1, k2, &
 	d1v_end(ncp-2), v_end(ncp-2), xcp_seg(4), ycp_seg(4), &
 	t, angle0, camber0, intg_d2v_end(ncp-2), &
 	intg_d1v_end(ncp-2)
-
+print*, 'xcp', xcp
+print*, 'ycp', ycp
 !!
 ! write (*, '(A)'), 'Executing subroutine camline in bsplinecam.f90'
 if (wing_flag .eq. 0) then
@@ -159,10 +160,20 @@ if (wing_flag .eq. 0) then
 elseif (wing_flag .eq. 1) then
 	tot_cam = aext
 endif
-intg_d2v_end(1) = 0.
-intg_d1v_end(1) = 0.
-u_end(1) = 0.
+
+intg_d2v_end = 0.
+intg_d1v_end = 0.
+u_end = 0.
 t = 1.
+init_angles = 0.
+init_cams = 0.
+splinedata = 0.
+if (tot_cam .eq. 0.) then
+	sang = ainl
+	chrd = chrdx/abs(cos(sang))
+	return
+endif
+
 do j = 1, ncp-3
 	xcp_seg = xcp(j:j+3)
 	ycp_seg = ycp(j:j+3)

@@ -7,7 +7,8 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, &
 	                LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments,&
 	                sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
                     n_normal_distance,casename,develop,isdev,mble,mbte,msle,mste,i_slope,jcellblade_all, &
-                    etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset)
+                    etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset, te_flag, &
+					le_opt_flag, te_opt_flag, le_angle_all, te_angle_all)
 
 !-----------------------------------------
 ! Input:
@@ -77,7 +78,7 @@ implicit none
 
 integer np, np_side, i, j, l, k, js, naca, chord_switch, istack, thick_distr, nxx
 integer nx, nax, nrow, nspn, nspan, npoints, nsl, nbls, ncp, le_pos, wing_flag
-integer const_stk_u, const_stk_v, stack, stack_switch
+integer const_stk_u, const_stk_v, stack, stack_switch, te_flag, le_opt_flag, te_opt_flag
 integer curv_camber, thick, LE, LEdegree, n_normal_distance
 integer TE_del, ii, ngrid, amount_data
 integer ncp_curv(nsl), ncp_thk(nsl), i_le, i_te, oo, nb, no_LE_segments
@@ -97,7 +98,7 @@ real, allocatable, dimension(:) :: xtop, ytop, xbot, ybot, u, xb, yb
 real, allocatable, dimension(:) :: splthick, thickness, angle, camber, slope
 real umin, umax, scaling, deltau, theta_offset
 real vtop_stack, vbot_stack, xb_stk, yb_stk
-real, allocatable, dimension(:, :) :: in_beta, out_beta
+real, allocatable, dimension(:, :) :: in_beta, out_beta, thickness_data
 real*8, allocatable, dimension(:, :) :: splinedata
 real, allocatable, dimension(:, :) :: chord, mrel1
 real, allocatable, dimension(:) :: xcp, ycp
@@ -119,7 +120,7 @@ real arc_bot, arc_top, curv_le_bot, curv_le_top, camber_ang(interval+1)
 real curv_cp(20, 2*nsl), thk_cp(20, 2*nsl)
 real lethk_all(nsl), tethk_all(nsl), s_all(nsl), ee_all(nsl), umxthk_all(nsl), thk_tm_c_spl(nsl)
 real C_le_x_top_all(nsl), C_le_x_bot_all(nsl), C_le_y_top_all(nsl), C_le_y_bot_all(nsl)
-real LE_vertex_ang_all(nsl), LE_vertex_dis_all(nsl)
+real LE_vertex_ang_all(nsl), LE_vertex_dis_all(nsl), le_angle_all(nsl), te_angle_all(nsl)
 real Zwiefel(nsl), sting_l_all(nsl), sting_h_all(nsl, 2)
 real jcellblade_all(nspn), etawidth_all(nspn), jcellblade, etawidth
 real, allocatable, dimension(:) :: xtop_refine, ytop_refine, xbot_refine, ybot_refine
@@ -212,6 +213,7 @@ if (allocated(yb        )) deallocate(yb        )
 if (allocated(ueq       )) deallocate(ueq       )
 if (allocated(xmean     )) deallocate(xmean     )
 if (allocated(ymean     )) deallocate(ymean     )
+if (allocated(thickness_data )) deallocate(thickness_data )
 ! Allocating all the blade data arrays:
 Allocate(splinedata(spline_data, np_side)) 
 Allocate(xtop(np))
@@ -221,6 +223,7 @@ Allocate(ybot(np))
 Allocate(u(np))
 Allocate(splthick(np))
 Allocate(thickness(np))
+Allocate(thickness_data(np, 12))
 Allocate(angle(np))
 Allocate(camber(np))
 Allocate(slope(np))
@@ -584,7 +587,38 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
 	! -----------------------------------------------------------------------------
 	!---- generate airfoil thickness: =============================== 
 	! -----------------------------------------------------------------------------
-	if (thick_distr.eq.3) then
+	if (thick_distr.eq.4) then
+		! Added by Karthik Balasubramanian
+		write (*, '(/, A)') 'Implementing exact thickness control'
+		ncp = ncp_thk(js)
+		if (allocated(xcp_thk)) deallocate(xcp_thk)
+		if (allocated(ycp_thk)) deallocate(ycp_thk)
+		Allocate(xcp_thk(ncp)) 
+		Allocate(ycp_thk(ncp)) 
+		do i = 1, ncp
+			xcp_thk(i) = thk_cp(i, 2*js-1)
+			ycp_thk(i) = thk_cp(i, 2*js)
+		enddo
+		print*, 'Exact thickness points:'
+		write(*, '(2F10.5)'), (xcp_thk(i), ycp_thk(i), i = 1, ncp)
+		print*, 'LE Angle', le_angle_all(js)		
+		print*, 'TE Angle', te_angle_all(js)
+		! thk_ctrl_gen_driver (uthk, thk, n, u_spl, np, te_angle_all, te_flag, out_coord)
+		print*, 'TE flag', te_flag
+		print*, 'LE optimization flag', le_opt_flag		
+		print*, 'TE optimization flag', te_opt_flag
+		call thk_ctrl_gen_driver(casename, isdev, sec, xcp_thk, ycp_thk, ncp, u, np, le_angle_all(js), te_angle_all(js), te_flag, le_opt_flag, te_opt_flag, thickness_data)
+		thickness = thickness_data(:, 2)
+		! if(isdev) then
+		open (unit = 81, file = 'thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
+		write (81, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
+		close (81)
+		open (unit = 81, file = 'thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
+		! write (81, '(2F20.16)') (u(i), thickness(i), i = 1, np)
+		write (81, '(6F40.16)') (thickness_data(i, 1), thickness_data(i, 2), thickness_data(i, 3), thickness_data(i, 4), thickness_data(i, 5), thickness_data(i, 6), i = 1, np)
+		close (81)
+		! endif
+	elseif (thick_distr.eq.3) then
 		! Added by Karthik Balasubramanian
 		write (*, '(/, A)') 'Implementing direct thickness control'
 		ncp = ncp_thk(js)
@@ -599,14 +633,14 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
 		write (*, '(A)') 'User input thickness control points including internally generated dummy points : '
 		write (*, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
 		call splinethickcontrol(umxthk, thkc, ncp, xcp_thk, ycp_thk, np, u, thickness, thick_distr_3_flag)
-		if(isdev) then
+		! if(isdev) then
 			open (unit = 81, file = 'thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
 			write (81, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
 			close (81)
 			open (unit = 81, file = 'thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
 			write (81, '(2F20.16)') (u(i), thickness(i), i = 1, np)
 			close (81)
-		endif
+		! endif
 	elseif(thick_distr.ne.0) then
 		! -----------------------------------------------------------------------------
 		!Spline thickness distr. with LE control
@@ -935,6 +969,6 @@ endif
 ! Format Statements
 !******************************************************************************************
 301 format(i3, 2x, 6(f19.16, 2x))
-
+print*, '******************************************'
 return
 end subroutine bladegen

@@ -675,11 +675,11 @@ if (thick_distr_3_flag(:1) .eq. '1') then
 	write (*, '(A, F5.3, ":", F5.3, I2, ":", I2)') 'End points of segment containing maximum thickness : ', bspline4(xcp_thk(i:i+4), 0.), x_spl_end
 	write (*, '(A, I2, ":", I2)') 'Control points containing maximum thickness : ', i, i+4
 	! Coefficients of Quartic t equation
-	ce(0) = xcp_thk(i)+(11*xcp_thk(i+1))+(11*xcp_thk(i+2))+xcp_thk(i+3)-(24*umxthk)
-	ce(1) = (-4*xcp_thk(i))-(12*xcp_thk(i+1))+(12*xcp_thk(i+2))+(4*xcp_thk(i+3))
-	ce(2) = (6*xcp_thk(i))-(6*xcp_thk(i+1))-(6*xcp_thk(i+2))+(6*xcp_thk(i+3))
-	ce(3) = (-4*xcp_thk(i))+(12*xcp_thk(i+1))-(12*xcp_thk(i+2))+(4*xcp_thk(i+3))
-	ce(4) = xcp_thk(i)-(4*xcp_thk(i+1))+(6*xcp_thk(i+2))-(4*xcp_thk(i+3))+xcp_thk(i+4)
+	ce(0) = xcp_thk(i)+(11.*xcp_thk(i+1))+(11.*xcp_thk(i+2))+xcp_thk(i+3)-(24.*umxthk)
+	ce(1) = (-4.*xcp_thk(i))-(12.*xcp_thk(i+1))+(12.*xcp_thk(i+2))+(4.*xcp_thk(i+3))
+	ce(2) = (6.*xcp_thk(i))-(6.*xcp_thk(i+1))-(6.*xcp_thk(i+2))+(6.*xcp_thk(i+3))
+	ce(3) = (-4.*xcp_thk(i))+(12.*xcp_thk(i+1))-(12.*xcp_thk(i+2))+(4.*xcp_thk(i+3))
+	ce(4) = xcp_thk(i)-(4.*xcp_thk(i+1))+(6.*xcp_thk(i+2))-(4.*xcp_thk(i+3))+xcp_thk(i+4)
 
 	if (abs(ce(4)) > 1e-13) then
 		write(*, '(A)') 'Equation in t is : Quartic'
@@ -712,6 +712,6 @@ endif
 
 write (*, '(//)')
 call bspline_y_of_x( thk, u, np, xcp_thk, ycp_thk, ncp, 4 )
-thk = thk*thkc/2/maxval(thk)
+thk = thk*thkc/2./maxval(thk)
 
 end subroutine splinethickcontrol

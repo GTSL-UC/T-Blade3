@@ -19,7 +19,7 @@ integer f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11
 integer i,js,k,p,nsec,switch,ia,na,jk,stack,current, narg
 integer nrow,nspn,nx,nax,n,nsl,nspan,nsp_hub,nsp_tip
 integer nwork,lenc,nd,np,ndep,radial,chord_switch,stack_switch
-integer beta_switch,curv,thick,LE,thick_distr, wing_flag
+integer beta_switch,curv,thick,LE,thick_distr, wing_flag, control_inp_flag
 integer cpbsv,bsv1,bsv2,bf1(100),bf2(100)
 integer amount_data,n_normal_distance,chrdsweep,chrdlean
 !-----------------------------------------------------------------------------------------------------------------------------
@@ -29,10 +29,10 @@ integer ncp_thickness,ncp_LE,ncp_chord,ncp_chord_thickness,ncp_curvature,ncp_cho
 !
 parameter (nspan=200,nrow=1,nx=500,nax=50,jk=12,amount_data= 15)
 
-integer nsp(nspan),curve,npoints,nbls,i_slope,i_slope_nonoffset_hub,ii,nspline,ncp1,k_tip
+integer nsp(nspan),curve,npoints,nbls,i_slope,i_slope_nonoffset_hub,ii,nspline,ncp1,k_tip, rad_in_flag(nspan), rad_out_flag(nspan)
 integer cpdeltam,cpdeltheta,cpinbeta,cpoutbeta,cpchord,cptm_c
 integer, allocatable, dimension(:) :: ncp_curv,ncp_thk,throat_index,BGgrid_all
-integer n_inter_intervals,nsp_interpolated_hub
+integer n_inter_intervals,nsp_interpolated_hub, te_flag, le_opt_flag, te_opt_flag
 !
 real*8, allocatable, dimension(:,:) :: bladedata,splinedata
 real*8 sinl,sext,thkc ,chrdx,mr1,stak_u,stak_v, x1hub,x1tip,r1hub,r1tip
@@ -53,7 +53,7 @@ real*8, allocatable, dimension(:) :: C_le_x_top_all,C_le_x_bot_all,C_le_y_top_al
 real*8, allocatable, dimension(:) :: LE_vertex_ang_all,LE_vertex_dis_all
 real*8, allocatable, dimension(:,:) :: intersec_coord
 real*8, allocatable, dimension(:) :: throat_3D,mouth_3D,exit_3D
-real*8, allocatable, dimension(:) :: hub_slope
+real*8, allocatable, dimension(:) :: hub_slope, le_angle_cp, le_angle_all, te_angle_cp, te_angle_all
 
 real*8  le_throat,te_throat
 real*8 pi,dtor,xcg(nspan),ycg(nspan),chrd(nspan), xcen, ycen, xb_stk, yb_stk, xb_stack(nspan), yb_stack(nspan)
@@ -110,7 +110,7 @@ character*15::istr1,istr2,H(13)
 !real*8 inBetaInci, outBetaDevn
 
 logical isdev, tm_c_spline, isxygrid, is_xyzstreamlines, spanwise_angle_spline,spanwise_inci_dev_spline, &
-is2d
+is2d, isold
 
 common / bladesectionpoints /xxa(nx,nax),yya(nx,nax)
 !
