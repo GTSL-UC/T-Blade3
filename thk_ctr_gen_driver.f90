@@ -252,6 +252,8 @@ call thk_ctrl_gen_1der_fn(uthk, thk, u, n, nknt_spl, iknt_spl, niknt_spl, dCdE, 
 ddD1(:, 1) = dAdD1; ddD1(:, 2) = dBdD1; ddD1(:, 3) = dCdD1; ddD1(:, 4) = dDdD1; ddD1(:, 5) = dEdD1
 call thk_ctrl_gen_1der_fn(uthk, thk, u, n, nknt_spl, iknt_spl, niknt_spl, dCdE, dDdE, dEdE, 0., 1, 2, 0, d1_flag, ddB1, ddC1, ddD1, dAdC1, dBdC1, dCdC1, dDdC1, dEdC1)
 ddC1(:, 1) = dAdC1; ddC1(:, 2) = dBdC1; ddC1(:, 3) = dCdC1; ddC1(:, 4) = dDdC1; ddC1(:, 5) = dEdC1
+
+! Included input parameters ddB1_le, ddC1_le, ddD1_le in subroutine calls 257-259 for gfortran
 call thk_ctrl_gen_1der_fn(uthk_le, thk_le, u_le, n_le, nknt_le, iknt_le, niknt_le, dCdE_le, dDdE_le, dEdE_le, -1., d3v_ang_flag_le, 1, 1, 0, ddB1_le, ddC1_le, ddD1_le, dAdB1_le, dBdB1_le, dCdB1_le, dDdB1_le, dEdB1_le)
 call thk_ctrl_gen_1der_fn(uthk_le, thk_le, u_le, n_le, nknt_le, iknt_le, niknt_le, dCdE_le, dDdE_le, dEdE_le,  1., d3v_ang_flag_le, 2, 1, 0, ddB1_le, ddC1_le, ddD1_le, dAdC1_le, dBdC1_le, dCdC1_le, dDdC1_le, dEdC1_le)
 call thk_ctrl_gen_1der_fn(uthk_le, thk_le, u_le, n_le, nknt_le, iknt_le, niknt_le, dCdE_le, dDdE_le, dEdE_le, -1., d3v_ang_flag_le, 3, 1, 0, ddB1_le, ddC1_le, ddD1_le, dAdD1_le, dBdD1_le, dCdD1_le, dDdD1_le, dEdD1_le)
