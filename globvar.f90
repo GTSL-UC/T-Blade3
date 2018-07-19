@@ -24,7 +24,8 @@ integer cpbsv,bsv1,bsv2,bf1(100),bf2(100)
 integer amount_data,n_normal_distance,chrdsweep,chrdlean
 !-----------------------------------------------------------------------------------------------------------------------------
 integer m,ncp_span_curv,ncp_span_curv1,ncp_span_thk,ncp_span_thk1,ncp_span_LE,ncp_span_LE1
-integer ncp_thickness,ncp_LE,ncp_chord,ncp_chord_thickness,ncp_curvature,ncp_chord_curv,ncp_chord_thk,num_points,num_sec,delta1,bladerow,LE_deg,LE_seg
+integer ncp_thickness,ncp_LE,ncp_chord,ncp_chord_thickness,ncp_curvature,ncp_chord_curv,ncp_chord_thk, &
+        num_points,num_sec,delta1,bladerow,LE_deg,LE_seg
 !--------------------------------------------------------------------------------------------------------------------------
 !
 parameter (nspan=200,nrow=1,nx=500,nax=50,jk=12,amount_data= 15)

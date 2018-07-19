@@ -104,10 +104,10 @@
 	!print*,'xtop',xtop
 	!print*,'ytop',ytop
 
-		write(90,*),'xtop rotated',xtop
-		write(90,*),'ytop rotated',ytop
-		write(90,*),'xbot rotated',xbot
-		write(90,*),'ybot rotated',ybot
+		write(90,*) 'xtop rotated',xtop
+		write(90,*) 'ytop rotated',ytop
+		write(90,*) 'xbot rotated',xbot
+		write(90,*) 'ybot rotated',ybot
 	close(90)
 	
 	cam_le = camber_le(1)
@@ -257,11 +257,21 @@
 ! Upper spline:
 !_____________
                                    !xcp(1),                 xcp(2),                 xcp(3),       			xcp(4),    xcp(5),                ycp(1), ycp(2), ycp(3), ycp(4), ycp(5)    , RHS
-     a_top(1,1:5) = (/                   1/24.,                 11/24.,                 11/24.,        			 1/24.,     0. /) ; a_top(1,7:11) = (/    0.,      0.,     0.,     0.,	0. /) 	; a_top(1,13) = xtop_le
-     a_top(2,1:5) = (/                      0.,                     0.,                     0.,       	  			0., 	0. /) ; a_top(2,7:11) = (/  1/24., 11/24., 11/24.,  1/24.,  0. /) 	; a_top(2,13) = ytop_le
-     a_top(3,1:5) = (/ 	  slope_le_top*(-1/6.),	  slope_le_top*(-1/2.), 	slope_le_top*(1/2.), 	slope_le_top*(1/6.),   	0. /) ; a_top(3,7:11) = (/  1/6.,  1/2.,   -1/2.,   -1/6.,  0. /) 	; a_top(3,13) = 0.
-     a_top(4,1:5) = (/      curv_le_top*(1/2.),    curv_le_top*(-1/2.),    curv_le_top*(-1/2.), 	curv_le_top*(1/2.),     0. /) ; a_top(4,7:11) = (/  -1/2.,  1/2.,   1/2.,   -1/2.,  0. /) 	; a_top(4,13) = 0.
-	 a_top(5,1:5) = (/    slope_curv_top*(-1.),    slope_curv_top*(3.),   slope_curv_top*(-3.),    slope_curv_top*(1.),     0. /) ; a_top(5,7:11) = (/   1.,  	  -3.,    3.,     -1.,  0. /) 	; a_top(5,13) = 0.
+     a_top(1,1:5)  = (/                   1/24.,                 11/24.,                 11/24.,        			 1/24.,     0. /)
+     a_top(1,7:11) = (/    0.,      0.,     0.,     0.,	0. /)
+     a_top(1,13)   = xtop_le
+     a_top(2,1:5)  = (/                      0.,                     0.,                     0.,       	  			0., 	0. /)
+     a_top(2,7:11) = (/  1/24., 11/24., 11/24.,  1/24.,  0. /)
+     a_top(2,13)   = ytop_le
+     a_top(3,1:5)  = (/ 	  slope_le_top*(-1/6.),	  slope_le_top*(-1/2.), 	slope_le_top*(1/2.), 	slope_le_top*(1/6.),   	0. /)
+     a_top(3,7:11) = (/  1/6.,  1/2.,   -1/2.,   -1/6.,  0. /)
+     a_top(3,13)   = 0.
+     a_top(4,1:5)  = (/      curv_le_top*(1/2.),    curv_le_top*(-1/2.),    curv_le_top*(-1/2.), 	curv_le_top*(1/2.),     0. /)
+     a_top(4,7:11) = (/  -1/2.,  1/2.,   1/2.,   -1/2.,  0. /)
+     a_top(4,13)   = 0.
+	 a_top(5,1:5)  = (/    slope_curv_top*(-1.),    slope_curv_top*(3.),   slope_curv_top*(-3.),    slope_curv_top*(1.),     0. /)
+     a_top(5,7:11) = (/   1.,  	  -3.,    3.,     -1.,  0. /)
+     a_top(5,13)   = 0.
 	 
 
 ! Zero Camber equation for 3rd cp:
@@ -273,30 +283,44 @@
 	 
 !This sets the LE point at uLE, vLE_top at the end of segment 2 
                    !xcp(3), xcp(4), xcp(5), xcp(6)	xcp(7) 
-     a_top(9,3:6)  = (/  1/24.,  11/24.,   11/24.,   1/24. /)   ; a_top(9,13)  = uLE_top		! x value
+     a_top(9,3:6)   = (/  1/24.,  11/24.,   11/24.,   1/24. /)   ; a_top(9,13)  = uLE_top		! x value
                    !ycp(3), ycp(4), ycp(5), ycp(6), ycp(7)
-     a_top(10,9:12)= (/  1/24.,  11/24.,   11/24.,	 1/24. /)   ; a_top(10,13) = vLE_top	! y value
+     a_top(10,9:12) = (/  1/24.,  11/24.,   11/24.,	 1/24. /)   ; a_top(10,13) = vLE_top	! y value
      !slope at the top spline end: = tan(-camber angle)
-	 a_top(11,2:6) = (/  0.,	tan(theta_rad)*(-1/6.),	tan(theta_rad)*(-1/2.),  	tan(theta_rad)*(1/2.), 	tan(theta_rad)*(1/6.) /) 	; a_top(11,8:12) = (/    0.,   1/6.,  1/2.,   -1/2.,   -1/6. /) ; a_top(11,13) = 0.
+	 a_top(11,2:6)  = (/  0.,	tan(theta_rad)*(-1/6.),	tan(theta_rad)*(-1/2.),  	tan(theta_rad)*(1/2.), 	tan(theta_rad)*(1/6.) /)
+     a_top(11,8:12) = (/    0.,   1/6.,  1/2.,   -1/2.,   -1/6. /)
+     a_top(11,13)   = 0.
      ! curvature at top spline end: = 0
-	 a_top(12,2:6) = (/  0.,    0.*(1/2.),    0.*(-1/2.),    0.*(-1/2.), 	  0.*(1/2.) /) 	; a_top(12,8:12) = (/    0.,    -1/2.,  1/2.,   1/2.,  -1/2. /) ; a_top(12,13) = 0.
+	 a_top(12,2:6)  = (/  0.,    0.*(1/2.),    0.*(-1/2.),    0.*(-1/2.), 	  0.*(1/2.) /)
+     a_top(12,8:12) = (/    0.,    -1/2.,  1/2.,   1/2.,  -1/2. /)
+     a_top(12,13)   = 0.
 	 
 ! -----------------------------------------------------------
 ! Lower spline:
 !_____________
                                    !xcp(1),                 xcp(2),                 xcp(3),       			xcp(4),    xcp(5),                ycp(1), ycp(2), ycp(3), ycp(4), ycp(5)    , RHS
-     a_bot(1,1:5) = (/                   1/24.,                 11/24.,                 11/24.,        			 1/24.,     0. /) ; a_bot(1,7:11) = (/    0.,      0.,     0.,     0.,	0. /) 	; a_bot(1,13) = xbot_le
-     a_bot(2,1:5) = (/                      0.,                     0.,                     0.,       	  			0., 	0. /) ; a_bot(2,7:11) = (/  1/24., 11/24., 11/24.,  1/24.,  0. /) 	; a_bot(2,13) = ybot_le
-     a_bot(3,1:5) = (/ 	  slope_le_bot*(-1/6.),	  slope_le_bot*(-1/2.), 	slope_le_bot*(1/2.), 	slope_le_bot*(1/6.),   	0. /) ; a_bot(3,7:11) = (/  1/6.,  1/2.,   -1/2.,   -1/6.,  0. /) 	; a_bot(3,13) = 0.
-     a_bot(4,1:5) = (/      curv_le_bot*(1/2.),    curv_le_bot*(-1/2.),    curv_le_bot*(-1/2.), 	curv_le_bot*(1/2.),     0. /) ; a_bot(4,7:11) = (/  -1/2.,  1/2.,   1/2.,   -1/2.,  0. /) 	; a_bot(4,13) = 0.
-	 a_bot(5,1:5) = (/    slope_curv_bot*(-1.),    slope_curv_bot*(3.),   slope_curv_bot*(-3.),    slope_curv_bot*(1.),     0. /) ; a_bot(5,7:11) = (/   1.,  	  -3.,    3.,     -1.,  0. /) 	; a_bot(5,13) = 0.
+     a_bot(1,1:5)  = (/                   1/24.,                 11/24.,                 11/24.,        			 1/24.,     0. /)
+     a_bot(1,7:11) = (/    0.,      0.,     0.,     0.,	0. /)
+     a_bot(1,13)   = xbot_le
+     a_bot(2,1:5)  = (/                      0.,                     0.,                     0.,       	  			0., 	0. /)
+     a_bot(2,7:11) = (/  1/24., 11/24., 11/24.,  1/24.,  0. /)
+     a_bot(2,13)   = ybot_le
+     a_bot(3,1:5)  = (/ 	  slope_le_bot*(-1/6.),	  slope_le_bot*(-1/2.), 	slope_le_bot*(1/2.), 	slope_le_bot*(1/6.),   	0. /)
+     a_bot(3,7:11) = (/  1/6.,  1/2.,   -1/2.,   -1/6.,  0. /)
+     a_bot(3,13)   = 0.
+     a_bot(4,1:5)  = (/      curv_le_bot*(1/2.),    curv_le_bot*(-1/2.),    curv_le_bot*(-1/2.), 	curv_le_bot*(1/2.),     0. /)
+     a_bot(4,7:11) = (/  -1/2.,  1/2.,   1/2.,   -1/2.,  0. /)
+     a_bot(4,13)   = 0.
+	 a_bot(5,1:5)  = (/    slope_curv_bot*(-1.),    slope_curv_bot*(3.),   slope_curv_bot*(-3.),    slope_curv_bot*(1.),     0. /)
+     a_bot(5,7:11) = (/   1.,  	  -3.,    3.,     -1.,  0. /)
+     a_bot(5,13)   = 0.
 	 
 ! Zero Camber equation for 3rd cp:
-	 a_bot(6,7:11) 	= (/     0.,    (-C_le_y_bot),    	   	1.,      (-1+C_le_y_bot), 		0./)
+	 a_bot(6,7:11) = (/     0.,    (-C_le_y_bot),    	   	1.,      (-1+C_le_y_bot), 		0./)
 
 ! Equations controlling the LE shape : 4th control point...	 
-	 a_bot(7,4)  	= 1.		; a_bot(7 ,13)  =  (1-xcp6_hat)	*(uin_le - uLE_bot)
-	 a_bot(8,10)  	= 1.		; a_bot(8 ,13) 	=  (ycp6_hat)	*(vLE_bot)
+	 a_bot(7,4)    = 1.		; a_bot(7 ,13)  =  (1-xcp6_hat)	*(uin_le - uLE_bot)
+	 a_bot(8,10)   = 1.		; a_bot(8 ,13) 	=  (ycp6_hat)	*(vLE_bot)
 	 	 
 !This sets the LE point at uLE, vLE in the middle of segment 3 
                    !xcp(3), xcp(4), xcp(5), xcp(6)	xcp(7) 
@@ -304,9 +328,13 @@
                    !ycp(3), ycp(4), ycp(5), ycp(6), ycp(7)
      a_bot(10,9:12)= (/  1/24.,  11/24.,   11/24.,   1/24. /)   ; a_bot(10,13)  = vLE_bot
 	 !slope at the top spline end: = tan(-camber angle)
-	 a_bot(11,2:6) = (/  0.,	tan(theta_rad)*(-1/6.),	tan(theta_rad)*(-1/2.),  	tan(theta_rad)*(1/2.), 	tan(theta_rad)*(1/6.) /) 	; a_bot(11,8:12) = (/    0.,   1/6.,  1/2.,   -1/2.,   -1/6. /) ; a_bot(11,13) = 0.
+	 a_bot(11,2:6) = (/  0.,	tan(theta_rad)*(-1/6.),	tan(theta_rad)*(-1/2.),  	tan(theta_rad)*(1/2.), 	tan(theta_rad)*(1/6.) /)
+     a_bot(11,8:12)= (/    0.,   1/6.,  1/2.,   -1/2.,   -1/6. /)
+     a_bot(11,13)  = 0.
      ! curvature at top spline end: = 0
-	 a_bot(12,2:6) = (/  0.,    0.*(1/2.),    0.*(-1/2.),    0.*(-1/2.), 	  0.*(1/2.) /)  ; a_bot(12,8:12) = (/    0.,    -1/2.,  1/2.,   1/2.,  -1/2. /) ; a_bot(12,13) = 0.
+	 a_bot(12,2:6) = (/  0.,    0.*(1/2.),    0.*(-1/2.),    0.*(-1/2.), 	  0.*(1/2.) /)
+     a_bot(12,8:12)= (/    0.,    -1/2.,  1/2.,   1/2.,  -1/2. /)
+     a_bot(12,13)  = 0.
 
 !-----------------------------------------
    !print*, "a = "
@@ -488,7 +516,8 @@
 	 do i= 1, 3
 		theta(i) = -theta_rad-sang
 	 enddo
-	 call vector_rotation(x_le_spl(le_pos-1:le_pos+1),y_le_spl(le_pos-1:le_pos+1),3,theta,x_le_spl(le_pos-1:le_pos+1),y_le_spl(le_pos-1:le_pos+1))
+	 call vector_rotation(x_le_spl(le_pos-1:le_pos+1), y_le_spl(le_pos-1:le_pos+1), 3, theta, x_le_spl(le_pos-1:le_pos+1), &
+                          y_le_spl(le_pos-1:le_pos+1))
 	 deallocate (theta)
 	 
  !final LE rotation: 
@@ -507,49 +536,49 @@
 	 ! write values to files:
       file1 = 'lesting_CP_top.'//trim(adjustl(sec))//'.'//trim(casename)//'.txt'
       open(unit=71,file=file1, form="formatted")
-         write(71,*),'xcp_top',"	",'ycp_top'
+         write(71,*) 'xcp_top',"	",'ycp_top'
          do i=1,ncp
-	         write(71,*),xcp_top(i),"	",ycp_top(i)
+	         write(71,*) xcp_top(i),"	",ycp_top(i)
          enddo
 	  close(71)
 	  file1 = 'lesting_CP_bot.'//trim(adjustl(sec))//'.'//trim(casename)//'.txt'
       open(unit=72,file=file1, form="formatted")
-		 write(72,*),'xcp_bot',"	",'ycp_bot'
+		 write(72,*) 'xcp_bot',"	",'ycp_bot'
          do i=1,ncp
-	         write(72,*),xcp_bot(i),"	",ycp_bot(i)
+	         write(72,*) xcp_bot(i),"	",ycp_bot(i)
          enddo
       close(72)
       if(trim(develop).eq.'dev')then
 	      file2 = 'le_def_sting.'//trim(adjustl(sec))//'.'//trim(casename)//'.txt'
           open(unit=73,file=file2, form="formatted")
-             write(73,*),"xtop	ytop"
+             write(73,*) "xtop	ytop"
               do i=1,dimen
-               write(73,*),xtop(i)," ",ytop(i)
+               write(73,*) xtop(i)," ",ytop(i)
              end do
              write(73,*)
-             write(73,*),"xbot	ybot"
+             write(73,*) "xbot	ybot"
               do i=1,dimen
-               write(73,*),xbot(i)," ",ybot(i)
+               write(73,*) xbot(i)," ",ybot(i)
              end do         
            close(73)
       endif
       file3 = 'le_sting.'//trim(adjustl(sec))//'.'//trim(casename)//'.txt'
       open(unit=74,file=file3, form="formatted")
-         write(74,*),"x_le_spl_sting	y_le_spl_sting"
+         write(74,*) "x_le_spl_sting	y_le_spl_sting"
           do i=1,(2*le_pos-1)
-           write(74,*),x_le_spl(i)," ",y_le_spl(i)
+           write(74,*) x_le_spl(i)," ",y_le_spl(i)
          end do
        close(74)
       if(trim(develop).eq.'dev')then
           file4 = 'le_sting_segments.'//trim(adjustl(sec))//'.'//trim(casename)//'.txt' 
           open(unit=75,file=file4, form="formatted")
-             write(75,*),"x_spl_end_top	y_spl_end_top"
+             write(75,*) "x_spl_end_top	y_spl_end_top"
               do i=1,ncp-(degree-1)
-                write(75,*),x_spl_end_top(i)," ",y_spl_end_top(i)
+                write(75,*) x_spl_end_top(i)," ",y_spl_end_top(i)
              end do
-			 write(75,*),"x_spl_end_bot	y_spl_end_bot"
+			 write(75,*) "x_spl_end_bot	y_spl_end_bot"
               do i=1,ncp-(degree-1)
-                write(75,*),x_spl_end_bot(i)," ",y_spl_end_bot(i)
+                write(75,*) x_spl_end_bot(i)," ",y_spl_end_bot(i)
              end do
            close(75)
       endif 

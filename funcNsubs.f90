@@ -352,34 +352,52 @@ character(len=2) :: units
 file1 = 'blade_section_data.'//trim(casename)//'.dat'
 open(unit= 100,file=file1, form="formatted")
 write(100,*)trim(casename)
-write(100,*),'Blade sections Data:'
-write(100,*),'---------------------'
+write(100,*)'Blade sections Data:'
+write(100,*)'---------------------'
 write(100,*)  
 do js = 1,nsl
    if (js == 1) then
 	if (units == 'mm') then
 	  if (throat_pos(nsl) == 'le') then
-	    write(100,202),'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)','chord [mm]','sweep','lean','area[mm^2]','lethk [mm]','tethk [mm]','throat [mm]','(r*delta_theta)LE','Geom Zweifel','le/te/btween/none'
+	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+                      'chord [mm]','sweep','lean','area[mm^2]','lethk [mm]','tethk [mm]','throat [mm]', &
+                      '(r*delta_theta)LE','Geom Zweifel','le/te/btween/none'
 	  elseif (throat_pos(nsl) == 'te') then
-	    write(100,202),'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)','chord [mm]','sweep','lean','area[mm^2]','lethk [mm]','tethk [mm]','throat [mm]','(r*delta_theta)TE','Geom Zweifel','le/te/btween/none'
+	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+                      'chord [mm]','sweep','lean','area[mm^2]','lethk [mm]','tethk [mm]','throat [mm]', &
+                      '(r*delta_theta)TE','Geom Zweifel','le/te/btween/none'
 	  else
-	    write(100,202),'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)','chord [mm]','sweep','lean','area[mm^2]','lethk [mm]','tethk [mm]','throat [mm]','(r*delta_theta)WT','Geom Zweifel','le/te/btween/none'
+	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+                      'chord [mm]','sweep','lean','area[mm^2]','lethk [mm]','tethk [mm]','throat [mm]', &
+                      '(r*delta_theta)WT','Geom Zweifel','le/te/btween/none'
       endif
 	elseif (units == 'cm') then
 	  if (throat_pos(nsl) == 'le') then
-	    write(100,202),'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)','chord [cm]','sweep','lean','area[cm^2]','lethk [cm]','tethk [cm]','throat [cm]','(r*delta_theta)LE','Geom Zweifel','le/te/btween/none'
+	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+                      'chord [cm]','sweep','lean','area[cm^2]','lethk [cm]','tethk [cm]','throat [cm]', &
+                      '(r*delta_theta)LE','Geom Zweifel','le/te/btween/none'
 	  elseif (throat_pos(nsl) == 'te') then
-	    write(100,202),'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)','chord [cm]','sweep','lean','area[cm^2]','lethk [cm]','tethk [cm]','throat [cm]','(r*delta_theta)TE','Geom Zweifel','le/te/btween/none'
+	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+                      'chord [cm]','sweep','lean','area[cm^2]','lethk [cm]','tethk [cm]','throat [cm]', &
+                      '(r*delta_theta)TE','Geom Zweifel','le/te/btween/none'
 	  else
-	    write(100,202),'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)','chord [cm]','sweep','lean','area[cm^2]','lethk [cm]','tethk [cm]','throat [cm]','(r*delta_theta)WT','Geom Zweifel','le/te/btween/none'
+	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+                      'chord [cm]','sweep','lean','area[cm^2]','lethk [cm]','tethk [cm]','throat [cm]', &
+                      '(r*delta_theta)WT','Geom Zweifel','le/te/btween/none'
       endif
     elseif ((units == 'm ').or.(units == 'm)')) then
 	  if (throat_pos(nsl) == 'le') then
-	    write(100,202),'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)','chord [ m]','sweep','lean','area[ m^2]','lethk [ m]','tethk [ m]','throat [ m]','(r*delta_theta)LE','Geom Zweifel','le/te/btween/none'
+	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+                      'chord [ m]','sweep','lean','area[ m^2]','lethk [ m]','tethk [ m]','throat [ m]', &
+                      '(r*delta_theta)LE','Geom Zweifel','le/te/btween/none'
 	  elseif (throat_pos(nsl) == 'te') then
-	    write(100,202),'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)','chord [ m]','sweep','lean','area[ m^2]','lethk [ m]','tethk [ m]','throat [ m]','(r*delta_theta)TE','Geom Zweifel','le/te/btween/none'
+	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+                      'chord [ m]','sweep','lean','area[ m^2]','lethk [ m]','tethk [ m]','throat [ m]', &
+                      '(r*delta_theta)TE','Geom Zweifel','le/te/btween/none'
 	  else
-	    write(100,202),'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)','chord [ m]','sweep','lean','area[ m^2]','lethk [ m]','tethk [ m]','throat [ m]','(r*delta_theta)WT','Geom Zweifel','le/te/btween/none'
+	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+                      'chord [ m]','sweep','lean','area[ m^2]','lethk [ m]','tethk [ m]','throat [ m]', &
+                      '(r*delta_theta)WT','Geom Zweifel','le/te/btween/none'
       endif
 	else
 		print*,'Error in Blade scaling factor ...'
@@ -387,9 +405,9 @@ do js = 1,nsl
 		stop
 	endif	
    endif
-   write(100,201),js,bladedata(1:(amount_data-1),js),throat_pos(js)		
+   write(100,201) js,bladedata(1:(amount_data-1),js),throat_pos(js)		
 enddo
-write(100,*),'Total Volume of the blade =',bladedata(amount_data,nsl),'[m^3]' 
+write(100,*) 'Total Volume of the blade =',bladedata(amount_data,nsl),'[m^3]' 
 close(100)
 
 202 format((A7,2x),(A4,11x),4(A14,3x),(A13,1x),2(A6,5x),(A13,2x),(A10,2x),(A10,1x),(A11),2x,A17,2x,A12,2x,A17)
@@ -446,7 +464,8 @@ open(13,file = file1,status ='unknown')
 write(13,*)trim(casename)
 write(13,*)'Blade row:',ibrow
 write(13,*)"Non-dimensional quantities:"
-write(13,*)"section    m'sLE             m'sTE              m'blade_LE          m'blade_TE            chord             pitch          "
+write(13,*)"section    m'sLE             m'sTE              m'blade_LE          m'blade_TE&
+                       chord             pitch          "
 
 do ia = 1, nsl
    write(13,101)ia,msle(ia),mste(ia),mprime_ble(ia),mprime_bte(ia),chordm(ia),pitch
@@ -998,7 +1017,7 @@ if(isdev)then
   write(85,*)'section',js
   write(85,*)'u	camber	upper_camber'
   do i = 1, np_sidee
-     write(85,*),u(i),camber(i),camber_upper(i)
+     write(85,*) u(i),camber(i),camber_upper(i)
   enddo
   write(85,*)'u	pitch_line'
   do i = 1, np_sidee
@@ -1012,8 +1031,8 @@ if(isdev)then
   write(85,*)' intersection points'
   write(85,*) '  u                   v                    counter'   
   do k = 1, n_normal_distance
-     write(85,*),inter_coord(1:2,k)
-     write(85,*),inter_coord(3:4,k),k
+     write(85,*) inter_coord(1:2,k)
+     write(85,*) inter_coord(3:4,k),k
   enddo
   write(85,*)'min_throat_2D',min_throat_2D
   write(85,*)'throat_index',throat_index

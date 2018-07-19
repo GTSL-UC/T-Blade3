@@ -95,7 +95,7 @@ write(ibrowc, '(i3)')ibrow
 read(1, *)temp
 read(1, *) nbls ! number of blades in this row
 !print*, 'Number of blades in this row:', nbls
-read(1, '(A)'), temp
+read(1, '(A)') temp
 units = temp(24:25)
 read(1, *)scf, temp
 temp = adjustl(trim(temp))
@@ -210,7 +210,8 @@ if (allocated(umxthk_all)) deallocate(umxthk_all)
 Allocate(umxthk_all(nsl))
 if (LE.ne.0) then
 	do js = 1, nspn
-		read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), tempr, tempr, jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+		read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), tempr, tempr,  &
+                  jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
 		!print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
 	enddo
 elseif (LE == 0) then
@@ -219,7 +220,8 @@ elseif (LE == 0) then
 	Allocate(lethk_all(nsl))
 	Allocate(tethk_all(nsl))
 	do js = 1, nspn
-		read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), tethk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+		read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), &
+                  tethk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
 		! print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), tethk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
 	enddo
 endif
@@ -386,13 +388,13 @@ if (allocated(ncp_curv)) deallocate(ncp_curv)
 if (allocated(curv_cp )) deallocate(curv_cp )
 Allocate(ncp_curv(nsl))
 Allocate(curv_cp(20, 2*nsl))
-read (11, *), temp	! the test case name (added 6 23 2013)
-read (11, *), temp
+read (11, *) temp	! the test case name (added 6 23 2013)
+read (11, *) temp
 current = 0
 do i = 1, nsl
-	read (11, *), temp
-	read (11, *), temp
-	read (11, *), ncp_curv(i)
+	read (11, *) temp
+	read (11, *) temp
+	read (11, *) ncp_curv(i)
 	ncp_curv(i) = ncp_curv(i) + 2
         if (allocated(xcp)) deallocate(xcp)
         if (allocated(ycp)) deallocate(ycp)
@@ -402,11 +404,11 @@ do i = 1, nsl
 	!print*, 'ycp = ', ycp 
 	current = i 
 	!print*, 'current', current
-	read (11, *), temp
+	read (11, *) temp
 	write(radialsec, *)current ! write out control points to a file to plot. Kiran 8/9/13
 	! reading the control points: 
 	do j = 1, (ncp_curv(i)-2)
-		read(11, *), xcp(j+1), ycp(j+1)			
+		read(11, *) xcp(j+1), ycp(j+1)			
 	enddo
 
 	if(isdev) then
@@ -449,22 +451,22 @@ elseif (thick_distr.eq.3) then
 else
 	phantom_n = 4
 endif
-read (11, *), temp
+read (11, *) temp
 do i = 1, nsl
-	read (11, *), temp
-	read (11, *), temp
-	read (11, *), ncp_thk(i)
+	read (11, *) temp
+	read (11, *) temp
+	read (11, *) ncp_thk(i)
 	ncp_thk(i) = ncp_thk(i) + phantom_n
         if (allocated(xcp)) deallocate(xcp)
         if (allocated(ycp)) deallocate(ycp)
 	Allocate(xcp(ncp_thk(i)))
 	Allocate(ycp(ncp_thk(i)))
-	read (11, *), temp
+	read (11, *) temp
 	! reading the control points: 
 	!do j = 1, (ncp_thk(i)-2)
 	do j = 1, (ncp_thk(i)-phantom_n)
 		!read(11, *), xcp(j+1), ycp(j+1)  ! for cubic spline
-		read(11, *), xcp(j+(phantom_n/2)), ycp(j+(phantom_n/2))	! for quartic spline
+		read(11, *) xcp(j+(phantom_n/2)), ycp(j+(phantom_n/2))	! for quartic spline
 		!print*, xcp(j+1), ycp(j+1)
 	enddo
 	if (thick_distr.eq.4) then
@@ -527,14 +529,14 @@ if(LE .ne.0) then
 	!Allocate(sting_l_all(nsl))
 	Allocate(sting_h_all(nsl, 2))
 	! 5 ... is the number of parameters to read
-	read (11, *), temp
-	read (11, *), temp
-	read (11, *), LEdegree, no_LE_segments
+	read (11, *) temp
+	read (11, *) temp
+	read (11, *) LEdegree, no_LE_segments
 	print*, 'LEdegree = ', LEdegree, 'no_LE_segments = ', no_LE_segments
 	do i = 1, nsl
-		read (11, *), temp
-		read (11, *), temp
-		read (11, *), lethk_all(i), tethk_all(i), s_all(i), ee_all(i), C_le_x_top_all(i), C_le_x_bot_all(i), &
+		read (11, *) temp
+		read (11, *) temp
+		read (11, *) lethk_all(i), tethk_all(i), s_all(i), ee_all(i), C_le_x_top_all(i), C_le_x_bot_all(i), &
 		C_le_y_top_all(i), C_le_y_bot_all(i), LE_vertex_ang_all(i), LE_vertex_dis_all(i), &
 		sting_l_all(i), sting_h_all(i, 1), sting_h_all(i, 2)
 		! print*, 'C_le_y_top_all(i), C_le_y_bot_all(i), LE_vertex_ang_all(i), LE_vertex_dis_all(i)', C_le_y_top_all(i), C_le_y_bot_all(i), LE_vertex_ang_all(i), LE_vertex_dis_all(i)
@@ -542,26 +544,26 @@ if(LE .ne.0) then
 	if (thick_distr .eq. 4) then
 		if (allocated(te_angle_cp)) deallocate(te_angle_cp)
 		Allocate(te_angle_cp(nsl))
-		read (11, *), temp
-		read (11, *), te_flag
-		read (11, *), temp
+		read (11, *) temp
+		read (11, *) te_flag
+		read (11, *) temp
 		do i = 1, nsl
-			read(11, *), te_angle_cp(i)
+			read(11, *) te_angle_cp(i)
 		enddo
 		print*, 'TE Angle'
-		write(*, '(F10.5)'), (te_angle_cp(i), i = 1, nsl)		
+		write(*, '(F10.5)') (te_angle_cp(i), i = 1, nsl)		
 	endif
 elseif (thick_distr .eq. 4) then ! end if for LE spline parameters
 	if (allocated(te_angle_cp)) deallocate(te_angle_cp)
 	Allocate(te_angle_cp(nsl))
-	read (11, *), temp
-	read (11, *), te_flag
-	read (11, *), temp
+	read (11, *) temp
+	read (11, *) te_flag
+	read (11, *) temp
 	do i = 1, nsl
-		read(11, *), te_angle_cp(i)
+		read(11, *) te_angle_cp(i)
 	enddo
 	print*, 'TE Angle'
-	write(*, '(F10.5)'), (te_angle_cp(i), i = 1, nsl)	
+	write(*, '(F10.5)') (te_angle_cp(i), i = 1, nsl)	
 endif
 close(11)
 !endif ! end if for curvature, thickness, thickness dist and LE spline definition.
@@ -605,7 +607,8 @@ end do
 !Reading curvature and chord control points
 read(10, *) ncp_span_curv, ncp_chord
 if(control_inp_flag .eq. 1 .and. ncp_span_curv .ne. nsl) then
-	print*, 'Error in auxiliary file inputs: Number of spanwise curvature specifications must equal number of streamlines if spanwise spline is not used.'
+	print*, 'Error in auxiliary file inputs: Number of spanwise curvature specifications &
+             must equal number of streamlines if spanwise spline is not used.'
 endif
 !number of chord and curvature control points will always be the same
 ncp_curvature = ncp_chord
@@ -810,7 +813,8 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
 		read(10, *)ncp_span_thk, ncp_chord_thickness
 	endif
 	if(control_inp_flag .eq. 1 .and. ncp_span_thk .ne. nsl) then
-		print*, 'Error in auxiliary file inputs: Number of spanwise thickness specifications must equal number of streamlines if spanwise spline is not used.'
+		print*, 'Error in auxiliary file inputs: Number of spanwise thickness specifications &
+                 must equal number of streamlines if spanwise spline is not used.'
 	endif
 	!number of chord and thickness control points will always be the same
 	ncp_thickness = ncp_chord_thickness

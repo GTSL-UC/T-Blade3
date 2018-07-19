@@ -1,4 +1,5 @@
-subroutine thk_ctrl_gen_driver (cname, isdev, sec, uthk, thk, n, u_spl, np, le_angle, te_angle, te_flag, le_opt_flag, te_opt_flag, out_coord)
+subroutine thk_ctrl_gen_driver (cname, isdev, sec, uthk, thk, n, u_spl, np, le_angle, te_angle, te_flag, le_opt_flag, &
+                                te_opt_flag, out_coord)
 
 implicit none
 
@@ -242,21 +243,29 @@ do i = 1, niknt_spl
 	call thk_ctrl_gen_Eder_fn(uthk, thk, u, n, nknt_spl, iknt_spl, niknt_spl, i, 0, dAdE, dBdE, dCdE, dDdE, dEdE)
 enddo
 do i = 1, niknt_le
-	call thk_ctrl_gen_Eder_fn(uthk_le, thk_le, u_le, n_le, nknt_le, iknt_le, niknt_le, i, 1, dAdE_le, dBdE_le, dCdE_le, dDdE_le, dEdE_le)
+	call thk_ctrl_gen_Eder_fn(uthk_le, thk_le, u_le, n_le, nknt_le, iknt_le, niknt_le, i, 1, dAdE_le, dBdE_le,  &
+                              dCdE_le, dDdE_le, dEdE_le)
 enddo
 
 !	Determining B1 C1 and D1 derivatives
-call thk_ctrl_gen_1der_fn(uthk, thk, u, n, nknt_spl, iknt_spl, niknt_spl, dCdE, dDdE, dEdE, 0., 1, 1, 0, d1_flag, ddB1, ddC1, ddD1, dAdB1, dBdB1, dCdB1, dDdB1, dEdB1)
+call thk_ctrl_gen_1der_fn(uthk, thk, u, n, nknt_spl, iknt_spl, niknt_spl, dCdE, dDdE, dEdE, 0., 1, 1, 0, d1_flag, &
+                          ddB1, ddC1, ddD1, dAdB1, dBdB1, dCdB1, dDdB1, dEdB1)
 ddB1(:, 1) = dAdB1; ddB1(:, 2) = dBdB1; ddB1(:, 3) = dCdB1; ddB1(:, 4) = dDdB1; ddB1(:, 5) = dEdB1
-call thk_ctrl_gen_1der_fn(uthk, thk, u, n, nknt_spl, iknt_spl, niknt_spl, dCdE, dDdE, dEdE, 0., 1, 3, 0, d1_flag, ddB1, ddC1, ddD1, dAdD1, dBdD1, dCdD1, dDdD1, dEdD1)
+call thk_ctrl_gen_1der_fn(uthk, thk, u, n, nknt_spl, iknt_spl, niknt_spl, dCdE, dDdE, dEdE, 0., 1, 3, 0, d1_flag, &
+                          ddB1, ddC1, ddD1, dAdD1, dBdD1, dCdD1, dDdD1, dEdD1)
 ddD1(:, 1) = dAdD1; ddD1(:, 2) = dBdD1; ddD1(:, 3) = dCdD1; ddD1(:, 4) = dDdD1; ddD1(:, 5) = dEdD1
-call thk_ctrl_gen_1der_fn(uthk, thk, u, n, nknt_spl, iknt_spl, niknt_spl, dCdE, dDdE, dEdE, 0., 1, 2, 0, d1_flag, ddB1, ddC1, ddD1, dAdC1, dBdC1, dCdC1, dDdC1, dEdC1)
+call thk_ctrl_gen_1der_fn(uthk, thk, u, n, nknt_spl, iknt_spl, niknt_spl, dCdE, dDdE, dEdE, 0., 1, 2, 0, d1_flag, &
+                          ddB1, ddC1, ddD1, dAdC1, dBdC1, dCdC1, dDdC1, dEdC1)
 ddC1(:, 1) = dAdC1; ddC1(:, 2) = dBdC1; ddC1(:, 3) = dCdC1; ddC1(:, 4) = dDdC1; ddC1(:, 5) = dEdC1
 
 ! Included input parameters ddB1_le, ddC1_le, ddD1_le in subroutine calls 257-259 for gfortran
-call thk_ctrl_gen_1der_fn(uthk_le, thk_le, u_le, n_le, nknt_le, iknt_le, niknt_le, dCdE_le, dDdE_le, dEdE_le, -1., d3v_ang_flag_le, 1, 1, 0, ddB1_le, ddC1_le, ddD1_le, dAdB1_le, dBdB1_le, dCdB1_le, dDdB1_le, dEdB1_le)
-call thk_ctrl_gen_1der_fn(uthk_le, thk_le, u_le, n_le, nknt_le, iknt_le, niknt_le, dCdE_le, dDdE_le, dEdE_le,  1., d3v_ang_flag_le, 2, 1, 0, ddB1_le, ddC1_le, ddD1_le, dAdC1_le, dBdC1_le, dCdC1_le, dDdC1_le, dEdC1_le)
-call thk_ctrl_gen_1der_fn(uthk_le, thk_le, u_le, n_le, nknt_le, iknt_le, niknt_le, dCdE_le, dDdE_le, dEdE_le, -1., d3v_ang_flag_le, 3, 1, 0, ddB1_le, ddC1_le, ddD1_le, dAdD1_le, dBdD1_le, dCdD1_le, dDdD1_le, dEdD1_le)
+call thk_ctrl_gen_1der_fn(uthk_le, thk_le, u_le, n_le, nknt_le, iknt_le, niknt_le, dCdE_le, dDdE_le, dEdE_le, -1.,d3v_ang_flag_le, &
+                          1, 1, 0, ddB1_le, ddC1_le, ddD1_le, dAdB1_le, dBdB1_le, dCdB1_le,       &
+                          dDdB1_le, dEdB1_le)
+call thk_ctrl_gen_1der_fn(uthk_le, thk_le, u_le, n_le, nknt_le, iknt_le, niknt_le, dCdE_le, dDdE_le, dEdE_le, 1., d3v_ang_flag_le, &
+                          2, 1, 0, ddB1_le, ddC1_le, ddD1_le, dAdC1_le, dBdC1_le, dCdC1_le, dDdC1_le, dEdC1_le)
+call thk_ctrl_gen_1der_fn(uthk_le, thk_le, u_le, n_le, nknt_le, iknt_le, niknt_le, dCdE_le, dDdE_le, dEdE_le, -1.,d3v_ang_flag_le, &
+                          3, 1, 0, ddB1_le, ddC1_le, ddD1_le, dAdD1_le, dBdD1_le, dCdD1_le, dDdD1_le, dEdD1_le)
 ddB1_le(:, 1) = dAdB1_le; ddB1_le(:, 2) = dBdB1_le; ddB1_le(:, 3) = dCdB1_le; ddB1_le(:, 4) = dDdB1_le; ddB1_le(:, 5) = dEdB1_le
 ddC1_le(:, 1) = dAdC1_le; ddC1_le(:, 2) = dBdC1_le; ddC1_le(:, 3) = dCdC1_le; ddC1_le(:, 4) = dDdC1_le; ddC1_le(:, 5) = dEdC1_le
 ddD1_le(:, 1) = dAdD1_le; ddD1_le(:, 2) = dBdD1_le; ddD1_le(:, 3) = dCdD1_le; ddD1_le(:, 4) = dDdD1_le; ddD1_le(:, 5) = dEdD1_le
@@ -284,30 +293,32 @@ elseif (te_flag .eq. 0) then
 endif
 if (te_flag .eq. 1 .and. te_opt_flag .eq. 0) then
 	do i = 1, niknt_te
-		call thk_ctrl_gen_Eder_fn(uthk_te, thk_te, u_te, n_te, nknt_te, iknt_te, niknt_te, i, 0, dAdE_te, dBdE_te, dCdE_te, dDdE_te, dEdE_te)
+		call thk_ctrl_gen_Eder_fn(uthk_te, thk_te, u_te, n_te, nknt_te, iknt_te, niknt_te, i, 0, dAdE_te, dBdE_te, dCdE_te,        &
+                                  dDdE_te, dEdE_te)
 	enddo
 	call thk_ctrl_gen_1der_fn(uthk_te, thk_te, u_te, n_te, nknt_te, iknt_te, niknt_te, dCdE_te, dDdE_te, dEdE_te, -1., 0, 1, 0, 0, &
-		ddB1_te, ddC1_te, ddD1_te, dAdB1_te, dBdB1_te, dCdB1_te, dDdB1_te, dEdB1_te)
+		                      ddB1_te, ddC1_te, ddD1_te, dAdB1_te, dBdB1_te, dCdB1_te, dDdB1_te, dEdB1_te)
 	ddB1_te(:, 1) = dAdB1_te; ddB1_te(:, 2) = dBdB1_te; ddB1_te(:, 3) = dCdB1_te; ddB1_te(:, 4) = dDdB1_te; ddB1_te(:, 5) = dEdB1_te
 	call thk_ctrl_gen_1der_fn(uthk_te, thk_te, u_te, n_te, nknt_te, iknt_te, niknt_te, dCdE_te, dDdE_te, dEdE_te, -1., 0, 3, 0, 0, &
-		dAdD1_te, dBdD1_te, dCdD1_te, dDdD1_te, dEdD1_te)	
+		                      dAdD1_te, dBdD1_te, dCdD1_te, dDdD1_te, dEdD1_te)	
 	ddD1_te(:, 1) = dAdD1_te; ddD1_te(:, 2) = dBdD1_te; ddD1_te(:, 3) = dCdD1_te; ddD1_te(:, 4) = dDdD1_te; ddD1_te(:, 5) = dEdD1_te		
-	call thk_ctrl_gen_1der_fn(uthk_te, thk_te, u_te, n_te, nknt_te, iknt_te, niknt_te, dCdE_te, dDdE_te, dEdE_te, 1., 0, 2, 0, 0, &
-		dAdC1_te, dBdC1_te, dCdC1_te, dDdC1_te, dEdC1_te)
+	call thk_ctrl_gen_1der_fn(uthk_te, thk_te, u_te, n_te, nknt_te, iknt_te, niknt_te, dCdE_te, dDdE_te, dEdE_te, 1., 0, 2, 0, 0,  &
+		                      dAdC1_te, dBdC1_te, dCdC1_te, dDdC1_te, dEdC1_te)
 	ddC1_te(:, 1) = dAdC1_te; ddC1_te(:, 2) = dBdC1_te; ddC1_te(:, 3) = dCdC1_te; ddC1_te(:, 4) = dDdC1_te; ddC1_te(:, 5) = dEdC1_te
 	d_0(1) = d1v_te
 	call dnv_rot(d_0, d1v_rot, d2v_rot, d3v_rot)
 	d_0(1) = d1v_rot; d_0(2) = d2v_rot; d_0(3) = d3v_rot
 	d_1(1) = -d1v_rot; d_1(2) = d2v_rot; d_1(3) = -d3v_rot
 	! u_spl = (/ (uthk(3) + j*(1.-uthk(3))/(np-1), j = 0, np-1) /)
-	call thk_ctrl_gen_spl(uthk_te, thk_te, n_te, nknt_te, d_0, d_1, dAdE_te, dBdE_te, dCdE_te, &
-		dDdE_te, dEdE_te, ddB1_te, ddC1_te, ddD1_te, u_spl_te, np_te, iknt_te, niknt_te, 0, 0, 1, &
-		1, 2, 0, 0, F, G, out_coord_te, coeff_te, fail_flag, dev_flag)
+	call thk_ctrl_gen_spl(uthk_te, thk_te, n_te, nknt_te, d_0, d_1, dAdE_te, dBdE_te, dCdE_te, dDdE_te, dEdE_te, ddB1_te, ddC1_te, &
+                          ddD1_te, u_spl_te, np_te, iknt_te, niknt_te, 0, 0, 1, 1, 2, 0, 0, F, G, out_coord_te, coeff_te,          &
+                          fail_flag, dev_flag)
 	out_coord(i_te : np, :) = out_coord_te
 	open (unit = 81, file = 'thk_dist_te.' // trim(adjustl(sec)) // '.' // trim(cname) // '.dat')
 	write (81, '(12F40.12)') (out_coord_te(i, :), i = 1, np_te)			
 	close (81)	
-	if (fail_flag .ne. 0) print*, 'FATAL ERROR: Trailing edge thickness distribution generation failed. TE angle may be too small/large for specified thickness.'
+	if (fail_flag .ne. 0) print*, 'FATAL ERROR: Trailing edge thickness distribution generation failed. TE angle &
+                                   may be too small/large for specified thickness.'
 	if (dev_flag .eq. 1) then	
 		do i = 1, np_fine
 			u_spl_fine(i) = (i-1.)/(np_fine-1)*(1. - thk_te(1)) + thk_te(1)
@@ -737,11 +748,14 @@ do i = 1, niknt_spl
 enddo
 
 !	Determining B1 C1 and D1 derivatives
-call thk_ctrl_gen_1der_fn(uthk, thk, u, n, nknt_spl, iknt_spl, niknt_spl, dCdE, dDdE, dEdE, 0., d3v_ang_flag, 1, 10, 1, ddB1, ddC1, ddD1, dAdB1, dBdB1, dCdB1, dDdB1, dEdB1)
+call thk_ctrl_gen_1der_fn(uthk, thk, u, n, nknt_spl, iknt_spl, niknt_spl, dCdE, dDdE, dEdE, 0., d3v_ang_flag, 1, 10, 1, &
+                          ddB1, ddC1, ddD1, dAdB1, dBdB1, dCdB1, dDdB1, dEdB1)
 ddB1(:, 1) = dAdB1; ddB1(:, 2) = dBdB1; ddB1(:, 3) = dCdB1; ddB1(:, 4) = dDdB1; ddB1(:, 5) = dEdB1
-call thk_ctrl_gen_1der_fn(uthk, thk, u, n, nknt_spl, iknt_spl, niknt_spl, dCdE, dDdE, dEdE, 0., d3v_ang_flag, 3, 10, 1, ddB1, ddC1, ddD1, dAdD1, dBdD1, dCdD1, dDdD1, dEdD1)
+call thk_ctrl_gen_1der_fn(uthk, thk, u, n, nknt_spl, iknt_spl, niknt_spl, dCdE, dDdE, dEdE, 0., d3v_ang_flag, 3, 10, 1, &
+                          ddB1, ddC1, ddD1, dAdD1, dBdD1, dCdD1, dDdD1, dEdD1)
 ddD1(:, 1) = dAdD1; ddD1(:, 2) = dBdD1; ddD1(:, 3) = dCdD1; ddD1(:, 4) = dDdD1; ddD1(:, 5) = dEdD1
-call thk_ctrl_gen_1der_fn(uthk, thk, u, n, nknt_spl, iknt_spl, niknt_spl, dCdE, dDdE, dEdE, 0., d3v_ang_flag, 2, 10, 1, ddB1, ddC1, ddD1, dAdC1, dBdC1, dCdC1, dDdC1, dEdC1)
+call thk_ctrl_gen_1der_fn(uthk, thk, u, n, nknt_spl, iknt_spl, niknt_spl, dCdE, dDdE, dEdE, 0., d3v_ang_flag, 2, 10, 1, &
+                          ddB1, ddC1, ddD1, dAdC1, dBdC1, dCdC1, dDdC1, dEdC1)
 ddC1(:, 1) = dAdC1; ddC1(:, 2) = dBdC1; ddC1(:, 3) = dCdC1; ddC1(:, 4) = dDdC1; ddC1(:, 5) = dEdC1
 
 d_1 = (/ d1v_te, d2v_te, d3v_te /)
@@ -774,13 +788,13 @@ do while (i .lt. iter_max)
 			np, iknt_spl, niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, &
 			F3, G_temp, out_coord)
 	elseif (opt_flag .eq. 1) then
-		call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, (/ d_0(1)-a3*G(1), d_0(2), d_0(3) /), (/ d_1(1)-a3*G(4), d_1(2), d_1(3) /), dAdE, dBdE, dCdE, dDdE, dEdE, &
-			np, iknt_spl, niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, &
-			F3, G_temp, out_coord)
+		call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, (/ d_0(1)-a3*G(1), d_0(2), d_0(3) /), &
+                                          (/ d_1(1)-a3*G(4), d_1(2), d_1(3) /), dAdE, dBdE, dCdE, dDdE, dEdE, np, iknt_spl, &
+                                          niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, F3, G_temp, out_coord)
 	elseif (opt_flag .eq. 2) then
-		call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, d_0-a3*G(1:3), d_1-a3*G(4:6), dAdE, dBdE, dCdE, dDdE, dEdE, &
-			np, iknt_spl, niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, &
-			F3, G_temp, out_coord)
+		call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, d_0-a3*G(1:3), d_1-a3*G(4:6), dAdE, dBdE, dCdE, dDdE, &
+                                           dEdE, np, iknt_spl, niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, F3, G_temp,        &
+                                           out_coord)
 	endif
 	do while (F3 .ge. F1)
         a3 = a3/2.
@@ -789,13 +803,13 @@ do while (i .lt. iter_max)
 				np, iknt_spl, niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, &
 				F3, G_temp, out_coord)			
 		elseif (opt_flag .eq. 1) then
-			call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, (/ d_0(1)-a3*G(1), d_0(2), d_0(3) /), (/ d_1(1)-a3*G(4), d_1(2), d_1(3) /), dAdE, dBdE, dCdE, dDdE, dEdE, &
-				np, iknt_spl, niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, &
-				F3, G_temp, out_coord)
+			call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, (/ d_0(1)-a3*G(1), d_0(2), d_0(3) /), &
+                                              (/ d_1(1)-a3*G(4), d_1(2), d_1(3) /), dAdE, dBdE, dCdE, dDdE, dEdE, np, iknt_spl, &
+                                              niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, F3, G_temp, out_coord)
 		elseif (opt_flag .eq. 2) then
-			call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, d_0-a3*G(1:3), d_1-a3*G(4:6), dAdE, dBdE, dCdE, dDdE, dEdE, &
-				np, iknt_spl, niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, &
-				F3, G_temp, out_coord)	
+			call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, d_0-a3*G(1:3), d_1-a3*G(4:6), dAdE, dBdE, dCdE, &
+                                               dDdE, dEdE, np, iknt_spl, niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, F3,    &
+                                               G_temp, out_coord)	
 		endif
         if (a3 .lt. tol/2.) then
 			print*, 'No improvement likely.'
@@ -813,13 +827,13 @@ do while (i .lt. iter_max)
 			np, iknt_spl, niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, &
 			F2, G_temp, out_coord)
 	elseif (opt_flag .eq. 1) then
-		call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, (/ d_0(1)-a2*G(1), d_0(2), d_0(3) /), (/ d_1(1)-a2*G(4), d_1(2), d_1(3) /), dAdE, dBdE, dCdE, dDdE, dEdE, &
-			np, iknt_spl, niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, &
-			F2, G_temp, out_coord)		
+		call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, (/ d_0(1)-a2*G(1), d_0(2), d_0(3) /), &
+                                          (/ d_1(1)-a2*G(4), d_1(2), d_1(3) /), dAdE, dBdE, dCdE, dDdE, dEdE, np, iknt_spl, &
+                                          niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, F2, G_temp, out_coord)		
 	elseif (opt_flag .eq. 2) then
-		call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, d_0-a2*G(1:3), d_1-a2*G(4:6), dAdE, dBdE, dCdE, dDdE, dEdE, &
-			np, iknt_spl, niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, &
-			F2, G_temp, out_coord)
+		call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, d_0-a2*G(1:3), d_1-a2*G(4:6), dAdE, dBdE, dCdE, dDdE, &
+                                           dEdE, np, iknt_spl, niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, F2, G_temp,        &
+                                           out_coord)
 	endif
     h1 = (F2 - F1)/a2; h2 = (F3 - F2)/(a3 - a2)
     h3 = (h2 - h1)/a3
@@ -829,9 +843,9 @@ do while (i .lt. iter_max)
 			np, iknt_spl, niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, &
 			F0, G_temp, out_coord)
 	elseif (opt_flag .eq. 1) then			
-		call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, (/ d_0(1)-a0*G(1), d_0(2), d_0(3) /), (/ d_1(1)-a0*G(4), d_1(2), d_1(3) /), dAdE, dBdE, dCdE, dDdE, dEdE, &
-			np, iknt_spl, niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, &
-			F0, G_temp, out_coord)			
+		call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, (/ d_0(1)-a0*G(1), d_0(2), d_0(3) /), &
+                                          (/ d_1(1)-a0*G(4), d_1(2), d_1(3) /), dAdE, dBdE, dCdE, dDdE, dEdE, np, iknt_spl, &
+                                          niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, F0, G_temp, out_coord)			
 	elseif (opt_flag .eq. 2) then			
 		call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, d_0-a0*G(1:3), d_1-a0*G(4:6), dAdE, dBdE, dCdE, dDdE, dEdE, &
 			np, iknt_spl, niknt_spl, ddB1, ddC1, ddD1, 0, u_spl, opt_flag, &

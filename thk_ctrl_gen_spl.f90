@@ -401,7 +401,7 @@ M1(:, 1:nun) = M
 M1(:, nun+1) = r
 call gauss_jordan(nun, 1, M1, fail_flag)
 if (fail_flag .eq. 1) then
-    write (*, *), 'Failed to solve linear system: thk_ctrl_1der_fn'
+    write (*, *) 'Failed to solve linear system: thk_ctrl_1der_fn'
 endif
 coeff = M1(:, nun+1)
 do i = 1, nun
@@ -637,19 +637,26 @@ if (grad_flag .eq. 1) then
             if (tvalid .eq. '00') then
                 dd2v_mod_dB1 = dd2v_mod_dB1 + (4.*ddB1(i, 5) + 3.*ddB1(i, 4) + 2.*ddB1(i, 3))/delu(i)*d2v_sign
             elseif (tvalid .eq. '10') then
-                dd2v_mod_dB1 = dd2v_mod_dB1 + (4.*ddB1(i, 5)*tr(1)**3 + 3.*ddB1(i, 4)*tr(1)**2 + 2.*ddB1(i, 3)*tr(1))/delu(i)*d2v_sign
+                dd2v_mod_dB1 = dd2v_mod_dB1 + (4.*ddB1(i, 5)*tr(1)**3 + 3.*ddB1(i, 4)*tr(1)**2 + 2.*ddB1(i, 3) * &
+                               tr(1))/delu(i)*d2v_sign
                 d2v_sign = -d2v_sign
-                dd2v_mod_dB1 = dd2v_mod_dB1 + (4.*ddB1(i, 5)*(1.-tr(1)**3) + 3.*ddB1(i, 4)*(1.-tr(1)**2) + 2.*ddB1(i, 3)*(1.-tr(1)))/delu(i)*d2v_sign
+                dd2v_mod_dB1 = dd2v_mod_dB1 + (4.*ddB1(i, 5)*(1.-tr(1)**3) + 3.*ddB1(i, 4)*(1.-tr(1)**2) + 2. *  &
+                               ddB1(i, 3)*(1.-tr(1)))/delu(i)*d2v_sign
             elseif (tvalid .eq. '01') then
-                dd2v_mod_dB1 = dd2v_mod_dB1 + (4.*ddB1(i, 5)*tr(2)**3 + 3.*ddB1(i, 4)*tr(2)**2 + 2.*ddB1(i, 3)*tr(2))/delu(i)*d2v_sign
+                dd2v_mod_dB1 = dd2v_mod_dB1 + (4.*ddB1(i, 5)*tr(2)**3 + 3.*ddB1(i, 4)*tr(2)**2 + 2.*ddB1(i, 3) * &
+                               tr(2))/delu(i)*d2v_sign
                 d2v_sign = -d2v_sign
-                dd2v_mod_dB1 = dd2v_mod_dB1 + (4.*ddB1(i, 5)*(1.-tr(2)**3) + 3.*ddB1(i, 4)*(1.-tr(2)**2) + 2.*ddB1(i, 3)*(1.-tr(2)))/delu(i)*d2v_sign
+                dd2v_mod_dB1 = dd2v_mod_dB1 + (4.*ddB1(i, 5)*(1.-tr(2)**3) + 3.*ddB1(i, 4)*(1.-tr(2)**2) + 2. *  &
+                               ddB1(i, 3)*(1.-tr(2)))/delu(i)*d2v_sign
             elseif (tvalid .eq. '11') then
-                dd2v_mod_dB1 = dd2v_mod_dB1 + (4.*ddB1(i, 5)*tr(1)**3 + 3.*ddB1(i, 4)*tr(1)**2 + 2.*ddB1(i, 3)*tr(1))/delu(i)*d2v_sign
+                dd2v_mod_dB1 = dd2v_mod_dB1 + (4.*ddB1(i, 5)*tr(1)**3 + 3.*ddB1(i, 4)*tr(1)**2 + 2.*ddB1(i, 3) * &
+                               tr(1))/delu(i)*d2v_sign
                 d2v_sign = -d2v_sign
-                dd2v_mod_dB1 = dd2v_mod_dB1 + (4.*ddB1(i, 5)*(tr(2)**3-tr(1)**3) + 3.*ddB1(i, 4)*(tr(2)**2-tr(1)**2) + 2.*ddB1(i, 3)*(tr(2)-tr(1)))/delu(i)*d2v_sign
+                dd2v_mod_dB1 = dd2v_mod_dB1 + (4.*ddB1(i, 5)*(tr(2)**3-tr(1)**3) + 3.*ddB1(i, 4)*(tr(2)**2-tr(1)**2) + &
+                               2.*ddB1(i, 3)*(tr(2)-tr(1)))/delu(i)*d2v_sign
                 d2v_sign = -d2v_sign
-                dd2v_mod_dB1 = dd2v_mod_dB1 + (4.*ddB1(i, 5)*(1.-tr(2)**3) + 3.*ddB1(i, 4)*(1.-tr(2)**2) + 2.*ddB1(i, 3)*(1.-tr(2)))/delu(i)*d2v_sign
+                dd2v_mod_dB1 = dd2v_mod_dB1 + (4.*ddB1(i, 5)*(1.-tr(2)**3) + 3.*ddB1(i, 4)*(1.-tr(2)**2) + 2.*ddB1(i, 3) * &
+                               (1.-tr(2)))/delu(i)*d2v_sign
             endif
         endif
     enddo
@@ -727,17 +734,21 @@ if (grad_flag .eq. 1) then
 			elseif (tvalid .eq. '10') then
 				dd2v_mod_dC1 = dd2v_mod_dC1 + (4.*ddC1(i, 5)*tr(1)**3 + 3.*ddC1(i, 4)*tr(1)**2 + 2.*ddC1(i, 3)*tr(1))/delu(i)*d2v_sign
 				d2v_sign = -d2v_sign
-				dd2v_mod_dC1 = dd2v_mod_dC1 + (4.*ddC1(i, 5)*(1.-tr(1)**3) + 3.*ddC1(i, 4)*(1.-tr(1)**2) + 2.*ddC1(i, 3)*(1.-tr(1)))/delu(i)*d2v_sign
+				dd2v_mod_dC1 = dd2v_mod_dC1 + (4.*ddC1(i, 5)*(1.-tr(1)**3) + 3.*ddC1(i, 4)*(1.-tr(1)**2) + 2.*ddC1(i, 3) * &
+                               (1.-tr(1)))/delu(i)*d2v_sign
 			elseif (tvalid .eq. '01') then
 				dd2v_mod_dC1 = dd2v_mod_dC1 + (4.*ddC1(i, 5)*tr(2)**3 + 3.*ddC1(i, 4)*tr(2)**2 + 2.*ddC1(i, 3)*tr(2))/delu(i)*d2v_sign
 				d2v_sign = -d2v_sign
-				dd2v_mod_dC1 = dd2v_mod_dC1 + (4.*ddC1(i, 5)*(1.-tr(2)**3) + 3.*ddC1(i, 4)*(1.-tr(2)**2) + 2.*ddC1(i, 3)*(1.-tr(2)))/delu(i)*d2v_sign
+				dd2v_mod_dC1 = dd2v_mod_dC1 + (4.*ddC1(i, 5)*(1.-tr(2)**3) + 3.*ddC1(i, 4)*(1.-tr(2)**2) + 2.*ddC1(i, 3) * &
+                               (1.-tr(2)))/delu(i)*d2v_sign
 			elseif (tvalid .eq. '11') then
 				dd2v_mod_dC1 = dd2v_mod_dC1 + (4.*ddC1(i, 5)*tr(1)**3 + 3.*ddC1(i, 4)*tr(1)**2 + 2.*ddC1(i, 3)*tr(1))/delu(i)*d2v_sign
 				d2v_sign = -d2v_sign
-				dd2v_mod_dC1 = dd2v_mod_dC1 + (4.*ddC1(i, 5)*(tr(2)**3-tr(1)**3) + 3.*ddC1(i, 4)*(tr(2)**2-tr(1)**2) + 2.*ddC1(i, 3)*(tr(2)-tr(1)))/delu(i)*d2v_sign
+				dd2v_mod_dC1 = dd2v_mod_dC1 + (4.*ddC1(i, 5)*(tr(2)**3-tr(1)**3) + 3.*ddC1(i, 4)*(tr(2)**2-tr(1)**2) + 2. * &
+                               ddC1(i, 3)*(tr(2)-tr(1)))/delu(i)*d2v_sign
 				d2v_sign = -d2v_sign
-				dd2v_mod_dC1 = dd2v_mod_dC1 + (4.*ddC1(i, 5)*(1.-tr(2)**3) + 3.*ddC1(i, 4)*(1.-tr(2)**2) + 2.*ddC1(i, 3)*(1.-tr(2)))/delu(i)*d2v_sign
+				dd2v_mod_dC1 = dd2v_mod_dC1 + (4.*ddC1(i, 5)*(1.-tr(2)**3) + 3.*ddC1(i, 4)*(1.-tr(2)**2) + 2.*ddC1(i, 3) * &
+                               (1.-tr(2)))/delu(i)*d2v_sign
 			endif
 		endif
 	enddo
@@ -816,17 +827,21 @@ if (grad_flag .eq. 1) then
 			elseif (tvalid .eq. '10') then
 				dd2v_mod_dD1 = dd2v_mod_dD1 + (4.*ddD1(i, 5)*tr(1)**3 + 3.*ddD1(i, 4)*tr(1)**2 + 2.*ddD1(i, 3)*tr(1))/delu(i)*d2v_sign
 				d2v_sign = -d2v_sign
-				dd2v_mod_dD1 = dd2v_mod_dD1 + (4.*ddD1(i, 5)*(1.-tr(1)**3) + 3.*ddD1(i, 4)*(1.-tr(1)**2) + 2.*ddD1(i, 3)*(1.-tr(1)))/delu(i)*d2v_sign
+				dd2v_mod_dD1 = dd2v_mod_dD1 + (4.*ddD1(i, 5)*(1.-tr(1)**3) + 3.*ddD1(i, 4)*(1.-tr(1)**2) + 2.*ddD1(i, 3) * &
+                               (1.-tr(1)))/delu(i)*d2v_sign
 			elseif (tvalid .eq. '01') then
 				dd2v_mod_dD1 = dd2v_mod_dD1 + (4.*ddD1(i, 5)*tr(2)**3 + 3.*ddD1(i, 4)*tr(2)**2 + 2.*ddD1(i, 3)*tr(2))/delu(i)*d2v_sign
 				d2v_sign = -d2v_sign
-				dd2v_mod_dD1 = dd2v_mod_dD1 + (4.*ddD1(i, 5)*(1.-tr(2)**3) + 3.*ddD1(i, 4)*(1.-tr(2)**2) + 2.*ddD1(i, 3)*(1.-tr(2)))/delu(i)*d2v_sign
+				dd2v_mod_dD1 = dd2v_mod_dD1 + (4.*ddD1(i, 5)*(1.-tr(2)**3) + 3.*ddD1(i, 4)*(1.-tr(2)**2) + 2.*ddD1(i, 3) * &
+                               (1.-tr(2)))/delu(i)*d2v_sign
 			elseif (tvalid .eq. '11') then
 				dd2v_mod_dD1 = dd2v_mod_dD1 + (4.*ddD1(i, 5)*tr(1)**3 + 3.*ddD1(i, 4)*tr(1)**2 + 2.*ddD1(i, 3)*tr(1))/delu(i)*d2v_sign
 				d2v_sign = -d2v_sign
-				dd2v_mod_dD1 = dd2v_mod_dD1 + (4.*ddD1(i, 5)*(tr(2)**3-tr(1)**3) + 3.*ddD1(i, 4)*(tr(2)**2-tr(1)**2) + 2.*ddD1(i, 3)*(tr(2)-tr(1)))/delu(i)*d2v_sign
+				dd2v_mod_dD1 = dd2v_mod_dD1 + (4.*ddD1(i, 5)*(tr(2)**3-tr(1)**3) + 3.*ddD1(i, 4)*(tr(2)**2-tr(1)**2) + 2.* &
+                               ddD1(i, 3)*(tr(2)-tr(1)))/delu(i)*d2v_sign
 				d2v_sign = -d2v_sign
-				dd2v_mod_dD1 = dd2v_mod_dD1 + (4.*ddD1(i, 5)*(1.-tr(2)**3) + 3.*ddD1(i, 4)*(1.-tr(2)**2) + 2.*ddD1(i, 3)*(1.-tr(2)))/delu(i)*d2v_sign
+				dd2v_mod_dD1 = dd2v_mod_dD1 + (4.*ddD1(i, 5)*(1.-tr(2)**3) + 3.*ddD1(i, 4)*(1.-tr(2)**2) + 2.*ddD1(i, 3) * &
+                               (1.-tr(2)))/delu(i)*d2v_sign
 			endif
 		endif
 	enddo
@@ -947,7 +962,8 @@ elseif (lete_flag .eq. 1) then
 						print*, 'LE Root not found, Possible values of t are: ', &
 						dble(root(1)), '+i', aimag(root(1)), dble(root(2)), '+i', aimag(root(2)), &
 						dble(root(3)), '+i', aimag(root(3)), dble(root(4)), '+i', aimag(root(4))					
-						print*, 'LE Root not found, Coeeficients are: ', real((/ A(i)-u_spl(k), B(i), C(i), D(i), E(i) /), dp), abs(A(i)+B(i)+C(i)+D(i)+E(i)-u_spl(k))
+						print*, 'LE Root not found, Coeeficients are: ', real((/ A(i)-u_spl(k), B(i), C(i), D(i), E(i) /), dp), &
+                                                                         abs(A(i)+B(i)+C(i)+D(i)+E(i)-u_spl(k))
 						print*, 'LE Root not found at ', u_spl(k)
 					endif
 				enddo

@@ -1,5 +1,5 @@
-subroutine splinethick(thickness, u, np, lethk, umxthk, mxthk, tethk, &
-                       i_le, i_te, uin_le, thick_distr, ucp_top, vcp_top, ucp_bot, vcp_bot, casename, js, develop, isdev, np_side, spline_data, splinedata)
+subroutine splinethick(thickness, u, np, lethk, umxthk, mxthk, tethk, i_le, i_te, uin_le, thick_distr, ucp_top, vcp_top, ucp_bot, &
+                       vcp_bot, casename, js, develop, isdev, np_side, spline_data, splinedata)
 ! 
 implicit none
 
@@ -186,9 +186,11 @@ print*, 'irow', irow
 
 irow = irow + 1
 if( degree == 3 ) then
-	Ax(irow, 1) = (-1/2.) ; Ax(irow, 3) = (1/2.) ;  Ax(irow, ncp-2) = (1/2.) ; Ax(irow, ncp) = (-1/2.)                         ; Ax(irow, xrhs) = 0 ; 
+	Ax(irow, 1)    = (-1/2.) ; Ax(irow, 3) = (1/2.) ;  Ax(irow, ncp-2) = (1/2.) ; Ax(irow, ncp) = (-1/2.)
+    Ax(irow, xrhs) = 0
 elseif ( degree == 4 ) then
-	Ax(irow, 1) = (-1/6.) ; Ax(irow, 2) = (-1/2.) ; Ax(irow, 3) = (1/2.) ; Ax(irow, 4) = (1/6.)  ;  Ax(irow, ncp-3) = -(-1/6.) ; Ax(irow, ncp-2) = -(-1/2.) ; Ax(irow, ncp-1) = -(1/2.) ; Ax(irow, ncp) = -(1/6.)   ; Ax(irow, xrhs) = 0 ; 
+	Ax(irow, 1)    = (-1/6.) ; Ax(irow, 2) = (-1/2.) ; Ax(irow, 3) = (1/2.) ; Ax(irow, 4) = (1/6.)  ;  Ax(irow, ncp-3) = -(-1/6.)
+    Ax(irow, ncp-2) = -(-1/2.) ; Ax(irow, ncp-1) = -(1/2.) ; Ax(irow, ncp) = -(1/6.)   ; Ax(irow, xrhs) = 0
 endif
 
 if(thick_distr == 1)then !spline thickness with BLUNT TE
@@ -222,9 +224,11 @@ endif
 irow = irow + 1
 ! the first derivative at the trailing edge upper and lower sides of the section is equal:
 if( degree == 3 ) then
-	Ax(irow, 1) = (1) ; Ax(irow, 2) = (-2) ; Ax(irow, 3) = (1)  ; Ax(irow, ncp-2) = (-1) ; Ax(irow, ncp-1) = (2) ; Ax(irow, ncp) = (-1) ; Ax(irow, xrhs) = 0 ; 
+	Ax(irow, 1) = (1) ; Ax(irow, 2) = (-2) ; Ax(irow, 3) = (1)  ; Ax(irow, ncp-2) = (-1) ; Ax(irow, ncp-1) = (2)
+    Ax(irow, ncp) = (-1); Ax(irow, xrhs) = 0 
 else if ( degree == 4 ) then
-	Ax(irow, 1) = (1/2.) ; Ax(irow, 2) = (-1/2.) ; Ax(irow, 3) = (-1/2.) ; Ax(irow, 4) = (1/2.)  ;  Ax(irow, ncp-3) = -(1/2.) ; Ax(irow, ncp-2) = -(-1/2.) ; Ax(irow, ncp-1) = -(-1/2.) ; Ax(irow, ncp) = -(1/2.)   ; Ax(irow, xrhs) = 0 ; 
+	Ax(irow, 1) = (1/2.) ; Ax(irow, 2) = (-1/2.) ; Ax(irow, 3) = (-1/2.) ; Ax(irow, 4) = (1/2.)  ;  Ax(irow, ncp-3) = -(1/2.)
+    Ax(irow, ncp-2) = -(-1/2.) ; Ax(irow, ncp-1) = -(-1/2.) ; Ax(irow, ncp) = -(1/2.)   ; Ax(irow, xrhs) = 0 ; 
 endif
 
 if(thick_distr == 1)then !spline thickness with BLUNT TE
@@ -246,8 +250,8 @@ elseif(thick_distr == 2)then ! spline thickness with SHARP TE
 	else if ( degree == 4 ) then
 		!Ay(irow, ncp-3) = -(1/2.) ; Ay(irow, ncp-2) = -(-1/2.) ; Ay(irow, ncp-1) = -(-1/2.) ; Ay(irow, ncp) = -(1/2.)   ; Ay(irow, yrhs) = 0 ; 
 		Ax(irow, :) = 0.0
-		Ax(irow, ncp-4) = (1/2.) ; Ax(irow, ncp-3) = (-1/2.)  ; Ax(irow, ncp-2) = (-1/2.)  ; Ax(irow, ncp-1) = (1/2.)   ; Ax(irow, xrhs) = 0.0 ;
-		Ay(irow, 1:ncp) = Ax(irow, 1:ncp)
+		Ax(irow, ncp-4) = (1/2.) ; Ax(irow, ncp-3) = (-1/2.)  ; Ax(irow, ncp-2) = (-1/2.)  ; Ax(irow, ncp-1) = (1/2.)
+        Ax(irow, xrhs) = 0.0 ; Ay(irow, 1:ncp) = Ax(irow, 1:ncp)
 	endif
 	!print*, "Ay"
 	!do i = 1, yrhs-1
@@ -257,8 +261,8 @@ endif
 
 if( degree == 4 ) then
 	irow = irow + 1
-	Ax(irow, 1) = (-1) ; Ax(irow, 2) = (3) ; Ax(irow, 3) = (-3) ; Ax(irow, 4) = (1) ; Ax(irow, ncp-3) = (-1) ; Ax(irow, ncp-2) = (3) ; Ax(irow, ncp-1) = (-3) ; Ax(irow, ncp) = (1) ; Ax(irow, xrhs) = 0 ; 
-	Ay(irow, 1:ncp) = Ax(irow, 1:ncp) ; Ay(irow, yrhs) = 0
+	Ax(irow, 1) = (-1) ; Ax(irow, 2) = (3) ; Ax(irow, 3) = (-3) ; Ax(irow, 4) = (1) ; Ax(irow, ncp-3) = (-1) ; Ax(irow, ncp-2) = (3)
+    Ax(irow, ncp-1) = (-3) ; Ax(irow, ncp) = (1) ; Ax(irow, xrhs) = 0 ; Ay(irow, 1:ncp) = Ax(irow, 1:ncp) ; Ay(irow, yrhs) = 0
 endif
 
 ! User input constraints
@@ -269,9 +273,11 @@ iyrow = irow
 !Specify thickenss locations !Marshall 9/13/13
 
 if( degree == 3 ) then
-	ixrow = ixrow + 1; Ax(ixrow, iLE) = 1 ; Ax(ixrow, iLE+1) = -2 ; Ax(ixrow, iLE+2) = 1 ; Ax(ixrow, ile_ee) = 0 ; Ax(ixrow, xrhs) = 0.03 !LE dx2/dt2
+	ixrow = ixrow + 1; Ax(ixrow, iLE) = 1 ; Ax(ixrow, iLE+1) = -2 ; Ax(ixrow, iLE+2) = 1 ; Ax(ixrow, ile_ee) = 0
+    Ax(ixrow, xrhs) = 0.03 !LE dx2/dt2
 else if ( degree == 4 ) then
-	ixrow = ixrow + 1; Ax(ixrow, iLE) = (1/2.) ; Ax(ixrow, iLE+1) = (-1/2.) ; Ax(ixrow, iLE+2) = (-1/2.) ; Ax(ixrow, iLE+3) = (1/2.)  ; Ax(ixrow, ile_ee) = 0 ; Ax(ixrow, xrhs) = 0.04 !LE dx2/dt2
+	ixrow = ixrow + 1; Ax(ixrow, iLE) = (1/2.) ; Ax(ixrow, iLE+1) = (-1/2.) ; Ax(ixrow, iLE+2) = (-1/2.) ; Ax(ixrow, iLE+3) = (1/2.)
+    Ax(ixrow, ile_ee) = 0 ; Ax(ixrow, xrhs) = 0.04 !LE dx2/dt2
 endif
 
 if(thick_distr == 1)then !spline thickness with BLUNT TE
@@ -280,10 +286,12 @@ if(thick_distr == 1)then !spline thickness with BLUNT TE
 		!ixrow = ixrow + 1 ; Ax(ixrow, ile_ee) = 1 ; Ax(ixrow, xrhs) = 1 !LE dx2/dt2
 		!ixrow   ixrow + 1 ; Ax(ixrow, ite_ee) = 1 ; Ax(ixrow, xrhs) = 1 !TE dx2/dt2
 		!ixrow = ixrow + 1; Ax(ixrow, iLE) = 1 ; Ax(ixrow, iLE+1) = -2 ; Ax(ixrow, iLE+2) = 1 ; Ax(ixrow, ile_ee) = 0 ; Ax(ixrow, xrhs) = 0.03 !LE dx2/dt2
-		ixrow = ixrow + 1; Ax(ixrow, iTE) = 1 ; Ax(ixrow, iTE+1) = -2 ; Ax(ixrow, iTE+2) = 1 ; Ax(ixrow, ite_ee) = 0 ; Ax(ixrow, xrhs) = -0.0 !TE dx2/dt2
+		ixrow = ixrow + 1; Ax(ixrow, iTE) = 1 ; Ax(ixrow, iTE+1) = -2 ; Ax(ixrow, iTE+2) = 1 ; Ax(ixrow, ite_ee) = 0
+        Ax(ixrow, xrhs) = -0.0 !TE dx2/dt2
 	else if ( degree == 4 ) then
 		!ixrow = ixrow + 1; Ax(ixrow, iLE) = (1/2.) ; Ax(ixrow, iLE+1) = (-1/2.) ; Ax(ixrow, iLE+2) = (-1/2.) ; Ax(ixrow, iLE+3) = (1/2.)  ; Ax(ixrow, ile_ee) = 0 ; Ax(ixrow, xrhs) = 0.04 !LE dx2/dt2
-		ixrow = ixrow + 1; Ax(ixrow, iTE) = (1/2.) ; Ax(ixrow, iTE+1) = (-1/2.) ; Ax(ixrow, iTE+2) = (-1/2.) ; Ax(ixrow, iTE+3) = (1/2.)  ; Ax(ixrow, ite_ee) = 0 ; Ax(ixrow, xrhs) = -0.00 !TE dx2/dt2 9/4/13 Kiran Changed from 0.00 to -0.20
+		ixrow = ixrow + 1; Ax(ixrow, iTE) = (1/2.) ; Ax(ixrow, iTE+1) = (-1/2.) ; Ax(ixrow, iTE+2) = (-1/2.)
+        Ax(ixrow, iTE+3) = (1/2.)  ; Ax(ixrow, ite_ee) = 0 ; Ax(ixrow, xrhs) = -0.00 !TE dx2/dt2 9/4/13 Kiran Changed from 0.00 to -0.20
 	endif
 elseif(thick_distr == 2)then ! spline thickness with SHARP TE
 	!Specify the thickness location using a sharpness angle for sharp TE.
@@ -298,16 +306,20 @@ endif
 if( degree == 3 ) then
 	!ixrow = ixrow + 1 ; Ax(ixrow, ix_le_float) = 1 ; Ax(ixrow, xrhs) = 0.12 !Max thickness x by LE
 	!ixrow = ixrow + 1 ; Ax(ixrow, ix_le) = 1 ; Ax(ixrow, ix_le+1) = -2 ; Ax(ixrow, ix_le+2) = 1 ; Ax(ixrow, ix_le_float) = 0 ; Ax(ixrow, xrhs) = 0. !Max thickness dx2/dt2 by LE
-	ixrow = ixrow + 1 ; Ax(ixrow, ix_le) = -1 ; Ax(ixrow, ix_le+1) = 3 ; Ax(ixrow, ix_le+2) = -3 ;  Ax(ixrow, ix_le+3) = 1 ; Ax(ixrow, ix_le_float) = 0 ; Ax(ixrow, xrhs) = 0. !Max thickness dx3/dt3 by LE
+	ixrow = ixrow + 1 ; Ax(ixrow, ix_le) = -1 ; Ax(ixrow, ix_le+1) = 3 ; Ax(ixrow, ix_le+2) = -3 ;  Ax(ixrow, ix_le+3) = 1
+    Ax(ixrow, ix_le_float) = 0 ; Ax(ixrow, xrhs) = 0. !Max thickness dx3/dt3 by LE
 	!iyrow = iyrow + 1 ; Ay(iyrow, ix_le) = 1 ; Ay(iyrow, ix_le+1) = -2 ; Ay(iyrow, ix_le+2) = 1 ; Ay(iyrow, iy_le_float) = 0 ; Ay(iyrow, yrhs) = 0. !Max thickness dy2/dt2
-	iyrow = iyrow + 1 ; Ay(iyrow, ix_le) = -1 ; Ay(iyrow, ix_le+1) = 3 ; Ay(iyrow, ix_le+2) = -3 ; Ay(iyrow, ix_le+3) = 1 ; Ay(iyrow, iy_le_float) = 0 ; Ay(iyrow, yrhs) = 0. !Max thickness dy3/dt3 by LE
+	iyrow = iyrow + 1 ; Ay(iyrow, ix_le) = -1 ; Ay(iyrow, ix_le+1) = 3 ; Ay(iyrow, ix_le+2) = -3 ;  Ay(iyrow, ix_le+3) = 1
+    Ay(iyrow, iy_le_float) = 0 ; Ay(iyrow, yrhs) = 0. !Max thickness dy3/dt3 by LE
 else if ( degree == 4 ) then
 	!ixrow = ixrow + 1 ; Ax(ixrow, ix_le) = 1/2. ; Ax(ixrow, ix_le+1) = -1/2. ; Ax(ixrow, ix_le+2) = -1/2. ; Ax(ixrow, ix_le+3) = 1/2. ; Ax(ixrow, ix_le_float) = 0 ; Ax(ixrow, xrhs) = 0 !Max thickness dx2/dt2 by LE
-	ixrow = ixrow + 1 ; Ax(ixrow, ix_le) = -1 ; Ax(ixrow, ix_le+1) = 3 ; Ax(ixrow, ix_le+2) = -3 ; Ax(ixrow, ix_le+3) = 1 ; Ax(ixrow, ix_le_float) = 0 ; Ax(ixrow, xrhs) = 0 !Max thickness dx3/dt3 by LE
+	ixrow = ixrow + 1 ; Ax(ixrow, ix_le) = -1 ; Ax(ixrow, ix_le+1) = 3 ; Ax(ixrow, ix_le+2) = -3 ;  Ax(ixrow, ix_le+3) = 1
+    Ax(ixrow, ix_le_float) = 0 ; Ax(ixrow, xrhs) = 0 !Max thickness dx3/dt3 by LE
 	!ixrow = ixrow + 1 ; Ax(ixrow, ix_le) = 1 ; Ax(ixrow, ix_le+1) = -4 ; Ax(ixrow, ix_le+2) = 6 ; Ax(ixrow, ix_le+3) = -4 ; Ax(ixrow, ix_le+4) = 1 ; Ax(ixrow, ix_le_float) = 0 ; Ax(ixrow, xrhs) = 0 !Max thickness dx4/dt4 by LE
 	!iyrow = iyrow + 1 ; Ay(iyrow, ix_le) = 1/2. ; Ay(iyrow, ix_le+1) = -1/2. ; Ay(iyrow, ix_le+2) = -1/2. ; Ay(iyrow, ix_le+3) = 1/2. ; Ay(iyrow, iy_le_float) = 0 ; Ay(iyrow, yrhs) = 0 !Max thickness dy2/dt2 by LE
 	!iyrow = iyrow + 1 ; Ay(iyrow, ix_le) = -1 ; Ay(iyrow, ix_le+1) = 3. ; Ay(iyrow, ix_le+2) = -3. ; Ay(iyrow, ix_le+3) = 1. ; Ay(iyrow, iy_le_float) = 0 ; Ay(iyrow, yrhs) = 0 !Max thickness dy3/dt3 by LE
-	iyrow = iyrow + 1 ; Ay(iyrow, ix_le) = 1 ; Ay(iyrow, ix_le+1) = -4 ; Ay(iyrow, ix_le+2) = 6 ; Ay(iyrow, ix_le+3) = -4 ; Ay(iyrow, ix_le+4) = 1 ; Ay(iyrow, iy_le_float) = 0 ; Ay(iyrow, yrhs) = 0 !Max thickness dy4/dt4 by LE
+	iyrow = iyrow + 1 ; Ay(iyrow, ix_le) = 1 ; Ay(iyrow, ix_le+1) = -4 ; Ay(iyrow, ix_le+2) = 6 ;  Ay(iyrow, ix_le+3) = -4
+    Ay(iyrow, ix_le+4) = 1 ; Ay(iyrow, iy_le_float) = 0 ; Ay(iyrow, yrhs) = 0 !Max thickness dy4/dt4 by LE
 endif
 
 !Max thickness control by TE
@@ -315,13 +327,17 @@ endif
 if( degree == 3 ) then
 	!ixrow = ixrow + 1 ; Ax(ixrow, ix_te_float) = 1 ; Ax(ixrow, xrhs) = 0.625 !Max thickness x by TE
 	!ixrow = ixrow + 1 ; Ax(ixrow, ix_te ) = 1   ; Ax(ixrow, ix_te+1 ) = -2 ; Ax(ixrow, ix_te+2 ) = 1    ; Ax(ixrow, ix_te_float) = 0 ; Ax(ixrow, xrhs) = 0. !Max thickness dx2/dt2 by TE
-	ixrow = ixrow + 1 ; Ax(ixrow, ix_te ) = -1 ; Ax(ixrow, ix_te+1 ) = 3 ; Ax(ixrow, ix_te+2 ) = -3   ;  Ax(ixrow, ix_te+3) = 1 ; Ax(ixrow, ix_te_float) = 0 ; Ax(ixrow, xrhs) = 0. !Max thickness dx3/dt3 by TE
-	iyrow = iyrow + 1 ; Ay(iyrow, imxthk) = 0.5 ; Ay(iyrow, imxthk+1) = 0 ; Ay(iyrow, imxthk+2) = -0.5 ; Ay(iyrow, iy_te_float) = 0 ; Ay(iyrow, yrhs) = 0. !Max thickness dy/dt
+	ixrow = ixrow + 1 ; Ax(ixrow, ix_te ) = -1 ; Ax(ixrow, ix_te+1 ) = 3 ; Ax(ixrow, ix_te+2 ) = -3   ;  Ax(ixrow, ix_te+3) = 1
+    Ax(ixrow, ix_te_float) = 0 ; Ax(ixrow, xrhs) = 0. !Max thickness dx3/dt3 by TE
+	iyrow = iyrow + 1 ; Ay(iyrow, imxthk) = 0.5 ; Ay(iyrow, imxthk+1) = 0 ; Ay(iyrow, imxthk+2) = -0.5 ; Ay(iyrow, iy_te_float) = 0
+    Ay(iyrow, yrhs) = 0. !Max thickness dy/dt
 else if ( degree == 4 ) then
 	!ixrow = ixrow + 1 ; Ax(ixrow, ix_te ) = 1/2.  ; Ax(ixrow, ix_te+1 ) = -1/2. ; Ax(ixrow, ix_te+2 ) = -1/2. ; Ax(ixrow, ix_te+3 ) = 1/2. ; Ax(ixrow, ix_te_float) = 0 ; Ax(ixrow, xrhs) = 0 !Max thickness dx2/dt2 by TE
 	!ixrow = ixrow + 1 ; Ax(ixrow, ix_te ) = -1    ; Ax(ixrow, ix_te+1 ) = 3. ; Ax(ixrow, ix_te+2 ) = -3. ; Ax(ixrow, ix_te+3 ) = 1. ; Ax(ixrow, ix_te_float) = 0 ; Ax(ixrow, xrhs) = 0 !Max thickness dx3/dt3 by TE
-	ixrow = ixrow + 1 ; Ax(ixrow, ix_te) = 1   ; Ax(ixrow, ix_te+1) = -4 ; Ax(ixrow, ix_te+2) = 6 ; Ax(ixrow, ix_te+3) = -4 ; Ax(ixrow, ix_te+4) = 1 ; Ax(ixrow, ix_te_float) = 0 ; Ax(ixrow, xrhs) = 0 !Max thickness dx4/dt4 by TE
-	iyrow = iyrow + 1 ; Ay(iyrow, imxthk) = -1/6. ; Ay(iyrow, imxthk+1) = -1/2. ; Ay(iyrow, imxthk+2) = 1/2. ; Ay(iyrow, imxthk+3) = 1/6. ; Ay(iyrow, iy_te_float) = 0 ; Ay(iyrow, yrhs) = 0 !Max thickness dy/dt
+	ixrow = ixrow + 1 ; Ax(ixrow, ix_te) = 1   ; Ax(ixrow, ix_te+1) = -4 ; Ax(ixrow, ix_te+2) = 6 ; Ax(ixrow, ix_te+3) = -4
+    Ax(ixrow, ix_te+4) = 1 ; Ax(ixrow, ix_te_float) = 0 ; Ax(ixrow, xrhs) = 0 !Max thickness dx4/dt4 by TE
+	iyrow = iyrow + 1 ; Ay(iyrow, imxthk) = -1/6. ; Ay(iyrow, imxthk+1) = -1/2. ; Ay(iyrow, imxthk+2) = 1/2.
+    Ay(iyrow, imxthk+3) = 1/6. ; Ay(iyrow, iy_te_float) = 0 ; Ay(iyrow, yrhs) = 0 !Max thickness dy/dt
 endif
 
 !Max thickness control by TE TE
@@ -330,18 +346,22 @@ if( ix_tete_float > ncp ) then
 	if( degree == 3 ) then
 		!ixrow = ixrow + 1 ; Ax(ixrow, ix_tete_float) = 1 ; Ax(ixrow, xrhs) = 0.825 !Max thickness x by TE
 		!ixrow = ixrow + 1 ; Ax(ixrow, ix_tete ) = 1   ; Ax(ixrow, ix_tete+1 ) = -2 ; Ax(ixrow, ix_tete+2 ) = 1    ; Ax(ixrow, ix_tete_float) = 0 ; Ax(ixrow, xrhs) = 0. !Max thickness dx2/dt2 by TE
-		ixrow = ixrow + 1 ; Ax(ixrow, ix_tete ) = -1 ; Ax(ixrow, ix_tete+1 ) = 3 ; Ax(ixrow, ix_tete+2 ) = -3   ;  Ax(ixrow, ix_tete+3) = 1 ; Ax(ixrow, ix_tete_float) = 0 ; Ax(ixrow, xrhs) = 0. !Max thickness dx3/dt3 by TE
+		ixrow = ixrow + 1 ; Ax(ixrow, ix_tete ) = -1 ; Ax(ixrow, ix_tete+1 ) = 3 ; Ax(ixrow, ix_tete+2 ) = -3
+        Ax(ixrow, ix_tete+3) = 1 ; Ax(ixrow, ix_tete_float) = 0 ; Ax(ixrow, xrhs) = 0. !Max thickness dx3/dt3 by TE
 		!iyrow = iyrow + 1 ; Ay(iyrow, ix_tete) = 0.5 ; Ay(iyrow, ix_tete+1) = 0 ; Ay(iyrow, ix_tete+2) = -0.5 ; Ay(iyrow, iy_tete_float) = 0 ; Ay(iyrow, yrhs) = 0. !Max thickness dy/dt
 		!iyrow = iyrow + 1 ; Ay(iyrow, ix_tete) = 1 ; Ay(iyrow, ix_tete+1) = -2 ; Ay(iyrow, ix_tete+2) = 1 ; Ay(iyrow, iy_tete_float) = 0 ; Ay(iyrow, yrhs) = 0. !Max thickness dy2/dt2
 		!                    Ay(iyrow, ix_le  ) = -1/2. ; Ay(iyrow, ix_le+1  ) = 2/2. ; Ay(iyrow, ix_le+2  ) = -1/2.
-		iyrow = iyrow + 1 ; Ay(iyrow, ix_tete) = -1 ; Ay(iyrow, ix_tete+1) = 3 ; Ay(iyrow, ix_tete+2) = -3 ; Ay(iyrow, ix_tete+3) = 1 ; Ay(iyrow, iy_tete_float) = 0 ; Ay(iyrow, yrhs) = 0. !Max thickness dy3/dt3 by TE
+		iyrow = iyrow + 1 ; Ay(iyrow, ix_tete) = -1 ; Ay(iyrow, ix_tete+1) = 3 ; Ay(iyrow, ix_tete+2) = -3
+        Ay(iyrow, ix_tete+3) = 1 ; Ay(iyrow, iy_tete_float) = 0 ; Ay(iyrow, yrhs) = 0. !Max thickness dy3/dt3 by TE
 		!                    Ay(iyrow, ix_le  ) = 1 ; Ay(iyrow, ix_le+1  ) = -3 ; Ay(iyrow, ix_le+2  ) = 3 ; Ay(iyrow, ix_le+3  ) = -1 ;
 	else if ( degree == 4 ) then
 		!ixrow = ixrow + 1 ; Ax(ixrow, ix_tete) = 1/2.  ; Ax(ixrow, ix_tete+1 ) = -1/2. ; Ax(ixrow, ix_tete+2 ) = -1/2. ; Ax(ixrow, ix_tete+3 ) = 1/2. ; Ax(ixrow, ix_tete_float) = 0 ; Ax(ixrow, xrhs) = 0 !Max thickness dx2/dt2 by TE TE
 		!ixrow = ixrow + 1 ; Ax(ixrow, ix_tete) = -1   ; Ax(ixrow, ix_tete+1) = 3. ; Ax(ixrow, ix_tete+2) = -3. ; Ax(ixrow, ix_tete+3) = 1. ; Ax(ixrow, ix_tete_float) = 0 ; Ax(ixrow, xrhs) = 0 !Max thickness dx3/dt3 by TE TE
-		ixrow = ixrow + 1 ; Ax(ixrow, ix_tete) = 1   ; Ax(ixrow, ix_tete+1) = -4 ; Ax(ixrow, ix_tete+2) = 6 ; Ax(ixrow, ix_tete+3) = -4 ; Ax(ixrow, ix_tete+4) = 1 ; Ax(ixrow, ix_tete_float) = 0 ; Ax(ixrow, xrhs) = 0 !Max thickness dx4/dt4 by TE TE
+		ixrow = ixrow + 1 ; Ax(ixrow, ix_tete) = 1   ; Ax(ixrow, ix_tete+1) = -4 ; Ax(ixrow, ix_tete+2) = 6 
+        Ax(ixrow, ix_tete+3) = -4 ; Ax(ixrow, ix_tete+4) = 1 ; Ax(ixrow, ix_tete_float) = 0 ; Ax(ixrow, xrhs) = 0 !Max thickness dx4/dt4 by TE TE
 		!iyrow = iyrow + 1 ; Ay(iyrow, ix_tete) = 1/2. ; Ay(iyrow, ix_tete+1) = -1/2. ; Ay(iyrow, ix_tete+2) = -1/2. ; Ay(iyrow, ix_tete+3) = 1/2. ; Ay(iyrow, iy_tete_float) = 0 ; Ay(iyrow, yrhs) = 0 !Max thickness dy2/dt2
-		iyrow = iyrow + 1 ; Ay(iyrow, ix_tete) = -1. ; Ay(iyrow, ix_tete+1) = 3. ; Ay(iyrow, ix_tete+2) = -3 ; Ay(iyrow, ix_tete+3) = 1. ; Ay(iyrow, iy_tete_float) = 0 ; Ay(iyrow, yrhs) = 0 !Max thickness dy3/dt3
+		iyrow = iyrow + 1 ; Ay(iyrow, ix_tete) = -1. ; Ay(iyrow, ix_tete+1) = 3. ; Ay(iyrow, ix_tete+2) = -3
+        Ay(iyrow, ix_tete+3) = 1. ; Ay(iyrow, iy_tete_float) = 0 ; Ay(iyrow, yrhs) = 0 !Max thickness dy3/dt3
 		!iyrow = iyrow + 1 ; Ay(iyrow, ix_tete) = 1 ; Ay(iyrow, ix_tete+1) = -4 ; Ay(iyrow, ix_tete+2) = 6 ; Ay(iyrow, ix_tete+3) = -4 ; Ay(iyrow, ix_tete+4) = 1 ; Ay(iyrow, iy_tete_float) = 0 ; Ay(iyrow, yrhs) = 0 !Max thickness dy4/dt4 by TE TE
 	endif
 endif
@@ -426,15 +446,15 @@ enddo
 if(isdev)then
 	file1 = 'splthickness_tec.'//trim(adjustl(sec))//'.'//trim(casename)//'.dat'
 	open(unit = 16, file = file1, form = "formatted")
-	write(16, *), 'Top control Pts. 				 						bot control Pts.'
-	write(16, *), "ucp_top					vcp_top						ucp_bot					vcp_bot"
+	write(16, *) 'Top control Pts. 				 						bot control Pts.'
+	write(16, *) "ucp_top					vcp_top						ucp_bot					vcp_bot"
 	do i = 1, ncp_side
-		write(16, *), ucp_top(i), vcp_top(i), " ", ucp_bot(i), vcp_bot(i)
+		write(16, *) ucp_top(i), vcp_top(i), " ", ucp_bot(i), vcp_bot(i)
 	enddo
-	write(16, *), 'thickness top											thickness bot'
-	write(16, *), "u							top_thickness				u						bot_thickness"
+	write(16, *) 'thickness top											thickness bot'
+	write(16, *) "u							top_thickness				u						bot_thickness"
 	do i = 1, np
-		write(16, *), u(i), top_thickness(i), " ", u(i), bot_thickness(i)
+		write(16, *) u(i), top_thickness(i), " ", u(i), bot_thickness(i)
 	enddo
 	close(16)
 endif
@@ -624,10 +644,10 @@ enddo
 
 ! write the thickness values in a file:
 open(unit = 61, file = "thickness_multip.txt", form = "formatted")
-write(61, *), "ui splthick"     
+write(61, *) "ui splthick"     
 do i = 1, np     
 	! write results in a file:
-	write(61, *), u(i), "    ", splthick(i)
+	write(61, *) u(i), "    ", splthick(i)
 end do
 close(61)         
 
@@ -657,7 +677,8 @@ ucp_thk_mat = reshape((/1., 1./3., 11., 1., -(11.*xcp_thk(3))-xcp_thk(4), xcp_th
 call gauss_jordan(2, 1, ucp_thk_mat, info)
 xcp_thk(1:2) = ucp_thk_mat(:, 3)
 ycp_thk(1) = -(11.*ycp_thk(2))-(11.*ycp_thk(3))-ycp_thk(4)
-ucp_thk_mat = reshape((/11., 1., 1., 1./3., 24.-xcp_thk(ncp-3)-(11.*xcp_thk(ncp-2)), (xcp_thk(ncp-3)/3.)+xcp_thk(ncp-2) /), (/2, 3/))
+ucp_thk_mat = reshape((/11., 1., 1., 1./3., 24.-xcp_thk(ncp-3)-(11.*xcp_thk(ncp-2)), (xcp_thk(ncp-3)/3.) + &
+                     xcp_thk(ncp-2) /), (/2, 3/))
 call gauss_jordan(2, 1, ucp_thk_mat, info)
 xcp_thk(ncp-1:ncp) = ucp_thk_mat(:, 3)
 ycp_thk(ncp) = -ycp_thk(ncp-3)-(11.*ycp_thk(ncp-2))-(11.*ycp_thk(ncp-1))
@@ -672,7 +693,8 @@ if (thick_distr_3_flag(:1) .eq. '1') then
 		if (umxthk <= x_spl_end) exit
 	end do
 	i_cp = i
-	write (*, '(A, F5.3, ":", F5.3, I2, ":", I2)') 'End points of segment containing maximum thickness : ', bspline4(xcp_thk(i:i+4), 0.), x_spl_end
+	write (*, '(A, F5.3, ":", F5.3, I2, ":", I2)') 'End points of segment containing maximum thickness : ', &
+                                                   bspline4(xcp_thk(i:i+4), 0.), x_spl_end
 	write (*, '(A, I2, ":", I2)') 'Control points containing maximum thickness : ', i, i+4
 	! Coefficients of Quartic t equation
 	ce(0) = xcp_thk(i)+(11.*xcp_thk(i+1))+(11.*xcp_thk(i+2))+xcp_thk(i+3)-(24.*umxthk)

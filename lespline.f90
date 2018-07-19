@@ -108,10 +108,10 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
 	!print*,'xtop',xtop
 	!print*,'ytop',ytop
 
-		write(90,*),'xtop rotated',xtop
-		write(90,*),'ytop rotated',ytop
-		write(90,*),'xbot rotated',xbot
-		write(90,*),'ybot rotated',ybot
+		write(90,*) 'xtop rotated',xtop
+		write(90,*) 'ytop rotated',ytop
+		write(90,*) 'xbot rotated',xbot
+		write(90,*) 'ybot rotated',ybot
 	close(90)
 	
 	cam_le = camber_le(1)
@@ -256,20 +256,23 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
 	
 	! evaluate the functions:
 	! sum_alpha_a = f(c_le_a) 
-	call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,c_le_a_top,c_le_a_bot,degree,no_LE_segments,dimen,slope_le_top,slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,&
-		xtop_le,ytop_le,xbot_le,ybot_le,uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,LE_vertex_dis)	
+	call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,c_le_a_top,c_le_a_bot,degree,no_LE_segments,dimen,slope_le_top,   &
+                       slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,xtop_le,ytop_le,xbot_le,ybot_le,uLE, &
+                       vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,LE_vertex_dis)	
 	call sum_alpha_function(xtop,ytop,xbot,ybot,dimen,le_pos,x_le_spl,y_le_spl,sum_alpha_le_spl_top,sum_alpha_le_spl_bot)
 	sum_alpha_top_a = sum_alpha_le_spl_top; 	sum_alpha_bot_a = sum_alpha_le_spl_bot
 	
 	! sum_alpha_b =  f(c_le_b)
-	call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,c_le_b_top,c_le_b_bot,degree,no_LE_segments,dimen,slope_le_top,slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,&
-		xtop_le,ytop_le,xbot_le,ybot_le,uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,LE_vertex_dis)
+	call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,c_le_b_top,c_le_b_bot,degree,no_LE_segments,dimen,slope_le_top,   &
+                       slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,xtop_le,ytop_le,xbot_le,ybot_le,uLE, &
+                       vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,LE_vertex_dis)
 	call sum_alpha_function(xtop,ytop,xbot,ybot,dimen,le_pos,x_le_spl,y_le_spl,sum_alpha_le_spl_top,sum_alpha_le_spl_bot)
 	sum_alpha_top_b = sum_alpha_le_spl_top; 	sum_alpha_bot_b = sum_alpha_le_spl_bot
 	
 	! sum_alpha_c =  f(c_le_c)
-	call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,c_le_c_top,c_le_c_bot,degree,no_LE_segments,dimen,slope_le_top,slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,&
-		xtop_le,ytop_le,xbot_le,ybot_le,uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,LE_vertex_dis)
+	call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,c_le_c_top,c_le_c_bot,degree,no_LE_segments,dimen,slope_le_top,   &
+                       slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,xtop_le,ytop_le,xbot_le,ybot_le,uLE, &
+                       vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,LE_vertex_dis)
 	call sum_alpha_function(xtop,ytop,xbot,ybot,dimen,le_pos,x_le_spl,y_le_spl,sum_alpha_le_spl_top,sum_alpha_le_spl_bot)
 	sum_alpha_top_c = sum_alpha_le_spl_top; 	sum_alpha_bot_c = sum_alpha_le_spl_bot
 	
@@ -298,14 +301,18 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
 	endif
 	
 	!sum_alpha_1 = f(t1)
-	call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,t1_top,t1_bot,degree,no_LE_segments,dimen,slope_le_top,slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,&
-		xtop_le,ytop_le,xbot_le,ybot_le,uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,LE_vertex_dis)	
+	call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,t1_top,t1_bot,degree,no_LE_segments,dimen,slope_le_top,       &
+                       slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,xtop_le,ytop_le,xbot_le,ybot_le, &
+                       uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,      & 
+                       LE_vertex_dis)	
 	call sum_alpha_function(xtop,ytop,xbot,ybot,dimen,le_pos,x_le_spl,y_le_spl,sum_alpha_le_spl_top,sum_alpha_le_spl_bot)
 	sum_alpha_top_1 = sum_alpha_le_spl_top; 	sum_alpha_bot_1 = sum_alpha_le_spl_bot
 	
 	!sum_alpha_2 = f(t2)
-	call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,t2_top,t2_bot,degree,no_LE_segments,dimen,slope_le_top,slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,&
-		xtop_le,ytop_le,xbot_le,ybot_le,uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,LE_vertex_dis)	
+	call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,t2_top,t2_bot,degree,no_LE_segments,dimen,slope_le_top,       &
+                       slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,xtop_le,ytop_le,xbot_le,ybot_le, &
+                       uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,      &
+                       LE_vertex_dis)	
 	call sum_alpha_function(xtop,ytop,xbot,ybot,dimen,le_pos,x_le_spl,y_le_spl,sum_alpha_le_spl_top,sum_alpha_le_spl_bot)
 	sum_alpha_top_2 = sum_alpha_le_spl_top; 	sum_alpha_bot_2 = sum_alpha_le_spl_bot
 	
@@ -319,16 +326,20 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
 			c_le_b_top = t2_top; 	t2_top = t1_top
 			t1_top = t2_top - golden_ratio *(t2_top - c_le_a_top)
 			sum_alpha_top_2 = sum_alpha_top_1
-			call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,t1_top,c_le_c_bot,degree,no_LE_segments,dimen,slope_le_top,slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,&
-				xtop_le,ytop_le,xbot_le,ybot_le,uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,LE_vertex_dis)	
+			call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,t1_top,c_le_c_bot,degree,no_LE_segments,dimen,slope_le_top,   &
+                               slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,xtop_le,ytop_le,xbot_le,ybot_le, &
+                               uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,      &
+                               LE_vertex_dis)	
 			call sum_alpha_function(xtop,ytop,xbot,ybot,dimen,le_pos,x_le_spl,y_le_spl,sum_alpha_le_spl_top,sum_alpha_le_spl_bot)
 			sum_alpha_top_1 = sum_alpha_le_spl_top;
 		else
 			c_le_a_top = t1_top; t1_top = t2_top
 			t2_top = t1_top + golden_ratio *(c_le_b_top - t1_top)
 			sum_alpha_top_1 = sum_alpha_top_2;	
-			call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,t2_top,c_le_c_bot,degree,no_LE_segments,dimen,slope_le_top,slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,&
-				xtop_le,ytop_le,xbot_le,ybot_le,uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,LE_vertex_dis)	
+			call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,t2_top,c_le_c_bot,degree,no_LE_segments,dimen,slope_le_top,   &
+                               slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,xtop_le,ytop_le,xbot_le,ybot_le, &
+                               uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,      &
+                               LE_vertex_dis)	
 			call sum_alpha_function(xtop,ytop,xbot,ybot,dimen,le_pos,x_le_spl,y_le_spl,sum_alpha_le_spl_top,sum_alpha_le_spl_bot)
 			sum_alpha_top_2 = sum_alpha_le_spl_top;
 		endif
@@ -358,16 +369,20 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
 			c_le_b_bot = t2_bot; 	t2_bot = t1_bot
 			t1_bot = t2_bot - golden_ratio *(t2_bot - c_le_a_bot)
 			sum_alpha_bot_2 = sum_alpha_bot_1
-			call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,t1_bot,degree,no_LE_segments,dimen,slope_le_top,slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,&
-				xtop_le,ytop_le,xbot_le,ybot_le,uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,LE_vertex_dis)	
+			call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,t1_bot,degree,no_LE_segments,dimen,slope_le_top,   &
+                               slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,xtop_le,ytop_le,xbot_le,ybot_le, &
+                               uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,      &
+                               LE_vertex_dis)	
 			call sum_alpha_function(xtop,ytop,xbot,ybot,dimen,le_pos,x_le_spl,y_le_spl,sum_alpha_le_spl_top,sum_alpha_le_spl_bot)
 			sum_alpha_bot_1 = sum_alpha_le_spl_bot
 		else
 			c_le_a_bot = t1_bot; t1_bot = t2_bot
 			t2_bot = t1_bot + golden_ratio *(c_le_b_bot - t1_bot)
 			sum_alpha_bot_1 = sum_alpha_bot_2;	
-			call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,t2_bot,degree,no_LE_segments,dimen,slope_le_top,slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,&
-				xtop_le,ytop_le,xbot_le,ybot_le,uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,LE_vertex_dis)	
+			call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,t2_bot,degree,no_LE_segments,dimen,slope_le_top,   &
+                               slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,xtop_le,ytop_le,xbot_le,ybot_le, &
+                               uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,      &
+                               LE_vertex_dis)	
 			call sum_alpha_function(xtop,ytop,xbot,ybot,dimen,le_pos,x_le_spl,y_le_spl,sum_alpha_le_spl_top,sum_alpha_le_spl_bot)
 			sum_alpha_bot_2 = sum_alpha_le_spl_bot
 		endif
@@ -390,8 +405,9 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
 !=========================================================================================	
 	
 ! Evaluation of the LE control points spline values (done in subroutine for LE optimization)
- call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,C_le_y_bot,degree,no_LE_segments,dimen,slope_le_top,slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,&
-	xtop_le,ytop_le,xbot_le,ybot_le,uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,LE_vertex_dis)
+ call le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,C_le_y_bot,degree,no_LE_segments,dimen,slope_le_top,   &
+                    slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,xtop_le,ytop_le,xbot_le,ybot_le,uLE, &
+                    vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,LE_vertex_dis)
 	
 !=========================================================================================
 !=========================================================================================
@@ -435,38 +451,38 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
 !	if (plot == js) then 
       file1 = 'le_CP.'//trim(adjustl(sec))//'.'//trim(casename)//'.txt'
       open(unit=71,file=file1, form="formatted")
-         write(71,*),'xcp_le',"	",'ycp_le'
+         write(71,*) 'xcp_le',"	",'ycp_le'
          do i=1,ncp
-	         write(71,*),xcp(i),"	",ycp(i)
+	         write(71,*) xcp(i),"	",ycp(i)
          enddo
       close(71)
       if(isdev)then
 	      file2 = 'le_def.'//trim(adjustl(sec))//'.'//trim(casename)//'.txt'
           open(unit=73,file=file2, form="formatted")
-             write(73,*),"xtop	ytop"
+             write(73,*) "xtop	ytop"
               do i=1,dimen
-               write(73,*),xtop(i)," ",ytop(i)
+               write(73,*) xtop(i)," ",ytop(i)
              end do
              write(73,*)
-             write(73,*),"xbot	ybot"
+             write(73,*) "xbot	ybot"
               do i=1,dimen
-               write(73,*),xbot(i)," ",ybot(i)
+               write(73,*) xbot(i)," ",ybot(i)
              end do         
            close(73)
       endif
       file3 = 'le_spline.'//trim(adjustl(sec))//'.'//trim(casename)//'.txt'
       open(unit=74,file=file3, form="formatted")
-         write(74,*),"x_le_spl	y_le_spl"
+         write(74,*) "x_le_spl	y_le_spl"
           do i=1,(2*le_pos-1)
-           write(74,*),x_le_spl(i)," ",y_le_spl(i)
+           write(74,*) x_le_spl(i)," ",y_le_spl(i)
          end do
        close(74)
       if(isdev)then
           file4 = 'le_segments.'//trim(adjustl(sec))//'.'//trim(casename)//'.txt' 
           open(unit=75,file=file4, form="formatted")
-             write(75,*),"x_spl_end	y_spl_end"
+             write(75,*) "x_spl_end	y_spl_end"
               do i=1,ncp-(degree-1)
-                write(75,*),x_spl_end(i)," ",y_spl_end(i)
+                write(75,*) x_spl_end(i)," ",y_spl_end(i)
              end do
            close(75)
       endif 
@@ -692,8 +708,9 @@ end function
 !*****************************************************************
 !*****************************************************************
 !*****************************************************************
-subroutine le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,C_le_y_bot,degree,no_LE_segments,dimen,slope_le_top,slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,&
-	xtop_le,ytop_le,xbot_le,ybot_le,uLE,vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,LE_vertex_dis)
+subroutine le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,C_le_y_bot,degree,no_LE_segments,dimen,slope_le_top,   &
+                         slope_le_bot,curv_le_top,curv_le_bot,slope_curv_top,slope_curv_bot,xtop_le,ytop_le,xbot_le,ybot_le,uLE, &
+                         vLE,le_camber_ang,C_le_x_bot,C_le_x_top,xcp,ycp,ncp,le_pos,uin_le,le_thk,pi,LE_vertex_ang,LE_vertex_dis)
 	
 	  implicit none
 
@@ -755,10 +772,14 @@ subroutine le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,C_le_y
 	
 
                                    !xcp(1),                 xcp(2),                xcp(3),                   xcp(4),                   ycp(1), ycp(2), ycp(3), ycp(4)    , RHS
-     a(1,1:4) = (/                    1/6.,                   2/3.,                   1/6.,                     0. /) ; a(1,8:11) = (/    0.,     0.,     0.,     0. /) ; a(1,15) = xtop_le
-     a(2,1:4) = (/                      0.,                     0.,                     0.,                     0. /) ; a(2,8:11) = (/  1/6.,   2/3.,   1/6.,     0. /) ; a(2,15) = ytop_le
-     a(3,1:4) = (/ 	  slope_le_top*(-1/2.),                     0., 	slope_le_top*(1/2.),                     0. /) ; a(3,8:11) = (/  1/2.,     0.,  -1/2.,     0. /) ; a(3,15) =0.
-     a(4,1:4) = (/             curv_le_top,         -2*curv_le_top,            	curv_le_top,                     0. /) ; a(4,8:11) = (/   -1.,     2.,    -1.,     0. /) ; a(4,15) =0.
+     a(1,1:4)  = (/                    1/6.,                   2/3.,                   1/6.,                     0. /)
+     a(1,8:11) = (/    0.,     0.,     0.,     0. /) ; a(1,15) = xtop_le
+     a(2,1:4)  = (/                      0.,                     0.,                     0.,                     0. /)
+     a(2,8:11) = (/  1/6.,   2/3.,   1/6.,     0. /) ; a(2,15) = ytop_le
+     a(3,1:4)  = (/ 	  slope_le_top*(-1/2.),                     0., 	slope_le_top*(1/2.),                     0. /)
+     a(3,8:11) = (/  1/2.,     0.,  -1/2.,     0. /) ; a(3,15) =0.
+     a(4,1:4)  = (/             curv_le_top,         -2*curv_le_top,            	curv_le_top,                     0. /)
+     a(4,8:11) = (/   -1.,     2.,    -1.,     0. /) ; a(4,15) =0.
 
      !This version sets the LE point at uLE, vLE  
                     !xcp(3), xcp(4), xcp(5)	 
@@ -776,14 +797,15 @@ subroutine le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,C_le_y
 !	 a(10,4:7) = (/     0.,           0.,         0.,          0. /) ; a(10,11:14) = (/   (-C_le_y),           1.,  -1+C_le_y,          0. /) 
 
 ! Rotated axes: xcp(3),ycp(3), xcp(5),ycp(5)
-	 a(7, 	1:4) 	= (/     0.,    (-1+C_le_x_top)*cos(le_camber_ang),         cos(le_camber_ang),         -C_le_x_top*cos(le_camber_ang)/) 
-	  a(7,  8:11) 	= (/     0.,     (1-C_le_x_top)*sin(le_camber_ang),        -sin(le_camber_ang),          C_le_x_top*sin(le_camber_ang)/)
-	 a(8, 	1:4) 	= (/     0.,    (-C_le_y_top)*sin(le_camber_ang),          sin(le_camber_ang),        (-1+C_le_y_top)*sin(le_camber_ang)/)
-	  a(8,  8:11) 	= (/     0.,    (-C_le_y_top)*cos(le_camber_ang),          cos(le_camber_ang),        (-1+C_le_y_top)*cos(le_camber_ang)/)
-	 a(9, 	4:7) 	= (/  (-C_le_x_bot)*cos(le_camber_ang),          cos(le_camber_ang),        (-1+C_le_x_bot)*cos(le_camber_ang),    	0. /) 
-	  a(9, 	11:14) 	= (/   (C_le_x_bot)*sin(le_camber_ang),         -sin(le_camber_ang),         (1-C_le_x_bot)*sin(le_camber_ang),   	0. /) 
-	 a(10,	4:7) 	= (/  (-1+C_le_y_bot)*sin(le_camber_ang),         sin(le_camber_ang),         -C_le_y_bot*sin(le_camber_ang),     	0. /)
-	  a(10,	11:14) 	= (/  (-1+C_le_y_bot)*cos(le_camber_ang),         cos(le_camber_ang),         -C_le_y_bot*cos(le_camber_ang),    	0. /)
+	 a(7, 1:4)  = (/0., (-1+C_le_x_top)*cos(le_camber_ang), cos(le_camber_ang),     -C_le_x_top*cos(le_camber_ang)/) 
+	 a(7, 8:11) = (/0., (1-C_le_x_top)*sin(le_camber_ang), -sin(le_camber_ang),      C_le_x_top*sin(le_camber_ang)/)
+	 a(8, 1:4)  = (/0., (-C_le_y_top)*sin(le_camber_ang),   sin(le_camber_ang), (-1+C_le_y_top)*sin(le_camber_ang)/)
+	 a(8, 8:11) = (/0., (-C_le_y_top)*cos(le_camber_ang),   cos(le_camber_ang), (-1+C_le_y_top)*cos(le_camber_ang)/)
+
+	 a(9, 4:7) 	= (/(-C_le_x_bot)*cos(le_camber_ang),   cos(le_camber_ang), (-1+C_le_x_bot)*cos(le_camber_ang),0. /) 
+	 a(9, 11:14)= (/(C_le_x_bot)*sin(le_camber_ang),    -sin(le_camber_ang),(1-C_le_x_bot)*sin(le_camber_ang), 0. /) 
+	 a(10,4:7) 	= (/(-1+C_le_y_bot)*sin(le_camber_ang), sin(le_camber_ang), -C_le_y_bot*sin(le_camber_ang),    0. /)
+	 a(10,11:14)= (/(-1+C_le_y_bot)*cos(le_camber_ang), cos(le_camber_ang), -C_le_y_bot*cos(le_camber_ang),    0. /)
 
 ! Fixed cp3 and cp5
 !	 a(7, 1:4) = (/   -C_le_x*1/6.,    -C_le_x*(2/3.),      1-C_le_x*(1/6.),           0./) ; a(7,  15) = (1-C_le_x)*uLE  							!1-
@@ -800,10 +822,14 @@ subroutine le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,C_le_y
 ! 	 a(10, 6) =  1.   ; a(10, 15) = xbot_le(1)	 
      
                                     !xcp(4),                 xcp(5),                 xcp(6),                  xcp(7),                    ycp(4), ycp(5), ycp(6), ycp(7)    , RHS     
-     a(11,4:7) = (/                      0.,                    1/6.,                  2/3.,                   1/6. /) ; a(11,11:14) = (/    0.,     0.,     0.,     0. /) ; a(11,15) = xbot_le
-     a(12,4:7) = (/                      0.,                      0.,                    0.,                     0. /) ; a(12,11:14) = (/    0.,   1/6.,   2/3.,   1/6. /) ; a(12,15) = ybot_le
-     a(13,4:7) = (/                      0., 	slope_le_bot*(-1/2.),                    0., 	slope_le_bot*(1/2.) /) ; a(13,11:14) = (/    0.,   1/2.,     0.,  -1/2. /) ; a(13,15) =        0.
-     a(14,4:7) = (/                      0.,             curv_le_bot,        -2*curv_le_bot,            curv_le_bot /) ; a(14,11:14) = (/    0.,    -1.,     2.,    -1. /) ; a(14,15) =        0.
+     a(11,4:7)   = (/                      0.,                    1/6.,                  2/3.,                   1/6. /)
+     a(11,11:14) = (/    0.,     0.,     0.,     0. /) ; a(11,15) = xbot_le
+     a(12,4:7)   = (/                      0.,                      0.,                    0.,                     0. /)
+     a(12,11:14) = (/    0.,   1/6.,   2/3.,   1/6. /) ; a(12,15) = ybot_le
+     a(13,4:7)   = (/                      0., 	slope_le_bot*(-1/2.),                    0., 	slope_le_bot*(1/2.) /)
+     a(13,11:14) = (/    0.,   1/2.,     0.,  -1/2. /) ; a(13,15) =        0.
+     a(14,4:7)   = (/                      0.,             curv_le_bot,        -2*curv_le_bot,            curv_le_bot /)
+     a(14,11:14) = (/    0.,    -1.,     2.,    -1. /) ; a(14,15) =        0.
 
 !--------------------------------------------------------------------------------------------------------------------------	 
 	else if ((degree == 4).and.(no_LE_segments == 4)) then
@@ -835,11 +861,16 @@ subroutine le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,C_le_y
 	!slope_curv_bot*( xcp(5)*(-1) + xcp(6)*(3) + xcp(7)*(-3)+ xcp(8)*(1) ) - ycp(5)*(-1)-ycp(6)*(3)- ycp(7)*(-3)-ycp(8)*(1) = 0
 
                                    !xcp(1),                 xcp(2),                 xcp(3),       			xcp(4),    xcp(5),                ycp(1), ycp(2), ycp(3), ycp(4), ycp(5)    , RHS
-     a(1,1:5) = (/                   1/24.,                 11/24.,                 11/24.,        			 1/24.,     0. /) ; a(1,9:13) = (/    0.,      0.,     0.,     0.,	0. /) ; a(1,17) = xtop_le
-     a(2,1:5) = (/                      0.,                     0.,                     0.,       	  			0., 	0. /) ; a(2,9:13) = (/  1/24., 11/24., 11/24.,  1/24.,  0. /) ; a(2,17) = ytop_le
-     a(3,1:5) = (/ 	  slope_le_top*(-1/6.),	  slope_le_top*(-1/2.), 	slope_le_top*(1/2.), 	slope_le_top*(1/6.),   	0. /) ; a(3,9:13) = (/  1/6.,  1/2.,   -1/2.,   -1/6.,  0. /) ; a(3,17) = 0.
-     a(4,1:5) = (/      curv_le_top*(1/2.),    curv_le_top*(-1/2.),    curv_le_top*(-1/2.), 	curv_le_top*(1/2.),     0. /) ; a(4,9:13) = (/  -1/2.,  1/2.,   1/2.,   -1/2.,  0. /) ; a(4,17) = 0.
-	 a(5,1:5) = (/    slope_curv_top*(-1.),    slope_curv_top*(3.),   slope_curv_top*(-3.),    slope_curv_top*(1.),     0. /) ; a(5,9:13) = (/   1.,  	  -3.,    3.,     -1.,  0. /) ; a(5,17) = 0.
+     a(1,1:5)  = (/                   1/24.,                 11/24.,                 11/24.,        			 1/24.,     0. /)
+     a(1,9:13) = (/    0.,      0.,     0.,     0.,	0. /) ; a(1,17) = xtop_le
+     a(2,1:5)  = (/                      0.,                     0.,                     0.,       	  			0., 	0. /)
+     a(2,9:13) = (/  1/24., 11/24., 11/24.,  1/24.,  0. /) ; a(2,17) = ytop_le
+     a(3,1:5)  = (/ 	  slope_le_top*(-1/6.),	  slope_le_top*(-1/2.), 	slope_le_top*(1/2.), 	slope_le_top*(1/6.),   	0. /)
+     a(3,9:13) = (/  1/6.,  1/2.,   -1/2.,   -1/6.,  0. /) ; a(3,17) = 0.
+     a(4,1:5)  = (/      curv_le_top*(1/2.),    curv_le_top*(-1/2.),    curv_le_top*(-1/2.), 	curv_le_top*(1/2.),     0. /)
+     a(4,9:13) = (/  -1/2.,  1/2.,   1/2.,   -1/2.,  0. /) ; a(4,17) = 0.
+	 a(5,1:5)  = (/    slope_curv_top*(-1.),    slope_curv_top*(3.),   slope_curv_top*(-3.),    slope_curv_top*(1.),     0. /)
+     a(5,9:13) = (/   1.,  	  -3.,    3.,     -1.,  0. /) ; a(5,17) = 0.
 	 
      !This version sets the LE point at uLE, vLE  
                     !xcp(3), xcp(4), xcp(5), xcp(6)
@@ -848,21 +879,26 @@ subroutine le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,C_le_y
      a(7,11:14) = (/  1/24., 11/24., 11/24.,  1/24. /)   ; a(7,17)  = vLE
 
 ! Rotated axes: xcp(3),ycp(3), xcp(6),ycp(6)
-	 a(8, 	1:5) 	= (/     0.,    (-1+C_le_x_top)*cos(le_camber_ang),        cos(le_camber_ang),          -C_le_x_top*cos(le_camber_ang), 	0./) 
-	  a(8,  9:13) 	= (/     0.,     (1-C_le_x_top)*sin(le_camber_ang),       -sin(le_camber_ang),           C_le_x_top*sin(le_camber_ang), 	0./)
-	 a(9, 	1:5) 	= (/     0.,    (-C_le_y_top)*sin(le_camber_ang),   	   sin(le_camber_ang),      (-1+C_le_y_top)*sin(le_camber_ang), 	0./)
-	  a(9,  9:13) 	= (/     0.,    (-C_le_y_top)*cos(le_camber_ang),    	   cos(le_camber_ang),      (-1+C_le_y_top)*cos(le_camber_ang), 	0./)
-	 a(10, 	4:8) 	= (/     0.,    (-C_le_x_bot)*cos(le_camber_ang),          cos(le_camber_ang),      (-1+C_le_x_bot)*cos(le_camber_ang),   	0./) 
-	  a(10, 12:16) 	= (/     0.,     (C_le_x_bot)*sin(le_camber_ang),         -sin(le_camber_ang),       (1-C_le_x_bot)*sin(le_camber_ang),   	0./) 
-	 a(11,	4:8) 	= (/     0.,  (-1+C_le_y_bot)*sin(le_camber_ang),   	   sin(le_camber_ang),          -C_le_y_bot*sin(le_camber_ang),    	0./)
-	  a(11,	12:16) 	= (/     0.,  (-1+C_le_y_bot)*cos(le_camber_ang),   	   cos(le_camber_ang),          -C_le_y_bot*cos(le_camber_ang),    	0./)
+	 a(8, 1:5  ) = (/0., (-1+C_le_x_top)*cos(le_camber_ang),  cos(le_camber_ang),     -C_le_x_top*cos(le_camber_ang), 0./) 
+	 a(8, 9:13 ) = (/0.,  (1-C_le_x_top)*sin(le_camber_ang), -sin(le_camber_ang),      C_le_x_top*sin(le_camber_ang), 0./)
+	 a(9, 1:5  ) = (/0.,   (-C_le_y_top)*sin(le_camber_ang),  sin(le_camber_ang), (-1+C_le_y_top)*sin(le_camber_ang), 0./)
+	 a(9, 9:13 ) = (/0.,   (-C_le_y_top)*cos(le_camber_ang),  cos(le_camber_ang), (-1+C_le_y_top)*cos(le_camber_ang), 0./)
+	 a(10,4:8  ) = (/0.,   (-C_le_x_bot)*cos(le_camber_ang),  cos(le_camber_ang), (-1+C_le_x_bot)*cos(le_camber_ang), 0./) 
+	 a(10,12:16) = (/0.,    (C_le_x_bot)*sin(le_camber_ang), -sin(le_camber_ang),  (1-C_le_x_bot)*sin(le_camber_ang), 0./) 
+	 a(11,4:8  ) = (/0., (-1+C_le_y_bot)*sin(le_camber_ang),  sin(le_camber_ang),     -C_le_y_bot*sin(le_camber_ang), 0./)
+	 a(11,12:16) = (/0., (-1+C_le_y_bot)*cos(le_camber_ang),  cos(le_camber_ang),     -C_le_y_bot*cos(le_camber_ang), 0./)
      
                                     !xcp(4),                 xcp(5),                  xcp(6),                 xcp(7),					xcp(8),                    ycp(4), ycp(5), ycp(6), ycp(7),  ycp(8)   , RHS     
-     a(12,4:8) = (/                      0.,                   1/24.,                 11/24.,                 11/24.,   	 		   1/24. /) ; a(12,12:16) = (/    0.,     0.,     0.,     0.,      0. /) ; a(12,17) = xbot_le 
-     a(13,4:8) = (/                      0.,                      0.,                     0.,            		  0.,              		  0. /) ; a(13,12:16) = (/    0.,   1/24., 11/24., 11/24.,  1/24. /) ; a(13,17) = ybot_le
-     a(14,4:8) = (/                      0., 	slope_le_bot*(-1/6.),	slope_le_bot*(-1/2.), 	slope_le_bot*(1/2.), 	slope_le_bot*(1/6.) /) ; a(14,12:16) = (/    0.,   1/6.,  1/2.,   -1/2.,   -1/6. /) ; a(14,17) = 0.
-     a(15,4:8) = (/                      0.,      curv_le_bot*(1/2.),    curv_le_bot*(-1/2.),    curv_le_bot*(-1/2.), 	  curv_le_bot*(1/2.) /) ; a(15,12:16) = (/    0.,    -1/2.,  1/2.,   1/2.,  -1/2. /) ; a(15,17) = 0.
-	 a(16,4:8) = (/                      0.,    slope_curv_bot*(-1.),    slope_curv_bot*(3.),   slope_curv_bot*(-3.),    slope_curv_bot*(1.) /) ; a(16,12:16) = (/    0.,  	  1., 	  -3.,     3.,    -1. /) ; a(16,17) = 0.	 
+     a(12,4:8)   = (/0.,                   1/24.,                 11/24.,                 11/24.,   	 		  1/24. /)
+     a(12,12:16) = (/    0.,     0.,     0.,     0.,      0. /) ; a(12,17) = xbot_le 
+     a(13,4:8)   = (/0.,                      0.,                     0.,            		    0.,                  0. /)
+     a(13,12:16) = (/    0.,   1/24., 11/24., 11/24.,  1/24. /) ; a(13,17) = ybot_le
+     a(14,4:8)   = (/0., 	  slope_le_bot*(-1/6.),	  slope_le_bot*(-1/2.),    slope_le_bot*(1/2.), slope_le_bot*(1/6.) /)
+     a(14,12:16) = (/    0.,   1/6.,  1/2.,   -1/2.,   -1/6. /) ; a(14,17) = 0.
+     a(15,4:8)   = (/0.,      curv_le_bot*(1/2.),    curv_le_bot*(-1/2.),    curv_le_bot*(-1/2.),    curv_le_bot*(1/2.) /)
+     a(15,12:16) = (/    0.,    -1/2.,  1/2.,   1/2.,  -1/2. /) ; a(15,17) = 0.
+	 a(16,4:8)   = (/0.,    slope_curv_bot*(-1.),    slope_curv_bot*(3.),   slope_curv_bot*(-3.),   slope_curv_bot*(1.) /)
+     a(16,12:16) = (/    0.,  	  1., 	  -3.,     3.,    -1. /) ; a(16,17) = 0.	 
 
 !-----------------------------------------------------------------------------------------------------------------------------   
    else if ((degree == 4).and.(no_LE_segments == 5)) then
@@ -900,11 +936,16 @@ subroutine le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,C_le_y
 	
 
                                    !xcp(1),                 xcp(2),                 xcp(3),       			xcp(4),    xcp(5),                ycp(1), ycp(2), ycp(3), ycp(4), ycp(5)    , RHS
-     a(1,1:5) = (/                   1/24.,                 11/24.,                 11/24.,        			 1/24.,     0. /) ; a(1,10:14) = (/    0.,      0.,     0.,     0.,	0. /) ; a(1,19) = xtop_le
-     a(2,1:5) = (/                      0.,                     0.,                     0.,       	  			0., 	0. /) ; a(2,10:14) = (/  1/24., 11/24., 11/24.,  1/24.,  0. /) ; a(2,19) = ytop_le
-     a(3,1:5) = (/ 	  slope_le_top*(-1/6.),	  slope_le_top*(-1/2.), 	slope_le_top*(1/2.), 	slope_le_top*(1/6.),   	0. /) ; a(3,10:14) = (/  1/6.,  1/2.,   -1/2.,   -1/6.,  0. /) ; a(3,19) = 0.
-     a(4,1:5) = (/      curv_le_top*(1/2.),    curv_le_top*(-1/2.),    curv_le_top*(-1/2.), 	curv_le_top*(1/2.),     0. /) ; a(4,10:14) = (/  -1/2.,  1/2.,   1/2.,   -1/2.,  0. /) ; a(4,19) = 0.
-	 a(5,1:5) = (/    slope_curv_top*(-1.),    slope_curv_top*(3.),   slope_curv_top*(-3.),    slope_curv_top*(1.),     0. /) ; a(5,10:14) = (/   1.,  	  -3.,    3.,     -1.,  0. /) ; a(5,19) = 0.
+     a(1,1:5)   = (/                   1/24.,                 11/24.,                 11/24.,        			 1/24.,     0. /)
+     a(1,10:14) = (/    0.,      0.,     0.,     0.,	0. /) ; a(1,19) = xtop_le
+     a(2,1:5)   = (/                      0.,                     0.,                     0.,       	  			0., 	0. /)
+     a(2,10:14) = (/  1/24., 11/24., 11/24.,  1/24.,  0. /) ; a(2,19) = ytop_le
+     a(3,1:5)   = (/ 	  slope_le_top*(-1/6.),	  slope_le_top*(-1/2.), 	slope_le_top*(1/2.), 	slope_le_top*(1/6.),   	0. /)
+     a(3,10:14) = (/  1/6.,  1/2.,   -1/2.,   -1/6.,  0. /) ; a(3,19) = 0.
+     a(4,1:5)   = (/      curv_le_top*(1/2.),    curv_le_top*(-1/2.),    curv_le_top*(-1/2.), 	curv_le_top*(1/2.),     0. /)
+     a(4,10:14) = (/  -1/2.,  1/2.,   1/2.,   -1/2.,  0. /) ; a(4,19) = 0.
+	 a(5,1:5)   = (/    slope_curv_top*(-1.),    slope_curv_top*(3.),   slope_curv_top*(-3.),    slope_curv_top*(1.),     0. /)
+     a(5,10:14) = (/   1.,  	  -3.,    3.,     -1.,  0. /) ; a(5,19) = 0.
 	 
      !This sets the LE control point at uLE, vLE  
                    ! xcp(5)	 
@@ -936,11 +977,16 @@ subroutine le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,C_le_y
 	  
 ! Equations determining the derivatives at the bottom:	  
                                     !xcp(5),                 xcp(6),                  xcp(7),                 xcp(8),					xcp(9),                    ycp(4), ycp(5), ycp(6), ycp(7),  ycp(8)   , RHS     
-     a(12,5:9) = (/                      0.,                   1/24.,                 11/24.,                 11/24.,   	 		   1/24. /) ; a(12,14:18) = (/    0.,     0.,     0.,     0.,      0. /) ; a(12,19) = xbot_le 
-     a(13,5:9) = (/                      0.,                      0.,                     0.,            		  0.,              		  0. /) ; a(13,14:18) = (/    0.,   1/24., 11/24., 11/24.,  1/24. /) ; a(13,19) = ybot_le
-     a(14,5:9) = (/                      0.,	slope_le_bot*(-1/6.),	slope_le_bot*(-1/2.),  	slope_le_bot*(1/2.), 	slope_le_bot*(1/6.) /) ; a(14,14:18) = (/    0.,   1/6.,  1/2.,   -1/2.,   -1/6. /) ; a(14,19) = 0.
-     a(15,5:9) = (/                      0.,      curv_le_bot*(1/2.),    curv_le_bot*(-1/2.),    curv_le_bot*(-1/2.), 	  curv_le_bot*(1/2.) /) ; a(15,14:18) = (/    0.,    -1/2.,  1/2.,   1/2.,  -1/2. /) ; a(15,19) = 0.
-	 a(16,5:9) = (/                      0.,    slope_curv_bot*(-1.),    slope_curv_bot*(3.),   slope_curv_bot*(-3.),    slope_curv_bot*(1.) /) ; a(16,14:18) = (/    0.,  	  1., 	  -3.,     3.,    -1. /) ; a(16,19) = 0.	 
+     a(12,5:9)   = (/0.,                1/24.,               11/24.,               11/24.,   	 		   1/24. /)
+     a(12,14:18) = (/    0.,     0.,     0.,     0.,      0. /) ; a(12,19) = xbot_le 
+     a(13,5:9)   = (/0.,                   0.,                   0.,            		 0.,              	  0. /)
+     a(13,14:18) = (/    0.,   1/24., 11/24., 11/24.,  1/24. /) ; a(13,19) = ybot_le
+     a(14,5:9)   = (/0., slope_le_bot*(-1/6.), slope_le_bot*(-1/2.),  slope_le_bot*(1/2.),   slope_le_bot*(1/6.) /)
+     a(14,14:18) = (/    0.,   1/6.,  1/2.,   -1/2.,   -1/6. /) ; a(14,19) = 0.
+     a(15,5:9)   = (/0.,   curv_le_bot*(1/2.),  curv_le_bot*(-1/2.),  curv_le_bot*(-1/2.),    curv_le_bot*(1/2.) /)
+     a(15,14:18) = (/    0.,    -1/2.,  1/2.,   1/2.,  -1/2. /) ; a(15,19) = 0.
+	 a(16,5:9)   = (/0., slope_curv_bot*(-1.),  slope_curv_bot*(3.), slope_curv_bot*(-3.),   slope_curv_bot*(1.) /)
+     a(16,14:18) = (/    0.,  	  1., 	  -3.,     3.,    -1. /) ; a(16,19) = 0.	 
 
 	 !print*,'xcp4_hat',xcp4_hat
 	 !print*,'xcp6_hat',xcp6_hat

@@ -363,7 +363,7 @@ do i = 1, nun
 enddo
 call gauss_jordan(nun, 1, A, fail_flag)
 if (fail_flag .eq. 1) then
-     write (*, *), 'Failed to solve linear system: thk_ctrl_gen_Eder_fn'
+     write (*, *) 'Failed to solve linear system: thk_ctrl_gen_Eder_fn'
 	 return
 endif
 ddE = A(:, nun+1)
@@ -799,7 +799,7 @@ do i = 1, nun
 enddo
 call gauss_jordan(nun, 1, A, fail_flag)
 if (fail_flag .eq. 1) then
-    write (*, *), 'Failed to solve linear system: thk_ctrl_1der_fn'
+    write (*, *) 'Failed to solve linear system: thk_ctrl_1der_fn'
 	print*, der_flag
 	return
 endif

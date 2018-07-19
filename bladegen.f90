@@ -505,7 +505,7 @@ elseif (curv_camber.eq.1) then ! using curvature control for camber instead of m
 	! Airfoil camber defined by curvature control through spline using control points-
 	!--Karthik Balasubramanian--
 	!-------- Ahmed Nemnem------
-	write (*, '(/, A)'), 'Using curvature control for camber definition...'
+	write (*, '(/, A)') 'Using curvature control for camber definition...'
 	ainl = atan(sinl)
 	aext = atan(sext)
 	! Reading the section control points:
@@ -572,9 +572,9 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
 		if(isdev)then
 			file2 = 'thick_Multi_cp.'//trim(adjustl(sec))//'.'//trim(casename)//'.txt'
 			open(unit = 81, file = file2, form = "formatted")
-			write(81, *), 'xcp_thk', "	", 'ycp_thk'
+			write(81, *) 'xcp_thk', "	", 'ycp_thk'
 			do i = 1, ncp
-				write(81, *), xcp_thk(i), "	", ycp_thk(i)
+				write(81, *) xcp_thk(i), "	", ycp_thk(i)
 			enddo
 			close(81)	 
 		endif ! end if for writing a file in developer mode  
@@ -600,14 +600,15 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
 			ycp_thk(i) = thk_cp(i, 2*js)
 		enddo
 		print*, 'Exact thickness points:'
-		write(*, '(2F10.5)'), (xcp_thk(i), ycp_thk(i), i = 1, ncp)
+		write(*, '(2F10.5)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
 		print*, 'LE Angle', le_angle_all(js)		
 		print*, 'TE Angle', te_angle_all(js)
 		! thk_ctrl_gen_driver (uthk, thk, n, u_spl, np, te_angle_all, te_flag, out_coord)
 		print*, 'TE flag', te_flag
 		print*, 'LE optimization flag', le_opt_flag		
 		print*, 'TE optimization flag', te_opt_flag
-		call thk_ctrl_gen_driver(casename, isdev, sec, xcp_thk, ycp_thk, ncp, u, np, le_angle_all(js), te_angle_all(js), te_flag, le_opt_flag, te_opt_flag, thickness_data)
+		call thk_ctrl_gen_driver(casename, isdev, sec, xcp_thk, ycp_thk, ncp, u, np, le_angle_all(js), &
+                                 te_angle_all(js), te_flag, le_opt_flag, te_opt_flag, thickness_data)
 		thickness = thickness_data(:, 2)
 		! if(isdev) then
 		open (unit = 81, file = 'thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
@@ -615,7 +616,8 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
 		close (81)
 		open (unit = 81, file = 'thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
 		! write (81, '(2F20.16)') (u(i), thickness(i), i = 1, np)
-		write (81, '(6F40.16)') (thickness_data(i, 1), thickness_data(i, 2), thickness_data(i, 3), thickness_data(i, 4), thickness_data(i, 5), thickness_data(i, 6), i = 1, np)
+		write (81, '(6F40.16)') (thickness_data(i, 1), thickness_data(i, 2), thickness_data(i, 3),     &
+                                 thickness_data(i, 4), thickness_data(i, 5), thickness_data(i, 6), i = 1, np)
 		close (81)
 		! endif
 	elseif (thick_distr.eq.3) then
@@ -739,14 +741,14 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
 		!refined values:
 		file3 = 'compare.'//trim(casename)//'.txt'
 		open(unit = 90, file = file3, form = "formatted")
-		write(90, *), 'xtop_refine', xtop_refine
-		write(90, *), 'ytop_refine', ytop_refine
-		write(90, *), 'xtop(le_pos)', xtop(le_pos)
-		write(90, *), 'ytop(le_pos)', ytop(le_pos)
-		write(90, *), 'xbot_refine', xbot_refine
-		write(90, *), 'ybot_refine', ybot_refine
-		write(90, *), 'xbot(le_pos)', xbot(le_pos)
-		write(90, *), 'ybot(le_pos)', ybot(le_pos)
+		write(90, *) 'xtop_refine', xtop_refine
+		write(90, *) 'ytop_refine', ytop_refine
+		write(90, *) 'xtop(le_pos)', xtop(le_pos)
+		write(90, *) 'ytop(le_pos)', ytop(le_pos)
+		write(90, *) 'xbot_refine', xbot_refine
+		write(90, *) 'ybot_refine', ybot_refine
+		write(90, *) 'xbot(le_pos)', xbot(le_pos)
+		write(90, *) 'ybot(le_pos)', ybot(le_pos)
 		! execute attachment of the LE spline :
 		!call lespline ( xtop(le_pos+3:le_pos:-1), ytop(le_pos+3:le_pos:-1), &
 		!        xbot(le_pos:le_pos+3), ybot(le_pos:le_pos+3), &    Nemnem 9/3/2013 I commented this to use the refined values
@@ -899,8 +901,9 @@ else
 endif
 
 ! note: in intersection coordinate array, the throat, mouth and exit lines are added respectively.
-call throat_calc_pitch_line(xb, yb, np, camber, angle, sang, u, pi, pitch, intersec_coord(1:4, js), intersec_coord(5:8, js), intersec_coord(9:12, js), &
-							min_throat_2D, throat_index(js), n_normal_distance, casename, js, nsl, develop, isdev)
+call throat_calc_pitch_line(xb, yb, np, camber, angle, sang, u, pi, pitch, intersec_coord(1:4, js), &
+                            intersec_coord(5:8, js), intersec_coord(9:12, js), min_throat_2D,       &
+                            throat_index(js), n_normal_distance, casename, js, nsl, develop, isdev)
 
 !******************************************************************************************            
 ! Writing the section properties into a single file

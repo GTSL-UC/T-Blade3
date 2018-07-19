@@ -32,11 +32,17 @@ ifeq ($(UNAME),Darwin)
 	$(FCOMP) -g techop.o -o techop    
 else
   3dbgb:$(OBJS)
-	$(FCOMP)  -g -static $(OBJS) -o 3dbgb
+	$(FCOMP)  -g $(OBJS) -o 3dbgb 
   tblade3:$(OBJS)
-	$(FCOMP)  -g -static $(OBJS) -o tblade3    
+	$(FCOMP)  -g $(OBJS) -o tblade3  
   techop:techop.o
-	$(FCOMP) -g -static techop.o -o techop    
+	$(FCOMP) -g techop.o -o techop    
+#  3dbgb:$(OBJS)
+#	$(FCOMP)  -g -static $(OBJS) -o 3dbgb
+#  tblade3:$(OBJS)
+#	$(FCOMP)  -g -static $(OBJS) -o tblade3    
+#  techop:techop.o
+#	$(FCOMP) -g -static techop.o -o techop    
 endif
 
 .f.o:; $(FCOMP) -c -o $@ $(FOPTS) $*.f

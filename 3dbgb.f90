@@ -375,11 +375,13 @@ enddo
 
 if(LE.ne.0) then ! LE spline options
 	do js = 1, nspn
-		print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+		print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), jcellblade_all(js), etawidth_all(js), &
+                BGgrid_all(js)
 	enddo
 elseif(LE == 0) then ! elliptical LE
 	do js = 1, nspn
-		print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), tethk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+		print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), tethk_all(js),         &
+                jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
 	enddo
 endif
 
@@ -1177,7 +1179,8 @@ do i = 1, nsl-1
    ! approximate method to calculate blade volume: strip average area * strip height
 !   bladedata(amount_data, i) = (bladedata(9, i)+bladedata(9, i+1))/2.*scf*((sum(sec_radius(i+1, :))/2.)-(sum(sec_radius(i, :))/2.))
    ! Volume of non uniform frustum = h/3(A1+A2+sqrt(A1.A2))
-   bladedata(amount_data, i) = (bladedata(9, i)+bladedata(9, i+1)+sqrt(bladedata(9, i)*bladedata(9, i+1)))*(scf*((sum(sec_radius(i+1, :))/2.)-(sum(sec_radius(i, :))/2.))/3.)
+   bladedata(amount_data, i) = (bladedata(9, i)+bladedata(9, i+1) + sqrt(bladedata(9, i) * bladedata(9, i+1))) * &
+                               (scf*((sum(sec_radius(i+1, :))/2.)-(sum(sec_radius(i, :))/2.))/3.)
 enddo
 
 bladedata(amount_data, nsl) = sum(bladedata(amount_data, 1:nsl-1))
