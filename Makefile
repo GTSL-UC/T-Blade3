@@ -2,7 +2,12 @@
 .SUFFIXES: .f .o .f90
 #
 LIBDIR = lib
-UNAME := $(shell uname)
+#UNAME := $(shell uname)
+ifeq ($(OS),Windows_NT)
+    detected_OS := Windows
+else
+    detected_OS := $(shell uname -s)
+endif
 
 DEFINE = 
 FCOMP  = gfortran
@@ -23,13 +28,13 @@ GLIBS  = -L/usr/X11R6/lib64 -lGLU -lGL -lX11 -lXext -lpthread
 #all: $(OBJS)
 all: 3dbgb tblade3 techop
 
-ifeq ($(UNAME),Darwin)
+ifeq ($(detected_OS),Windows)
   3dbgb:$(OBJS)
-	$(FCOMP)  -g $(OBJS) -o 3dbgb 
+	$(FCOMP)  -g -static $(OBJS) -o 3dbgb
   tblade3:$(OBJS)
-	$(FCOMP)  -g $(OBJS) -o tblade3  
+	$(FCOMP)  -g -static $(OBJS) -o tblade3    
   techop:techop.o
-	$(FCOMP) -g techop.o -o techop    
+	$(FCOMP) -g -static techop.o -o techop   
 else
   3dbgb:$(OBJS)
 	$(FCOMP)  -g $(OBJS) -o 3dbgb 
@@ -37,13 +42,7 @@ else
 	$(FCOMP)  -g $(OBJS) -o tblade3  
   techop:techop.o
 	$(FCOMP) -g techop.o -o techop    
-#  3dbgb:$(OBJS)
-#	$(FCOMP)  -g -static $(OBJS) -o 3dbgb
-#  tblade3:$(OBJS)
-#	$(FCOMP)  -g -static $(OBJS) -o tblade3    
-#  techop:techop.o
-#	$(FCOMP) -g -static techop.o -o techop    
-endif
+endif  
 
 .f.o:; $(FCOMP) -c -o $@ $(FOPTS) $*.f
 .f90.o:; $(FCOMP) -c -o $@ $(FOPTS) $(F90OPTS) $*.f90
