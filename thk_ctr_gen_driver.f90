@@ -258,7 +258,7 @@ call thk_ctrl_gen_1der_fn(uthk, thk, u, n, nknt_spl, iknt_spl, niknt_spl, dCdE, 
                           ddB1, ddC1, ddD1, dAdC1, dBdC1, dCdC1, dDdC1, dEdC1)
 ddC1(:, 1) = dAdC1; ddC1(:, 2) = dBdC1; ddC1(:, 3) = dCdC1; ddC1(:, 4) = dDdC1; ddC1(:, 5) = dEdC1
 
-! Included input parameters ddB1_le, ddC1_le, ddD1_le in subroutine calls 257-259 for gfortran
+! Included input parameters ddB1_le, ddC1_le, ddD1_le in subroutine calls 262-267 for gfortran
 call thk_ctrl_gen_1der_fn(uthk_le, thk_le, u_le, n_le, nknt_le, iknt_le, niknt_le, dCdE_le, dDdE_le, dEdE_le, -1.,d3v_ang_flag_le, &
                           1, 1, 0, ddB1_le, ddC1_le, ddD1_le, dAdB1_le, dBdB1_le, dCdB1_le,       &
                           dDdB1_le, dEdB1_le)
@@ -296,14 +296,16 @@ if (te_flag .eq. 1 .and. te_opt_flag .eq. 0) then
 		call thk_ctrl_gen_Eder_fn(uthk_te, thk_te, u_te, n_te, nknt_te, iknt_te, niknt_te, i, 0, dAdE_te, dBdE_te, dCdE_te,        &
                                   dDdE_te, dEdE_te)
 	enddo
+
+    ! Included input parameters ddB1_te, ddC1_te, ddD1_te in subroutine calls 303-305 for gfortran
 	call thk_ctrl_gen_1der_fn(uthk_te, thk_te, u_te, n_te, nknt_te, iknt_te, niknt_te, dCdE_te, dDdE_te, dEdE_te, -1., 0, 1, 0, 0, &
 		                      ddB1_te, ddC1_te, ddD1_te, dAdB1_te, dBdB1_te, dCdB1_te, dDdB1_te, dEdB1_te)
-	ddB1_te(:, 1) = dAdB1_te; ddB1_te(:, 2) = dBdB1_te; ddB1_te(:, 3) = dCdB1_te; ddB1_te(:, 4) = dDdB1_te; ddB1_te(:, 5) = dEdB1_te
 	call thk_ctrl_gen_1der_fn(uthk_te, thk_te, u_te, n_te, nknt_te, iknt_te, niknt_te, dCdE_te, dDdE_te, dEdE_te, -1., 0, 3, 0, 0, &
-		                      dAdD1_te, dBdD1_te, dCdD1_te, dDdD1_te, dEdD1_te)	
-	ddD1_te(:, 1) = dAdD1_te; ddD1_te(:, 2) = dBdD1_te; ddD1_te(:, 3) = dCdD1_te; ddD1_te(:, 4) = dDdD1_te; ddD1_te(:, 5) = dEdD1_te		
+		                      ddB1_te, ddC1_te, ddD1_te, dAdD1_te, dBdD1_te, dCdD1_te, dDdD1_te, dEdD1_te)	
 	call thk_ctrl_gen_1der_fn(uthk_te, thk_te, u_te, n_te, nknt_te, iknt_te, niknt_te, dCdE_te, dDdE_te, dEdE_te, 1., 0, 2, 0, 0,  &
-		                      dAdC1_te, dBdC1_te, dCdC1_te, dDdC1_te, dEdC1_te)
+		                      ddB1_te, ddC1_te, ddD1_te, dAdC1_te, dBdC1_te, dCdC1_te, dDdC1_te, dEdC1_te)
+	ddB1_te(:, 1) = dAdB1_te; ddB1_te(:, 2) = dBdB1_te; ddB1_te(:, 3) = dCdB1_te; ddB1_te(:, 4) = dDdB1_te; ddB1_te(:, 5) = dEdB1_te
+	ddD1_te(:, 1) = dAdD1_te; ddD1_te(:, 2) = dBdD1_te; ddD1_te(:, 3) = dCdD1_te; ddD1_te(:, 4) = dDdD1_te; ddD1_te(:, 5) = dEdD1_te		
 	ddC1_te(:, 1) = dAdC1_te; ddC1_te(:, 2) = dBdC1_te; ddC1_te(:, 3) = dCdC1_te; ddC1_te(:, 4) = dDdC1_te; ddC1_te(:, 5) = dEdC1_te
 	d_0(1) = d1v_te
 	call dnv_rot(d_0, d1v_rot, d2v_rot, d3v_rot)
