@@ -135,7 +135,8 @@ subroutine camline(casename, isdev, xcp, ycp, ncp, u, np, ainl, aext, chrdx, win
 !			angle specifications and rotates the curve by appropriate stagger/twist.
 	
 implicit none
-real, parameter :: dtor = 4.*atan(1.)/180.
+!real, parameter :: dtor = 4.*atan(1.)/180. MCG: calling a function for a parameter does not work with all compilers
+real :: dtor
 integer, parameter :: splinedata_col = 6
 
 !!		Inputs to this subroutine
@@ -191,8 +192,11 @@ real :: scalefactor, P, knew, det, k1, k2, &
 	d1v_end(ncp-2), v_end(ncp-2), xcp_seg(4), ycp_seg(4), &
 	t, angle0, camber0, intg_d2v_end(ncp-2), &
 	intg_d1v_end(ncp-2)
-print*, 'xcp', xcp
-print*, 'ycp', ycp
+
+dtor = 4.*atan(1.)/180.
+
+!!print*, 'xcp', xcp
+!!print*, 'ycp', ycp
 !!
 ! write (*, '(A)'), 'Executing subroutine camline in bsplinecam.f90'
 if (wing_flag .eq. 0) then

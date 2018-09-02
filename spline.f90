@@ -428,13 +428,17 @@ real, intent (in) :: x1(n1), y1(n1), t1(n1), dxdt1(n1), dydt1(n1), &
 real, intent (inout) :: tt1, tt2
 
 !!		Other local variables
-real, parameter :: GR = 0.5*(3.-sqrt(5.)), tol = 1.0e-12
+!real, parameter :: GR = 0.5*(3.-sqrt(5.)), tol = 1.0e-12 MCG: calling a function for a parameter does not work with all compilers
+real, parameter :: tol = 1.0e-12
+real :: GR
 logical :: GS_flag, trunc1knt1, trunc1kntn, trunc2knt1, trunc2kntn
 real :: dt1, dt2, r, ra, rb, rt1, rt2, F, Fa, Fb, Ft1, Ft2, &
 	F1, F2, J11, J12, J21, J22, xx1, xx2, yy1, yy2, tt1old, tt2old, &
 	mint1, mint2, maxt1, maxt2
 integer :: iter, i, l
 real :: dspl_eval
+
+GR = 0.5*(3.-sqrt(5.))
 
 mint1 = minval(t1); maxt1 = maxval(t1)
 mint2 = minval(t2); maxt2 = maxval(t2)
