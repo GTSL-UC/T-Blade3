@@ -714,8 +714,7 @@ subroutine le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,C_le_y
 	
 	  implicit none
 
-      integer i,j,k
-      real    t
+      integer i,j,k,t
 	  integer,intent(in) :: le_pos
 	  integer ncp,degree,no_LE_segments
 	  integer factorial,dimen,interval,order

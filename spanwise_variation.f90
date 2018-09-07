@@ -8,7 +8,7 @@ subroutine span_variation()
 use globvar
 implicit none
 
-integer :: np_fine
+integer :: np_fine, i_local
 real, allocatable, dimension(:) :: span_fine
 real, allocatable, dimension(:, :) :: out_coord_u_fine, out_coord_v_fine
 real :: out_coord_u(na, 12), out_coord_v(na, 12)

@@ -34,7 +34,9 @@ real, allocatable, dimension(:, :) :: out_coord_fine
 dev_flag = 0
 if (isdev) dev_flag = 1
 np_fine = 1000
+if (allocated(u_spl_fine)) deallocate(u_spl_fine)
 Allocate(u_spl_fine(np_fine))
+if (allocated(out_coord_fine)) deallocate(out_coord_fine)
 Allocate(out_coord_fine(np_fine, 12))
 
 ! if (te_opt_flag .eq. 1 .or. te_opt_flag .eq. 2) then
@@ -69,11 +71,13 @@ do i = 2, n-1
 		nmin = nmin+1
 	endif
 enddo
+if (allocated(imin)) deallocate(imin)
 if (nmin .gt. 0) then
 	Allocate(imin(nmin))
 else
 	Allocate(imin(1))
 endif
+if (allocated(imax)) deallocate(imax)
 if (nmax .gt. 0) then
 	Allocate(imax(nmax))
 else
@@ -279,14 +283,18 @@ if (te_flag .eq. 1) then
 	enddo
 	i_te = i+1
 	np_te = np-i_te+1
+    if (allocated(u_spl_te)) deallocate(u_spl_te)
 	Allocate(u_spl_te(np_te))
+    if (allocated(out_coord_te)) deallocate(out_coord_te)
 	Allocate(out_coord_te(np_te, 12))
 	out_coord_te = 0.
 	! u_spl = (/ (uthk(3) + j*(1.-uthk(3))/(np-1), j = 0, np-1) /)
 	u_spl_te = u_spl(i_te : np)
 elseif (te_flag .eq. 0) then
 	np_te = 1
+    if (allocated(u_spl_te)) deallocate(u_spl_te)
 	Allocate(u_spl_te(np_te))
+    if (allocated(out_coord_te)) deallocate(out_coord_te)
 	Allocate(out_coord_te(np_te, 12))
 	out_coord_te = 0.
 	u_spl_te = 0.
@@ -354,6 +362,8 @@ do i = 1, np
 	endif
 enddo
 np_bl = i_te-i
+if (allocated(u_spl_le)) deallocate(u_spl_le)
+if (allocated(u_spl_bl)) deallocate(u_spl_bl)
 Allocate(u_spl_le(np_le))
 Allocate(u_spl_bl(np_bl))
 u_spl_le = u_spl(1 : np_le)
@@ -674,11 +684,13 @@ do i = 2, n-1
 		nmin = nmin+1
 	endif
 enddo
+if (allocated(imin)) deallocate(imin)
 if (nmin .gt. 0) then
 	Allocate(imin(nmin))
 else
 	Allocate(imin(1))
 endif
+if (allocated(imax)) deallocate(imax)
 if (nmax .gt. 0) then
 	Allocate(imax(nmax))
 else
@@ -951,7 +963,9 @@ d1_flag = 1
 fail_flag = 0
 
 np_fine = 1000
+if (allocated(u_spl_fine)) deallocate(u_spl_fine)
 Allocate(u_spl_fine(np_fine))
+if (allocated(out_coord_fine)) deallocate(out_coord_fine)
 Allocate(out_coord_fine(np_fine, 12))
 
 delu = u_spl(2:nknt) - u_spl(1:nknt-1)

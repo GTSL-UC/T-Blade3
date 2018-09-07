@@ -31,11 +31,13 @@ do i = 2, n-1
 		nmin = nmin+1
 	endif
 enddo
+if (allocated(imin)) deallocate(imin)
 if (nmin .gt. 0) then
 	Allocate(imin(nmin))
 else
 	Allocate(imin(1))
 endif
+if (allocated(imax)) deallocate(imax)
 if (nmax .gt. 0) then
 	Allocate(imax(nmax))
 else
@@ -440,11 +442,13 @@ do i = 2, n-1
 		nmin = nmin+1
 	endif
 enddo
+if (allocated(imin)) deallocate(imin)
 if (nmin .gt. 0) then
 	Allocate(imin(nmin))
 else
 	Allocate(imin(1))
 endif
+if (allocated(imax)) deallocate(imax)
 if (nmax .gt. 0) then
 	Allocate(imax(nmax))
 else

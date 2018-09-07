@@ -7,6 +7,7 @@ implicit none
 character*256 :: fname, temp, temp2, tempr1, fname1, fname2, fname3
 integer :: er
 real*8 inBetaInci, outBetaDevn
+real*8, allocatable :: temp_in(:)
 
 if (allocated(x_le          )) deallocate(x_le          )
 if (allocated(x_te          )) deallocate(x_te          )
@@ -176,10 +177,10 @@ do js = 1, nspn
 enddo
 
 !! override the inputs
-call override_chord(nspn, chord)
-call override_thk_c(nspn, thk_c)
-call override_inci( nspn, inci )
-call override_devn( nspn, devn )
+!call override_chord(nspn, chord)
+!call override_thk_c(nspn, thk_c)
+!call override_inci( nspn, inci )
+!call override_devn( nspn, devn )
 
 if (.not.spanwise_angle_spline .and. .not.spanwise_inci_dev_spline) then
    do js = 1, nspn
@@ -252,6 +253,10 @@ else
 		read(1, *)spanmp(i), xcpdelm(i)
 	enddo
 endif
+if (allocated(temp_in)) deallocate(temp_in)
+temp_in = xcpdelm(1:cpdeltam)
+call override_span_del_m(cpdeltam, temp_in)
+xcpdelm(1:cpdeltam) = temp_in
 read(1, *)temp
 read(1, '(A)')temp ! control points for lean, switch for lean normal to the chord.
 !print*, 'temp: ', temp(12:12)
@@ -275,23 +280,33 @@ else
 		read(1, *)spantheta(i), xcpdeltheta(i)
 		!print*, spantheta(i), xcpdeltheta(i)
 	enddo
-endif  
+endif 
+if (allocated(temp_in)) deallocate(temp_in)
+temp_in = xcpdeltheta(1:cpdeltheta) 
+call override_span_del_theta(cpdeltheta, temp_in)
+xcpdeltheta(1:cpdeltheta) = temp_in
 read(1, *)temp
 read(1, *)cpinbeta ! control points for inBeta*
 read(1, *)temp
 do i = 1, cpinbeta
 	read(1, *)spaninbeta(i), xcpinbeta(i)
 enddo
-call override_in_beta(cpinbeta,xcpinbeta)
-call override_span_in_beta(cpinbeta, spaninbeta)
+!call override_in_beta(cpinbeta,xcpinbeta)
+if (allocated(temp_in)) deallocate(temp_in)
+temp_in = xcpinbeta(1:cpinbeta)
+call override_span_in_beta(cpinbeta, temp_in)
+xcpinbeta(1:cpinbeta) = temp_in
 read(1, *)temp
 read(1, *)cpoutbeta ! control points for outBeta*
 read(1, *)temp
 do i = 1, cpoutbeta
 	read(1, *)spanoutbeta(i), xcpoutbeta(i)
 enddo
-call override_out_beta(cpoutbeta, xcpoutbeta)
-call override_span_out_beta(cpoutbeta, spanoutbeta)
+!call override_out_beta(cpoutbeta, xcpoutbeta)
+if (allocated(temp_in)) deallocate(temp_in)
+temp_in = xcpoutbeta(1:cpoutbeta)
+call override_span_out_beta(cpoutbeta, temp_in)
+xcpoutbeta(1:cpoutbeta) = temp_in
 read(1, *)temp
 read(1, *)cpchord ! control points for chord
 read(1, *)temp
@@ -299,6 +314,10 @@ do i = 1, cpchord
 	read(1, *)spanchord(i), xcpchord(i)
 	xcpchord(i) = xcpchord(i) + 1.0
 enddo
+if (allocated(temp_in)) deallocate(temp_in)
+temp_in = xcpchord(1:cpchord)
+call override_span_chord(cpchord, temp_in)
+xcpchord(1:cpchord) = temp_in 
 read(1, *)temp
 read(1, *)cptm_c ! control points for tm/c
 read(1, *)temp
@@ -314,6 +333,10 @@ do i = 1, cptm_c
 	! if (xcptm_c(i).ne.0.000000) tm_c_spline = .True. 
 	!print*, cptm_c
 enddo
+if(allocated(temp_in)) deallocate(temp_in)
+temp_in = xcptm_c(1:cptm_c)
+call override_span_thk_c(cptm_c, temp_in)
+xcptm_c(1:cptm_c) = temp_in
 read(1, *)temp 
 read(1, *)hub
 !print*, 'hub offset:', hub
@@ -592,8 +615,9 @@ character*(*) path
 character*256 file_name
 !opening files to read inputs
 real :: span_dum
-real*8, allocatable, dimension(:) :: temp
+real*8, allocatable, dimension(:) :: temp, temp_exact
 integer jj
+integer     :: i_local
 
 file_name = trim(path)//'spancontrolinputs.'//trim(row_type)//'.dat'
 open(10, file = file_name)
@@ -675,126 +699,161 @@ enddo
 
 ! Variable override subroutine calls for ESP integration
 ! Added by Simon Livingston
-! if (ncp_curvature >= 1) then
-   ! jj = 1 + ncp_chord-2 + 2-1
-   ! do i = 1, ncp_span_curv
-      ! temp(i) = cp_chord_curv(i,jj)
-   ! enddo
-   ! call override_cur2(ncp_span_curv, temp)
-   ! do i = 1, ncp_span_curv
-      ! cp_chord_curv(i,jj) = temp(i)
-   ! enddo
-! endif
+ if (isold .eqv. .false.) then
+    jj = 1 + ncp_chord-2 + 1
+    do i = 1,ncp_span_curv
+        temp(i) = cp_chord_curv(i,jj)
+    end do
+    call override_cur1(ncp_span_curv, temp)
+    do i = 1,ncp_span_curv
+        cp_chord_curv(i,jj) = temp(i)
+    end do
+ end if
+     
+ if (ncp_curvature >= 1) then
+    if (isold) then 
+        jj = 1 + ncp_chord-2 + 2-1
+    else
+        jj = 1 + ncp_chord-2 + 2
+    end if
+    do i = 1, ncp_span_curv
+       temp(i) = cp_chord_curv(i,jj)
+    enddo
+    call override_cur2(ncp_span_curv, temp)
+    do i = 1, ncp_span_curv
+       cp_chord_curv(i,jj) = temp(i)
+    enddo
+ endif
 
-! if (ncp_curvature >= 2) then
-   ! jj = 1 + ncp_chord-2 + 3-1
-   ! do i = 1, ncp_span_curv
-      ! temp(i) = cp_chord_curv(i,jj)
-   ! enddo
-   ! call override_cur3(ncp_span_curv, temp)
-   ! do i = 1, ncp_span_curv
-      ! cp_chord_curv(i,jj) = temp(i)
-   ! enddo
-! endif
+ if (ncp_curvature >= 2) then
+    if (isold) then
+        jj = 1 + ncp_chord-2 + 3-1
+    else
+        jj = 1 + ncp_chord-2 + 3
+    end if
+    do i = 1, ncp_span_curv
+       temp(i) = cp_chord_curv(i,jj)
+    enddo
+    call override_cur3(ncp_span_curv, temp)
+    do i = 1, ncp_span_curv
+       cp_chord_curv(i,jj) = temp(i)
+    enddo
+ endif
 
-! if (ncp_curvature >= 3) then
-   ! jj = 1 + ncp_chord-2 + 4-1
-   ! do i = 1, ncp_span_curv
-      ! temp(i) = cp_chord_curv(i,jj)
-   ! enddo
-   ! call override_cur4(ncp_span_curv, temp)
-   ! do i = 1, ncp_span_curv
-      ! cp_chord_curv(i,jj) = temp(i)
-   ! enddo
-! endif
+ if (ncp_curvature >= 3) then
+    if (isold) then
+        jj = 1 + ncp_chord-2 + 4-1
+    else
+        jj = 1 + ncp_chord-2 + 4
+    end if
+    do i = 1, ncp_span_curv
+       temp(i) = cp_chord_curv(i,jj)
+    enddo
+    call override_cur4(ncp_span_curv, temp)
+    do i = 1, ncp_span_curv
+       cp_chord_curv(i,jj) = temp(i)
+    enddo
+ endif
 
-! if (ncp_curvature >= 4) then
-   ! jj = 1 + ncp_chord-2 + 5-1
-   ! do i = 1, ncp_span_curv
-      ! temp(i) = cp_chord_curv(i,jj)
-   ! enddo
-   ! call override_cur5(ncp_span_curv, temp)
-   ! do i = 1, ncp_span_curv
-      ! cp_chord_curv(i,jj) = temp(i)
-   ! enddo
-! endif
+ if (ncp_curvature >= 4) then
+    if (isold) then
+        jj = 1 + ncp_chord-2 + 5-1
+    else
+        jj = 1 + ncp_chord-2 + 5
+    end if
+    do i = 1, ncp_span_curv
+       temp(i) = cp_chord_curv(i,jj)
+    enddo
+    call override_cur5(ncp_span_curv, temp)
+    do i = 1, ncp_span_curv
+       cp_chord_curv(i,jj) = temp(i)
+    enddo
+ endif
 
-! if (ncp_curvature >= 5) then
-   ! jj = 1 + ncp_chord-2 + 6-1
-   ! do i = 1, ncp_span_curv
-      ! temp(i) = cp_chord_curv(i,jj)
-   ! enddo
-   ! call override_cur6(ncp_span_curv, temp)
-   ! do i = 1, ncp_span_curv
-      ! cp_chord_curv(i,jj) = temp(i)
-   ! enddo
-! endif
+ if (ncp_curvature >= 5) then
+    if (isold) then
+        jj = 1 + ncp_chord-2 + 6-1
+    else
+        jj = 1 + ncp_chord-2 + 6
+    end if
+    do i = 1, ncp_span_curv
+       temp(i) = cp_chord_curv(i,jj)
+    enddo
+    call override_cur6(ncp_span_curv, temp)
+    do i = 1, ncp_span_curv
+       cp_chord_curv(i,jj) = temp(i)
+    enddo
+ endif
 
-! if (ncp_curvature >= 6) then
-   ! jj = 1 + ncp_chord-2 + 7-1
-   ! do i = 1, ncp_span_curv
-      ! temp(i) = cp_chord_curv(i,jj)
-   ! enddo
-   ! call override_cur7(ncp_span_curv, temp)
-   ! do i = 1, ncp_span_curv
-      ! cp_chord_curv(i,jj) = temp(i)
-   ! enddo
-! endif
+ if (ncp_curvature >= 6) then
+    if (isold) then
+        jj = 1 + ncp_chord-2 + 7-1
+    else
+        jj = 1 + ncp_chord-2 + 7
+    end if
+    do i = 1, ncp_span_curv
+       temp(i) = cp_chord_curv(i,jj)
+    enddo
+    call override_cur7(ncp_span_curv, temp)
+    do i = 1, ncp_span_curv
+       cp_chord_curv(i,jj) = temp(i)
+    enddo
+ endif
 
-! if (ncp_chord >= 1) then
-   ! jj = 1 + 2-1
-   ! do i = 1, ncp_span_curv
-      ! temp(i) = cp_chord_curv(i,jj)
-   ! enddo
-   ! call override_u2(ncp_span_curv, temp)
-   ! do i = 1, ncp_span_curv
-      ! cp_chord_curv(i,jj) = temp(i)
-   ! enddo
-! endif
+ if (ncp_chord >= 1) then
+    jj = 1 + 2-1
+    do i = 1, ncp_span_curv
+       temp(i) = cp_chord_curv(i,jj)
+    enddo
+    call override_u2(ncp_span_curv, temp)
+    do i = 1, ncp_span_curv
+       cp_chord_curv(i,jj) = temp(i)
+    enddo
+ endif
 
-! if (ncp_chord >= 2) then
-   ! jj = 1 + 3-1
-   ! do i = 1, ncp_span_curv
-      ! temp(i) = cp_chord_curv(i,jj)
-   ! enddo
-   ! call override_u3(ncp_span_curv, temp)
-   ! do i = 1, ncp_span_curv
-      ! cp_chord_curv(i,jj) = temp(i)
-   ! enddo
-! endif
+ if (ncp_chord >= 2) then
+    jj = 1 + 3-1
+    do i = 1, ncp_span_curv
+       temp(i) = cp_chord_curv(i,jj)
+    enddo
+    call override_u3(ncp_span_curv, temp)
+    do i = 1, ncp_span_curv
+       cp_chord_curv(i,jj) = temp(i)
+    enddo
+ endif
 
-! if (ncp_chord >= 3) then
-   ! jj = 1 + 4-1
-   ! do i = 1, ncp_span_curv
-      ! temp(i) = cp_chord_curv(i,jj)
-   ! enddo
-   ! call override_u4(ncp_span_curv, temp)
-   ! do i = 1, ncp_span_curv
-      ! cp_chord_curv(i,jj) = temp(i)
-   ! enddo
-! endif
+ if (ncp_chord >= 3) then
+    jj = 1 + 4-1
+    do i = 1, ncp_span_curv
+       temp(i) = cp_chord_curv(i,jj)
+    enddo
+    call override_u4(ncp_span_curv, temp)
+    do i = 1, ncp_span_curv
+       cp_chord_curv(i,jj) = temp(i)
+    enddo
+ endif
 
-! if (ncp_chord >= 4) then
-   ! jj = 1 +5-1
-   ! do i = 1, ncp_span_curv
-      ! temp(i) = cp_chord_curv(i,jj)
-   ! enddo
-   ! call override_u5(ncp_span_curv, temp)
-   ! do i = 1, ncp_span_curv
-      ! cp_chord_curv(i,jj) = temp(i)
-   ! enddo
-! endif
+ if (ncp_chord >= 4) then
+    jj = 1 +5-1
+    do i = 1, ncp_span_curv
+       temp(i) = cp_chord_curv(i,jj)
+    enddo
+    call override_u5(ncp_span_curv, temp)
+    do i = 1, ncp_span_curv
+       cp_chord_curv(i,jj) = temp(i)
+    enddo
+ endif
 
-! if (ncp_chord >= 5) then
-   ! jj = 1 +6-1
-   ! do i = 1, ncp_span_curv
-      ! temp(i) = cp_chord_curv(i,jj)
-   ! enddo
-   ! call override_u6(ncp_span_curv, temp)
-   ! do i = 1, ncp_span_curv
-      ! cp_chord_curv(i,jj) = temp(i)
-   ! enddo
-! endif
+ if (ncp_chord >= 5) then
+    jj = 1 +6-1
+    do i = 1, ncp_span_curv
+       temp(i) = cp_chord_curv(i,jj)
+    enddo
+    call override_u6(ncp_span_curv, temp)
+    do i = 1, ncp_span_curv
+       cp_chord_curv(i,jj) = temp(i)
+    enddo
+ endif
 
 deallocate(temp)
 endif
@@ -888,11 +947,13 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
 				ycp(ncp_thk(i)-1) = 2*ycp(ncp_thk(i)-2)-ycp(ncp_thk(i)-3)
 			endif
 		endif
+
 		do k = 1, ncp_thk(i)
 			thk_cp(k, 2*i-1) = xcp(k)
 			thk_cp(k, 2*i) = ycp(k)
 		enddo		
 	enddo
+
 	if (LE .ne. 0) then
 		!--------------------------------------------------------------------------
 		!Reading LE control points

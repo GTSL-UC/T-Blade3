@@ -25,7 +25,9 @@ real, allocatable, dimension(:) :: u, r, delu, A, B, C, D, E, coeff, u_end, v_en
 real, allocatable, dimension(:, :) :: M, M1, out_coord_temp
 character (len = 2) :: tvalid
 
+if (allocated(u_spl_dev)) deallocate(u_spl_dev)
 Allocate(u_spl_dev(np))
+if (allocated(out_coord_temp)) deallocate(out_coord_temp)
 Allocate(out_coord_temp(np, 12))
 if (min_flag .eq. 0 .or. min_flag .eq. 10) then
 	thkm_i = maxloc(thk, 1)
@@ -53,11 +55,13 @@ do i = 2, n-1
 		nmin = nmin+1
 	endif
 enddo
+if (allocated(imin)) deallocate(imin)
 if (nmin .gt. 0) then
 	Allocate(imin(nmin))
 else
 	Allocate(imin(1))
 endif
+if (allocated(imax)) deallocate(imax)
 if (nmax .gt. 0) then
 	Allocate(imax(nmax))
 else
@@ -107,7 +111,9 @@ Allocate(d1v_spl(np))
 Allocate(d2v_spl(np))
 Allocate(d3v_spl(np))
 Allocate(d4v_spl(np))
+if (allocated(u_end)) deallocate(u_end)
 Allocate(u_end(nseg))
+if (allocated(v_end)) deallocate(v_end)
 Allocate(v_end(nseg))
 
 A = 0.; B = 0.; C = 0.; D = 0.; E = 0.

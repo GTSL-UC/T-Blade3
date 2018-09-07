@@ -112,18 +112,21 @@ call bgb3d_sub(fname, 'spancontrolinputs.'//trim(row_type)//'.dat', arg2, arg3, 
 end program bgb3d
 ! Variable override subroutines for ESP intergation
 ! Added by Simon Livingston
-subroutine     override_chord(n, a)
+!subroutine     override_chord(n, a)
+!   real*8 a(*)
+!end subroutine override_chord
+!subroutine     override_thk_c(n, a)
+!   real*8 a(*)
+!end subroutine override_thk_c
+!subroutine     override_inci(n, a)
+!   real*8 a(*)
+!end subroutine override_inci
+!subroutine     override_devn(n, a)
+!   real*8 a(*)
+!end subroutine override_devn
+subroutine     override_cur1(n, a)
    real*8 a(*)
-end subroutine override_chord
-subroutine     override_thk_c(n, a)
-   real*8 a(*)
-end subroutine override_thk_c
-subroutine     override_inci(n, a)
-   real*8 a(*)
-end subroutine override_inci
-subroutine     override_devn(n, a)
-   real*8 a(*)
-end subroutine override_devn
+end subroutine override_cur1
 subroutine     override_cur2(n, a)
    real*8 a(*)
 end subroutine override_cur2
@@ -142,12 +145,12 @@ end subroutine override_cur6
 subroutine     override_cur7(n, a)
    real*8 a(*)
 end subroutine override_cur7
-subroutine     override_in_beta(n, a)
-   real*8 a(*)
-end subroutine override_in_beta
-subroutine     override_out_beta(n, a)
-   real*8 a(*)
-end subroutine override_out_beta
+!subroutine     override_in_beta(n, a)
+!   real*8 a(*)
+!end subroutine override_in_beta
+!subroutine     override_out_beta(n, a)
+!   real*8 a(*)
+!end subroutine override_out_beta
 subroutine     override_u2(n, a)
    real*8 a(*)
 end subroutine override_u2
@@ -163,12 +166,24 @@ end subroutine override_u5
 subroutine     override_u6(n, a)
    real*8 a(*)
 end subroutine override_u6
+subroutine     override_span_del_m(n, a)
+   real*8 a(*)
+end subroutine override_span_del_m
+subroutine     override_span_del_theta(n, a)
+   real*8 a(*)
+end subroutine override_span_del_theta
 subroutine     override_span_in_beta(n, a)
    real*8 a(*)
 end subroutine override_span_in_beta
 subroutine     override_span_out_beta(n, a)
    real*8 a(*)
 end subroutine override_span_out_beta
+subroutine     override_span_chord(n, a)
+   real*8 a(*)
+end subroutine override_span_chord
+subroutine     override_span_thk_c(n, a)
+  real*8 a(*)
+end subroutine override_span_thk_c
 subroutine     override_span_curv_ctrl(n, a)
    real*8 a(*)
 end subroutine override_span_curv_ctrl
@@ -189,6 +204,7 @@ character*256 :: fname, temp, tempr1, fname1, fname2, fname3, fname4, row_type, 
 character*(*) :: arg2, arg3, arg4
 ! !
 logical axial_LE, radial_LE, axial_TE, radial_TE
+integer     :: i_local
 axial_LE = .False.
 radial_LE = .False.
 axial_TE = .False.
@@ -295,6 +311,7 @@ do i = len(trim(fname)), 1, -1
 	endif
 enddo
 row_type = fname(k:j)
+
 print*, 'Row number and blade type is ', row_type
 
 !****************************************************************************
