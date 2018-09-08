@@ -1,5 +1,15 @@
 #       Makefile for TBlade library
 #
+#
+
+ifndef ESP_ROOT
+$(error ESP_ROOT must be set -- Please fix the environment...)
+endif
+
+ifndef OCSM_SRC
+OCSM_SRC=..
+endif
+
 IDIR  = $(ESP_ROOT)/include
 include $(IDIR)/$(ESP_ARCH)
 LDIR  = $(ESP_ROOT)/lib
@@ -44,6 +54,7 @@ FOPTX =	-fdefault-real-8 -fbounds-check -fbacktrace -Wline-truncation -cpp \
 	-fno-automatic -ffree-form -ffree-line-length-none -std=legacy -J $(ODIR)
 endif
 
+all: $(LDIR)/libTBlade3.a $(LDIR)/tblade.so
 
 $(LDIR)/libTBlade3.a:	$(OBJS)
 	touch $(LDIR)/libTBlade3.a
@@ -101,8 +112,16 @@ $(ODIR)/thk_ctrl_gen_der.o:	thk_ctrl_gen_der.f90
 $(ODIR)/thk_ctrl_gen_spl.o:	thk_ctrl_gen_spl.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) thk_ctrl_gen_spl.f90  -o $(ODIR)/thk_ctrl_gen_spl.o
 
+$(LDIR)/tblade.so:	$(ODIR)/udpTblade.o $(LDIR)/libTBlade3.a
+	touch $(LDIR)/tblade.so
+	rm $(LDIR)/tblade.so
+	$(FCOMP) $(SOFLGS) -o $(LDIR)/tblade.so $(ODIR)/udpTblade.o -L$(LDIR) -lTBlade3 -legads
+
+$(ODIR)/udpTblade.o:	udpTblade.c $(OCSM_SRC)/udpUtilities.c $(OCSM_SRC)/udpUtilities.h
+	$(CC) -c $(COPTS) $(DEFINE) -I$(IDIR) -I$(OCSM_SRC)/ udpTblade.c -o $(ODIR)/udpTblade.o
+
 clean:
-	rm -f $(OBJS)
+	rm -f $(OBJS) $(ODIR)/udpTblade.o $(OBJS:.o=.mod)
 
 cleanall:	clean
-	rm -f $(LDIR)/libTBlade3.a
+	rm -f $(LDIR)/libTBlade3.a $(LDIR)/tblade.so
