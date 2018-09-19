@@ -1,0 +1,39 @@
+# tblade_comp4
+# written by John Dannenhoffer
+# modified by Mayank Sharma
+# modified to use span_in_beta and span_out_beta along with inci_dev_spline in tblade_comp4.2.dat
+
+DIMENSION span_thk_c    1 5 1
+DIMENSION span_in_beta  1 5 1
+DIMENSION span_out_beta 1 5 1
+DIMENSION cur4          1 5 1
+
+DESPMTR   span_thk_c    "0.100; 0.100; 0.100; 0.100; 0.100;"
+DESPMTR   span_in_beta  "7.444; 7.959; -6.089; 2.709; -0.520;" 
+DESPMTR   span_out_beta "-1.693; -0.682; -3.447; 6.498; -1.998;"
+DESPMTR   cur4          "0.081; 0.081; 0.043; -0.040; 0.032;"
+
+UDPARG    tblade    ncp             33
+UDPARG    tblade    span_thk_c      span_thk_c
+UDPARG    tblade    span_in_beta    span_in_beta
+UDPARG    tblade    span_out_beta   span_out_beta
+UDPARG    tblade    cur4            cur4
+UDPRIM    tblade    filename        $$/tblade_comp4.2.dat \
+                    auxname         $$/tblade_comp4.spancontrolinputs.2.dat
+
+#======================================#
+# automatically generated verification #
+# OpenCSM  1.13      OpenCASCADE 6.8.1 #
+#======================================#
+select    body 6
+   assert         3      @itype       0  1
+   assert         4      @nnode       0  1
+   assert         6      @nedge       0  1
+   assert         4      @nface       0  1
+   assert   1.26767e+05  @volume  -.001  1
+   assert   3.54818e+04  @area    -.001  1
+   assert   3.90434e+01  @xcg     -.001  1
+   assert   5.68449e-01  @ycg     -.001  1
+   assert   2.65113e+02  @zcg     -.001  1
+
+end
