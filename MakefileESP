@@ -1,52 +1,127 @@
-.SUFFIXES:
-.SUFFIXES: .f .o .f90
+#       Makefile for TBlade library
 #
-LIBDIR = lib
-#UNAME := $(shell uname)
-ifeq ($(OS),Windows_NT)
-    detected_OS := Windows
-else
-    detected_OS := $(shell uname -s)
+#
+
+ifndef ESP_ROOT
+$(error ESP_ROOT must be set -- Please fix the environment...)
 endif
 
-DEFINE = 
-FCOMP  = gfortran
-FOPTS  = -fdefault-real-8 -g -fbounds-check -fbacktrace -O2 -Wline-truncation
-F90OPTS = -ffree-form -ffree-line-length-none -fPIC
-#FOPTS = -fPIC -g
-
-OBJS =  globvar.o spline.o readinput.o funcNsubs.o 3dbgb.o bladegen.o b3d2sec.o bladestack.o bspline3.o lesting.o \
-        cubicspline.o lespline.o bsplinecam.o splinethick.o gauss_jordan.o airfoiltypes.o bladegrid2D.o ellipgrid.o \
-		spanwise_variation.o spanwise_output.o poly_solve_bisect.o quartic_poly_solve.o thk_ctr_gen_driver.o \
-		thk_ctrl_gen_der.o thk_ctrl_gen_spl.o \
-
-#MYLIBS = $(HOME)/$(LIBDIR)/dtnurbsPIC_i.a
-
-XLIBS  = -L/usr/X11R6/lib64 -lX11 -lpthread
-GLIBS  = -L/usr/X11R6/lib64 -lGLU -lGL -lX11 -lXext -lpthread
-
-all: $(OBJS)
-
-ifeq ($(detected_OS),Windows)
-  3dbgb:$(OBJS)
-	$(FCOMP)  -g -static $(OBJS) -o 3dbgb
-  tblade3:$(OBJS)
-	$(FCOMP)  -g -static $(OBJS) -o tblade3
-  techop:techop.o
-	$(FCOMP) -g -static techop.o -o techop
-else
-  3dbgb:$(OBJS)
-	$(FCOMP)  -g $(OBJS) -o 3dbgb 
-  tblade3:$(OBJS)
-	$(FCOMP)  -g $(OBJS) -o tblade3
-  techop:techop.o
-	$(FCOMP) -g techop.o -o techop
+ifndef OCSM_SRC
+OCSM_SRC=..
 endif
 
-.f.o:; $(FCOMP) -c -o $@ $(FOPTS) $*.f
-.f90.o:; $(FCOMP) -c -o $@ $(FOPTS) $(F90OPTS) $*.f90
+IDIR  = $(ESP_ROOT)/include
+include $(IDIR)/$(ESP_ARCH)
+LDIR  = $(ESP_ROOT)/lib
+ifdef ESP_BLOC
+ODIR  = $(ESP_BLOC)/obj
+else
+ODIR  = .
+endif
 
+VPATH = $(ODIR)
+
+OBJS  =	$(ODIR)/globvar.o \
+	$(ODIR)/spline.o \
+	$(ODIR)/readinput.o \
+	$(ODIR)/funcNsubs.o \
+	$(ODIR)/bladegen.o \
+	$(ODIR)/3dbgb.o \
+	$(ODIR)/b3d2sec.o \
+	$(ODIR)/bladestack.o \
+	$(ODIR)/bspline3.o \
+	$(ODIR)/lesting.o \
+	$(ODIR)/cubicspline.o \
+	$(ODIR)/lespline.o \
+	$(ODIR)/bsplinecam.o \
+	$(ODIR)/splinethick.o \
+	$(ODIR)/gauss_jordan.o \
+	$(ODIR)/airfoiltypes.o \
+	$(ODIR)/bladegrid2D.o \
+	$(ODIR)/ellipgrid.o \
+	$(ODIR)/spanwise_variation.o \
+	$(ODIR)/spanwise_output.o \
+	$(ODIR)/poly_solve_bisect.o \
+	$(ODIR)/quartic_poly_solve.o \
+	$(ODIR)/thk_ctr_gen_driver.o \
+	$(ODIR)/thk_ctrl_gen_der.o \
+	$(ODIR)/thk_ctrl_gen_spl.o
+
+ifeq ($(EFCOMP),ifort)
+FOPTX = -cpp -norecursive -save -noautomatic -module $(ODIR)
+else
+FOPTX =	-fdefault-real-8 -fbounds-check -fbacktrace -Wline-truncation -cpp \
+	-fno-automatic -ffree-form -ffree-line-length-none -std=legacy -J $(ODIR)
+endif
+
+all: $(LDIR)/libTBlade3.a $(LDIR)/tblade.so
+
+$(LDIR)/libTBlade3.a:	$(OBJS)
+	touch $(LDIR)/libTBlade3.a
+	rm $(LDIR)/libTBlade3.a
+	(cd $(ODIR); ar $(LOPTS) $(LDIR)/libTBlade3.a $(OBJS); $(RANLB) )
+
+$(ODIR)/globvar.o:	globvar.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) globvar.f90            -o $(ODIR)/globvar.o
+$(ODIR)/spline.o:	spline.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) spline.f90             -o $(ODIR)/spline.o
+$(ODIR)/readinput.o:	readinput.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) readinput.f90          -o $(ODIR)/readinput.o
+$(ODIR)/funcNsubs.o:	funcNsubs.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) funcNsubs.f90          -o $(ODIR)/funcNsubs.o
+$(ODIR)/bladegen.o:	bladegen.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) bladegen.f90           -o $(ODIR)/bladegen.o
+$(ODIR)/3dbgb.o:	3dbgb.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) 3dbgb.f90              -o $(ODIR)/3dbgb.o
+$(ODIR)/b3d2sec.o:	b3d2sec.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) b3d2sec.f90            -o $(ODIR)/b3d2sec.o
+$(ODIR)/bladestack.o:	bladestack.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) bladestack.f90         -o $(ODIR)/bladestack.o
+$(ODIR)/bspline3.o:	bspline3.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) bspline3.f90           -o $(ODIR)/bspline3.o
+$(ODIR)/lesting.o:	lesting.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) lesting.f90            -o $(ODIR)/lesting.o
+$(ODIR)/cubicspline.o:	cubicspline.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) cubicspline.f90        -o $(ODIR)/cubicspline.o
+$(ODIR)/lespline.o:	lespline.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) lespline.f90           -o $(ODIR)/lespline.o
+$(ODIR)/bsplinecam.o:	bsplinecam.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) bsplinecam.f90         -o $(ODIR)/bsplinecam.o
+$(ODIR)/splinethick.o:	splinethick.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) splinethick.f90        -o $(ODIR)/splinethick.o
+$(ODIR)/gauss_jordan.o:	gauss_jordan.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) gauss_jordan.f90       -o $(ODIR)/gauss_jordan.o
+$(ODIR)/airfoiltypes.o:	airfoiltypes.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) airfoiltypes.f90       -o $(ODIR)/airfoiltypes.o
+$(ODIR)/bladegrid2D.o:	bladegrid2D.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) bladegrid2D.f90        -o $(ODIR)/bladegrid2D.o
+$(ODIR)/ellipgrid.o:	ellipgrid.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) ellipgrid.f90          -o $(ODIR)/ellipgrid.o
+$(ODIR)/spanwise_variation.o:	spanwise_variation.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) spanwise_variation.f90 -o $(ODIR)/spanwise_variation.o
+$(ODIR)/spanwise_output.o:	spanwise_output.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) spanwise_output.f90    -o $(ODIR)/spanwise_output.o
+$(ODIR)/poly_solve_bisect.o:	poly_solve_bisect.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) poly_solve_bisect.f90  -o $(ODIR)/poly_solve_bisect.o
+$(ODIR)/quartic_poly_solve.o:	quartic_poly_solve.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) quartic_poly_solve.f90  -o $(ODIR)/quartic_poly_solve.o
+$(ODIR)/thk_ctr_gen_driver.o:	thk_ctr_gen_driver.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) thk_ctr_gen_driver.f90  -o $(ODIR)/thk_ctr_gen_driver.o
+$(ODIR)/thk_ctrl_gen_der.o:	thk_ctrl_gen_der.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) thk_ctrl_gen_der.f90  -o $(ODIR)/thk_ctrl_gen_der.o
+$(ODIR)/thk_ctrl_gen_spl.o:	thk_ctrl_gen_spl.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) thk_ctrl_gen_spl.f90  -o $(ODIR)/thk_ctrl_gen_spl.o
+
+$(LDIR)/tblade.so:	$(ODIR)/udpTblade.o $(LDIR)/libTBlade3.a
+	touch $(LDIR)/tblade.so
+	rm $(LDIR)/tblade.so
+	$(FCOMP) $(SOFLGS) -o $(LDIR)/tblade.so $(ODIR)/udpTblade.o -L$(LDIR) -lTBlade3 -legads
+
+$(ODIR)/udpTblade.o:	udpTblade.c $(OCSM_SRC)/udpUtilities.c $(OCSM_SRC)/udpUtilities.h
+	$(CC) -c $(COPTS) $(DEFINE) -I$(IDIR) -I$(OCSM_SRC)/ udpTblade.c -o $(ODIR)/udpTblade.o
 
 clean:
+	rm -f $(OBJS) $(ODIR)/udpTblade.o $(OBJS:.o=.mod)
 
-	-rm -f 3dbgb tblade3 techop techop.o $(OBJS) *.mod *.x *.exe
+cleanall:	clean
+	rm -f $(LDIR)/libTBlade3.a $(LDIR)/tblade.so
