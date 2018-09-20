@@ -187,6 +187,30 @@ end subroutine override_span_thk_c
 subroutine     override_span_curv_ctrl(n, a)
    real*8 a(*)
 end subroutine override_span_curv_ctrl
+subroutine     override_exact_u1(n, a)
+  real*8 a(*)
+end subroutine override_exact_u1
+subroutine     override_exact_u2(n, a)
+  real*8 a(*)
+end subroutine override_exact_u2
+subroutine     override_exact_u3(n, a)
+  real*8 a(*)
+end subroutine override_exact_u3
+subroutine     override_exact_thk1(n, a)
+  real*8 a(*)
+end subroutine override_exact_thk1
+subroutine     override_exact_thk2(n, a)
+  real*8 a(*)
+end subroutine override_exact_thk2
+subroutine     override_exact_thk3(n, a)
+  real*8 a(*)
+end subroutine override_exact_thk3
+subroutine     override_exact_lethk(n, a)
+  real*8 a(*)
+end subroutine override_exact_lethk
+subroutine     override_exact_tethk(n, a)
+  real*8 a(*)
+end subroutine override_Exact_tethk
 #endif
 !****************************************************************************************
 

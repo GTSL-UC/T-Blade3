@@ -953,7 +953,87 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
 			thk_cp(k, 2*i) = ycp(k)
 		enddo		
 	enddo
+    
+    if (control_inp_flag .eq. 2 .and. isold .eqv. .false.) then
+        
+        if (allocated(temp_exact)) deallocate(temp_exact)
+        allocate(temp_exact(ncp_span_thk))
+        
+        ! Override exact_u1
+        do i = 1,ncp_span_thk
+            temp_exact(i) = cp_chord_thk(i,2)
+        end do
+        call override_exact_u1(ncp_span_thk,temp_exact)
+        do i = 1,ncp_span_thk
+            cp_chord_thk(i,2) = temp_exact(i)
+        end do    
 
+        ! Override exact_u2
+        do i = 1,ncp_span_thk
+            temp_exact(i) = cp_chord_thk(i,3)
+        end do
+        call override_exact_u2(ncp_span_thk,temp_exact)
+        do i = 1,ncp_span_thk
+            cp_chord_thk(i,3) = temp_exact(i)
+        end do
+
+        ! Override exact_u3
+        do i = 1,ncp_span_thk
+            temp_exact(i) = cp_chord_thk(i,4)
+        end do
+        call override_exact_u3(ncp_span_thk,temp_exact)
+        do i = 1,ncp_span_thk
+            cp_chord_thk(i,4) = temp_exact(i)
+        end do
+
+        ! Override exact_thk1
+        do i = 1,ncp_span_thk
+            temp_exact(i) = cp_chord_thk(i,5)
+        end do
+        call override_exact_thk1(ncp_span_thk,temp_exact)
+        do i = 1,ncp_span_thk
+            cp_chord_thk(i,5) = temp_exact(i)
+        end do    
+
+        ! Override exact_thk2
+        do i = 1,ncp_span_thk
+            temp_exact(i) = cp_chord_thk(i,6)
+        end do
+        call override_exact_thk2(ncp_span_thk,temp_exact)
+        do i = 1,ncp_span_thk
+            cp_chord_thk(i,6) = temp_exact(i)
+        end do
+
+        ! Override exact_thk3
+        do i = 1,ncp_span_thk
+            temp_exact(i) = cp_chord_thk(i,7)
+        end do
+        call override_exact_thk3(ncp_span_thk,temp_exact)
+        do i = 1,ncp_span_thk
+            cp_chord_thk(i,7) = temp_exact(i)
+        end do
+    
+        ! Override le_angle_cp
+        do i = 1,ncp_span_thk
+            temp_exact(i) = le_angle_cp(i)
+        end do
+        call override_exact_lethk(ncp_span_thk,temp_exact)
+        do i = 1,ncp_span_thk
+            le_angle_cp(i) = temp_exact(i)
+        end do
+
+        ! Override te_angle_cp
+        do i = 1,ncp_span_thk
+            temp_exact(i) = te_angle_cp(i)
+        end do
+        call override_exact_tethk(ncp_span_thk,temp_exact)
+        do i = 1,ncp_span_thk
+            te_angle_cp(i) = temp_exact(i)
+        end do
+
+    end if
+    
+     
 	if (LE .ne. 0) then
 		!--------------------------------------------------------------------------
 		!Reading LE control points
