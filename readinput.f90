@@ -8,6 +8,8 @@ character*256 :: fname, temp, temp2, tempr1, fname1, fname2, fname3
 integer :: er
 real*8 inBetaInci, outBetaDevn
 real*8, allocatable :: temp_in(:)
+real*8, parameter   :: tol = 1E-8
+logical             :: equal
 
 if (allocated(x_le          )) deallocate(x_le          )
 if (allocated(x_te          )) deallocate(x_te          )
@@ -317,7 +319,15 @@ enddo
 if (allocated(temp_in)) deallocate(temp_in)
 temp_in = xcpchord(1:cpchord)
 call override_span_chord(cpchord, temp_in)
-xcpchord(1:cpchord) = temp_in 
+do i = 1,cpchord
+    equal = (abs(xcpchord(i) - temp_in(i)) .le. tol)
+    if (.not. equal) exit
+end do
+if (.not. equal) then
+    xcpchord(1:cpchord) = temp_in + 1
+else
+    xcpchord(1:cpchord) = temp_in
+end if
 read(1, *)temp
 read(1, *)cptm_c ! control points for tm/c
 read(1, *)temp
@@ -336,7 +346,15 @@ enddo
 if(allocated(temp_in)) deallocate(temp_in)
 temp_in = xcptm_c(1:cptm_c)
 call override_span_thk_c(cptm_c, temp_in)
-xcptm_c(1:cptm_c) = temp_in
+do i = 1,cptm_c
+    equal = (abs(xcptm_c(i) - temp_in(i)) .le. tol)
+    if (.not. equal) exit
+end do
+if (.not. equal) then
+    xcptm_c(1:cptm_c) = temp_in + 1
+else
+    xcptm_c(1:cptm_c) = temp_in
+end if
 read(1, *)temp 
 read(1, *)hub
 !print*, 'hub offset:', hub
@@ -616,6 +634,7 @@ character*256 file_name
 !opening files to read inputs
 real :: span_dum
 real*8, allocatable, dimension(:) :: temp, temp_exact
+integer                           :: temp_thk_flag(3)
 integer jj
 integer     :: i_local
 
@@ -953,65 +972,197 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
 			thk_cp(k, 2*i) = ycp(k)
 		enddo		
 	enddo
-    
-    if (control_inp_flag .eq. 2 .and. isold .eqv. .false.) then
-        
+
+    if (control_inp_flag .eq. 2 .and. isold .eqv. .false. .and. thick_distr .eq. 4) then
+
         if (allocated(temp_exact)) deallocate(temp_exact)
         allocate(temp_exact(ncp_span_thk))
+
+        ! Override exact_thickness_flags
+        temp_thk_flag(1) = te_flag
+        temp_thk_flag(2) = le_opt_flag
+        temp_thk_flag(3) = te_opt_flag
+        call override_thk_flags(temp_thk_flag)
+        te_flag     = temp_thk_flag(1)
+        le_opt_flag = temp_thk_flag(2)
+        te_opt_flag = temp_thk_flag(3)
+       
+        ! Override span_thk_ctrl
+        do i = 1,ncp_span_thk
+            temp_exact(i) = cp_chord_thk(i,1)
+        end do
+        call override_span_thk_ctrl(ncp_span_thk,temp_exact)
+        do i = 1,ncp_span_thk
+            cp_chord_thk(i,1) = temp_exact(i)
+        end do
         
         ! Override exact_u1
-        do i = 1,ncp_span_thk
-            temp_exact(i) = cp_chord_thk(i,2)
-        end do
-        call override_exact_u1(ncp_span_thk,temp_exact)
-        do i = 1,ncp_span_thk
-            cp_chord_thk(i,2) = temp_exact(i)
-        end do    
+        if (ncp_chord_thickness >= 1) then
+            jj = 1 + 1
+            do i = 1,ncp_span_thk
+                temp_exact(i) = cp_chord_thk(i,jj)
+            end do
+            call override_exact_u1(ncp_span_thk,temp_exact)
+            do i = 1,ncp_span_thk
+                cp_chord_thk(i,jj) = temp_exact(i)
+            end do    
+        end if
 
         ! Override exact_u2
-        do i = 1,ncp_span_thk
-            temp_exact(i) = cp_chord_thk(i,3)
-        end do
-        call override_exact_u2(ncp_span_thk,temp_exact)
-        do i = 1,ncp_span_thk
-            cp_chord_thk(i,3) = temp_exact(i)
-        end do
+        if (ncp_chord_thickness >= 2) then 
+            jj = 1 + 2
+            do i = 1,ncp_span_thk
+                temp_exact(i) = cp_chord_thk(i,jj)
+            end do
+            call override_exact_u2(ncp_span_thk,temp_exact)
+            do i = 1,ncp_span_thk
+                cp_chord_thk(i,jj) = temp_exact(i)
+            end do
+        end if
 
         ! Override exact_u3
-        do i = 1,ncp_span_thk
-            temp_exact(i) = cp_chord_thk(i,4)
-        end do
-        call override_exact_u3(ncp_span_thk,temp_exact)
-        do i = 1,ncp_span_thk
-            cp_chord_thk(i,4) = temp_exact(i)
-        end do
+        if (ncp_chord_thickness >= 3) then
+            jj = 1 + 3
+            do i = 1,ncp_span_thk
+                temp_exact(i) = cp_chord_thk(i,jj)
+            end do
+            call override_exact_u3(ncp_span_thk,temp_exact)
+            do i = 1,ncp_span_thk
+                cp_chord_thk(i,jj) = temp_exact(i)
+            end do
+        end if
+
+        ! Override exact_u4
+        if (ncp_chord_thickness >= 4) then
+            jj = 1 + 4
+            do i = 1,ncp_span_thk
+                temp_exact(i) = cp_chord_thk(i,jj)
+            end do
+            call override_exact_u4(ncp_span_thk,temp_exact)
+            do i = 1,ncp_span_thk
+                cp_chord_thk(i,jj) = temp_exact(i)
+            end do
+        end if
+
+        ! Override exact_u5
+        if (ncp_chord_thickness >= 5) then
+            jj = 1 + 5
+            do i = 1,ncp_span_thk
+                temp_exact(i) = cp_chord_thk(i,jj)
+            end do
+            call override_exact_u5(ncp_span_thk,temp_exact)
+            do i = 1,ncp_span_thk
+                cp_chord_thk(i,jj) = temp_exact(i)
+            end do
+        end if
+
+        ! Override exact_u6
+        if (ncp_chord_thickness >= 6) then
+            jj = 1 + 6
+            do i = 1,ncp_span_thk
+                temp_exact(i) = cp_chord_thk(i,jj)
+            end do
+            call override_exact_u6(ncp_span_thk,temp_exact)
+            do i = 1,ncp_span_thk
+                cp_chord_thk(i,jj) = temp_exact(i)
+            end do
+        end if
+
+        ! Override exact_u7
+        if (ncp_chord_thickness == 7) then
+            jj = 1 + 7
+            do i = 1,ncp_span_thk
+                temp_exact(i) = cp_chord_thk(i,jj)
+            end do
+            call override_exact_u7(ncp_span_thk,temp_exact)
+            do i = 1,ncp_span_thk
+                cp_chord_thk(i,jj) = temp_exact(i)
+            end do
+        end if
 
         ! Override exact_thk1
-        do i = 1,ncp_span_thk
-            temp_exact(i) = cp_chord_thk(i,5)
-        end do
-        call override_exact_thk1(ncp_span_thk,temp_exact)
-        do i = 1,ncp_span_thk
-            cp_chord_thk(i,5) = temp_exact(i)
-        end do    
+        if (ncp_thickness >= 1) then
+            jj = 1 + ncp_chord_thickness + 1
+            do i = 1,ncp_span_thk
+                temp_exact(i) = cp_chord_thk(i,jj)
+            end do
+            call override_exact_thk1(ncp_span_thk,temp_exact)
+            do i = 1,ncp_span_thk
+                cp_chord_thk(i,jj) = temp_exact(i)
+            end do    
+        end if
 
         ! Override exact_thk2
-        do i = 1,ncp_span_thk
-            temp_exact(i) = cp_chord_thk(i,6)
-        end do
-        call override_exact_thk2(ncp_span_thk,temp_exact)
-        do i = 1,ncp_span_thk
-            cp_chord_thk(i,6) = temp_exact(i)
-        end do
+        if (ncp_thickness >= 2) then
+            jj = 1 + ncp_chord_thickness + 2
+            do i = 1,ncp_span_thk
+                temp_exact(i) = cp_chord_thk(i,jj)
+            end do
+            call override_exact_thk2(ncp_span_thk,temp_exact)
+            do i = 1,ncp_span_thk
+                cp_chord_thk(i,jj) = temp_exact(i)
+            end do
+        end if
 
         ! Override exact_thk3
-        do i = 1,ncp_span_thk
-            temp_exact(i) = cp_chord_thk(i,7)
-        end do
-        call override_exact_thk3(ncp_span_thk,temp_exact)
-        do i = 1,ncp_span_thk
-            cp_chord_thk(i,7) = temp_exact(i)
-        end do
+        if (ncp_thickness >= 3) then
+            jj = 1 + ncp_chord_thickness + 3
+            do i = 1,ncp_span_thk
+                temp_exact(i) = cp_chord_thk(i,jj)
+            end do
+            call override_exact_thk3(ncp_span_thk,temp_exact)
+            do i = 1,ncp_span_thk
+                cp_chord_thk(i,jj) = temp_exact(i)
+            end do
+        end if
+
+        ! Override exact_thk4
+        if (ncp_thickness >= 4) then
+            jj = 1 + ncp_chord_thickness + 4
+            do i = 1,ncp_span_thk
+                temp_exact(i) = cp_chord_thk(i,jj)
+            end do
+            call override_exact_thk4(ncp_span_thk,temp_exact)
+            do i = 1,ncp_span_thk
+                cp_chord_thk(i,jj) = temp_exact(i)
+            end do
+        end if
+   
+        ! Override exact_thk5
+        if (ncp_thickness >= 5) then
+            jj = 1 + ncp_chord_thickness + 5
+            do i = 1,ncp_span_thk
+                temp_exact(i) = cp_chord_thk(i,jj)
+            end do
+            call override_exact_thk5(ncp_span_thk,temp_exact)
+            do i = 1,ncp_span_thk
+                cp_chord_thk(i,jj) = temp_exact(i)
+            end do
+        end if
+   
+        ! Override exact_thk6
+        if (ncp_thickness >= 6) then
+            jj = 1 + ncp_chord_thickness + 6
+            do i = 1,ncp_span_thk
+                temp_exact(i) = cp_chord_thk(i,jj)
+            end do
+            call override_exact_thk6(ncp_span_thk,temp_exact)
+            do i = 1,ncp_span_thk
+                cp_chord_thk(i,jj) = temp_exact(i)
+            end do
+        end if
+
+        ! Override exact_thk7
+        if (ncp_thickness >= 7) then
+            jj = 1 + ncp_chord_thickness + 7
+            do i = 1,ncp_span_thk
+                temp_exact(i) = cp_chord_thk(i,jj)
+            end do
+            call override_exact_thk7(ncp_span_thk,temp_exact)
+            do i = 1,ncp_span_thk
+                cp_chord_thk(i,jj) = temp_exact(i)
+            end do
+        end if
     
         ! Override le_angle_cp
         do i = 1,ncp_span_thk
@@ -1033,7 +1184,6 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
 
     end if
     
-     
 	if (LE .ne. 0) then
 		!--------------------------------------------------------------------------
 		!Reading LE control points

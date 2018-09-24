@@ -7,7 +7,7 @@ DIMENSION span_thk_c    1 5 1
 DIMENSION span_in_beta  1 5 1
 DIMENSION span_out_beta 1 5 1
 
-DESPMTR   span_thk_c    "0.130; 0.117; 0.105; 0.092; 0.080;"
+DESPMTR   span_thk_c    "0.130; 0.117; 0.105; 0.092; 0.080;" 
 DESPMTR   span_in_beta  "0.000; 0.000; 0.000; 0.000; 0.000;"
 DESPMTR   span_out_beta "0.000; 0.000; 0.000; 0.000; 0.000;"
 
@@ -22,7 +22,7 @@ UDPRIM    tblade    filename        $$/tblade_turb4.2.dat \
 # automatically generated verification #
 # OpenCSM  1.13      OpenCASCADE 6.8.1 #
 #======================================#
-select    body 5
+select    body 4
    assert         3      @itype       0  1
    assert         4      @nnode       0  1
    assert         6      @nedge       0  1

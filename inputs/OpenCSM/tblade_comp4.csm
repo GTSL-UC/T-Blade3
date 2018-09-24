@@ -8,7 +8,7 @@ DIMENSION span_in_beta  1 5 1
 DIMENSION span_out_beta 1 5 1
 DIMENSION cur4          1 5 1
 
-DESPMTR   span_thk_c    "0.100; 0.100; 0.100; 0.100; 0.100;"
+DESPMTR   span_thk_c    "-0.900; -0.900; -0.900; -0.900; -0.900;"
 DESPMTR   span_in_beta  "7.444; 7.959; -6.089; 2.709; -0.520;" 
 DESPMTR   span_out_beta "-1.693; -0.682; -3.447; 6.498; -1.998;"
 DESPMTR   cur4          "0.081; 0.081; 0.043; -0.040; 0.032;"

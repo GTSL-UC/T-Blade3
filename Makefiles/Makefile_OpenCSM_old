@@ -37,7 +37,7 @@ LIBLIST =	$(LDIR)/$(OSHLIB) \
 		$(LDIR)/supell.so \
 		$(LDIR)/waffle.so \
 		$(LDIR)/PDT2.so
-LIBFLIST =	$(LDIR)/naca456.so $(LDIR)/tblade.so 
+LIBFLIST =	$(LDIR)/naca456.so $(LDIR)/tblade.so $(LDIR)/bladevolume.so $(LDIR)/hubwedge.so
 INCLIST =	$(IDIR)/OpenCSM.h \
 		$(IDIR)/common.h \
 		$(IDIR)/udp.h \
@@ -328,6 +328,26 @@ $(ODIR)/udpTblade.o:	udpTblade.c udpUtilities.c udpUtilities.h
 $(LDIR)/libTBlade3.a:
 	(cd Tblade3; make)
 
+$(LDIR)/bladevolume.so:	$(ODIR)/udpBladeVolume.o $(LDIR)/libTBlade3.a
+	touch $(LDIR)/bladevolume.so
+	rm $(LDIR)/bladevolume.so
+	$(FCOMP) $(SOFLGS) -o $(LDIR)/bladevolume.so $(ODIR)/udpBladeVolume.o \
+		-L$(LDIR) -lTBlade3 -legads
+
+$(ODIR)/udpBladeVolume.o:	udpBladeVolume.c udpUtilities.c udpUtilities.h
+	$(CC) -c $(COPTS) $(DEFINE) -I$(IDIR) -I. udpBladeVolume.c \
+		-o $(ODIR)/udpBladeVolume.o
+
+$(LDIR)/hubwedge.so: $(ODIR)/udpHubWedge.o $(LDIR)/libTBlade3.a
+	touch $(LDIR)/hubwedge.so
+	rm $(LDIR)/hubwedge.so
+	$(FCOMP) $(SOFLGS) -o $(LDIR)/hubwedge.so $(ODIR)/udpHubWedge.o \
+		-L$(LDIR) -lTBlade3 -legads
+
+$(ODIR)/udpHubWedge.o:	udpHubWedge.c udpUtilities.c udpUtilities.h
+	$(CC) -c $(COPTS) $(DEFINE) -I$(IDIR) -I. udpHubWedge.c \
+		-o $(ODIR)/udpHubWedge.o
+
 $(LDIR)/waffle.so:	$(ODIR)/udpWaffle.o $(LDIR)/$(OSHLIB)
 	touch $(LDIR)/waffle.so
 	rm $(LDIR)/waffle.so
@@ -385,7 +405,7 @@ clean:
 		udpSample.o udpSew.o udpRadwaf.o udpNaca456.o naca456.o \
 		udpSupell.o udpStag.o udpKulfan.o udpBiconvex.o \
 		udfCreateBEM.o udfCreatePoly.o udpPod.o udfEditAttr.o \
-		eggPDT2.o sensCSM.o udpTblade.o )
+		eggPDT2.o sensCSM.o udpTblade.o udpBladeVolume.o udpHubWedge.o )
 ifdef FCOMP
 	(cd Tblade3; make clean)
 endif
