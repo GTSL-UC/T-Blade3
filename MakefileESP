@@ -1,5 +1,15 @@
 #       Makefile for TBlade library
 #
+#
+
+ifndef ESP_ROOT
+$(error ESP_ROOT must be set -- Please fix the environment...)
+endif
+
+ifndef OCSM_SRC
+OCSM_SRC=..
+endif
+
 IDIR  = $(ESP_ROOT)/include
 include $(IDIR)/$(ESP_ARCH)
 LDIR  = $(ESP_ROOT)/lib
@@ -32,18 +42,19 @@ OBJS  =	$(ODIR)/globvar.o \
 	$(ODIR)/spanwise_variation.o \
 	$(ODIR)/spanwise_output.o \
 	$(ODIR)/poly_solve_bisect.o \
-    $(ODIR)/quartic_poly_solve.o \
-    $(ODIR)/thk_ctr_gen_driver.o \
-    $(ODIR)/thk_ctrl_gen_der.o \
-    $(ODIR)/thk_ctrl_gen_spl.o 
+	$(ODIR)/quartic_poly_solve.o \
+	$(ODIR)/thk_ctr_gen_driver.o \
+	$(ODIR)/thk_ctrl_gen_der.o \
+	$(ODIR)/thk_ctrl_gen_spl.o
 
 ifeq ($(EFCOMP),ifort)
 FOPTX = -cpp -norecursive -save -noautomatic -module $(ODIR)
 else
-FOPTX =	-fdefault-real-8 -fbounds-check -fbacktrace -O2 -Wline-truncation -cpp \
-	    -fno-automatic -ffree-form -ffree-line-length-none -std=legacy -J $(ODIR)
+FOPTX =	-fdefault-real-8 -fbounds-check -fbacktrace -Wline-truncation -cpp \
+	-fno-automatic -ffree-form -ffree-line-length-none -std=legacy -J $(ODIR)
 endif
 
+all: $(LDIR)/libTBlade3.a $(LDIR)/tblade.so $(LDIR)/bladevolume.so $(LDIR)/hubwedge.so
 
 $(LDIR)/libTBlade3.a:	$(OBJS)
 	touch $(LDIR)/libTBlade3.a
@@ -93,16 +104,40 @@ $(ODIR)/spanwise_output.o:	spanwise_output.f90
 $(ODIR)/poly_solve_bisect.o:	poly_solve_bisect.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) poly_solve_bisect.f90  -o $(ODIR)/poly_solve_bisect.o
 $(ODIR)/quartic_poly_solve.o:	quartic_poly_solve.f90
-	$(FCOMP) -c $(FOPTS) $(FOPTX) quartic_poly_solve.f90 -o $(ODIR)/quartic_poly_solve.o
+	$(FCOMP) -c $(FOPTS) $(FOPTX) quartic_poly_solve.f90  -o $(ODIR)/quartic_poly_solve.o
 $(ODIR)/thk_ctr_gen_driver.o:	thk_ctr_gen_driver.f90
-	$(FCOMP) -c $(FOPTS) $(FOPTX) thk_ctr_gen_driver.f90 -o $(ODIR)/thk_ctr_gen_driver.o
+	$(FCOMP) -c $(FOPTS) $(FOPTX) thk_ctr_gen_driver.f90  -o $(ODIR)/thk_ctr_gen_driver.o
 $(ODIR)/thk_ctrl_gen_der.o:	thk_ctrl_gen_der.f90
-	$(FCOMP) -c $(FOPTS) $(FOPTX) thk_ctrl_gen_der.f90   -o $(ODIR)/thk_ctrl_gen_der.o
+	$(FCOMP) -c $(FOPTS) $(FOPTX) thk_ctrl_gen_der.f90  -o $(ODIR)/thk_ctrl_gen_der.o
 $(ODIR)/thk_ctrl_gen_spl.o:	thk_ctrl_gen_spl.f90
-	$(FCOMP) -c $(FOPTS) $(FOPTX) thk_ctrl_gen_spl.f90   -o $(ODIR)/thk_ctrl_gen_spl.o
+	$(FCOMP) -c $(FOPTS) $(FOPTX) thk_ctrl_gen_spl.f90  -o $(ODIR)/thk_ctrl_gen_spl.o
+
+$(LDIR)/tblade.so:	$(ODIR)/udpTblade.o $(LDIR)/libTBlade3.a
+	touch $(LDIR)/tblade.so
+	rm $(LDIR)/tblade.so
+	$(FCOMP) $(SOFLGS) -o $(LDIR)/tblade.so $(ODIR)/udpTblade.o -L$(LDIR) -lTBlade3 -legads
+
+$(ODIR)/udpTblade.o:	udpTblade.c $(OCSM_SRC)/udpUtilities.c $(OCSM_SRC)/udpUtilities.h
+	$(CC) -c $(COPTS) $(DEFINE) -I$(IDIR) -I$(OCSM_SRC)/ udpTblade.c -o $(ODIR)/udpTblade.o
+
+$(LDIR)/bladevolume.so:	$(ODIR)/udpBladeVolume.o $(LDIR)/libTBlade3.a
+	touch $(LDIR)/bladevolume.so
+	rm $(LDIR)/bladevolume.so
+	$(FCOMP) $(SOFLGS) -o $(LDIR)/bladevolume.so $(ODIR)/udpBladeVolume.o -L$(LDIR) -lTBlade3 -legads
+
+$(ODIR)/udpBladeVolume.o:	udpBladeVolume.c $(OCSM_SRC)/udpUtilities.c $(OCSM_SRC)/udpUtilities.h
+	$(CC) -c $(COPTS) $(DEFINE) -I$(IDIR) -I$(OCSM_SRC)/ udpBladeVolume.c -o $(ODIR)/udpBladeVolume.o
+
+$(LDIR)/hubwedge.so:	$(ODIR)/udpHubWedge.o $(LDIR)/libTBlade3.a
+	touch $(LDIR)/hubwedge.so
+	rm $(LDIR)/hubwedge.so
+	$(FCOMP) $(SOFLGS) -o $(LDIR)/hubwedge.so $(ODIR)/udpHubWedge.o -L$(LDIR) -lTBlade3 -legads
+
+$(ODIR)/udpHubWedge.o:	udpHubWedge.c $(OCSM_SRC)/udpUtilities.c $(OCSM_SRC)/udpUtilities.h
+	$(CC) -c $(COPTS) $(DEFINE) -I$(IDIR) -I$(OCSM_SRC)/ udpHubWedge.c -o $(ODIR)/udpHubWedge.o
 
 clean:
-	rm -f $(OBJS)
+	rm -f $(OBJS) $(ODIR)/udpTblade.o $(ODIR)/udpBladeVolume.o $(ODIR)/udpHubWedge.o $(OBJS:.o=.mod)
 
 cleanall:	clean
-	rm -f $(LDIR)/libTBlade3.a
+	rm -f $(LDIR)/libTBlade3.a $(LDIR)/tblade.so $(LDIR)/bladevolume.so $(LDIR)/hubwedge.so
