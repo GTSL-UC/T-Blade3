@@ -6,10 +6,6 @@ ifndef ESP_ROOT
 $(error ESP_ROOT must be set -- Please fix the environment...)
 endif
 
-ifndef OCSM_SRC
-OCSM_SRC=..
-endif
-
 IDIR  = $(ESP_ROOT)/include
 include $(IDIR)/$(ESP_ARCH)
 LDIR  = $(ESP_ROOT)/lib
@@ -117,24 +113,24 @@ $(LDIR)/tblade.so:	$(ODIR)/udpTblade.o $(LDIR)/libTBlade3.a
 	rm $(LDIR)/tblade.so
 	$(FCOMP) $(SOFLGS) -o $(LDIR)/tblade.so $(ODIR)/udpTblade.o -L$(LDIR) -lTBlade3 -legads
 
-$(ODIR)/udpTblade.o:	udpTblade.c $(OCSM_SRC)/udpUtilities.c $(OCSM_SRC)/udpUtilities.h
-	$(CC) -c $(COPTS) $(DEFINE) -I$(IDIR) -I$(OCSM_SRC)/ udpTblade.c -o $(ODIR)/udpTblade.o
+$(ODIR)/udpTblade.o:	udpTblade.c $(IDIR)/udpUtilities.c $(IDIR)/udpUtilities.h
+	$(CC) -c $(COPTS) $(DEFINE) -I$(IDIR) udpTblade.c -o $(ODIR)/udpTblade.o
 
 $(LDIR)/bladevolume.so:	$(ODIR)/udpBladeVolume.o $(LDIR)/libTBlade3.a
 	touch $(LDIR)/bladevolume.so
 	rm $(LDIR)/bladevolume.so
 	$(FCOMP) $(SOFLGS) -o $(LDIR)/bladevolume.so $(ODIR)/udpBladeVolume.o -L$(LDIR) -lTBlade3 -legads
 
-$(ODIR)/udpBladeVolume.o:	udpBladeVolume.c $(OCSM_SRC)/udpUtilities.c $(OCSM_SRC)/udpUtilities.h
-	$(CC) -c $(COPTS) $(DEFINE) -I$(IDIR) -I$(OCSM_SRC)/ udpBladeVolume.c -o $(ODIR)/udpBladeVolume.o
+$(ODIR)/udpBladeVolume.o:	udpBladeVolume.c $(IDIR)/udpUtilities.c $(IDIR)/udpUtilities.h
+	$(CC) -c $(COPTS) $(DEFINE) -I$(IDIR) udpBladeVolume.c -o $(ODIR)/udpBladeVolume.o
 
 $(LDIR)/hubwedge.so:	$(ODIR)/udpHubWedge.o $(LDIR)/libTBlade3.a
 	touch $(LDIR)/hubwedge.so
 	rm $(LDIR)/hubwedge.so
 	$(FCOMP) $(SOFLGS) -o $(LDIR)/hubwedge.so $(ODIR)/udpHubWedge.o -L$(LDIR) -lTBlade3 -legads
 
-$(ODIR)/udpHubWedge.o:	udpHubWedge.c $(OCSM_SRC)/udpUtilities.c $(OCSM_SRC)/udpUtilities.h
-	$(CC) -c $(COPTS) $(DEFINE) -I$(IDIR) -I$(OCSM_SRC)/ udpHubWedge.c -o $(ODIR)/udpHubWedge.o
+$(ODIR)/udpHubWedge.o:	udpHubWedge.c $(IDIR)/udpUtilities.c $(IDIR)/udpUtilities.h
+	$(CC) -c $(COPTS) $(DEFINE) -I$(IDIR) udpHubWedge.c -o $(ODIR)/udpHubWedge.o
 
 clean:
 	rm -f $(OBJS) $(ODIR)/udpTblade.o $(ODIR)/udpBladeVolume.o $(ODIR)/udpHubWedge.o $(OBJS:.o=.mod)
