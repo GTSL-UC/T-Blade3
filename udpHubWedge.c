@@ -121,7 +121,6 @@ static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0., 		0.,  		0.,
                                       0.,       0.,         0.,         0.,
-                                      0.,       0.,         0.,         0., 
                                       0.,       };
 
 /* get utility routines: udpErrorStr, udpInitialize, udpReset, udpSet,
@@ -189,17 +188,17 @@ void   override_exact_lethk_(   int *nspn, double exact_lethk[   ]);
 void   override_exact_tethk_(   int *nspn, double exact_tethk[   ]);
 void   override_thk_flags_(                int    thk_flags[     ]);
 
-static int    EG_fitBspline(ego context,
+/*static int    EG_fitBspline(ego context,
                             int npnt, int bitflag, double xyz[],
-                            int ncp, ego *ecurve, double *rms);
-static int    fit1dCloud(int m, int ordered, double XYZcloud[],
-                         int n, double cp[], double *normf);
-static int    eval1dBspline(double T, int n, double cp[], double XYZ[],
-                            /*@null@*/double dXYZdT[], /*@null@*/double dXYZdP[]);
-static int    cubicBsplineBases(int ncp, double t, double N[], double dN[]);
-static int    solveSparse(double SAv[], int SAi[], double b[], double x[],
-                          int itol, double *errmax, int *iter);
-static double L2norm(double f[], int n);
+                            int ncp, ego *ecurve, double *rms);*/
+/*static int    fit1dCloud(int m, int ordered, double XYZcloud[],
+                         int n, double cp[], double *normf);*/
+//static int    eval1dBspline(double T, int n, double cp[], double XYZ[],
+//                            /*@null@*/double dXYZdT[], /*@null@*/double dXYZdP[]);
+//static int    cubicBsplineBases(int ncp, double t, double N[], double dN[]);
+//static int    solveSparse(double SAv[], int SAi[], double b[], double x[],
+//                          int itol, double *errmax, int *iter);
+//static double L2norm(double f[], int n);
 
 #ifdef GRAFIC
 static int    plotCurve(int npnt, double xyz[], ego ecurve);
@@ -223,13 +222,13 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     int     status = EGADS_SUCCESS;
 
 #define NPNT 1000
-    int     nsec, isec, npnt, ipnt,ipnt2, nn, periodic, senses[4], sense[8],oclass,mtype,nchild,nchilds,sizes[2];
-    double  xyz[3*NPNT], rms, xyzNode[18],data[6],data2[12],node0[3],node1[3],node2[3],node3[3],node4[3],node5[3],xyz2[3*NPNT],xyz3[3*NPNT],angle,bladespace,nblades,data3[4];
-    double  trange[2], trange1[2], trange2[2];
-    double  xsave, ysave, zsave, xmin, ymin, zmin, xmax, ymax, zmax;
-    char    filename[257], nextline[257], casename[257];
-    FILE    *fp,*hub,*casing,*meanline;
-    ego     ecurve[20], enodes[5], eedges[4], eloop,eloops[20], efaces[20],*body,bodies,ebody2[10],*ebody3,emodel,*echilds2,source,*echilds,eref,meansurface,transform,*children;
+    int     nsec, isec, npnt, /*ipnt,ipnt2, */nn, /*periodic, */*senses/*[4]*/, sense[8],oclass,mtype,nchild,/*nchilds,*/sizes[2];
+    double  /*xyz[3*NPNT], rms, xyzNode[18],*/data[6],/*data2[12],*/node0[3],node1[3],/*node2[3],node3[3],node4[3],node5[3],*/xyz2[3*NPNT],/*xyz3[3*NPNT],*/angle,bladespace,nblades/*,data3[4]*/;
+    double  trange[2] /*,trange1[2], trange2[2]*/;
+    double  /*xsave, ysave, zsave, */xmin, ymin, zmin, xmax, ymax, zmax;
+    char    filename[300], nextline[257], casename[257];
+    FILE    *fp,*hub,/**casing,*/*meanline;
+    ego     ecurve[20], enodes[5], eedges[4], /*eloop,*/eloops[20], efaces[20],/***/body,/*bodies,*/ebody2[10],/**ebody3,*/emodel,*echilds2,/*source,*echilds,*/eref,/*meansurface,transform,*/*children;
 
 #ifdef DEBUG
     printf("udpExecute(context=%llx)\n", (long long)context);
@@ -297,6 +296,7 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     printf("reading: %s\n", filename);
 	
     hub = fopen(filename, "r");
+    fp  = hub;      //Might need to remove
     if (fp == NULL) {
         printf("could not open \"%s\"\n", filename);
         status = -9999;
@@ -336,13 +336,13 @@ udpExecute(ego  context,                /* (in)  EGADS context */
 		zmin=xyz2[2];
 		
 		/*Creating a node at the first and last points*/		
-		node0[0]=xyz2[0];
-		node0[1]=xyz2[1];
-		node0[2]=xyz2[2];
+		node0[0]=xmin;//xyz2[0];
+		node0[1]=ymin;//xyz2[1];
+		node0[2]=zmin;//xyz2[2];
 	
-		node1[0]=xyz2[3*(npnt-1)];
-		node1[1]=xyz2[3*(npnt-1)+1];
-		node1[2]=xyz2[3*(npnt-1)+2];
+		node1[0]=xmax;//xyz2[3*(npnt-1)];
+		node1[1]=ymax;//xyz2[3*(npnt-1)+1];
+		node1[2]=zmax;//xyz2[3*(npnt-1)+2];
 	
 		status = EG_makeTopology(context, NULL, NODE, 0, node0, 0, NULL, NULL, &(enodes[0]));
 		#ifdef DEBUG
@@ -386,7 +386,8 @@ udpExecute(ego  context,                /* (in)  EGADS context */
 		#ifdef DEBUG		
 		printf("EG_makeTopology(loop) -> status=%d\n", status);	
 		#endif
-	
+
+        fclose(meanline);	
 	}
 	
 	/*Making the Nodes for the Line along the X-axis-the .0001 is because ESP 
@@ -447,7 +448,7 @@ udpExecute(ego  context,                /* (in)  EGADS context */
 	#endif
 
 	/*Blend the meanline edge with the edge along the x-axis*/
-	status=EG_blend(2,&eloops,NULL,NULL,&body);
+	status=EG_blend(2,eloops,NULL,NULL,&body);
 	#ifdef DEBUG
 		printf("EG_blend -> status=%d\n", status);
 	#endif
@@ -524,10 +525,10 @@ udpExecute(ego  context,                /* (in)  EGADS context */
 /*
  *************************************************************************/
 
-cleanup:
+/*cleanup:
     if (status != EGADS_SUCCESS) {
         *string = udpErrorStr(status);
-    }	
+    }*/	
 	
 	return status;
 }
@@ -1528,28 +1529,28 @@ void override_thk_flags_(int thk_flags[])
  ************************************************************************
  */
 
-static int
-EG_fitBspline(ego    context,           /* (in)  EGADS context */
-              int    npnt,              /* (in)  number of points */
-              int    bitflag,           /* (in)  1=ordered, 2=periodic */
-              double xyz[],             /* (in)  array of points (xyzxyz...) */
-              int    ncp,               /* (in)  number of control points */
-              ego    *ecurve,           /* (out) Bspline curve (degree=3) */
-              double *rms)              /* (out) RMS distance of points from curve */
-{
+/*static int
+EG_fitBspline(ego    context,  */           /* (in)  EGADS context */
+              /*int    npnt,   */           /* (in)  number of points */
+              /*int    bitflag,*/           /* (in)  1=ordered, 2=periodic */
+              /*double xyz[],  */           /* (in)  array of points (xyzxyz...) */
+              /*int    ncp,    */           /* (in)  number of control points */
+              /*ego    *ecurve,*/           /* (out) Bspline curve (degree=3) */
+              /*double *rms)   */           /* (out) RMS distance of points from curve */
+/*{
     int    status = EGADS_SUCCESS;
 
     int    nknot, ndata, idata, j, header[4];
-    double *cpdata=NULL;
+    double *cpdata=NULL;*/
 
     /* --------------------------------------------------------------- */
 
     /* default returns */
-    *ecurve = NULL;
-    *rms    = 0;
+    /**ecurve = NULL;
+    *rms    = 0;*/
 
     /* check the inputs */
-    if (context == NULL) {
+    /*if (context == NULL) {
         status = EGADS_NULLOBJ;
         goto cleanup;
     } else if (npnt < 2) {
@@ -1561,10 +1562,10 @@ EG_fitBspline(ego    context,           /* (in)  EGADS context */
     } else if (ncp < 3) {
         status = EGADS_NODATA;
         goto cleanup;
-    }
+    }*/
 
     /* set up arrays needed to define Bspline */
-    nknot = ncp + 4;
+    /*nknot = ncp + 4;
     ndata = nknot + 3 * ncp;
 
     header[0] = 0;            // bitflag
@@ -1578,10 +1579,10 @@ EG_fitBspline(ego    context,           /* (in)  EGADS context */
         goto cleanup;
     }
 
-    ndata = 0;
+    ndata = 0;*/
 
     /* knot vector */
-    cpdata[ndata++] = 0;
+    /*cpdata[ndata++] = 0;
     cpdata[ndata++] = 0;
     cpdata[ndata++] = 0;
     cpdata[ndata++] = 0;
@@ -1593,10 +1594,10 @@ EG_fitBspline(ego    context,           /* (in)  EGADS context */
     cpdata[ndata++] = ncp - 3;
     cpdata[ndata++] = ncp - 3;
     cpdata[ndata++] = ncp - 3;
-    cpdata[ndata++] = ncp - 3;
+    cpdata[ndata++] = ncp - 3;*/
 
     /* control points at the two ends */
-    idata = ndata;
+    /*idata = ndata;
     cpdata[idata  ] = xyz[0];
     cpdata[idata+1] = xyz[1];
     cpdata[idata+2] = xyz[2];
@@ -1604,22 +1605,22 @@ EG_fitBspline(ego    context,           /* (in)  EGADS context */
     idata = ndata + 3 * (ncp-1);
     cpdata[idata  ] = xyz[3*npnt-3];
     cpdata[idata+1] = xyz[3*npnt-2];
-    cpdata[idata+2] = xyz[3*npnt-1];
+    cpdata[idata+2] = xyz[3*npnt-1];*/
 
     /* perform the fitting (which updates the interior control points) */
-    status = fit1dCloud(npnt, bitflag, xyz,
+    /*status = fit1dCloud(npnt, bitflag, xyz,
                         ncp,  &(cpdata[ndata]), rms);
-    if (status < EGADS_SUCCESS) goto cleanup;
+    if (status < EGADS_SUCCESS) goto cleanup;*/
 
     /* make the geometry */
-    status = EG_makeGeometry(context, CURVE, BSPLINE, NULL,
+    /*status = EG_makeGeometry(context, CURVE, BSPLINE, NULL,
                              header, cpdata, ecurve);
 
 cleanup:
     if (cpdata != NULL) free(cpdata);
 
     return status;
-}
+}*/
 
 
 /*
@@ -1630,18 +1631,18 @@ cleanup:
  ************************************************************************
  */
 
-static int
-fit1dCloud(int    m,                    /* (in)  number of points in cloud */
-           int    bitflag,              /* (in)  1=ordered, 2=periodic */
-           double XYZcloud[],           /* (in)  array  of points in cloud */
-           int    n,                    /* (in)  number of control points */
-           double cp[],                 /* (in)  array  of control points (first and last are set) */
-                                        /* (out) array  of control points (all set) */
-           double *normf)               /* (out) RMS of distances between cloud and fit */
-{
-    int    status = EGADS_SUCCESS;      /* (out)  return status */
+/*static int
+fit1dCloud(int    m,           */           /* (in)  number of points in cloud */
+           /*int    bitflag,   */           /* (in)  1=ordered, 2=periodic */
+           /*double XYZcloud[],*/           /* (in)  array  of points in cloud */
+           /*int    n,         */           /* (in)  number of control points */
+           /*double cp[],      */           /* (in)  array  of control points (first and last are set) */
+           /*                  */           /* (out) array  of control points (all set) */
+           /*double *normf)    */           /* (out) RMS of distances between cloud and fit */
+/*{
+    int    status = EGADS_SUCCESS;*/      /* (out)  return status */
 
-    int    ordered=0, periodic=0, np, nvar, ivar, jvar, nobj, iobj, i, j, k, next;
+    /*int    ordered=0, periodic=0, np, nvar, ivar, jvar, nobj, iobj, i, j, k, next;
     int    niter, iter, count, itol, maxiter;
     double xmin, xmax, ymin, ymax, zmin, zmax, scale, xcent, ycent, zcent;
     double frac, toler, lambda, normdelta, normfnew, delta0, delta1, delta2;
@@ -1655,535 +1656,535 @@ fit1dCloud(int    m,                    /* (in)  number of points in cloud */
     double *f=NULL,  *fnew=NULL;
     double *aa=NULL, *bb=NULL, *cc=NULL, *rhs=NULL;
 
-    ROUTINE(fit1dCloud);
+    ROUTINE(fit1dCloud);*/
 
     /* --------------------------------------------------------------- */
 
-#ifdef DEBUG
-    printf("enter fit1dCloud(m=%d, ordered=%d, n=%d)\n", m, ordered, n);
-#endif
+//#ifdef DEBUG
+//    printf("enter fit1dCloud(m=%d, ordered=%d, n=%d)\n", m, ordered, n);
+//#endif
 
-    assert(m > 1);                      // needed to avoid clang warning
-    assert(n > 2);                      // needed to avoid clang warning
+//    assert(m > 1);                      // needed to avoid clang warning
+//    assert(n > 2);                      // needed to avoid clang warning
 
     /* default return */
-    *normf  = 1e-12;
+//    *normf  = 1e-12;
 
     /* extract ordered and periodic flags */
-    if (bitflag == 1 || bitflag == 3) ordered  = 1;
-    if (bitflag == 2 || bitflag == 3) periodic = 1;
+//    if (bitflag == 1 || bitflag == 3) ordered  = 1;
+//    if (bitflag == 2 || bitflag == 3) periodic = 1;
 
     /* number of design variables and objectives */
-    np   = 3 * n - 6;
-    nvar = m + np;
-    nobj = 3 * m;
-
-    /* if m < n, then assume that the linear spline is the best fit */
-    if (m < n) {
-        for (j = 1; j < n-1; j++) {
-            frac = (double)(j) / (double)(n-1);
-
-            cp[3*j  ] = (1-frac) * cp[0] + frac * cp[3*n-3];
-            cp[3*j+1] = (1-frac) * cp[1] + frac * cp[3*n-2];
-            cp[3*j+2] = (1-frac) * cp[2] + frac * cp[3*n-1];
-        }
-
-#ifdef DEBUG
-        printf("making linear fit because not enough points in cloud\n");
-#endif
-        goto cleanup;
-    }
-
-    /* allocate all temporary arrays */
-    XYZcopy = (double *) malloc(3*m*sizeof(double));
-    dXYZdP  = (double *) malloc(  n*sizeof(double));
-    cpnew   = (double *) malloc(3*n*sizeof(double));
-
-    beta    = (double *) malloc(nvar*sizeof(double));
-    delta   = (double *) malloc(nvar*sizeof(double));
-    betanew = (double *) malloc(nvar*sizeof(double));
-
-    f       = (double *) malloc(nobj*sizeof(double));
-    fnew    = (double *) malloc(nobj*sizeof(double));
-
-    aa      = (double *) malloc(m    *sizeof(double));
-    bb      = (double *) malloc(m *np*sizeof(double));
-    cc      = (double *) malloc(np*np*sizeof(double));
-    rhs     = (double *) malloc(nvar *sizeof(double));
-
-    if (XYZcopy == NULL ||dXYZdP == NULL || cpnew == NULL ||
-        beta    == NULL || delta == NULL || betanew == NULL ||
-        f       == NULL || fnew  == NULL ||
-        aa      == NULL || bb    == NULL || cc == NULL || rhs == NULL) {
-        status = EGADS_MALLOC;
-        goto cleanup;
-    }
-
-#define AA(I)       aa[(I)]
-#define BB(I,J)     bb[(J)+np*(I)]
-#define CC(I,J)     cc[(J)+np*(I)]
-
-    /* transform inputs so that they are centered at origin and
-       unit length */
-    xmin = XYZcloud[0];
-    xmax = XYZcloud[0];
-    ymin = XYZcloud[1];
-    ymax = XYZcloud[1];
-    zmin = XYZcloud[2];
-    zmax = XYZcloud[2];
-
-    for (k = 1; k < m; k++) {
-        if (XYZcloud[3*k  ] < xmin) xmin = XYZcloud[3*k  ];
-        if (XYZcloud[3*k  ] > xmax) xmax = XYZcloud[3*k  ];
-        if (XYZcloud[3*k+1] < ymin) ymin = XYZcloud[3*k+1];
-        if (XYZcloud[3*k+1] > ymax) ymax = XYZcloud[3*k+1];
-        if (XYZcloud[3*k+2] < zmin) zmin = XYZcloud[3*k+2];
-        if (XYZcloud[3*k+2] > zmax) zmax = XYZcloud[3*k+2];
-    }
-
-    scale = 1.0 / MAX(MAX(xmax-xmin, ymax-ymin), zmax-zmin);
-    xcent = scale * (xmin + xmax) / 2;
-    ycent = scale * (ymin + ymax) / 2;
-    zcent = scale * (zmin + zmax) / 2;
-
-    for (k = 0; k < m; k++) {
-        XYZcopy[3*k  ] = scale * (XYZcloud[3*k  ] - xcent);
-        XYZcopy[3*k+1] = scale * (XYZcloud[3*k+1] - ycent);
-        XYZcopy[3*k+2] = scale * (XYZcloud[3*k+2] - zcent);
-    }
-    for (j = 0; j < n; j++) {
-        cp[3*j  ] = scale * (cp[3*j  ] - xcent);
-        cp[3*j+1] = scale * (cp[3*j+1] - ycent);
-        cp[3*j+2] = scale * (cp[3*j+2] - zcent);
-    }
-
-    /* set up the initial values for the interior control
-       points and the initial values of "t" */
-
-    /* XYZcopy is ordered */
-    if (ordered == 1) {
-
-        /* set the initial control point locations by picking up evenly
-           spaced points (based upon point number) from the cloud */
-        for (j = 1; j < n-1; j++) {
-            i = (j * (m-1)) / (n-1);
-
-            cp[3*j  ] = XYZcopy[3*i  ];
-            cp[3*j+1] = XYZcopy[3*i+1];
-            cp[3*j+2] = XYZcopy[3*i+2];
-        }
-
-        /* for each point in the cloud, assign the value of "t"
-           (which is stored in the first m betas) based upon it
-           local pseudo-arc-length */
-        beta[0] = 0;
-        for (k = 1; k < m; k++) {
-            beta[k] = beta[k-1] + sqrt(SQR(XYZcopy[3*k  ]-XYZcopy[3*k-3])
-                                      +SQR(XYZcopy[3*k+1]-XYZcopy[3*k-2])
-                                      +SQR(XYZcopy[3*k+2]-XYZcopy[3*k-1]));
-        }
-
-        for (k = 0; k < m; k++) {
-            beta[k] = (n-3) * beta[k] / beta[m-1];
-        }
-
-    /* XYZcopy is unordered */
-    } else {
-
-        /* set the "center" control point to coincide with the point
-           in the cloud that is furthest away from the first and
-           last control points */
-        dmax = 0;
-        for (k = 1; k < m-1; k++) {
-            dist1 = pow(XYZcopy[3*k  ]-cp[0], 2)
-                  + pow(XYZcopy[3*k+1]-cp[1], 2)
-                  + pow(XYZcopy[3*k+2]-cp[2], 2);
-            dist2 = pow(XYZcopy[3*k  ]-cp[3*n-3], 2)
-                  + pow(XYZcopy[3*k+1]-cp[3*n-2], 2)
-                  + pow(XYZcopy[3*k+2]-cp[3*n-1], 2);
-            dist  = MIN(dist1, dist2);
-
-            if (dist > dmax) {
-                dmax = dist;
-                cp[3*(n/2)  ] = XYZcopy[3*k  ];
-                cp[3*(n/2)+1] = XYZcopy[3*k+1];
-                cp[3*(n/2)+2] = XYZcopy[3*k+2];
-            }
-        }
-
-        /* fill in the other control points */
-        for (j = 1; j < (n/2); j++) {
-            frac = (double)(j) / (double)(n/2);
-
-            cp[3*j  ] = (1-frac) * cp[0] + frac * cp[3*(n/2)  ];
-            cp[3*j+1] = (1-frac) * cp[1] + frac * cp[3*(n/2)+1];
-            cp[3*j+2] = (1-frac) * cp[2] + frac * cp[3*(n/2)+2];
-        }
-
-        for (j = (n/2)+1; j < n; j++) {
-            frac = (double)(j-(n/2)) / (double)(n-1-(n/2));
-
-            cp[3*j  ] = (1-frac) * cp[3*(n/2)  ] + frac * cp[3*n-3];
-            cp[3*j+1] = (1-frac) * cp[3*(n/2)+1] + frac * cp[3*n-2];
-            cp[3*j+2] = (1-frac) * cp[3*(n/2)+2] + frac * cp[3*n-1];
-        }
-
-        /* for each point in the cloud, assign the value of "t"
-           (which is stored in the first m betas) as the closest
-           point to the control polygon */
-        for (k = 0; k < m; k++) {
-            xx = XYZcopy[3*k  ];
-            yy = XYZcopy[3*k+1];
-            zz = XYZcopy[3*k+2];
-
-            dmin = HUGEQ;
-            for (j = 1; j < n; j++) {
-                xb = cp[3*j-3];   yb = cp[3*j-2];   zb = cp[3*j-1];
-                xe = cp[3*j  ];   ye = cp[3*j+1];   ze = cp[3*j+2];
-
-                tt = ((xe-xb) * (xx-xb) + (ye-yb) * (yy-yb) + (ze-zb) * (zz-zb))
-                   / ((xe-xb) * (xe-xb) + (ye-yb) * (ye-yb) + (ze-zb) * (ze-zb));
-                tt = MIN(MAX(0, tt), 1);
-
-                dd = pow((1-tt) * xb + tt * xe - xx, 2)
-                   + pow((1-tt) * yb + tt * ye - yy, 2)
-                   + pow((1-tt) * zb + tt * ze - zz, 2);
-
-                if (dd < dmin) {
-                    dmin    = dd;
-                    beta[k] = ((j-1) + tt) * (double)(n - 3) / (double)(n - 1);
-                }
-            }
-        }
-    }
-
-#ifdef DEBUG
-    printf("Initialization\n");
-    for (j = 0; j < n; j++) {
-        printf("%3d: %12.6f %12.6f %12.6f\n", j, cp[3*j], cp[3*j+1], cp[3*j+2]);
-    }
-    for (k = 0; k < m; k++) {
-        printf("%3d: %12.6f\n", k, beta[k]);
-    }
-#endif
-
-    /* set the relaxation parameter for control points */
-    omega = 0.25;
-
-    /* insert the interior control points into the design variables */
-    next = m;
-    for (j = 1; j < n-1; j++) {
-        beta[next++] = cp[3*j  ];
-        beta[next++] = cp[3*j+1];
-        beta[next++] = cp[3*j+2];
-    }
-
-    /* compute the initial objective function */
-    for (k = 0; k < m; k++) {
-        status = eval1dBspline(beta[k], n, cp, XYZ, NULL, NULL);
-        CHECK_STATUS(eval1dBspline);
-
-        f[3*k  ] = XYZcopy[3*k  ] - XYZ[0];
-        f[3*k+1] = XYZcopy[3*k+1] - XYZ[1];
-        f[3*k+2] = XYZcopy[3*k+2] - XYZ[2];
-    }
-    *normf = L2norm(f, nobj) / m;
-#ifdef DEBUG
-    printf("initial   norm(f)=%11.4e\n", *normf);
-#endif
-
-    /* initialize the Levenberg-Marquardt algorithm */
-    niter  = 501;
-    toler  = 1.0e-6;
-    lambda = 1;
-
-    /* LM iterations */
-    for (iter = 0; iter < niter; iter++) {
-
-        /* initialize [AA  BB]
-                      [      ] =  transpose(J) * J + lambda * diag(transpose(J) * J)
-                      [BB' CC]
-
-           and        rhs  = -transpose(J) * f
-        */
-        for (jvar = 0; jvar < np; jvar++) {
-            for (ivar = 0; ivar < np; ivar++) {
-                CC(ivar,jvar) = 0;
-            }
-            CC(jvar,jvar) = 1e-6;
-        }
-
-        for (jvar = 0; jvar < nvar; jvar++) {
-            rhs[jvar] = 0;
-        }
-
-        /* accumulate AA, BB, CC, and rhs by looping over points in cloud */
-        for (k = 0; k < m; k++) {
-            status = eval1dBspline(beta[k], n, cp, XYZ, dXYZdT, dXYZdP);
-            CHECK_STATUS(eval1dBspline);
-
-            AA(k) = dXYZdT[0] * dXYZdT[0] + dXYZdT[1] * dXYZdT[1] + dXYZdT[2] * dXYZdT[2];
-
-            for (ivar = 1; ivar < n-1; ivar++) {
-                BB(k, 3*ivar-3) = dXYZdT[0] * dXYZdP[ivar];
-                BB(k, 3*ivar-2) = dXYZdT[1] * dXYZdP[ivar];
-                BB(k, 3*ivar-1) = dXYZdT[2] * dXYZdP[ivar];
-
-                for (jvar = 1; jvar < n-1; jvar++) {
-#ifndef __clang_analyzer__
-                    CC(3*ivar-3, 3*jvar-3) += dXYZdP[ivar] * dXYZdP[jvar];
-                    CC(3*ivar-2, 3*jvar-2) += dXYZdP[ivar] * dXYZdP[jvar];
-                    CC(3*ivar-1, 3*jvar-1) += dXYZdP[ivar] * dXYZdP[jvar];
-#endif
-                }
-            }
-
-            rhs[k] = dXYZdT[0] * f[3*k] + dXYZdT[1] * f[3*k+1] + dXYZdT[2] * f[3*k+2];
-
-            for (ivar = 1; ivar < n-1; ivar++) {
-#ifndef __clang_analyzer__
-                rhs[m+3*ivar-3] += dXYZdP[ivar] * f[3*k  ];
-                rhs[m+3*ivar-2] += dXYZdP[ivar] * f[3*k+1];
-                rhs[m+3*ivar-1] += dXYZdP[ivar] * f[3*k+2];
-#endif
-            }
-        }
-
-        /* set up sparse-matrix arrays */
-        count = m + 2 * m * np + np * np + 1;
-
-        MMd = (double *) malloc(count*sizeof(double));
-        MMi = (int    *) malloc(count*sizeof(int   ));
-
-        if (MMd == NULL || MMi == NULL) {
-            status = EGADS_MALLOC;
-            goto cleanup;
-        }
-
-        /* store diagonal values (multiplied by (1+lambda)) */
-        for (k = 0; k < m; k++) {
-            MMd[k] = AA(k) * (1 + lambda);
-        }
-        for (ivar = 0; ivar < np; ivar++) {
-            MMd[m+ivar] = CC(ivar,ivar) * (1 + lambda);
-        }
-
-        /* set up off-diagonal elements, including indices */
-        MMi[0] = nvar + 1;
-        count  = nvar;
-
-        /* BB to the right of AA */
-        for (k = 0; k < m; k++) {
-            for (jvar = 0; jvar < np; jvar++) {
-                count++;
-                MMd[count] = BB(k,jvar);
-                MMi[count] = m + jvar;
-            }
-            MMi[k+1] = count + 1;
-        }
-
-        for (ivar = 0; ivar < np; ivar++) {
-            /* transpose(BB) below A */
-            for (k = 0; k < m; k++) {
-                count++;
-                MMd[count] = BB(k,ivar);
-                MMi[count] = k;
-            }
-
-            /* CC in bottom-right corner */
-            for (jvar = 0; jvar < np; jvar++) {
-                if (ivar != jvar) {
-                    count++;
-                    MMd[count] = CC(ivar,jvar);
-                    MMi[count] = m + jvar;
-                }
-            }
-            MMi[m+ivar+1] = count + 1;
-        }
-
-        /* arbitrary value (not used) */
-        MMd[nvar] = 0;
-
-        /* set up for sparse matrix solve (via biconjugate gradient technique) */
-        itol    = 1;
-        errmax  = 1.0e-12;
-        maxiter = 2 * nvar;
-        for (ivar = 0; ivar < nvar; ivar++) {
-            delta[ivar] = 0;
-        }
-
-        status = solveSparse(MMd, MMi, rhs, delta, itol, &errmax, &maxiter);
-        CHECK_STATUS(solveSparse);
-
-        FREE(MMd);
-        FREE(MMi);
-
-        /* check for convergence on delta (which corresponds to a small
-           change in beta) */
-        normdelta = L2norm(delta, nvar);
-
-        if (normdelta < toler) {
-#ifdef DEBUG
-            printf("converged with norm(delta)=%11.4e\n", normdelta);
-#endif
-            break;
-        }
-
-        /* find the temporary new beta */
-        for (ivar = 0; ivar < nvar; ivar++) {
-
-            /* beta associated with Tcloud */
-            if (ivar < m) {
-                betanew[ivar] = beta[ivar] + delta[ivar];
-
-                if (betanew[ivar] < 0  ) betanew[ivar] = 0;
-                if (betanew[ivar] > n-3) betanew[ivar] = n-3;
-
-                /* beta associated with control points */
-            } else {
-                betanew[ivar] = beta[ivar] + omega * delta[ivar];
-            }
-        }
-
-        /* gradually increase omega */
-        omega = MIN(1.01*omega, 1.0);
-
-        /* extract the temporary control points from betanew */
-        next = m;
-        for (j = 0; j < n; j++) {
-            if (j == 0 || j == n-1) {
-                cpnew[3*j  ] = cp[3*j  ];
-                cpnew[3*j+1] = cp[3*j+1];
-                cpnew[3*j+2] = cp[3*j+2];
-            } else {
-                cpnew[3*j  ] = betanew[next++];
-                cpnew[3*j+1] = betanew[next++];
-                cpnew[3*j+2] = betanew[next++];
-            }
-        }
-
-        /* apply periodicity condition by making sure first and last
-           intervals are the same */
-        if (periodic == 1) {
-            delta0 = (2*cpnew[0] - cpnew[3] - cpnew[3*n-6]) / 2;
-            delta1 = (2*cpnew[1] - cpnew[4] - cpnew[3*n-5]) / 2;
-            delta2 = (2*cpnew[2] - cpnew[5] - cpnew[3*n-4]) / 2;
-
-            cpnew[    3] += delta0;
-            cpnew[    4] += delta1;
-            cpnew[    5] += delta2;
-
-            cpnew[3*n-6] += delta0;
-            cpnew[3*n-5] += delta1;
-            cpnew[3*n-4] += delta2;
-        }
-
-        /* compute the objective function based upon the new beta */
-        for (k = 0; k < m; k++) {
-            status = eval1dBspline(betanew[k], n, cp, XYZ, NULL, NULL);
-            CHECK_STATUS(eval1dBspline);
-
-            fnew[3*k  ] = XYZcopy[3*k  ] - XYZ[0];
-            fnew[3*k+1] = XYZcopy[3*k+1] - XYZ[1];
-            fnew[3*k+2] = XYZcopy[3*k+2] - XYZ[2];
-        }
-        normfnew = L2norm(fnew, nobj) / m;
-#ifdef DEBUG
-        if (iter%10 == 0) {
-            printf("iter=%4d: norm(delta)=%11.4e, norm(f)=%11.4e  ",
-                   iter, normdelta, normfnew);
-        }
-#endif
-
-        /* if this was a better step, accept it and decrease
-           lambda (making it more Newton-like) */
-        if (normfnew < *normf) {
-            lambda /= 2;
-#ifdef DEBUG
-            if (iter%10 == 0) {
-                printf("ACCEPTED,  lambda=%11.4e, omega=%10.5f\n", lambda, omega);
-            }
-#endif
-
-            /* save new design variables, control points, and
-               objective function */
-            for (ivar = 0; ivar < nvar; ivar++) {
-                beta[ivar] = betanew[ivar];
-            }
-            for (j = 0; j < n; j++) {
-                cp[3*j  ] = cpnew[3*j  ];
-                cp[3*j+1] = cpnew[3*j+1];
-                cp[3*j+2] = cpnew[3*j+2];
-            }
-            for (iobj = 0; iobj < nobj; iobj++) {
-                f[iobj] = fnew[iobj];
-            }
-            *normf = normfnew;
-
-        /* otherwise do not take the step and increase lambda (making it
-           more steepest-descent-like) */
-        } else {
-            lambda *= 2;
-#ifdef DEBUG
-            if (iter %10 == 0) {
-                printf("rejected,  lambda=%11.4e, omega=%10.5f\n", lambda, omega);
-            }
-#endif
-        }
-
-        /* check for convergence (based upon a small value of
-           objective function) */
-        if (*normf < toler) {
-#ifdef DEBUG
-            printf("converged with norm(f)=%11.4e\n", *normf);
-#endif
-            break;
-        }
-    }
-
-    /* transform control points back to their original scale */
-    for (j = 0; j < n; j++) {
-        cp[3*j  ] = xcent + cp[3*j  ] / scale;
-        cp[3*j+1] = ycent + cp[3*j+1] / scale;
-        cp[3*j+2] = zcent + cp[3*j+2] / scale;
-    }
-
-    *normf /= scale;
-
-#ifdef DEBUG
-    printf("final control points\n");
-    for (j = 0; j < n; j++) {
-        printf("%3d: %12.6f %12.6f %12.6f\n", j, cp[3*j], cp[3*j+1], cp[3*j+2]);
-    }
-    printf("*normf: %12.4e\n", *normf);
-#endif
-
-cleanup:
-    if (XYZcopy != NULL) free(XYZcopy);
-    if (dXYZdP  != NULL) free(dXYZdP );
-    if (cpnew   != NULL) free(cpnew  );
-
-    if (beta    != NULL) free(beta   );
-    if (delta   != NULL) free(delta  );
-    if (betanew != NULL) free(betanew);
-
-    if (f       != NULL) free(f      );
-    if (fnew    != NULL) free(fnew   );
-
-    if (aa      != NULL) free(aa     );
-    if (bb      != NULL) free(bb     );
-    if (cc      != NULL) free(cc     );
-    if (rhs     != NULL) free(rhs    );
-
-    if (MMi     != NULL) free(MMi    );
-    if (MMd     != NULL) free(MMd    );
-
-#undef AA
-#undef BB
-#undef CC
-
-    return status;
-}
+//    np   = 3 * n - 6;
+//    nvar = m + np;
+//    nobj = 3 * m;
+//
+//    /* if m < n, then assume that the linear spline is the best fit */
+//    if (m < n) {
+//        for (j = 1; j < n-1; j++) {
+//            frac = (double)(j) / (double)(n-1);
+//
+//            cp[3*j  ] = (1-frac) * cp[0] + frac * cp[3*n-3];
+//            cp[3*j+1] = (1-frac) * cp[1] + frac * cp[3*n-2];
+//            cp[3*j+2] = (1-frac) * cp[2] + frac * cp[3*n-1];
+//        }
+//
+//#ifdef DEBUG
+//        printf("making linear fit because not enough points in cloud\n");
+//#endif
+//        goto cleanup;
+//    }
+//
+//    /* allocate all temporary arrays */
+//    XYZcopy = (double *) malloc(3*m*sizeof(double));
+//    dXYZdP  = (double *) malloc(  n*sizeof(double));
+//    cpnew   = (double *) malloc(3*n*sizeof(double));
+//
+//    beta    = (double *) malloc(nvar*sizeof(double));
+//    delta   = (double *) malloc(nvar*sizeof(double));
+//    betanew = (double *) malloc(nvar*sizeof(double));
+//
+//    f       = (double *) malloc(nobj*sizeof(double));
+//    fnew    = (double *) malloc(nobj*sizeof(double));
+//
+//    aa      = (double *) malloc(m    *sizeof(double));
+//    bb      = (double *) malloc(m *np*sizeof(double));
+//    cc      = (double *) malloc(np*np*sizeof(double));
+//    rhs     = (double *) malloc(nvar *sizeof(double));
+//
+//    if (XYZcopy == NULL ||dXYZdP == NULL || cpnew == NULL ||
+//        beta    == NULL || delta == NULL || betanew == NULL ||
+//        f       == NULL || fnew  == NULL ||
+//        aa      == NULL || bb    == NULL || cc == NULL || rhs == NULL) {
+//        status = EGADS_MALLOC;
+//        goto cleanup;
+//    }
+//
+//#define AA(I)       aa[(I)]
+//#define BB(I,J)     bb[(J)+np*(I)]
+//#define CC(I,J)     cc[(J)+np*(I)]
+//
+//    /* transform inputs so that they are centered at origin and
+//       unit length */
+//    xmin = XYZcloud[0];
+//    xmax = XYZcloud[0];
+//    ymin = XYZcloud[1];
+//    ymax = XYZcloud[1];
+//    zmin = XYZcloud[2];
+//    zmax = XYZcloud[2];
+//
+//    for (k = 1; k < m; k++) {
+//        if (XYZcloud[3*k  ] < xmin) xmin = XYZcloud[3*k  ];
+//        if (XYZcloud[3*k  ] > xmax) xmax = XYZcloud[3*k  ];
+//        if (XYZcloud[3*k+1] < ymin) ymin = XYZcloud[3*k+1];
+//        if (XYZcloud[3*k+1] > ymax) ymax = XYZcloud[3*k+1];
+//        if (XYZcloud[3*k+2] < zmin) zmin = XYZcloud[3*k+2];
+//        if (XYZcloud[3*k+2] > zmax) zmax = XYZcloud[3*k+2];
+//    }
+//
+//    scale = 1.0 / MAX(MAX(xmax-xmin, ymax-ymin), zmax-zmin);
+//    xcent = scale * (xmin + xmax) / 2;
+//    ycent = scale * (ymin + ymax) / 2;
+//    zcent = scale * (zmin + zmax) / 2;
+//
+//    for (k = 0; k < m; k++) {
+//        XYZcopy[3*k  ] = scale * (XYZcloud[3*k  ] - xcent);
+//        XYZcopy[3*k+1] = scale * (XYZcloud[3*k+1] - ycent);
+//        XYZcopy[3*k+2] = scale * (XYZcloud[3*k+2] - zcent);
+//    }
+//    for (j = 0; j < n; j++) {
+//        cp[3*j  ] = scale * (cp[3*j  ] - xcent);
+//        cp[3*j+1] = scale * (cp[3*j+1] - ycent);
+//        cp[3*j+2] = scale * (cp[3*j+2] - zcent);
+//    }
+//
+//    /* set up the initial values for the interior control
+//       points and the initial values of "t" */
+//
+//    /* XYZcopy is ordered */
+//    if (ordered == 1) {
+//
+//        /* set the initial control point locations by picking up evenly
+//           spaced points (based upon point number) from the cloud */
+//        for (j = 1; j < n-1; j++) {
+//            i = (j * (m-1)) / (n-1);
+//
+//            cp[3*j  ] = XYZcopy[3*i  ];
+//            cp[3*j+1] = XYZcopy[3*i+1];
+//            cp[3*j+2] = XYZcopy[3*i+2];
+//        }
+//
+//        /* for each point in the cloud, assign the value of "t"
+//           (which is stored in the first m betas) based upon it
+//           local pseudo-arc-length */
+//        beta[0] = 0;
+//        for (k = 1; k < m; k++) {
+//            beta[k] = beta[k-1] + sqrt(SQR(XYZcopy[3*k  ]-XYZcopy[3*k-3])
+//                                      +SQR(XYZcopy[3*k+1]-XYZcopy[3*k-2])
+//                                      +SQR(XYZcopy[3*k+2]-XYZcopy[3*k-1]));
+//        }
+//
+//        for (k = 0; k < m; k++) {
+//            beta[k] = (n-3) * beta[k] / beta[m-1];
+//        }
+//
+//    /* XYZcopy is unordered */
+//    } else {
+//
+//        /* set the "center" control point to coincide with the point
+//           in the cloud that is furthest away from the first and
+//           last control points */
+//        dmax = 0;
+//        for (k = 1; k < m-1; k++) {
+//            dist1 = pow(XYZcopy[3*k  ]-cp[0], 2)
+//                  + pow(XYZcopy[3*k+1]-cp[1], 2)
+//                  + pow(XYZcopy[3*k+2]-cp[2], 2);
+//            dist2 = pow(XYZcopy[3*k  ]-cp[3*n-3], 2)
+//                  + pow(XYZcopy[3*k+1]-cp[3*n-2], 2)
+//                  + pow(XYZcopy[3*k+2]-cp[3*n-1], 2);
+//            dist  = MIN(dist1, dist2);
+//
+//            if (dist > dmax) {
+//                dmax = dist;
+//                cp[3*(n/2)  ] = XYZcopy[3*k  ];
+//                cp[3*(n/2)+1] = XYZcopy[3*k+1];
+//                cp[3*(n/2)+2] = XYZcopy[3*k+2];
+//            }
+//        }
+//
+//        /* fill in the other control points */
+//        for (j = 1; j < (n/2); j++) {
+//            frac = (double)(j) / (double)(n/2);
+//
+//            cp[3*j  ] = (1-frac) * cp[0] + frac * cp[3*(n/2)  ];
+//            cp[3*j+1] = (1-frac) * cp[1] + frac * cp[3*(n/2)+1];
+//            cp[3*j+2] = (1-frac) * cp[2] + frac * cp[3*(n/2)+2];
+//        }
+//
+//        for (j = (n/2)+1; j < n; j++) {
+//            frac = (double)(j-(n/2)) / (double)(n-1-(n/2));
+//
+//            cp[3*j  ] = (1-frac) * cp[3*(n/2)  ] + frac * cp[3*n-3];
+//            cp[3*j+1] = (1-frac) * cp[3*(n/2)+1] + frac * cp[3*n-2];
+//            cp[3*j+2] = (1-frac) * cp[3*(n/2)+2] + frac * cp[3*n-1];
+//        }
+//
+//        /* for each point in the cloud, assign the value of "t"
+//           (which is stored in the first m betas) as the closest
+//           point to the control polygon */
+//        for (k = 0; k < m; k++) {
+//            xx = XYZcopy[3*k  ];
+//            yy = XYZcopy[3*k+1];
+//            zz = XYZcopy[3*k+2];
+//
+//            dmin = HUGEQ;
+//            for (j = 1; j < n; j++) {
+//                xb = cp[3*j-3];   yb = cp[3*j-2];   zb = cp[3*j-1];
+//                xe = cp[3*j  ];   ye = cp[3*j+1];   ze = cp[3*j+2];
+//
+//                tt = ((xe-xb) * (xx-xb) + (ye-yb) * (yy-yb) + (ze-zb) * (zz-zb))
+//                   / ((xe-xb) * (xe-xb) + (ye-yb) * (ye-yb) + (ze-zb) * (ze-zb));
+//                tt = MIN(MAX(0, tt), 1);
+//
+//                dd = pow((1-tt) * xb + tt * xe - xx, 2)
+//                   + pow((1-tt) * yb + tt * ye - yy, 2)
+//                   + pow((1-tt) * zb + tt * ze - zz, 2);
+//
+//                if (dd < dmin) {
+//                    dmin    = dd;
+//                    beta[k] = ((j-1) + tt) * (double)(n - 3) / (double)(n - 1);
+//                }
+//            }
+//        }
+//    }
+//
+//#ifdef DEBUG
+//    printf("Initialization\n");
+//    for (j = 0; j < n; j++) {
+//        printf("%3d: %12.6f %12.6f %12.6f\n", j, cp[3*j], cp[3*j+1], cp[3*j+2]);
+//    }
+//    for (k = 0; k < m; k++) {
+//        printf("%3d: %12.6f\n", k, beta[k]);
+//    }
+//#endif
+//
+//    /* set the relaxation parameter for control points */
+//    omega = 0.25;
+//
+//    /* insert the interior control points into the design variables */
+//    next = m;
+//    for (j = 1; j < n-1; j++) {
+//        beta[next++] = cp[3*j  ];
+//        beta[next++] = cp[3*j+1];
+//        beta[next++] = cp[3*j+2];
+//    }
+//
+//    /* compute the initial objective function */
+//    for (k = 0; k < m; k++) {
+//        status = eval1dBspline(beta[k], n, cp, XYZ, NULL, NULL);
+//        CHECK_STATUS(eval1dBspline);
+//
+//        f[3*k  ] = XYZcopy[3*k  ] - XYZ[0];
+//        f[3*k+1] = XYZcopy[3*k+1] - XYZ[1];
+//        f[3*k+2] = XYZcopy[3*k+2] - XYZ[2];
+//    }
+//    *normf = L2norm(f, nobj) / m;
+//#ifdef DEBUG
+//    printf("initial   norm(f)=%11.4e\n", *normf);
+//#endif
+//
+//    /* initialize the Levenberg-Marquardt algorithm */
+//    niter  = 501;
+//    toler  = 1.0e-6;
+//    lambda = 1;
+//
+//    /* LM iterations */
+//    for (iter = 0; iter < niter; iter++) {
+//
+//        /* initialize [AA  BB]
+//                      [      ] =  transpose(J) * J + lambda * diag(transpose(J) * J)
+//                      [BB' CC]
+//
+//           and        rhs  = -transpose(J) * f
+//        */
+//        for (jvar = 0; jvar < np; jvar++) {
+//            for (ivar = 0; ivar < np; ivar++) {
+//                CC(ivar,jvar) = 0;
+//            }
+//            CC(jvar,jvar) = 1e-6;
+//        }
+//
+//        for (jvar = 0; jvar < nvar; jvar++) {
+//            rhs[jvar] = 0;
+//        }
+//
+//        /* accumulate AA, BB, CC, and rhs by looping over points in cloud */
+//        for (k = 0; k < m; k++) {
+//            status = eval1dBspline(beta[k], n, cp, XYZ, dXYZdT, dXYZdP);
+//            CHECK_STATUS(eval1dBspline);
+//
+//            AA(k) = dXYZdT[0] * dXYZdT[0] + dXYZdT[1] * dXYZdT[1] + dXYZdT[2] * dXYZdT[2];
+//
+//            for (ivar = 1; ivar < n-1; ivar++) {
+//                BB(k, 3*ivar-3) = dXYZdT[0] * dXYZdP[ivar];
+//                BB(k, 3*ivar-2) = dXYZdT[1] * dXYZdP[ivar];
+//                BB(k, 3*ivar-1) = dXYZdT[2] * dXYZdP[ivar];
+//
+//                for (jvar = 1; jvar < n-1; jvar++) {
+//#ifndef __clang_analyzer__
+//                    CC(3*ivar-3, 3*jvar-3) += dXYZdP[ivar] * dXYZdP[jvar];
+//                    CC(3*ivar-2, 3*jvar-2) += dXYZdP[ivar] * dXYZdP[jvar];
+//                    CC(3*ivar-1, 3*jvar-1) += dXYZdP[ivar] * dXYZdP[jvar];
+//#endif
+//                }
+//            }
+//
+//            rhs[k] = dXYZdT[0] * f[3*k] + dXYZdT[1] * f[3*k+1] + dXYZdT[2] * f[3*k+2];
+//
+//            for (ivar = 1; ivar < n-1; ivar++) {
+//#ifndef __clang_analyzer__
+//                rhs[m+3*ivar-3] += dXYZdP[ivar] * f[3*k  ];
+//                rhs[m+3*ivar-2] += dXYZdP[ivar] * f[3*k+1];
+//                rhs[m+3*ivar-1] += dXYZdP[ivar] * f[3*k+2];
+//#endif
+//            }
+//        }
+//
+//        /* set up sparse-matrix arrays */
+//        count = m + 2 * m * np + np * np + 1;
+//
+//        MMd = (double *) malloc(count*sizeof(double));
+//        MMi = (int    *) malloc(count*sizeof(int   ));
+//
+//        if (MMd == NULL || MMi == NULL) {
+//            status = EGADS_MALLOC;
+//            goto cleanup;
+//        }
+//
+//        /* store diagonal values (multiplied by (1+lambda)) */
+//        for (k = 0; k < m; k++) {
+//            MMd[k] = AA(k) * (1 + lambda);
+//        }
+//        for (ivar = 0; ivar < np; ivar++) {
+//            MMd[m+ivar] = CC(ivar,ivar) * (1 + lambda);
+//        }
+//
+//        /* set up off-diagonal elements, including indices */
+//        MMi[0] = nvar + 1;
+//        count  = nvar;
+//
+//        /* BB to the right of AA */
+//        for (k = 0; k < m; k++) {
+//            for (jvar = 0; jvar < np; jvar++) {
+//                count++;
+//                MMd[count] = BB(k,jvar);
+//                MMi[count] = m + jvar;
+//            }
+//            MMi[k+1] = count + 1;
+//        }
+//
+//        for (ivar = 0; ivar < np; ivar++) {
+//            /* transpose(BB) below A */
+//            for (k = 0; k < m; k++) {
+//                count++;
+//                MMd[count] = BB(k,ivar);
+//                MMi[count] = k;
+//            }
+//
+//            /* CC in bottom-right corner */
+//            for (jvar = 0; jvar < np; jvar++) {
+//                if (ivar != jvar) {
+//                    count++;
+//                    MMd[count] = CC(ivar,jvar);
+//                    MMi[count] = m + jvar;
+//                }
+//            }
+//            MMi[m+ivar+1] = count + 1;
+//        }
+//
+//        /* arbitrary value (not used) */
+//        MMd[nvar] = 0;
+//
+//        /* set up for sparse matrix solve (via biconjugate gradient technique) */
+//        itol    = 1;
+//        errmax  = 1.0e-12;
+//        maxiter = 2 * nvar;
+//        for (ivar = 0; ivar < nvar; ivar++) {
+//            delta[ivar] = 0;
+//        }
+//
+//        status = solveSparse(MMd, MMi, rhs, delta, itol, &errmax, &maxiter);
+//        CHECK_STATUS(solveSparse);
+//
+//        FREE(MMd);
+//        FREE(MMi);
+//
+//        /* check for convergence on delta (which corresponds to a small
+//           change in beta) */
+//        normdelta = L2norm(delta, nvar);
+//
+//        if (normdelta < toler) {
+//#ifdef DEBUG
+//            printf("converged with norm(delta)=%11.4e\n", normdelta);
+//#endif
+//            break;
+//        }
+//
+//        /* find the temporary new beta */
+//        for (ivar = 0; ivar < nvar; ivar++) {
+//
+//            /* beta associated with Tcloud */
+//            if (ivar < m) {
+//                betanew[ivar] = beta[ivar] + delta[ivar];
+//
+//                if (betanew[ivar] < 0  ) betanew[ivar] = 0;
+//                if (betanew[ivar] > n-3) betanew[ivar] = n-3;
+//
+//                /* beta associated with control points */
+//            } else {
+//                betanew[ivar] = beta[ivar] + omega * delta[ivar];
+//            }
+//        }
+//
+//        /* gradually increase omega */
+//        omega = MIN(1.01*omega, 1.0);
+//
+//        /* extract the temporary control points from betanew */
+//        next = m;
+//        for (j = 0; j < n; j++) {
+//            if (j == 0 || j == n-1) {
+//                cpnew[3*j  ] = cp[3*j  ];
+//                cpnew[3*j+1] = cp[3*j+1];
+//                cpnew[3*j+2] = cp[3*j+2];
+//            } else {
+//                cpnew[3*j  ] = betanew[next++];
+//                cpnew[3*j+1] = betanew[next++];
+//                cpnew[3*j+2] = betanew[next++];
+//            }
+//        }
+//
+//        /* apply periodicity condition by making sure first and last
+//           intervals are the same */
+//        if (periodic == 1) {
+//            delta0 = (2*cpnew[0] - cpnew[3] - cpnew[3*n-6]) / 2;
+//            delta1 = (2*cpnew[1] - cpnew[4] - cpnew[3*n-5]) / 2;
+//            delta2 = (2*cpnew[2] - cpnew[5] - cpnew[3*n-4]) / 2;
+//
+//            cpnew[    3] += delta0;
+//            cpnew[    4] += delta1;
+//            cpnew[    5] += delta2;
+//
+//            cpnew[3*n-6] += delta0;
+//            cpnew[3*n-5] += delta1;
+//            cpnew[3*n-4] += delta2;
+//        }
+//
+//        /* compute the objective function based upon the new beta */
+//        for (k = 0; k < m; k++) {
+//            status = eval1dBspline(betanew[k], n, cp, XYZ, NULL, NULL);
+//            CHECK_STATUS(eval1dBspline);
+//
+//            fnew[3*k  ] = XYZcopy[3*k  ] - XYZ[0];
+//            fnew[3*k+1] = XYZcopy[3*k+1] - XYZ[1];
+//            fnew[3*k+2] = XYZcopy[3*k+2] - XYZ[2];
+//        }
+//        normfnew = L2norm(fnew, nobj) / m;
+//#ifdef DEBUG
+//        if (iter%10 == 0) {
+//            printf("iter=%4d: norm(delta)=%11.4e, norm(f)=%11.4e  ",
+//                   iter, normdelta, normfnew);
+//        }
+//#endif
+//
+//        /* if this was a better step, accept it and decrease
+//           lambda (making it more Newton-like) */
+//        if (normfnew < *normf) {
+//            lambda /= 2;
+//#ifdef DEBUG
+//            if (iter%10 == 0) {
+//                printf("ACCEPTED,  lambda=%11.4e, omega=%10.5f\n", lambda, omega);
+//            }
+//#endif
+//
+//            /* save new design variables, control points, and
+//               objective function */
+//            for (ivar = 0; ivar < nvar; ivar++) {
+//                beta[ivar] = betanew[ivar];
+//            }
+//            for (j = 0; j < n; j++) {
+//                cp[3*j  ] = cpnew[3*j  ];
+//                cp[3*j+1] = cpnew[3*j+1];
+//                cp[3*j+2] = cpnew[3*j+2];
+//            }
+//            for (iobj = 0; iobj < nobj; iobj++) {
+//                f[iobj] = fnew[iobj];
+//            }
+//            *normf = normfnew;
+//
+//        /* otherwise do not take the step and increase lambda (making it
+//           more steepest-descent-like) */
+//        } else {
+//            lambda *= 2;
+//#ifdef DEBUG
+//            if (iter %10 == 0) {
+//                printf("rejected,  lambda=%11.4e, omega=%10.5f\n", lambda, omega);
+//            }
+//#endif
+//        }
+//
+//        /* check for convergence (based upon a small value of
+//           objective function) */
+//        if (*normf < toler) {
+//#ifdef DEBUG
+//            printf("converged with norm(f)=%11.4e\n", *normf);
+//#endif
+//            break;
+//        }
+//    }
+//
+//    /* transform control points back to their original scale */
+//    for (j = 0; j < n; j++) {
+//        cp[3*j  ] = xcent + cp[3*j  ] / scale;
+//        cp[3*j+1] = ycent + cp[3*j+1] / scale;
+//        cp[3*j+2] = zcent + cp[3*j+2] / scale;
+//    }
+//
+//    *normf /= scale;
+//
+//#ifdef DEBUG
+//    printf("final control points\n");
+//    for (j = 0; j < n; j++) {
+//        printf("%3d: %12.6f %12.6f %12.6f\n", j, cp[3*j], cp[3*j+1], cp[3*j+2]);
+//    }
+//    printf("*normf: %12.4e\n", *normf);
+//#endif
+//
+//cleanup:
+//    if (XYZcopy != NULL) free(XYZcopy);
+//    if (dXYZdP  != NULL) free(dXYZdP );
+//    if (cpnew   != NULL) free(cpnew  );
+//
+//    if (beta    != NULL) free(beta   );
+//    if (delta   != NULL) free(delta  );
+//    if (betanew != NULL) free(betanew);
+//
+//    if (f       != NULL) free(f      );
+//    if (fnew    != NULL) free(fnew   );
+//
+//    if (aa      != NULL) free(aa     );
+//    if (bb      != NULL) free(bb     );
+//    if (cc      != NULL) free(cc     );
+//    if (rhs     != NULL) free(rhs    );
+//
+//    if (MMi     != NULL) free(MMi    );
+//    if (MMd     != NULL) free(MMd    );
+//
+//#undef AA
+//#undef BB
+//#undef CC
+//
+//    return status;
+//}
 
 
 /*
@@ -2194,68 +2195,68 @@ cleanup:
  ************************************************************************
  */
 
-static int
-eval1dBspline(double T,                 /* (in)  independent variable */
-              int    n,                 /* (in)  number of control points */
-              double cp[],              /* (in)  array  of control points */
-              double XYZ[],             /* (out) dependent variables */
-    /*@null@*/double dXYZdT[],          /* (out) derivative wrt T (or NULL) */
-    /*@null@*/double dXYZdP[])          /* (out) derivative wrt P (or NULL) */
-{
-    int    status = EGADS_SUCCESS;      /* (out) return status */
-
-    int    i, span;
-    double N[4], dN[4];
-
-    ROUTINE(eval1dBspline);
-
-    /* --------------------------------------------------------------- */
-
-    assert (n > 3);
-
-    XYZ[0] = 0;
-    XYZ[1] = 0;
-    XYZ[2] = 0;
-
-    /* set up the Bspline bases */
-    status = cubicBsplineBases(n, T, N, dN);
-    CHECK_STATUS(cubicBsplineBases);
-
-    span = MIN(floor(T), n-4);
-
-    /* find the dependent variable */
-    for (i = 0; i < 4; i++) {
-        XYZ[0] += N[i] * cp[3*(i+span)  ];
-        XYZ[1] += N[i] * cp[3*(i+span)+1];
-        XYZ[2] += N[i] * cp[3*(i+span)+2];
-    }
-
-    /* find the deriviative wrt T */
-    if (dXYZdT != NULL) {
-        dXYZdT[0] = 0;
-        dXYZdT[1] = 0;
-        dXYZdT[2] = 0;
-
-        for (i = 0; i < 4; i++) {
-            dXYZdT[0] += dN[i] * cp[3*(i+span)  ];
-            dXYZdT[1] += dN[i] * cp[3*(i+span)+1];
-            dXYZdT[2] += dN[i] * cp[3*(i+span)+2];
-        }
-    }
-
-    /* find the derivative wrt P */
-    if (dXYZdP != NULL) {
-        for (i = 0; i < n; i++) {
-            dXYZdP[i] = 0;
-        }
-        for (i = 0; i < 4; i++) {
-            dXYZdP[i+span] += N[i];
-        }
-    }
-
-cleanup:
-    return status;
-}
+//static int
+//eval1dBspline(double T,                 /* (in)  independent variable */
+//              int    n,                 /* (in)  number of control points */
+//              double cp[],              /* (in)  array  of control points */
+//              double XYZ[],             /* (out) dependent variables */
+//    /*@null@*/double dXYZdT[],          /* (out) derivative wrt T (or NULL) */
+//    /*@null@*/double dXYZdP[])          /* (out) derivative wrt P (or NULL) */
+//{
+//    int    status = EGADS_SUCCESS;      /* (out) return status */
+//
+//    int    i, span;
+//    double N[4], dN[4];
+//
+//    ROUTINE(eval1dBspline);
+//
+//    /* --------------------------------------------------------------- */
+//
+//    assert (n > 3);
+//
+//    XYZ[0] = 0;
+//    XYZ[1] = 0;
+//    XYZ[2] = 0;
+//
+//    /* set up the Bspline bases */
+//    status = cubicBsplineBases(n, T, N, dN);
+//    CHECK_STATUS(cubicBsplineBases);
+//
+//    span = MIN(floor(T), n-4);
+//
+//    /* find the dependent variable */
+//    for (i = 0; i < 4; i++) {
+//        XYZ[0] += N[i] * cp[3*(i+span)  ];
+//        XYZ[1] += N[i] * cp[3*(i+span)+1];
+//        XYZ[2] += N[i] * cp[3*(i+span)+2];
+//    }
+//
+//    /* find the deriviative wrt T */
+//    if (dXYZdT != NULL) {
+//        dXYZdT[0] = 0;
+//        dXYZdT[1] = 0;
+//        dXYZdT[2] = 0;
+//
+//        for (i = 0; i < 4; i++) {
+//            dXYZdT[0] += dN[i] * cp[3*(i+span)  ];
+//            dXYZdT[1] += dN[i] * cp[3*(i+span)+1];
+//            dXYZdT[2] += dN[i] * cp[3*(i+span)+2];
+//        }
+//    }
+//
+//    /* find the derivative wrt P */
+//    if (dXYZdP != NULL) {
+//        for (i = 0; i < n; i++) {
+//            dXYZdP[i] = 0;
+//        }
+//        for (i = 0; i < 4; i++) {
+//            dXYZdP[i+span] += N[i];
+//        }
+//    }
+//
+//cleanup:
+//    return status;
+//}
 
 
 /*
@@ -2266,61 +2267,61 @@ cleanup:
  ************************************************************************
  */
 
-static int
-cubicBsplineBases(int    ncp,           /* (in)  number of control points */
-                  double T,             /* (in)  independent variable (0<=T<=(ncp-3) */
-                  double N[],           /* (out) bases */
-                  double dN[])          /* (out) d(bases)/d(T) */
-{
-    int       status = EGADS_SUCCESS;   /* (out) return status */
-
-    int      i, r, span;
-    double   saved, dsaved, num, dnum, den, dden, temp, dtemp;
-    double   left[4], dleft[4], rite[4], drite[4];
-
-    ROUTINE(cubicBsplineBases);
-
-    /* --------------------------------------------------------------- */
-
-    span = MIN(floor(T)+3, ncp-1);
-
-    N[ 0] = 1.0;
-    dN[0] = 0;
-
-    for (i = 1; i <= 3; i++) {
-        left[ i] = T - MAX(0, span-2-i);
-        dleft[i] = 1;
-
-        rite[ i] = MIN(ncp-3,span-3+i) - T;
-        drite[i] =                     - 1;
-
-        saved  = 0;
-        dsaved = 0;
-
-        for (r = 0; r < i; r++) {
-            num   = N[ r];
-            dnum  = dN[r];
-
-            den   = rite[ r+1] + left[ i-r];
-            dden  = drite[r+1] + dleft[i-r];
-
-            temp  = num / den;
-            dtemp = (dnum * den - dden * num) / den / den;
-
-            N[ r] = saved  + rite[ r+1] * temp;
-            dN[r] = dsaved + drite[r+1] * temp + rite[r+1] * dtemp;
-
-            saved  = left[ i-r] * temp;
-            dsaved = dleft[i-r] * temp + left[i-r] * dtemp;
-        }
-
-        N[ i] = saved;
-        dN[i] = dsaved;
-    }
-
-//cleanup:
-    return status;
-}
+//static int
+//cubicBsplineBases(int    ncp,           /* (in)  number of control points */
+//                  double T,             /* (in)  independent variable (0<=T<=(ncp-3) */
+//                  double N[],           /* (out) bases */
+//                  double dN[])          /* (out) d(bases)/d(T) */
+//{
+//    int       status = EGADS_SUCCESS;   /* (out) return status */
+//
+//    int      i, r, span;
+//    double   saved, dsaved, num, dnum, den, dden, temp, dtemp;
+//    double   left[4], dleft[4], rite[4], drite[4];
+//
+//    ROUTINE(cubicBsplineBases);
+//
+//    /* --------------------------------------------------------------- */
+//
+//    span = MIN(floor(T)+3, ncp-1);
+//
+//    N[ 0] = 1.0;
+//    dN[0] = 0;
+//
+//    for (i = 1; i <= 3; i++) {
+//        left[ i] = T - MAX(0, span-2-i);
+//        dleft[i] = 1;
+//
+//        rite[ i] = MIN(ncp-3,span-3+i) - T;
+//        drite[i] =                     - 1;
+//
+//        saved  = 0;
+//        dsaved = 0;
+//
+//        for (r = 0; r < i; r++) {
+//            num   = N[ r];
+//            dnum  = dN[r];
+//
+//            den   = rite[ r+1] + left[ i-r];
+//            dden  = drite[r+1] + dleft[i-r];
+//
+//            temp  = num / den;
+//            dtemp = (dnum * den - dden * num) / den / den;
+//
+//            N[ r] = saved  + rite[ r+1] * temp;
+//            dN[r] = dsaved + drite[r+1] * temp + rite[r+1] * dtemp;
+//
+//            saved  = left[ i-r] * temp;
+//            dsaved = dleft[i-r] * temp + left[i-r] * dtemp;
+//        }
+//
+//        N[ i] = saved;
+//        dN[i] = dsaved;
+//    }
+//
+////cleanup:
+//    return status;
+//}
 
 
 /*
@@ -2331,211 +2332,211 @@ cubicBsplineBases(int    ncp,           /* (in)  number of control points */
  ************************************************************************
  */
 
-static int
-solveSparse(double SAv[],               /* (in)  sparse array values */
-            int    SAi[],               /* (in)  sparse array indices */
-            double b[],                 /* (in)  rhs vector */
-            double x[],                 /* (in)  guessed result vector */
-                                        /* (out) result vector */
-            int    itol,                /* (in)  stopping criterion */
-            double *errmax,             /* (in)  convergence tolerance */
-                                        /* (out) estimated error at convergence */
-            int    *iter)               /* (in)  maximum number of iterations */
-                                        /* (out) number of iterations taken */
-{
-    int    status = EGADS_SUCCESS;      /* (out) return status */
-
-    int    n, i, j, k, itmax;
-    double tol, ak, akden, bk, bknum, bkden, bnorm, dxnorm, xnorm, znorm_old, znorm=0;
-    double *p=NULL, *pp=NULL, *r=NULL, *rr=NULL, *z=NULL, *zz=NULL;
-
-    ROUTINE(solveSparse);
-
-    /* --------------------------------------------------------------- */
-
-    tol   = *errmax;
-    itmax = *iter;
-
-    n = SAi[0] - 1;
-
-    p  = (double *) malloc(n*sizeof(double));
-    pp = (double *) malloc(n*sizeof(double));
-    r  = (double *) malloc(n*sizeof(double));
-    rr = (double *) malloc(n*sizeof(double));
-    z  = (double *) malloc(n*sizeof(double));
-    zz = (double *) malloc(n*sizeof(double));
-
-    if (p == NULL || pp == NULL ||
-        r == NULL || rr == NULL ||
-        z == NULL || zz == NULL   ) {
-        status = EGADS_MALLOC;
-        goto cleanup;
-    }
-
-    /* make sure none of the diagonals are very small */
-    for (i = 0; i < n; i++) {
-        if (fabs(SAv[i]) < 1.0e-14) {
-            printf(" solveSparse: cannot solve since SAv[%d]=%11.4e\n", i, SAv[i]);
-            status = EGADS_DEGEN;
-            goto cleanup;
-        }
-    }
-
-    /* calculate initial residual */
-    *iter = 0;
-
-    /* r = A * x  */
-    for (i = 0; i < n; i++) {
-        r[i] = SAv[i] * x[i];
-
-        for (k = SAi[i]; k < SAi[i+1]; k++) {
-            r[i] += SAv[k] * x[SAi[k]];
-        }
-    }
-
-    for (j = 0; j < n; j++) {
-        r[ j] = b[j] - r[j];
-        rr[j] = r[j];
-    }
-
-    if (itol == 1) {
-        bnorm = L2norm(b, n);
-
-        for (j = 0; j < n; j++) {
-            z[j] = r[j] / SAv[j];
-        }
-    } else if (itol == 2) {
-        for (j = 0; j < n; j++) {
-            z[j] = b[j] / SAv[j];
-        }
-
-        bnorm = L2norm(z, n);
-
-        for (j = 0; j < n; j++) {
-            z[j] = r[j] / SAv[j];
-        }
-    } else {
-        for (j = 0; j < n; j++) {
-            z[j] = b[j] / SAv[j];
-        }
-
-        bnorm = L2norm(z, n);
-
-        for (j = 0; j < n; j++) {
-            z[j] = r[j] / SAv[j];
-        }
-
-        znorm = L2norm(z, n);
-    }
-
-    /* main iteration loop */
-    for (*iter = 0; *iter < itmax; (*iter)++) {
-
-        for (j = 0; j < n; j++) {
-            zz[j] = rr[j] / SAv[j];
-        }
-
-        /* calculate coefficient bk and direction vectors p and pp */
-        bknum = 0;
-        for (j = 0; j < n; j++) {
-            bknum += z[j] * rr[j];
-        }
-
-        if (*iter == 0) {
-            for (j = 0; j < n; j++) {
-                p[ j] = z[ j];
-                pp[j] = zz[j];
-            }
-        } else {
-            bk = bknum / bkden;
-
-            for (j = 0; j < n; j++) {
-                p[ j] = bk * p[ j] + z[ j];
-                pp[j] = bk * pp[j] + zz[j];
-            }
-        }
-
-        /* calculate coefficient ak, new iterate x, and new residuals r and rr */
-        bkden = bknum;
-
-        /* z = A * p  */
-        for (i = 0; i < n; i++) {
-            z[i] = SAv[i] * p[i];
-
-            for (k = SAi[i]; k < SAi[i+1]; k++) {
-                z[i] += SAv[k] * p[SAi[k]];
-            }
-        }
-
-        akden = 0;
-        for (j = 0; j < n; j++) {
-            akden += z[j] * pp[j];
-        }
-
-        ak = bknum / akden;
-
-        /* zz = transpose(A) * pp  */
-        for (i = 0; i < n; i++) {
-            zz[i] = SAv[i] * pp[i];
-        }
-
-        for (i = 0; i < n; i++) {
-            for (k = SAi[i]; k < SAi[i+1]; k++) {
-                j = SAi[k];
-                zz[j] += SAv[k] * pp[i];
-            }
-        }
-
-        for (j = 0; j < n; j++) {
-            x[ j] += ak * p[ j];
-            r[ j] -= ak * z[ j];
-            rr[j] -= ak * zz[j];
-        }
-
-        /* solve Abar * z = r */
-        for (j = 0; j < n; j++) {
-            z[j] = r[j] / SAv[j];
-        }
-
-        /* compute and check stopping criterion */
-        if (itol == 1) {
-            *errmax = L2norm(r, n) / bnorm;
-        } else if (itol == 2) {
-            *errmax = L2norm(z, n) / bnorm;
-        } else {
-            znorm_old = znorm;
-            znorm = L2norm(z, n);
-            if (fabs(znorm_old-znorm) > (1.0e-14)*znorm) {
-                dxnorm = fabs(ak) * L2norm(p, n);
-                *errmax  = znorm / fabs(znorm_old-znorm) * dxnorm;
-            } else {
-                *errmax = znorm / bnorm;
-                continue;
-            }
-
-            xnorm = L2norm(x, n);
-            if (*errmax <= xnorm/2) {
-                *errmax /= xnorm;
-            } else {
-                *errmax = znorm / bnorm;
-                continue;
-            }
-        }
-
-        /* exit if converged */
-        if (*errmax <= tol) break;
-    }
-
-cleanup:
-    if (p  != NULL) free(p );
-    if (pp != NULL) free(pp);
-    if (r  != NULL) free(r );
-    if (rr != NULL) free(rr);
-    if (z  != NULL) free(z );
-    if (zz != NULL) free(zz);
-
-    return status;
-}
+//static int
+//solveSparse(double SAv[],               /* (in)  sparse array values */
+//            int    SAi[],               /* (in)  sparse array indices */
+//            double b[],                 /* (in)  rhs vector */
+//            double x[],                 /* (in)  guessed result vector */
+//                                        /* (out) result vector */
+//            int    itol,                /* (in)  stopping criterion */
+//            double *errmax,             /* (in)  convergence tolerance */
+//                                        /* (out) estimated error at convergence */
+//            int    *iter)               /* (in)  maximum number of iterations */
+//                                        /* (out) number of iterations taken */
+//{
+//    int    status = EGADS_SUCCESS;      /* (out) return status */
+//
+//    int    n, i, j, k, itmax;
+//    double tol, ak, akden, bk, bknum, bkden, bnorm, dxnorm, xnorm, znorm_old, znorm=0;
+//    double *p=NULL, *pp=NULL, *r=NULL, *rr=NULL, *z=NULL, *zz=NULL;
+//
+//    ROUTINE(solveSparse);
+//
+//    /* --------------------------------------------------------------- */
+//
+//    tol   = *errmax;
+//    itmax = *iter;
+//
+//    n = SAi[0] - 1;
+//
+//    p  = (double *) malloc(n*sizeof(double));
+//    pp = (double *) malloc(n*sizeof(double));
+//    r  = (double *) malloc(n*sizeof(double));
+//    rr = (double *) malloc(n*sizeof(double));
+//    z  = (double *) malloc(n*sizeof(double));
+//    zz = (double *) malloc(n*sizeof(double));
+//
+//    if (p == NULL || pp == NULL ||
+//        r == NULL || rr == NULL ||
+//        z == NULL || zz == NULL   ) {
+//        status = EGADS_MALLOC;
+//        goto cleanup;
+//    }
+//
+//    /* make sure none of the diagonals are very small */
+//    for (i = 0; i < n; i++) {
+//        if (fabs(SAv[i]) < 1.0e-14) {
+//            printf(" solveSparse: cannot solve since SAv[%d]=%11.4e\n", i, SAv[i]);
+//            status = EGADS_DEGEN;
+//            goto cleanup;
+//        }
+//    }
+//
+//    /* calculate initial residual */
+//    *iter = 0;
+//
+//    /* r = A * x  */
+//    for (i = 0; i < n; i++) {
+//        r[i] = SAv[i] * x[i];
+//
+//        for (k = SAi[i]; k < SAi[i+1]; k++) {
+//            r[i] += SAv[k] * x[SAi[k]];
+//        }
+//    }
+//
+//    for (j = 0; j < n; j++) {
+//        r[ j] = b[j] - r[j];
+//        rr[j] = r[j];
+//    }
+//
+//    if (itol == 1) {
+//        bnorm = L2norm(b, n);
+//
+//        for (j = 0; j < n; j++) {
+//            z[j] = r[j] / SAv[j];
+//        }
+//    } else if (itol == 2) {
+//        for (j = 0; j < n; j++) {
+//            z[j] = b[j] / SAv[j];
+//        }
+//
+//        bnorm = L2norm(z, n);
+//
+//        for (j = 0; j < n; j++) {
+//            z[j] = r[j] / SAv[j];
+//        }
+//    } else {
+//        for (j = 0; j < n; j++) {
+//            z[j] = b[j] / SAv[j];
+//        }
+//
+//        bnorm = L2norm(z, n);
+//
+//        for (j = 0; j < n; j++) {
+//            z[j] = r[j] / SAv[j];
+//        }
+//
+//        znorm = L2norm(z, n);
+//    }
+//
+//    /* main iteration loop */
+//    for (*iter = 0; *iter < itmax; (*iter)++) {
+//
+//        for (j = 0; j < n; j++) {
+//            zz[j] = rr[j] / SAv[j];
+//        }
+//
+//        /* calculate coefficient bk and direction vectors p and pp */
+//        bknum = 0;
+//        for (j = 0; j < n; j++) {
+//            bknum += z[j] * rr[j];
+//        }
+//
+//        if (*iter == 0) {
+//            for (j = 0; j < n; j++) {
+//                p[ j] = z[ j];
+//                pp[j] = zz[j];
+//            }
+//        } else {
+//            bk = bknum / bkden;
+//
+//            for (j = 0; j < n; j++) {
+//                p[ j] = bk * p[ j] + z[ j];
+//                pp[j] = bk * pp[j] + zz[j];
+//            }
+//        }
+//
+//        /* calculate coefficient ak, new iterate x, and new residuals r and rr */
+//        bkden = bknum;
+//
+//        /* z = A * p  */
+//        for (i = 0; i < n; i++) {
+//            z[i] = SAv[i] * p[i];
+//
+//            for (k = SAi[i]; k < SAi[i+1]; k++) {
+//                z[i] += SAv[k] * p[SAi[k]];
+//            }
+//        }
+//
+//        akden = 0;
+//        for (j = 0; j < n; j++) {
+//            akden += z[j] * pp[j];
+//        }
+//
+//        ak = bknum / akden;
+//
+//        /* zz = transpose(A) * pp  */
+//        for (i = 0; i < n; i++) {
+//            zz[i] = SAv[i] * pp[i];
+//        }
+//
+//        for (i = 0; i < n; i++) {
+//            for (k = SAi[i]; k < SAi[i+1]; k++) {
+//                j = SAi[k];
+//                zz[j] += SAv[k] * pp[i];
+//            }
+//        }
+//
+//        for (j = 0; j < n; j++) {
+//            x[ j] += ak * p[ j];
+//            r[ j] -= ak * z[ j];
+//            rr[j] -= ak * zz[j];
+//        }
+//
+//        /* solve Abar * z = r */
+//        for (j = 0; j < n; j++) {
+//            z[j] = r[j] / SAv[j];
+//        }
+//
+//        /* compute and check stopping criterion */
+//        if (itol == 1) {
+//            *errmax = L2norm(r, n) / bnorm;
+//        } else if (itol == 2) {
+//            *errmax = L2norm(z, n) / bnorm;
+//        } else {
+//            znorm_old = znorm;
+//            znorm = L2norm(z, n);
+//            if (fabs(znorm_old-znorm) > (1.0e-14)*znorm) {
+//                dxnorm = fabs(ak) * L2norm(p, n);
+//                *errmax  = znorm / fabs(znorm_old-znorm) * dxnorm;
+//            } else {
+//                *errmax = znorm / bnorm;
+//                continue;
+//            }
+//
+//            xnorm = L2norm(x, n);
+//            if (*errmax <= xnorm/2) {
+//                *errmax /= xnorm;
+//            } else {
+//                *errmax = znorm / bnorm;
+//                continue;
+//            }
+//        }
+//
+//        /* exit if converged */
+//        if (*errmax <= tol) break;
+//    }
+//
+//cleanup:
+//    if (p  != NULL) free(p );
+//    if (pp != NULL) free(pp);
+//    if (r  != NULL) free(r );
+//    if (rr != NULL) free(rr);
+//    if (z  != NULL) free(z );
+//    if (zz != NULL) free(zz);
+//
+//    return status;
+//}
 
 
 /*
@@ -2546,30 +2547,30 @@ cleanup:
  ************************************************************************
  */
 
-static double
-L2norm(double f[],                      /* (in)  vector */
-       int    n)                        /* (in)  length of vector */
-{
-    double L2norm;                      /* (out) L2-norm */
-
-    int    i;
-
-    ROUTINE(L2norm);
-
-    /* --------------------------------------------------------------- */
-
-    /* L2-norm */
-    L2norm = 0;
-
-    for (i = 0; i < n; i++) {
-        L2norm += f[i] * f[i];
-    }
-
-    L2norm = sqrt(L2norm);
-
-//cleanup:
-    return L2norm;
-}
+//static double
+//L2norm(double f[],                      /* (in)  vector */
+//       int    n)                        /* (in)  length of vector */
+//{
+//    double L2norm;                      /* (out) L2-norm */
+//
+//    int    i;
+//
+//    ROUTINE(L2norm);
+//
+//    /* --------------------------------------------------------------- */
+//
+//    /* L2-norm */
+//    L2norm = 0;
+//
+//    for (i = 0; i < n; i++) {
+//        L2norm += f[i] * f[i];
+//    }
+//
+//    L2norm = sqrt(L2norm);
+//
+////cleanup:
+//    return L2norm;
+//}
 
 
 /*

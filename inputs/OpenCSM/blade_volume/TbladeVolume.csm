@@ -2,12 +2,6 @@
 # written by Simon Livingston
 # modified by Mayank Sharma
 
-#This file will generate a hub and blade, and fuse them and fillet them. 
-#Change the filename and auxname to the blade input file you want to generate. 
-#Right now there has to be two input files. One with the blade offset at the hub, and one without.
-#The one with the blade offset is used for generating the blade, and the other is used for 
-#generating the hub wedge. The fillet might not work, so remove it if it isn't working. 
-
 #DIMENSION span_chord        1 4 1
 #DIMENSION span_thk_c        1 4 1
 #DIMENSION span_in_beta      1 4 1
@@ -69,38 +63,38 @@
 #DESPMTR   thk_flags         "1;     2;     1;"
 
 
-UDPARG    hubwedge    ncp               33
-#UDPARG    hubwedge    span_chord        span_chord
-#UDPARG    hubwedge    span_thk_c        span_thk_c
-#UDPARG    hubwedge    span_in_beta      span_in_beta
-#UDPARG    hubwedge    span_out_beta     span_out_beta
-#UDPARG    hubwedge    u2	            u2	           
-#UDPARG    hubwedge    u3	            u3	          
-#UDPARG    hubwedge    u4	            u4	          
-#UDPARG    hubwedge    u5	            u5	          
-#UDPARG    hubwedge    u6	            u6	          
-#UDPARG    hubwedge    cur1              cur1           
-#UDPARG    hubwedge    cur2	            cur2	          
-#UDPARG    hubwedge    cur3	            cur3	          
-#UDPARG    hubwedge    cur4	            cur4	          
-#UDPARG    hubwedge    cur5	            cur5	          
-#UDPARG    hubwedge    cur6	            cur6	          
-#UDPARG    hubwedge    cur7              cur7           
-#UDPARG    hubwedge    span_curv_ctrl    span_curv_ctrl 
-#UDPARG    hubwedge    span_del_m        span_del_m     
-#UDPARG    hubwedge    span_del_theta    span_del_theta 
-#UDPARG    hubwedge    span_thk_ctrl     span_thk_ctrl  
-#UDPARG    hubwedge    exact_u1          exact_u1       
-#UDPARG    hubwedge    exact_u2          exact_u2       
-#UDPARG    hubwedge    exact_u3          exact_u3       
-#UDPARG    hubwedge    exact_thk1        exact_thk1     
-#UDPARG    hubwedge    exact_thk2        exact_thk2     
-#UDPARG    hubwedge    exact_thk3        exact_thk3     
-#UDPARG    hubwedge    exact_lethk       exact_lethk    
-#UDPARG    hubwedge    exact_tethk       exact_tethk    
-#UDPARG    hubwedge    thk_flags         thk_flags      
-UDPRIM    hubwedge    filename          $$/3dbgbinput.2.dat \
-                      auxname           $$/spancontrolinputs.2.dat
+UDPARG    bladevolume    ncp               33
+UDPARG    bladevolume    span_chord        span_chord
+UDPARG    bladevolume    span_thk_c        span_thk_c
+UDPARG    bladevolume    span_in_beta      span_in_beta
+UDPARG    bladevolume    span_out_beta     span_out_beta
+UDPARG    bladevolume    u2	               u2	           
+UDPARG    bladevolume    u3	               u3	          
+UDPARG    bladevolume    u4	               u4	          
+UDPARG    bladevolume    u5	               u5	          
+UDPARG    bladevolume    u6	               u6	          
+UDPARG    bladevolume    cur1              cur1           
+UDPARG    bladevolume    cur2	           cur2	          
+UDPARG    bladevolume    cur3	           cur3	          
+UDPARG    bladevolume    cur4	           cur4	          
+UDPARG    bladevolume    cur5	           cur5	          
+UDPARG    bladevolume    cur6	           cur6	          
+UDPARG    bladevolume    cur7              cur7           
+UDPARG    bladevolume    span_curv_ctrl    span_curv_ctrl 
+UDPARG    bladevolume    span_del_m        span_del_m     
+UDPARG    bladevolume    span_del_theta    span_del_theta 
+UDPARG    bladevolume    span_thk_ctrl     span_thk_ctrl  
+UDPARG    bladevolume    exact_u1          exact_u1       
+UDPARG    bladevolume    exact_u2          exact_u2       
+UDPARG    bladevolume    exact_u3          exact_u3       
+UDPARG    bladevolume    exact_thk1        exact_thk1     
+UDPARG    bladevolume    exact_thk2        exact_thk2     
+UDPARG    bladevolume    exact_thk3        exact_thk3     
+UDPARG    bladevolume    exact_lethk       exact_lethk    
+UDPARG    bladevolume    exact_tethk       exact_tethk    
+UDPARG    bladevolume    thk_flags         thk_flags      
+UDPRIM    bladevolume    filename          $$/3dbgbinput.2.dat \
+                         auxname           $$/spancontrolinputs.2.dat
 UDPARG    tblade      ncp               33
 #UDPARG    tblade      span_in_beta      span_in_beta
 #UDPARG    tblade      span_out_beta     span_out_beta
