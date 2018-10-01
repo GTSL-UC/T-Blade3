@@ -6,6 +6,15 @@ ifndef ESP_ROOT
 $(error ESP_ROOT must be set -- Please fix the environment...)
 endif
 
+ifdef MEMCHECK
+ESPFLAGS  += -fsanitize=address -fno-omit-frame-pointer -fuse-ld=gold
+ESPFFLAGS += -fsanitize=address -fno-omit-frame-pointer -fuse-ld=gold
+endif
+ifdef UNDEFINED
+ESPFLAGS  += -fsanitize=undefined -fno-omit-frame-pointer -fuse-ld=gold
+ESPFFLAGS += -fsanitize=undefined -fno-omit-frame-pointer -fuse-ld=gold
+endif
+
 IDIR  = $(ESP_ROOT)/include
 include $(IDIR)/$(ESP_ARCH)
 LDIR  = $(ESP_ROOT)/lib
