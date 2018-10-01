@@ -64,38 +64,38 @@
 
 
 UDPARG    bladevolume    ncp               33
-UDPARG    bladevolume    span_chord        span_chord
-UDPARG    bladevolume    span_thk_c        span_thk_c
-UDPARG    bladevolume    span_in_beta      span_in_beta
-UDPARG    bladevolume    span_out_beta     span_out_beta
-UDPARG    bladevolume    u2	               u2	           
-UDPARG    bladevolume    u3	               u3	          
-UDPARG    bladevolume    u4	               u4	          
-UDPARG    bladevolume    u5	               u5	          
-UDPARG    bladevolume    u6	               u6	          
-UDPARG    bladevolume    cur1              cur1           
-UDPARG    bladevolume    cur2	           cur2	          
-UDPARG    bladevolume    cur3	           cur3	          
-UDPARG    bladevolume    cur4	           cur4	          
-UDPARG    bladevolume    cur5	           cur5	          
-UDPARG    bladevolume    cur6	           cur6	          
-UDPARG    bladevolume    cur7              cur7           
-UDPARG    bladevolume    span_curv_ctrl    span_curv_ctrl 
-UDPARG    bladevolume    span_del_m        span_del_m     
-UDPARG    bladevolume    span_del_theta    span_del_theta 
-UDPARG    bladevolume    span_thk_ctrl     span_thk_ctrl  
-UDPARG    bladevolume    exact_u1          exact_u1       
-UDPARG    bladevolume    exact_u2          exact_u2       
-UDPARG    bladevolume    exact_u3          exact_u3       
-UDPARG    bladevolume    exact_thk1        exact_thk1     
-UDPARG    bladevolume    exact_thk2        exact_thk2     
-UDPARG    bladevolume    exact_thk3        exact_thk3     
-UDPARG    bladevolume    exact_lethk       exact_lethk    
-UDPARG    bladevolume    exact_tethk       exact_tethk    
-UDPARG    bladevolume    thk_flags         thk_flags      
+#UDPARG    bladevolume    span_chord        span_chord
+#UDPARG    bladevolume    span_thk_c        span_thk_c
+#UDPARG    bladevolume    span_in_beta      span_in_beta
+#UDPARG    bladevolume    span_out_beta     span_out_beta
+#UDPARG    bladevolume    u2	               u2	           
+#UDPARG    bladevolume    u3	               u3	          
+#UDPARG    bladevolume    u4	               u4	          
+#UDPARG    bladevolume    u5	               u5	          
+#UDPARG    bladevolume    u6	               u6	          
+#UDPARG    bladevolume    cur1              cur1           
+#UDPARG    bladevolume    cur2	           cur2	          
+#UDPARG    bladevolume    cur3	           cur3	          
+#UDPARG    bladevolume    cur4	           cur4	          
+#UDPARG    bladevolume    cur5	           cur5	          
+#UDPARG    bladevolume    cur6	           cur6	          
+#UDPARG    bladevolume    cur7              cur7           
+#UDPARG    bladevolume    span_curv_ctrl    span_curv_ctrl 
+#UDPARG    bladevolume    span_del_m        span_del_m     
+#UDPARG    bladevolume    span_del_theta    span_del_theta 
+#UDPARG    bladevolume    span_thk_ctrl     span_thk_ctrl  
+#UDPARG    bladevolume    exact_u1          exact_u1       
+#UDPARG    bladevolume    exact_u2          exact_u2       
+#UDPARG    bladevolume    exact_u3          exact_u3       
+#UDPARG    bladevolume    exact_thk1        exact_thk1     
+#UDPARG    bladevolume    exact_thk2        exact_thk2     
+#UDPARG    bladevolume    exact_thk3        exact_thk3     
+#UDPARG    bladevolume    exact_lethk       exact_lethk    
+#UDPARG    bladevolume    exact_tethk       exact_tethk    
+#UDPARG    bladevolume    thk_flags         thk_flags      
 UDPRIM    bladevolume    filename          $$/3dbgbinput.2.dat \
                          auxname           $$/spancontrolinputs.2.dat
-UDPARG    tblade      ncp               33
+#UDPARG    tblade      ncp               33
 #UDPARG    tblade      span_in_beta      span_in_beta
 #UDPARG    tblade      span_out_beta     span_out_beta
 #UDPARG    tblade      span_in_beta      span_in_beta
@@ -125,9 +125,9 @@ UDPARG    tblade      ncp               33
 #UDPARG    tblade      exact_lethk       exact_lethk   
 #UDPARG    tblade      exact_tethk       exact_tethk   
 #UDPARG    tblade      thk_flags         thk_flags     
-UDPRIM    tblade      filename          $$/3dbgbinput.2offset.dat \
-                      auxname           $$/spancontrolinputs.2offset.dat
-UNION
+#UDPRIM    tblade      filename          $$/3dbgbinput.2offset.dat \
+#                      auxname           $$/spancontrolinputs.2offset.dat
+#UNION
 #FILLET 1 0
 dump ../hubsection37.step
 
