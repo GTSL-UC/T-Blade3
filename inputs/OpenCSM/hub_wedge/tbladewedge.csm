@@ -133,7 +133,7 @@ UDPARG    tblade      ncp               33
 #UDPARG    tblade      thk_flags         thk_flags     
 UDPRIM    tblade      filename          $$/3dbgbinput.2offset.dat \
                       auxname           $$/spancontrolinputs.2offset.dat
-#UNION
+UNION
 #FILLET 1 0
 dump ../hubsection37.step
 

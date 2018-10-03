@@ -472,11 +472,11 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     printf("strlen(filename)=%d\n", (int)strlen(filename));
     printf("auxname=%s\n", AUXNAME(numUdp));
     printf("strlen(auxname)=%d\n", (int)strlen(AUXNAME(numUdp)));
-    BGB3D_SUB (filename, AUXNAME(numUdp), "v0", "", "",
-               strlen(filename), strlen(AUXNAME(numUdp)), strlen("v0"), strlen(""), strlen(""));
+    BGB3D_SUB (filename, AUXNAME(numUdp), "", "", "",
+               strlen(filename), strlen(AUXNAME(numUdp)), strlen(""), strlen(""), strlen(""));
 #else
-    bgb3d_sub_(filename, AUXNAME(numUdp), "v0", "", "",
-               strlen(filename), strlen(AUXNAME(numUdp)), strlen("v0"), strlen(""), strlen(""));
+    bgb3d_sub_(filename, AUXNAME(numUdp), "", "", "",
+               strlen(filename), strlen(AUXNAME(numUdp)), strlen(""), strlen(""), strlen(""));
 #endif
 
     ecurves = (ego*) malloc(nsec*sizeof(ego));

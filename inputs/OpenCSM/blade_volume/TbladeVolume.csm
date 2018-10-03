@@ -95,7 +95,7 @@ UDPARG    bladevolume    ncp               33
 #UDPARG    bladevolume    thk_flags         thk_flags      
 UDPRIM    bladevolume    filename          $$/3dbgbinput.2.dat \
                          auxname           $$/spancontrolinputs.2.dat
-#UDPARG    tblade      ncp               33
+UDPARG    tblade      ncp               33
 #UDPARG    tblade      span_in_beta      span_in_beta
 #UDPARG    tblade      span_out_beta     span_out_beta
 #UDPARG    tblade      span_in_beta      span_in_beta
@@ -125,9 +125,9 @@ UDPRIM    bladevolume    filename          $$/3dbgbinput.2.dat \
 #UDPARG    tblade      exact_lethk       exact_lethk   
 #UDPARG    tblade      exact_tethk       exact_tethk   
 #UDPARG    tblade      thk_flags         thk_flags     
-#UDPRIM    tblade      filename          $$/3dbgbinput.2offset.dat \
-#                      auxname           $$/spancontrolinputs.2offset.dat
-#UNION
+UDPRIM    tblade      filename          $$/3dbgbinput.2offset.dat \
+                      auxname           $$/spancontrolinputs.2offset.dat
+UNION
 #FILLET 1 0
 dump ../hubsection37.step
 
