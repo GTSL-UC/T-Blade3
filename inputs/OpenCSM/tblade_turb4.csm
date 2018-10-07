@@ -15,6 +15,7 @@ UDPARG    tblade    ncp             33
 UDPARG    tblade    span_thk_c      span_thk_c
 UDPARG    tblade    span_in_beta    span_in_beta
 UDPARG    tblade    span_out_beta   span_out_beta
+UDPARG    tblade    arg_2           $v0
 UDPRIM    tblade    filename        $$/tblade_turb4.2.dat \
                     auxname         $$/tblade_turb4.controlinputs.2.dat
 

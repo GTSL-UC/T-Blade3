@@ -28,7 +28,7 @@
  *     MA  02110-1301  USA
  */
 
-#define NUMUDPARGS 40
+#define NUMUDPARGS 41
 #include "udpUtilities.h"
 
 /* shorthands for accessing argument values and velocities */
@@ -78,6 +78,7 @@
 #define EXACT_LETHK(   IUDP,I) ((double *) (udps[IUDP].arg[37].val))[I]
 #define EXACT_TETHK(   IUDP,I) ((double *) (udps[IUDP].arg[38].val))[I] 
 #define THK_FLAGS(     IUDP,I) ((int    *) (udps[IUDP].arg[39].val))[I]
+#define ARG_2(         IUDP)   ((char   *) (udps[IUDP].arg[40].val))
 
 /* data about possible arguments */
 static char*  argNames[NUMUDPARGS] = {"ncp",            "filename",     "auxname",
@@ -91,7 +92,7 @@ static char*  argNames[NUMUDPARGS] = {"ncp",            "filename",     "auxname
                                       "exact_u4",       "exact_u5",     "exact_u6",         "exact_u7",
                                       "exact_thk1",     "exact_thk2",   "exact_thk3",       "exact_thk4",
                                       "exact_thk5",     "exact_thk6",   "exact_thk7",       "exact_lethk",      
-                                      "exact_tethk",    "thk_flags",    };
+                                      "exact_tethk",    "thk_flags",    "arg_2",            };
 static int    argTypes[NUMUDPARGS] = {ATTRINT,  ATTRSTRING, ATTRSTRING,
                                       /*ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,*/
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
@@ -103,7 +104,7 @@ static int    argTypes[NUMUDPARGS] = {ATTRINT,  ATTRSTRING, ATTRSTRING,
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
-                                      ATTRREAL, ATTRINT,    };
+                                      ATTRREAL, ATTRINT,    ATTRSTRING, };
 static int    argIdefs[NUMUDPARGS] = {33,       0,          0,
                                       /*0,        0,          0,          0,*/
                                       0,        0,          0,          0,
@@ -115,7 +116,7 @@ static int    argIdefs[NUMUDPARGS] = {33,       0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,
-                                      0,        0,          };
+                                      0,        0,          0,          };
 static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,
                                       /*0.,       0.,         0.,         0.,*/
                                       0.,       0.,         0.,         0.,
@@ -127,7 +128,7 @@ static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0., 
                                       0.,       0.,         0.,         0.,
-                                      0.,       0.,         };
+                                      0.,       0.,         0.,         };
 
 /* get utility routines: udpErrorStr, udpInitialize, udpReset, udpSet,
                          udpGet, udpVel, udpClean, udpMesh */
@@ -420,7 +421,7 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     if (status < 0) {
         printf(" udpExecute: could not change to \"Tblade3_temp\"\n");
         status = EGADS_EMPTY;
-        return status;
+        return status; 
     }
 
     /* cache copy of arguments for future use */
@@ -472,11 +473,11 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     printf("strlen(filename)=%d\n", (int)strlen(filename));
     printf("auxname=%s\n", AUXNAME(numUdp));
     printf("strlen(auxname)=%d\n", (int)strlen(AUXNAME(numUdp)));
-    BGB3D_SUB (filename, AUXNAME(numUdp), "", "", "",
-               strlen(filename), strlen(AUXNAME(numUdp)), strlen(""), strlen(""), strlen(""));
+    BGB3D_SUB (filename, AUXNAME(numUdp), ARG_2(numUdp), "", "",
+               strlen(filename), strlen(AUXNAME(numUdp)), (int)strlen(ARG_2(numUdp)), strlen(""), strlen(""));
 #else
-    bgb3d_sub_(filename, AUXNAME(numUdp), "", "", "",
-               strlen(filename), strlen(AUXNAME(numUdp)), strlen(""), strlen(""), strlen(""));
+    bgb3d_sub_(filename, AUXNAME(numUdp), ARG_2(numUdp), "", "",
+               strlen(filename), strlen(AUXNAME(numUdp)), (int)strlen(ARG_2(numUdp)), strlen(""), strlen(""));
 #endif
 
     ecurves = (ego*) malloc(nsec*sizeof(ego));

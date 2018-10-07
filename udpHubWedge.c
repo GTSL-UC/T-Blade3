@@ -31,7 +31,7 @@
  *     MA  02110-1301  USA
  */
 
-#define NUMUDPARGS 41
+#define NUMUDPARGS 42
 #include "udpUtilities.h"
 
 /* shorthands for accessing argument values and velocities */
@@ -76,6 +76,7 @@
 #define EXACT_LETHK(   IUDP,I) ((double *) (udps[IUDP].arg[38].val))[I]
 #define EXACT_TETHK(   IUDP,I) ((double *) (udps[IUDP].arg[39].val))[I] 
 #define THK_FLAGS(     IUDP,I) ((int    *) (udps[IUDP].arg[40].val))[I]
+#define ARG_2(         IUDP)   ((char   *) (udps[IUDP].arg[41].val))
 
 /* data about possible arguments */
 static char*  argNames[NUMUDPARGS] = {"ncp",            "filename",     "auxname",          "average",
@@ -88,7 +89,7 @@ static char*  argNames[NUMUDPARGS] = {"ncp",            "filename",     "auxname
                                       "exact_u5",       "exact_u6",     "exact_u7",         "exact_thk1",
                                       "exact_thk2",     "exact_thk3",   "exact_thk4",       "exact_thk5",
                                       "exact_thk6",     "exact_thk7",   "exact_lethk",      "exact_tethk",
-                                      "thk_flags",      };
+                                      "thk_flags",      "arg_2",        };
 static int    argTypes[NUMUDPARGS] = {ATTRINT,  ATTRSTRING, ATTRSTRING, ATTRSTRING, 
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
@@ -99,7 +100,7 @@ static int    argTypes[NUMUDPARGS] = {ATTRINT,  ATTRSTRING, ATTRSTRING, ATTRSTRI
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
                                       ATTRREAL, ATTRREAL, 	ATTRREAL,	ATTRREAL,
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
-                                      ATTRREAL, };
+                                      ATTRREAL, ATTRSTRING, };
 static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,
@@ -110,7 +111,7 @@ static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0, 			0, 	        0,
                                       0,        0,          0,          0,
-                                      0,        };
+                                      0,        0,          };
 static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
@@ -121,7 +122,7 @@ static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0., 		0.,  		0.,
                                       0.,       0.,         0.,         0.,
-                                      0.,       };
+                                      0.,       0.,         };
 
 /* get utility routines: udpErrorStr, udpInitialize, udpReset, udpSet,
                          udpGet, udpVel, udpClean, udpMesh */
@@ -289,8 +290,8 @@ udpExecute(ego  context,                /* (in)  EGADS context */
 
     /* try running Tblade */
     printf("filename = %s\n", FILENAME(numUdp));
-    bgb3d_sub_(FILENAME(numUdp), AUXNAME(numUdp), "", "", "",
-               strlen(FILENAME(numUdp)), strlen(AUXNAME(numUdp)), strlen(""), strlen(""), strlen(""));
+    bgb3d_sub_(FILENAME(numUdp), AUXNAME(numUdp), ARG_2(numUdp), "", "",
+               strlen(FILENAME(numUdp)), strlen(AUXNAME(numUdp)), (int)strlen(ARG_2(numUdp)), strlen(""), strlen(""));
     /* Read Hub File */		   
     sprintf(filename, "hub.%s.sldcrv", casename);
     printf("reading: %s\n", filename);

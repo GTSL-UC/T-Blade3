@@ -18,6 +18,7 @@ UDPARG    tblade    span_thk_c      span_thk_c
 UDPARG    tblade    span_in_beta    span_in_beta
 UDPARG    tblade    span_out_beta   span_out_beta
 UDPARG    tblade    cur4            cur4
+UDPARG    tblade    arg_2           $v0
 UDPRIM    tblade    filename        $$/tblade_comp4.2.dat \
                     auxname         $$/tblade_comp4.spancontrolinputs.2.dat
 
