@@ -31,7 +31,7 @@
  *     MA  02110-1301  USA
  */
 
-#define NUMUDPARGS 42
+#define NUMUDPARGS 43
 #include "udpUtilities.h"
 
 /* shorthands for accessing argument values and velocities */
@@ -39,69 +39,70 @@
 #define FILENAME(      IUDP)   ((char   *) (udps[IUDP].arg[ 1].val))
 #define AUXNAME(       IUDP)   ((char   *) (udps[IUDP].arg[ 2].val))
 #define AVERAGE(       IUDP)   ((char   *) (udps[IUDP].arg[ 3].val))
-#define SPAN_CHORD(    IUDP,I) ((double *) (udps[IUDP].arg[ 4].val))[I]
-#define SPAN_THK_C(    IUDP,I) ((double *) (udps[IUDP].arg[ 5].val))[I]
-#define SPAN_IN_BETA(  IUDP,I) ((double *) (udps[IUDP].arg[ 6].val))[I]
-#define SPAN_OUT_BETA( IUDP,I) ((double *) (udps[IUDP].arg[ 7].val))[I]
-#define U2(            IUDP,I) ((double *) (udps[IUDP].arg[ 8].val))[I]
-#define U3(            IUDP,I) ((double *) (udps[IUDP].arg[ 9].val))[I]
-#define U4(            IUDP,I) ((double *) (udps[IUDP].arg[10].val))[I]
-#define U5(            IUDP,I) ((double *) (udps[IUDP].arg[11].val))[I]
-#define U6(            IUDP,I) ((double *) (udps[IUDP].arg[12].val))[I]
-#define CUR1(          IUDP,I) ((double *) (udps[IUDP].arg[13].val))[I]
-#define CUR2(          IUDP,I) ((double *) (udps[IUDP].arg[14].val))[I]
-#define CUR3(          IUDP,I) ((double *) (udps[IUDP].arg[15].val))[I]
-#define CUR4(          IUDP,I) ((double *) (udps[IUDP].arg[16].val))[I]
-#define CUR5(          IUDP,I) ((double *) (udps[IUDP].arg[17].val))[I]
-#define CUR6(          IUDP,I) ((double *) (udps[IUDP].arg[18].val))[I]
-#define CUR7(          IUDP,I) ((double *) (udps[IUDP].arg[19].val))[I]
-#define SPAN_CURV_CTRL(IUDP,I) ((double *) (udps[IUDP].arg[20].val))[I]
-#define SPAN_DEL_M(    IUDP,I) ((double *) (udps[IUDP].arg[21].val))[I]
-#define SPAN_DEL_THETA(IUDP,I) ((double *) (udps[IUDP].arg[22].val))[I]
-#define SPAN_THK_CTRL( IUDP,I) ((double *) (udps[IUDP].arg[23].val))[I]
-#define EXACT_U1(      IUDP,I) ((double *) (udps[IUDP].arg[24].val))[I]
-#define EXACT_U2(      IUDP,I) ((double *) (udps[IUDP].arg[25].val))[I]
-#define EXACT_U3(      IUDP,I) ((double *) (udps[IUDP].arg[26].val))[I]
-#define EXACT_U4(      IUDP,I) ((double *) (udps[IUDP].arg[27].val))[I]
-#define EXACT_U5(      IUDP,I) ((double *) (udps[IUDP].arg[28].val))[I]
-#define EXACT_U6(      IUDP,I) ((double *) (udps[IUDP].arg[29].val))[I]
-#define EXACT_U7(      IUDP,I) ((double *) (udps[IUDP].arg[30].val))[I]
-#define EXACT_THK1(    IUDP,I) ((double *) (udps[IUDP].arg[31].val))[I]
-#define EXACT_THK2(    IUDP,I) ((double *) (udps[IUDP].arg[32].val))[I]
-#define EXACT_THK3(    IUDP,I) ((double *) (udps[IUDP].arg[33].val))[I]
-#define EXACT_THK4(    IUDP,I) ((double *) (udps[IUDP].arg[34].val))[I]
-#define EXACT_THK5(    IUDP,I) ((double *) (udps[IUDP].arg[35].val))[I]
-#define EXACT_THK6(    IUDP,I) ((double *) (udps[IUDP].arg[36].val))[I]
-#define EXACT_THK7(    IUDP,I) ((double *) (udps[IUDP].arg[37].val))[I]
-#define EXACT_LETHK(   IUDP,I) ((double *) (udps[IUDP].arg[38].val))[I]
-#define EXACT_TETHK(   IUDP,I) ((double *) (udps[IUDP].arg[39].val))[I] 
-#define THK_FLAGS(     IUDP,I) ((int    *) (udps[IUDP].arg[40].val))[I]
-#define ARG_2(         IUDP)   ((char   *) (udps[IUDP].arg[41].val))
+#define ARG_2(         IUDP)   ((char   *) (udps[IUDP].arg[ 4].val))
+#define SPAN_CHORD(    IUDP,I) ((double *) (udps[IUDP].arg[ 5].val))[I]
+#define SPAN_THK_C(    IUDP,I) ((double *) (udps[IUDP].arg[ 6].val))[I]
+#define SPAN_IN_BETA(  IUDP,I) ((double *) (udps[IUDP].arg[ 7].val))[I]
+#define SPAN_OUT_BETA( IUDP,I) ((double *) (udps[IUDP].arg[ 8].val))[I]
+#define U2(            IUDP,I) ((double *) (udps[IUDP].arg[ 9].val))[I]
+#define U3(            IUDP,I) ((double *) (udps[IUDP].arg[10].val))[I]
+#define U4(            IUDP,I) ((double *) (udps[IUDP].arg[11].val))[I]
+#define U5(            IUDP,I) ((double *) (udps[IUDP].arg[12].val))[I]
+#define U6(            IUDP,I) ((double *) (udps[IUDP].arg[13].val))[I]
+#define CUR1(          IUDP,I) ((double *) (udps[IUDP].arg[14].val))[I]
+#define CUR2(          IUDP,I) ((double *) (udps[IUDP].arg[15].val))[I]
+#define CUR3(          IUDP,I) ((double *) (udps[IUDP].arg[16].val))[I]
+#define CUR4(          IUDP,I) ((double *) (udps[IUDP].arg[17].val))[I]
+#define CUR5(          IUDP,I) ((double *) (udps[IUDP].arg[18].val))[I]
+#define CUR6(          IUDP,I) ((double *) (udps[IUDP].arg[19].val))[I]
+#define CUR7(          IUDP,I) ((double *) (udps[IUDP].arg[20].val))[I]
+#define SPAN_CURV_CTRL(IUDP,I) ((double *) (udps[IUDP].arg[21].val))[I]
+#define SPAN_DEL_M(    IUDP,I) ((double *) (udps[IUDP].arg[22].val))[I]
+#define SPAN_DEL_THETA(IUDP,I) ((double *) (udps[IUDP].arg[23].val))[I]
+#define SPAN_THK_CTRL( IUDP,I) ((double *) (udps[IUDP].arg[24].val))[I]
+#define EXACT_U1(      IUDP,I) ((double *) (udps[IUDP].arg[25].val))[I]
+#define EXACT_U2(      IUDP,I) ((double *) (udps[IUDP].arg[26].val))[I]
+#define EXACT_U3(      IUDP,I) ((double *) (udps[IUDP].arg[27].val))[I]
+#define EXACT_U4(      IUDP,I) ((double *) (udps[IUDP].arg[28].val))[I]
+#define EXACT_U5(      IUDP,I) ((double *) (udps[IUDP].arg[29].val))[I]
+#define EXACT_U6(      IUDP,I) ((double *) (udps[IUDP].arg[30].val))[I]
+#define EXACT_U7(      IUDP,I) ((double *) (udps[IUDP].arg[31].val))[I]
+#define EXACT_THK1(    IUDP,I) ((double *) (udps[IUDP].arg[32].val))[I]
+#define EXACT_THK2(    IUDP,I) ((double *) (udps[IUDP].arg[33].val))[I]
+#define EXACT_THK3(    IUDP,I) ((double *) (udps[IUDP].arg[34].val))[I]
+#define EXACT_THK4(    IUDP,I) ((double *) (udps[IUDP].arg[35].val))[I]
+#define EXACT_THK5(    IUDP,I) ((double *) (udps[IUDP].arg[36].val))[I]
+#define EXACT_THK6(    IUDP,I) ((double *) (udps[IUDP].arg[37].val))[I]
+#define EXACT_THK7(    IUDP,I) ((double *) (udps[IUDP].arg[38].val))[I]
+#define EXACT_LETHK(   IUDP,I) ((double *) (udps[IUDP].arg[39].val))[I]
+#define EXACT_TETHK(   IUDP,I) ((double *) (udps[IUDP].arg[40].val))[I] 
+#define THK_FLAGS(     IUDP,I) ((int    *) (udps[IUDP].arg[41].val))[I]
+#define OFFSETS(       IUDP,I) ((double *) (udps[IUDP].arg[42].val))[I]
 
 /* ADDED */
 /* data about possible arguments */
-static char*  argNames[NUMUDPARGS] = {"ncp",            "filename",     "auxname",          "average",
-                                      "span_chord",     "span_thk_c",   "span_in_beta",     "span_out_beta",
-                                      "u2",             "u3",           "u4",               "u5",
-                                      "u6",             "cur1",         "cur2",             "cur3",         
-                                      "cur4",           "cur5",         "cur6",             "cur7",          
-                                      "span_curv_ctrl", "span_del_m",   "span_del_theta",   "span_thk_ctrl",
-                                      "exact_u1",       "exact_u2",     "exact_u3",         "exact_u4",
-                                      "exact_u5",       "exact_u6",     "exact_u7",         "exact_thk1",
-                                      "exact_thk2",     "exact_thk3",   "exact_thk4",       "exact_thk5",
-                                      "exact_thk6",     "exact_thk7",   "exact_lethk",      "exact_tethk",
-                                      "thk_flags",      "arg_2",        };
-static int    argTypes[NUMUDPARGS] = {ATTRINT,  ATTRSTRING, ATTRSTRING, ATTRSTRING, 
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
-                                      ATTRREAL, ATTRREAL, 	ATTRREAL,	ATTRREAL,
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL, 
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
-                                      ATTRREAL, ATTRREAL, 	ATTRREAL,	ATTRREAL,
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
-                                      ATTRREAL, ATTRSTRING, };
+static char*  argNames[NUMUDPARGS] = {"ncp",            "filename",         "auxname",          "average",
+                                      "arg_2",          "span_chord",       "span_thk_c",       "span_in_beta",     
+                                      "span_out_beta",  "u2",               "u3",               "u4",               
+                                      "u5",             "u6",               "cur1",             "cur2",             
+                                      "cur3",           "cur4",             "cur5",             "cur6",             
+                                      "cur7",           "span_curv_ctrl",   "span_del_m",       "span_del_theta",   
+                                      "span_thk_ctrl",  "exact_u1",         "exact_u2",         "exact_u3",         
+                                      "exact_u4",       "exact_u5",         "exact_u6",         "exact_u7",         
+                                      "exact_thk1",     "exact_thk2",       "exact_thk3",       "exact_thk4",       
+                                      "exact_thk5",     "exact_thk6",       "exact_thk7",       "exact_lethk",      
+                                      "exact_tethk",    "thk_flags",        "offsets",          };
+static int    argTypes[NUMUDPARGS] = {ATTRINT,      ATTRSTRING, ATTRSTRING, ATTRSTRING, 
+                                      ATTRSTRING,   ATTRREAL,   ATTRREAL,   ATTRREAL,   
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL, 	ATTRREAL,	
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL, 	ATTRREAL,	
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   };
 static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,
@@ -112,7 +113,7 @@ static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0, 			0, 	        0,
                                       0,        0,          0,          0,
-                                      0,        0,          };
+                                      0,        0,          0,          };
 static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
@@ -123,7 +124,7 @@ static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0., 		0.,  		0.,
                                       0.,       0.,         0.,         0.,
-                                      0.,       0.,         };
+                                      0.,       0.,         0.,         };
 
 /* get utility routines: udpErrorStr, udpInitialize, udpReset, udpSet,
                          udpGet, udpVel, udpClean, udpMesh */
@@ -188,6 +189,7 @@ void   override_exact_thk7_(    int *nspn, double exact_thk7[    ]);
 void   override_exact_lethk_(   int *nspn, double exact_lethk[   ]);
 void   override_exact_tethk_(   int *nspn, double exact_tethk[   ]);
 void   override_thk_flags_(                int    thk_flags[     ]);
+void   override_offsets_(                  double offsets[       ]);
 
 //static int    EG_fitBspline(ego context,
 //                            int npnt, int bitflag, double xyz[],
@@ -980,10 +982,9 @@ udpSensitivity(ego    ebody,            /* (in)  Body pointer */
  ************************************************************************
  */
 
-void
-override_span_chord_(int    *nspn, double span_chord[])
+void override_span_chord_(int *nspn, double span_chord[])
 {
-    int    ispn, narg=4;
+    int    ispn, narg=5;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_chord\n");
@@ -1007,10 +1008,9 @@ override_span_chord_(int    *nspn, double span_chord[])
  ************************************************************************
  */
 
-void
-override_span_thk_c_(int    *nspn, double span_thk_c[])
+void override_span_thk_c_(int *nspn, double span_thk_c[])
 {
-    int    ispn, narg=5;
+    int    ispn, narg=6;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_thk_c\n");
@@ -1034,10 +1034,9 @@ override_span_thk_c_(int    *nspn, double span_thk_c[])
  ************************************************************************
  */
 
-void
-override_span_in_beta_(int    *nspn, double span_in_beta[])
+void override_span_in_beta_(int *nspn, double span_in_beta[])
 {
-    int    ispn, narg=6;
+    int    ispn, narg=7;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_in_beta\n");
@@ -1061,10 +1060,9 @@ override_span_in_beta_(int    *nspn, double span_in_beta[])
  ************************************************************************
  */
 
-void
-override_span_out_beta_(int    *nspn, double span_out_beta[])
+void override_span_out_beta_(int *nspn, double span_out_beta[])
 {
-    int    ispn, narg=7;
+    int    ispn, narg=8;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_out_beta\n");
@@ -1087,10 +1085,9 @@ override_span_out_beta_(int    *nspn, double span_out_beta[])
  ************************************************************************
  */
 
-void 
-override_u2_(int    *nspn, double u2[])
+void override_u2_(int *nspn, double u2[])
 {
-    int    ispn, narg=8;
+    int    ispn, narg=9;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding u2\n");
@@ -1113,10 +1110,9 @@ override_u2_(int    *nspn, double u2[])
  ************************************************************************
  */
 
-void 
-override_u3_(int    *nspn, double u3[])
+void override_u3_(int *nspn, double u3[])
 {
-    int    ispn, narg=9;
+    int    ispn, narg=10;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding u3\n");
@@ -1139,10 +1135,9 @@ override_u3_(int    *nspn, double u3[])
  ************************************************************************
  */
 
-void 
-override_u4_(int    *nspn, double u4[])
+void override_u4_(int *nspn, double u4[])
 {
-    int    ispn, narg=10;
+    int    ispn, narg=11;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding u4\n");
@@ -1165,10 +1160,9 @@ override_u4_(int    *nspn, double u4[])
  ************************************************************************
  */
 
-void 
-override_u5_(int    *nspn, double u5[])
+void override_u5_(int *nspn, double u5[])
 {
-    int    ispn, narg=11;
+    int    ispn, narg=12;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding u5\n");
@@ -1191,10 +1185,9 @@ override_u5_(int    *nspn, double u5[])
  ************************************************************************
  */
 
-void 
-override_u6_(int    *nspn, double u6[])
+void override_u6_(int *nspn, double u6[])
 {
-    int    ispn, narg=12;
+    int    ispn, narg=13;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding u6\n");
@@ -1217,10 +1210,9 @@ override_u6_(int    *nspn, double u6[])
  ************************************************************************
  */
 
-void
-override_cur1_(int    *nspn, double cur1[])
+void override_cur1_(int *nspn, double cur1[])
 {
-    int    ispn, narg=13;
+    int    ispn, narg=14;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur1\n");
@@ -1243,10 +1235,9 @@ override_cur1_(int    *nspn, double cur1[])
  ************************************************************************
  */
 
-void
-override_cur2_(int    *nspn, double cur2[])
+void override_cur2_(int *nspn, double cur2[])
 {
-    int    ispn, narg=14;
+    int    ispn, narg=15;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur2\n");
@@ -1269,10 +1260,9 @@ override_cur2_(int    *nspn, double cur2[])
  ************************************************************************
  */
 
-void
-override_cur3_(int    *nspn, double cur3[])
+void override_cur3_(int *nspn, double cur3[])
 {
-    int    ispn, narg=15;
+    int    ispn, narg=16;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur3\n");
@@ -1295,10 +1285,9 @@ override_cur3_(int    *nspn, double cur3[])
  ************************************************************************
  */
 
-void
-override_cur4_(int    *nspn, double cur4[])
+void override_cur4_(int *nspn, double cur4[])
 {
-    int    ispn, narg=16;
+    int    ispn, narg=17;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur4\n");
@@ -1321,10 +1310,9 @@ override_cur4_(int    *nspn, double cur4[])
  ************************************************************************
  */
 
-void
-override_cur5_(int    *nspn, double cur5[])
+void override_cur5_(int *nspn, double cur5[])
 {
-    int    ispn, narg=17;
+    int    ispn, narg=18;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur5\n");
@@ -1347,10 +1335,9 @@ override_cur5_(int    *nspn, double cur5[])
  ************************************************************************
  */
 
-void
-override_cur6_(int    *nspn, double cur6[])
+void override_cur6_(int *nspn, double cur6[])
 {
-    int    ispn, narg=18;
+    int    ispn, narg=19;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur6\n");
@@ -1373,10 +1360,9 @@ override_cur6_(int    *nspn, double cur6[])
  ************************************************************************
  */
 
-void
-override_cur7_(int    *nspn, double cur7[])
+void override_cur7_(int *nspn, double cur7[])
 {
-    int    ispn, narg=19;
+    int    ispn, narg=20;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur7\n");
@@ -1400,10 +1386,9 @@ override_cur7_(int    *nspn, double cur7[])
  ************************************************************************
  */
 
-void
-override_span_curv_ctrl_(int   *nspn, double span_curv_ctrl[])
+void override_span_curv_ctrl_(int *nspn, double span_curv_ctrl[])
 {
-    int    ispn, narg=20;
+    int    ispn, narg=21;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_curv_ctrl\n");
@@ -1427,10 +1412,9 @@ override_span_curv_ctrl_(int   *nspn, double span_curv_ctrl[])
  ************************************************************************
  */
 
-void 
-override_span_del_m_(int   *nspn, double span_del_m[])
+void override_span_del_m_(int *nspn, double span_del_m[])
 {
-    int   ispn, narg=21;
+    int    ispn, narg=22;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_del_m\n");
@@ -1454,10 +1438,9 @@ override_span_del_m_(int   *nspn, double span_del_m[])
  ************************************************************************
  */
 
-void 
-override_span_del_theta_(int   *nspn, double span_del_theta[])
+void override_span_del_theta_(int *nspn, double span_del_theta[])
 {
-    int   ispn, narg=22;
+    int    ispn, narg=23;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_del_theta\n");
@@ -1482,7 +1465,7 @@ override_span_del_theta_(int   *nspn, double span_del_theta[])
 
 void override_span_thk_ctrl_(int *nspn, double span_thk_ctrl[])
 {
-    int    ispn, narg=23;
+    int    ispn, narg=24;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_thk_ctrl\n");
@@ -1508,7 +1491,7 @@ void override_span_thk_ctrl_(int *nspn, double span_thk_ctrl[])
 
 void override_exact_u1_(int *nspn, double exact_u1[])
 {
-    int    ispn, narg=24;
+    int    ispn, narg=25;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding exact_u1\n");
@@ -1534,7 +1517,7 @@ void override_exact_u1_(int *nspn, double exact_u1[])
 
 void override_exact_u2_(int *nspn, double exact_u2[])
 {
-    int    ispn, narg=25;
+    int    ispn, narg=26;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding exact_u2\n");
@@ -1560,7 +1543,7 @@ void override_exact_u2_(int *nspn, double exact_u2[])
 
 void override_exact_u3_(int *nspn, double exact_u3[])
 {
-    int    ispn, narg=26;
+    int    ispn, narg=27;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding exact_u3\n");
@@ -1586,7 +1569,7 @@ void override_exact_u3_(int *nspn, double exact_u3[])
 
 void override_exact_u4_(int *nspn, double exact_u4[])
 {
-    int    ispn, narg=27;
+    int    ispn, narg=28;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding exact_u4\n");
@@ -1612,7 +1595,7 @@ void override_exact_u4_(int *nspn, double exact_u4[])
 
 void override_exact_u5_(int *nspn, double exact_u5[])
 {
-    int    ispn, narg=28;
+    int    ispn, narg=29;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding exact_u5\n");
@@ -1638,7 +1621,7 @@ void override_exact_u5_(int *nspn, double exact_u5[])
 
 void override_exact_u6_(int *nspn, double exact_u6[])
 {
-    int    ispn, narg=29;
+    int    ispn, narg=30;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding exact_u6\n");
@@ -1664,7 +1647,7 @@ void override_exact_u6_(int *nspn, double exact_u6[])
 
 void override_exact_u7_(int *nspn, double exact_u7[])
 {
-    int    ispn, narg=30;
+    int    ispn, narg=31;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding exact_u7\n");
@@ -1690,7 +1673,7 @@ void override_exact_u7_(int *nspn, double exact_u7[])
 
 void override_exact_thk1_(int *nspn, double exact_thk1[])
 {
-    int    ispn, narg=31;
+    int    ispn, narg=32;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding exact_thk1\n");
@@ -1716,7 +1699,7 @@ void override_exact_thk1_(int *nspn, double exact_thk1[])
 
 void override_exact_thk2_(int *nspn, double exact_thk2[])
 {
-    int    ispn, narg=32;
+    int    ispn, narg=33;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding exact_thk2\n");
@@ -1742,7 +1725,7 @@ void override_exact_thk2_(int *nspn, double exact_thk2[])
 
 void override_exact_thk3_(int *nspn, double exact_thk3[])
 {
-    int    ispn, narg=33;
+    int    ispn, narg=34;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding exact_thk3\n");
@@ -1768,7 +1751,7 @@ void override_exact_thk3_(int *nspn, double exact_thk3[])
 
 void override_exact_thk4_(int *nspn, double exact_thk4[])
 {
-    int    ispn, narg=34;
+    int    ispn, narg=35;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding exact_thk4\n");
@@ -1794,7 +1777,7 @@ void override_exact_thk4_(int *nspn, double exact_thk4[])
 
 void override_exact_thk5_(int *nspn, double exact_thk5[])
 {
-    int    ispn, narg=35;
+    int    ispn, narg=36;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding exact_thk5\n");
@@ -1820,7 +1803,7 @@ void override_exact_thk5_(int *nspn, double exact_thk5[])
 
 void override_exact_thk6_(int *nspn, double exact_thk6[])
 {
-    int    ispn, narg=36;
+    int    ispn, narg=37;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding exact_thk6\n");
@@ -1846,7 +1829,7 @@ void override_exact_thk6_(int *nspn, double exact_thk6[])
 
 void override_exact_thk7_(int *nspn, double exact_thk7[])
 {
-    int    ispn, narg=37;
+    int    ispn, narg=38;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding exact_thk7\n");
@@ -1872,7 +1855,7 @@ void override_exact_thk7_(int *nspn, double exact_thk7[])
 
 void override_exact_lethk_(int *nspn, double exact_lethk[])
 {
-    int    ispn, narg=38;
+    int    ispn, narg=39;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding exact_lethk\n");
@@ -1898,7 +1881,7 @@ void override_exact_lethk_(int *nspn, double exact_lethk[])
 
 void override_exact_tethk_(int *nspn, double exact_tethk[])
 {
-    int    ispn, narg=39;
+    int    ispn, narg=40;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding exact_tethk\n");
@@ -1924,7 +1907,7 @@ void override_exact_tethk_(int *nspn, double exact_tethk[])
 
 void override_thk_flags_(int thk_flags[])
 {
-    int    iflag, narg=40;
+    int    iflag, narg=41;
 
     if (udps[numUdp].arg[narg].size == 3) {
         printf(" ==> overriding thk_flags\n");
@@ -1937,6 +1920,33 @@ void override_thk_flags_(int thk_flags[])
                udps[numUdp].arg[narg].size);
     }
 }
+
+
+/*
+ ************************************************************************
+ *                                                                      *
+ *   override_offsets - callback from Tblade3 to change                 *
+ *                      offsets array                                   *
+ *                                                                      *
+ ************************************************************************
+ */
+
+void override_offsets_(double offsets[])
+{
+    int    ioffset, narg=42;
+
+    if (udps[numUdp].arg[narg].size == 2) {
+        printf(" ==> overriding offsets\n");
+        for (ioffset = 0; ioffset < 2; ioffset++) {
+            offsets[ioffset] = OFFSETS(numUdp,ioffset);
+            printf("     offsets(%2d) = %12.5f\n", ioffset+1, offsets[ioffset]);
+        }
+    } else {
+        printf(" ==> not overriding offsets (noffset=2 but size=%d)\n",
+               udps[numUdp].arg[narg].size);
+    }
+}
+
 
 /*
  ************************************************************************

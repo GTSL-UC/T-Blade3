@@ -241,6 +241,9 @@ end subroutine override_exact_tethk
 subroutine     override_thk_flags(a)
   integer a(*)
 end subroutine override_thk_flags
+subroutine     override_offsets(a)
+  integer a(*)
+end subroutine override_offsets
 #endif
 !****************************************************************************************
 

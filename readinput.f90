@@ -8,6 +8,7 @@ character*256 :: fname, temp, temp2, tempr1, fname1, fname2, fname3
 integer :: er
 real*8 inBetaInci, outBetaDevn
 real*8, allocatable :: temp_in(:)
+real*8              :: temp_offsets(2)
 real*8, parameter   :: tol = 1E-8
 logical             :: equal
 
@@ -360,6 +361,23 @@ read(1, *)hub
 !print*, 'hub offset:', hub
 read(1, *)temp
 read(1, *)tip
+print *, ''
+print *, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+print *, 'From readinput - hub_offset - ', hub
+print *, 'From readinput - tip_offset - ', tip 
+print *, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+print *, ''
+temp_offsets(1) = hub
+temp_offsets(2) = tip
+call override_offsets(temp_offsets)
+hub = temp_offsets(1)
+tip = temp_offsets(2)
+print *, ''
+print *, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+print *, 'From readinput - hub_offset - ', hub
+print *, 'From readinput - tip_offset - ', tip 
+print *, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+print *, ''
 !print*, 'tip offset:', tip
 read(1, *)temp
 do while(temp.ne.'x_s')
@@ -986,6 +1004,12 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
         te_flag     = temp_thk_flag(1)
         le_opt_flag = temp_thk_flag(2)
         te_opt_flag = temp_thk_flag(3)
+      
+        print *, ''
+        print *, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+        print *, 'From readinput - ', te_flag, le_opt_flag, te_opt_flag
+        print *, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+        print *, ''
        
         ! Override span_thk_ctrl
         do i = 1,ncp_span_thk
