@@ -156,6 +156,16 @@ read(1, *)LE           ! Airfoil LE control switch
 read(1, *)temp
 read(1, *)chord_switch ! non-dimensional actual chord switch
 read(1, *)temp
+read(1, *)leansweep_switch ! switch for determining whether to use true lean and sweep
+if (leansweep_switch .eq. 0) then
+    trueleansweep = ''
+else if (leansweep_switch .eq. 1) then
+    trueleansweep = '1'
+else
+    print *, 'Invalid argument for leansweep_switch: quitting!!!'
+    stop
+end if
+read(1, *)temp
 read(1, *)temp
 !
 !---- blade file names
@@ -237,18 +247,18 @@ do i = 1, cpbsv
 enddo
 read(1, *)temp
 read(1, *)stack! Reading the stacking value
+
+!
+! Read sweep spline control points and call ESP override subroutine 
+!
 read(1, *)temp
-read(1, '(A)')temp ! control points for sweep, switch for sweep along the chord.
-!print*, 'temp: ', temp(12:12)
-trueleansweep = temp(15:15)
+read(1, '(A)')temp 
 read(temp(12:12), *)cpdeltam
-!print*, 'cpdeltam: ', cpdeltam
-!write(*, *)
 if(trim(trueleansweep).ne.'')then
-	read(trueleansweep, *)chrdsweep
+    chrdsweep = 1
 	read(1, *)temp
 	do i = 1, cpdeltam
-		read(1, *)spanmp(i), tempr, xcpdelm(i)
+        read(1, *)spanmp(i), xcpdelm(i)
 	enddo
 else
 	read(1, *)temp
@@ -256,38 +266,37 @@ else
 		read(1, *)spanmp(i), xcpdelm(i)
 	enddo
 endif
+
 if (allocated(temp_in)) deallocate(temp_in)
 temp_in = xcpdelm(1:cpdeltam)
 call override_span_del_m(cpdeltam, temp_in)
 xcpdelm(1:cpdeltam) = temp_in
+
+!
+! Read lean spline control points and call ESP override subroutine
+!
 read(1, *)temp
 read(1, '(A)')temp ! control points for lean, switch for lean normal to the chord.
-!print*, 'temp: ', temp(12:12)
-trueleansweep = temp(15:15)
 read(temp(12:12), *)cpdeltheta
-!print*, 'cpdeltheta: ', cpdeltheta
 if(trim(trueleansweep).ne.'')then
-	read(trueleansweep, *)chrdlean 
-	!print*, 'Lean normal to the chord (1 = yes): ', chrdlean
-	!write(*, *)
-	read(1, *)temp
-	do i = 1, cpdeltheta
-		read(1, *)spantheta(i), tempr, xcpdeltheta(i)
-		!print*, spantheta(i), xcpdeltheta(i)
-	enddo
-else
-	!print*, 'Lean in the tangential direction (theta).'
-	!write(*, *)
+    chrdlean = 1
 	read(1, *)temp
 	do i = 1, cpdeltheta
 		read(1, *)spantheta(i), xcpdeltheta(i)
-		!print*, spantheta(i), xcpdeltheta(i)
 	enddo
-endif 
+else
+	read(1, *)temp
+	do i = 1, cpdeltheta
+		read(1, *)spantheta(i), xcpdeltheta(i)
+	enddo
+endif
+ 
 if (allocated(temp_in)) deallocate(temp_in)
 temp_in = xcpdeltheta(1:cpdeltheta) 
 call override_span_del_theta(cpdeltheta, temp_in)
 xcpdeltheta(1:cpdeltheta) = temp_in
+
+
 read(1, *)temp
 read(1, *)cpinbeta ! control points for inBeta*
 read(1, *)temp
@@ -361,23 +370,11 @@ read(1, *)hub
 !print*, 'hub offset:', hub
 read(1, *)temp
 read(1, *)tip
-print *, ''
-print *, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-print *, 'From readinput - hub_offset - ', hub
-print *, 'From readinput - tip_offset - ', tip 
-print *, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-print *, ''
 temp_offsets(1) = hub
 temp_offsets(2) = tip
 call override_offsets(temp_offsets)
 hub = temp_offsets(1)
 tip = temp_offsets(2)
-print *, ''
-print *, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-print *, 'From readinput - hub_offset - ', hub
-print *, 'From readinput - tip_offset - ', tip 
-print *, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-print *, ''
 !print*, 'tip offset:', tip
 read(1, *)temp
 do while(temp.ne.'x_s')
@@ -1005,12 +1002,6 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
         le_opt_flag = temp_thk_flag(2)
         te_opt_flag = temp_thk_flag(3)
       
-        print *, ''
-        print *, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-        print *, 'From readinput - ', te_flag, le_opt_flag, te_opt_flag
-        print *, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-        print *, ''
-       
         ! Override span_thk_ctrl
         do i = 1,ncp_span_thk
             temp_exact(i) = cp_chord_thk(i,1)

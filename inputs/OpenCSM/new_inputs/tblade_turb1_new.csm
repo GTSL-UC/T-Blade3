@@ -29,7 +29,8 @@ DIMENSION span_chord     1 5 1
 #DIMENSION exact_thk3     1 5 1
 #DIMENSION exact_lethk    1 5 1
 #DIMENSION exact_tethk    1 5 1
-#DIMENSION thk_flags      1 3 1
+DIMENSION thk_flags      1 3 1
+DIMENSION offsets        1 2 1
 
 #DESPMTR   cur1           "0.000; 0.000; 0.000; 0.000;"
 #DESPMTR   cur2           "0.000; 0.000; 0.000; 0.000;"
@@ -59,7 +60,8 @@ DESPMTR   span_chord     "-0.100; -0.100; -0.100; -0.100; -0.100;"
 #DESPMTR   exact_thk3     "0.017; 0.015; 0.010; 0.008; 0.006;"
 #DESPMTR   exact_lethk    "21.00; 19.00; 15.00; 10.00; 5.000;"
 #DESPMTR   exact_tethk    "10.00; 9.000; 8.000; 6.000; 3.000;"
-#DESPMTR   thk_flags      "1;     2;     1;"
+DESPMTR   thk_flags      "1;     2;     1;"
+DESPMTR   offsets        "0.020; 0.000;"
 
 UDPARG    tblade    ncp             33
 #UDPARG    tblade    cur1            cur1
@@ -90,7 +92,8 @@ UDPARG    tblade    span_chord      span_chord
 #UDPARG    tblade    exact_thk3      exact_thk3
 #UDPARG    tblade    exact_lethk     exact_lethk
 #UDPARG    tblade    exact_tethk     exact_tethk
-#UDPARG    tblade    thk_flags       thk_flags
+UDPARG    tblade    thk_flags       thk_flags
+UDPARG    tblade    offsets         offsets
 UDPRIM    tblade    filename        $$/3dbgbinput.2.dat \
                     auxname         $$/spancontrolinputs.2.dat
 

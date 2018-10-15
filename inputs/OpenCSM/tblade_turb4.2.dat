@@ -20,6 +20,8 @@
            1
  Non-dimensional Actual chord (0=no,1=yes,2=spline):
            0
+ True lean and sweep (0=no,1=yes):
+           0
  Sectionwise properties:
  J        in_Beta          out_Beta          mrel_in           chord           t/c_max         Incidence        Deviation      Sec. Flow Angle
  1      31.52062563     -59.91192880       0.33900000       0.16387267       0.13000000       0.00000000       -4.100000000       0.00000000
@@ -55,18 +57,18 @@
  Stacking axis location (200=centroid):
        25000
 
- Control points for delta_m:
+ Control points for sweep:
            5
-        span                   delta_m
+        span                   sweep
    0.0000000000000000        0.0000000000000000     
   0.25000000000000000        0.0000000000000000     
   0.50000000000000000        0.0000000000000000     
   0.75000000000000000        0.0000000000000000     
    1.0000000000000000        0.0000000000000000     
 
- Control points for delta_theta:
+ Control points for lean:
            5
-        span                    delta_theta
+        span                    lean
    0.0000000000000000        0.0000000000000000     
   0.25000000000000000        0.0000000000000000     
   0.50000000000000000        0.0000000000000000     
