@@ -18,7 +18,7 @@ character(len=1) :: trueleansweep
 integer f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11
 integer i,js,k,p,nsec,switch,ia,na,jk,stack,current, narg
 integer nrow,nspn,nx,nax,n,nsl,nspan,nsp_hub,nsp_tip
-integer nwork,lenc,nd,np,ndep,radial,chord_switch,stack_switch
+integer nwork,lenc,nd,np,ndep,radial,chord_switch,stack_switch,leansweep_switch
 integer beta_switch,curv,thick,LE,thick_distr, wing_flag, control_inp_flag
 integer cpbsv,bsv1,bsv2,bf1(100),bf2(100)
 integer amount_data,n_normal_distance,chrdsweep,chrdlean
