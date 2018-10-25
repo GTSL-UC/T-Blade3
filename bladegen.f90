@@ -247,17 +247,21 @@ ueq = 0; xmean = 0; ymean = 0
 ! Generate spacing array or clustering for the airfoil coordinates ----------------
 !*******************************************************************************************
 ! This increases the points in leading and trailing edges...Clustering
-u(1) = 0.0
-ueq(1) = 0.0 ! uniform clustering
-do i = 2, np
-	ui = real(i-1)/real(np) ! Marshall 8/19/13
-	du = (sin(pi*ui))**5.5
-	u(i) = u(i-1) + du 
-	!! uniform clustering
-	dueq = ui 
-	ueq(i) = ueq(i-1) + dueq ! Kiran 12/27/13
-enddo
-u = u/u(np) ! Non dimensionalizing
+!call exponential_clustering(np,u)
+!call sine_clustering(np,u)
+!u = u/u(np)
+call hyperbolic_tan_clustering(np,u)
+!u(1) = 0.0
+!ueq(1) = 0.0 ! uniform clustering
+!do i = 2, np
+!	ui = real(i-1)/real(np) ! Marshall 8/19/13
+!	du = (sin(pi*ui))**5.5
+!	u(i) = u(i-1) + du 
+!	!! uniform clustering
+!	dueq = ui 
+!	ueq(i) = ueq(i-1) + dueq ! Kiran 12/27/13
+!enddo
+!u = u/u(np) ! Non dimensionalizing
 ! do i = 2, np
 ! ui = du*(i-2)
 ! dsi = dsmn + (dsmx-dsmn)*sin(pi*ui)**2.0 

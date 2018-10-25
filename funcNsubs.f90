@@ -1539,6 +1539,165 @@ end subroutine constantslopemeanline3D
 
 
 
+!
+! Subroutine for a sine function based clustering of u before starting blade generation
+!
+!*******************************************************************************************
+subroutine sine_clustering(np,u)
+    implicit none
+
+    integer,                    intent(in)          :: np 
+    real(kind = 8),             intent(inout)       :: u(*)
+    integer                                         :: i
+    real(kind = 8)                                  :: ui, du, pi
+
+    ! First element of u is set to zero
+    u(1)            = 0.0
+    pi              = real(4.0*atan(1.0),8)
+    
+    ! Cluster u    
+    do i = 2,np
+        
+        ui          = real(i - 1)/real(np)
+        du          = (sin(pi*ui))**5.5
+        u(i)        = u(i - 1) + du
+
+    end do
+
+
+end subroutine sine_clustering
+!*******************************************************************************************
+
+
+
+!
+! Subroutine for exponential clustering of u before starting blade generation 
+!
+!*******************************************************************************************
+subroutine exponential_clustering(np,u)
+    implicit none
+
+    integer,                    intent(in)          :: np
+    real(kind = 8),             intent(inout)       :: u(*)
+    integer                                         :: np1, i, j
+    real(kind = 8), allocatable                     :: xi(:), u_temp(:)
+
+    ! np1 is the size of the stretched arrays from 0.0 to 0.5 and 0.5 to 1.0
+    np1                 = (np + 1)/2
+
+    !
+    ! Generate stretching coordinate xi with a uniform distribution from
+    ! xi = 0.0 to xi = 1.0
+    !
+    if (allocated(xi)) deallocate(xi)
+    allocate(xi(np1))
+
+    do i = 1,np1
+        xi(i)           = real(i - 1,8)/real(np1 - 1,8)
+    end do
+
+    !
+    ! Generate temporary cluster from u = 0.0 to u = 0.5
+    ! This cluster will be reversed and used to generate cluster from u = 0.5 to u = 1.0
+    !
+    if (allocated(u_temp)) deallocate(u_temp)
+    allocate(u_temp(np1))
+
+    do i = 1,np1
+        u_temp(i)       = (exp(10.0*xi(i)) - 1.0)/(exp(10.0) - 1.0)
+        u_temp(i)       = 0.5*u_temp(i)
+    end do
+
+    !
+    ! Populate u from u = 0.0 to u = 1.0
+    !
+    do i = 1,np1
+        u(i)            = u_temp(i)
+    end do
+    do i = 1,np1 - 1
+        j               = np1 + i
+        u(j)            = 1.0 - u_temp(np1 - i)
+    end do
+
+
+end subroutine exponential_clustering
+!*******************************************************************************************
+
+
+
+!
+! Subroutine for hyperbolic tangent clustering of u before starting blade generation
+!
+!*******************************************************************************************
+subroutine hyperbolic_tan_clustering(np,u)
+    implicit none
+
+    integer,                    intent(in)          :: np
+    real(kind = 8),             intent(inout)       :: u(*)
+    integer                                         :: np1, i, j
+    real(kind = 8), allocatable                     :: xi(:), u_temp(:), temp(:)
+
+    ! np1 is the size of the stretched arrays from 0.0 to 0.5 and 0.5 to 1.0
+    np1                 = (np + 1)/2
+
+    !
+    ! Generate stretching coordinate xi with a uniform distribution from
+    ! xi = 0.0 to xi = 1.0
+    !
+    if (allocated(xi)) deallocate(xi)
+    allocate(xi(np1))
+
+    do i = 1,np1
+        xi(i)           = real(i - 1,8)/real(np - 1,8)
+    end do
+
+    !
+    ! Generate temporary cluster from u = 0.0 to u = 0.5
+    ! This cluster will be reversed and used to generate cluster from u = 0.5 to u = 1.0
+    !
+    if (allocated(u_temp)) deallocate(u_temp)
+    allocate(u_temp(np1))
+    if (allocated(temp)) deallocate(temp)
+    allocate(temp(np1))
+
+    do i = 1,np1
+
+        temp(i)         = 1.0 + (tanh(0.5*10.0*xi(i))/tanh(0.5*10.0))
+        temp(i)         = 0.5*temp(i)
+
+    end do
+
+    ! Generate cluster from u = 0.0 to u = 0.5
+    do i = 1,np1
+        u_temp(i)       = 1.0 - temp(np1 + 1 - i)
+    end do
+
+    !
+    ! Populate u from u = 0.0 to u = 1.0
+    !
+    do i = 1,np1
+        u(i)            = u_temp(i)
+    end do
+    do i = 1,np1 - 1
+        j               = np1 + i
+        u(j)            = 1.0 - u_temp(np1 - i)
+    end do
+
+
+end subroutine hyperbolic_tan_clustering
+!*******************************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
