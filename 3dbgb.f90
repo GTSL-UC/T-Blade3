@@ -1201,9 +1201,9 @@ do js = 1, nspn
    !----------------------------------------------------------------------
    call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js), &
                 stgr,stack,chord_switch,stak_u,stak_v,xb_stk,yb_stk,stack_switch, &
-		        nsl,nbls,curv,thick,LE,np,ncp_curv,ncp_thk,curv_cp,thk_cp, wing_flag, &
-                lethk_all,tethk_all,s_all,ee_all,thick_distr,thick_distr_3_flag,umxthk_all, &
-		        C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all, &
+		        clustering_switch, clustering_parameter, nsl,nbls,curv,thick,LE,np,ncp_curv,ncp_thk, &
+                curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,ee_all,thick_distr,thick_distr_3_flag, &
+                umxthk_all, C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all, &
 		        LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments, &
 		        sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
                 n_normal_distance,casename,develop,isdev,mble,mbte,mles,mtes,i_slope,jcellblade_all, &

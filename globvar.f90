@@ -18,7 +18,7 @@ character(len=1) :: trueleansweep
 integer f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11
 integer i,js,k,p,nsec,switch,ia,na,jk,stack,current, narg
 integer nrow,nspn,nx,nax,n,nsl,nspan,nsp_hub,nsp_tip
-integer nwork,lenc,nd,np,ndep,radial,chord_switch,stack_switch,leansweep_switch
+integer nwork,lenc,nd,np,ndep,radial,chord_switch,stack_switch,leansweep_switch,clustering_switch
 integer beta_switch,curv,thick,LE,thick_distr, wing_flag, control_inp_flag
 integer cpbsv,bsv1,bsv2,bf1(100),bf2(100)
 integer amount_data,n_normal_distance,chrdsweep,chrdlean
@@ -55,7 +55,7 @@ real*8, allocatable, dimension(:) :: LE_vertex_ang_all,LE_vertex_dis_all
 real*8, allocatable, dimension(:,:) :: intersec_coord
 real*8, allocatable, dimension(:) :: throat_3D,mouth_3D,exit_3D
 real*8, allocatable, dimension(:) :: hub_slope, le_angle_cp, le_angle_all, te_angle_cp, te_angle_all
-
+real*8 :: clustering_parameter
 real*8  le_throat,te_throat
 real*8 pi,dtor,xcg(nspan),ycg(nspan),chrd(nspan), xcen, ycen, xb_stk, yb_stk, xb_stack(nspan), yb_stack(nspan)
 !

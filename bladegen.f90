@@ -1,9 +1,9 @@
 !*************************************************************************************************
 subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, &
                     stagger,stack,chord_switch,stk_u,stk_v,xb_stk,yb_stk,stack_switch, &
-                    nsl,nbls,curv_camber,thick,LE,np, ncp_curv,ncp_thk,curv_cp,thk_cp, wing_flag, &
-                    lethk_all,tethk_all,s_all,ee_all,thick_distr,thick_distr_3_flag,umxthk_all,&
-	                C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all,&
+                    clustering_switch, clustering_parameter,nsl,nbls,curv_camber,thick,LE,np, ncp_curv,ncp_thk, &
+                    curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,ee_all,thick_distr,thick_distr_3_flag, &
+                    umxthk_all,C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all,&
 	                LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments,&
 	                sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
                     n_normal_distance,casename,develop,isdev,mble,mbte,msle,mste,i_slope,jcellblade_all, &
@@ -78,7 +78,7 @@ implicit none
 
 integer np, np_side, i, j, l, k, js, naca, chord_switch, istack, thick_distr, nxx
 integer nx, nax, nrow, nspn, nspan, npoints, nsl, nbls, ncp, le_pos, wing_flag
-integer const_stk_u, const_stk_v, stack, stack_switch, te_flag, le_opt_flag, te_opt_flag
+integer const_stk_u, const_stk_v, stack, stack_switch, clustering_switch, te_flag, le_opt_flag, te_opt_flag
 integer curv_camber, thick, LE, LEdegree, n_normal_distance
 integer TE_del, ii, ngrid, amount_data
 integer ncp_curv(nsl), ncp_thk(nsl), i_le, i_te, oo, nb, no_LE_segments
@@ -89,7 +89,7 @@ parameter(interval = 6, pt2 = 1, TE_del = 0) 	! parameter to choose the position
 ! interval is the number of intervals for the LE spline values refinement process
 real*8 bladedata(amount_data, nsl)
 real sec_radius(nsl, 2)
-
+real*8 :: clustering_parameter
 real :: sinl, sext, tempr, chrdx, chrd, stagger, pitch, radius_pitch
 !real xtop(nb), ytop(nb), xbot(nb), ybot(nb), u(nb)
 !real, intent(out) :: xb(nx), yb(nx)
@@ -247,10 +247,24 @@ ueq = 0; xmean = 0; ymean = 0
 ! Generate spacing array or clustering for the airfoil coordinates ----------------
 !*******************************************************************************************
 ! This increases the points in leading and trailing edges...Clustering
-!call exponential_clustering(np,u)
-!call sine_clustering(np,u)
-!u = u/u(np)
-call hyperbolic_tan_clustering(np,u)
+if (clustering_switch .eq. 0) then
+    call uniform_clustering(np,u)
+    print *, 'From bladegen - uniform clustering'
+else if (clustering_switch .eq. 1) then
+    call sine_clustering(np,u)
+    u = u/u(np)
+    print *, 'From bladegen - sine clustering'
+    print *, 'from bladegen - ', clustering_parameter
+else if (clustering_switch .eq. 2) then
+    call exponential_clustering(np,u)
+    print *, 'From bladegen - exponential clustering'
+else if (clustering_switch .eq. 3) then
+    call hyperbolic_tan_clustering(np,u)
+    print *, 'From bladegen - hyperbolic clustering'
+else
+    print *, 'Invalid argument for clustering switch: Quitting!!'
+    stop
+end if
 !u(1) = 0.0
 !ueq(1) = 0.0 ! uniform clustering
 !do i = 2, np

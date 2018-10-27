@@ -1540,14 +1540,35 @@ end subroutine constantslopemeanline3D
 
 
 !
+! Subroutine for a uniform ckustering of u before starting blade generation
+!
+!*******************************************************************************************
+subroutine uniform_clustering(np,u)
+    implicit none
+
+    integer,                    intent(in)          :: np
+    real(kind = 8),             intent(inout)       :: u(*)
+    integer                                         :: i
+
+    ! Uniform clustering of u from u = 0.0 to u = 1.0
+    do i = 1,np
+        u(i)        = real(i - 1,8)/real(np - 1,8)
+    end do
+
+end subroutine uniform_clustering
+!*******************************************************************************************
+
+
+!
 ! Subroutine for a sine function based clustering of u before starting blade generation
 !
 !*******************************************************************************************
-subroutine sine_clustering(np,u)
+subroutine sine_clustering(np,u,clustering_parameter)
     implicit none
 
     integer,                    intent(in)          :: np 
     real(kind = 8),             intent(inout)       :: u(*)
+    real(kind = 8),             intent(inout)       :: clustering_parameter
     integer                                         :: i
     real(kind = 8)                                  :: ui, du, pi
 
@@ -1559,7 +1580,7 @@ subroutine sine_clustering(np,u)
     do i = 2,np
         
         ui          = real(i - 1)/real(np)
-        du          = (sin(pi*ui))**5.5
+        du          = (sin(pi*ui))**clustering_parameter
         u(i)        = u(i - 1) + du
 
     end do
@@ -1574,11 +1595,12 @@ end subroutine sine_clustering
 ! Subroutine for exponential clustering of u before starting blade generation 
 !
 !*******************************************************************************************
-subroutine exponential_clustering(np,u)
+subroutine exponential_clustering(np,u,clustering_parameter)
     implicit none
 
     integer,                    intent(in)          :: np
     real(kind = 8),             intent(inout)       :: u(*)
+    real(kind = 8),             intent(inout)       :: clustering_parameter
     integer                                         :: np1, i, j
     real(kind = 8), allocatable                     :: xi(:), u_temp(:)
 
@@ -1604,7 +1626,7 @@ subroutine exponential_clustering(np,u)
     allocate(u_temp(np1))
 
     do i = 1,np1
-        u_temp(i)       = (exp(10.0*xi(i)) - 1.0)/(exp(10.0) - 1.0)
+        u_temp(i)       = (exp(clustering_parameter*xi(i)) - 1.0)/(exp(clustering_parameter) - 1.0)
         u_temp(i)       = 0.5*u_temp(i)
     end do
 
@@ -1629,11 +1651,12 @@ end subroutine exponential_clustering
 ! Subroutine for hyperbolic tangent clustering of u before starting blade generation
 !
 !*******************************************************************************************
-subroutine hyperbolic_tan_clustering(np,u)
+subroutine hyperbolic_tan_clustering(np,u,clustering_parameter)
     implicit none
 
     integer,                    intent(in)          :: np
     real(kind = 8),             intent(inout)       :: u(*)
+    real(kind = 8),             intent(inout)       :: clustering_parameter
     integer                                         :: np1, i, j
     real(kind = 8), allocatable                     :: xi(:), u_temp(:), temp(:)
 
@@ -1648,7 +1671,7 @@ subroutine hyperbolic_tan_clustering(np,u)
     allocate(xi(np1))
 
     do i = 1,np1
-        xi(i)           = real(i - 1,8)/real(np - 1,8)
+        xi(i)           = real(i - 1,8)/real(np1 - 1,8)
     end do
 
     !
@@ -1662,7 +1685,7 @@ subroutine hyperbolic_tan_clustering(np,u)
 
     do i = 1,np1
 
-        temp(i)         = 1.0 + (tanh(0.5*10.0*xi(i))/tanh(0.5*10.0))
+        temp(i)         = 1.0 + (tanh(0.5*clustering_parameter*xi(i))/tanh(0.5*clustering_parameter))
         temp(i)         = 0.5*temp(i)
 
     end do
