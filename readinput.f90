@@ -167,11 +167,6 @@ else
 end if
 read(1, *)temp
 read(1, *)clustering_switch, clustering_parameter
-print *, ''
-print *, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-print *, 'From readinput - ', clustering_switch, clustering_parameter
-print *, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-print *, ''
 read(1, *)temp
 read(1, *)temp
 !

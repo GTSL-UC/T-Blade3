@@ -22,6 +22,8 @@ F
            0
  True lean and sweep (0=no,1=yes):
            1
+ Clustering control (0=uniform,1=sine,2=exponential,3=hyperbolic):
+           1  2.0
  Sectionwise properties:
  J        in_Beta        out_Beta          mrel_in           chord           t/c_max         Incidence       Deviation      Sec. Flow Angle
  1     -54.47338791     -28.21655510       0.79255895       0.08038719       0.07972391       0.00000000       0.00000000       0.00000000
