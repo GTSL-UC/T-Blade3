@@ -249,18 +249,13 @@ ueq = 0; xmean = 0; ymean = 0
 ! This increases the points in leading and trailing edges...Clustering
 if (clustering_switch .eq. 0) then
     call uniform_clustering(np,u)
-    print *, 'From bladegen - uniform clustering'
 else if (clustering_switch .eq. 1) then
     call sine_clustering(np,u)
     u = u/u(np)
-    print *, 'From bladegen - sine clustering'
-    print *, 'from bladegen - ', clustering_parameter
 else if (clustering_switch .eq. 2) then
     call exponential_clustering(np,u)
-    print *, 'From bladegen - exponential clustering'
 else if (clustering_switch .eq. 3) then
     call hyperbolic_tan_clustering(np,u)
-    print *, 'From bladegen - hyperbolic clustering'
 else
     print *, 'Invalid argument for clustering switch: Quitting!!'
     stop
