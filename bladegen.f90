@@ -250,12 +250,12 @@ ueq = 0; xmean = 0; ymean = 0
 if (clustering_switch .eq. 0) then
     call uniform_clustering(np,u)
 else if (clustering_switch .eq. 1) then
-    call sine_clustering(np,u)
+    call sine_clustering(np,u,clustering_parameter)
     u = u/u(np)
 else if (clustering_switch .eq. 2) then
-    call exponential_clustering(np,u)
+    call exponential_clustering(np,u,clustering_parameter)
 else if (clustering_switch .eq. 3) then
-    call hyperbolic_tan_clustering(np,u)
+    call hyperbolic_tan_clustering(np,u,clustering_parameter)
 else
     print *, 'Invalid argument for clustering switch: Quitting!!'
     stop
