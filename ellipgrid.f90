@@ -1406,8 +1406,8 @@ integer i
 real*8, dimension(n), intent(in):: X,Y
 
 open(1,file=fname,status='unknown')
-write(1,*)'skip'
-write(1,*)'skip'
+!write(1,*)'skip'
+!write(1,*)'skip'
 do i = 1, n
    write(1,*)X(i),Y(i)
 enddo
