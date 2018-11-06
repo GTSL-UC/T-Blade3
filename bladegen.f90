@@ -247,6 +247,7 @@ ueq = 0; xmean = 0; ymean = 0
 ! Generate spacing array or clustering for the airfoil coordinates ----------------
 !*******************************************************************************************
 ! This increases the points in leading and trailing edges...Clustering
+! Subroutine definition found in funcNsubs.f90
 if (clustering_switch .eq. 0) then
     call uniform_clustering(np,u)
 else if (clustering_switch .eq. 1) then
