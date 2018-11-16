@@ -1712,6 +1712,234 @@ end subroutine hyperbolic_tan_clustering
 
 
 
+!
+! Add ellipical LE and TE
+!
+!*******************************************************************************************
+subroutine add_elliptical_clustering(np,ncp,u,camber,xtop,ytop,xbot,ybot,xcp_thk,ycp_thk,xtop_new,ytop_new, &
+                                     xbot_new,ybot_new)
+    implicit none
+
+    integer,                intent(in)          :: np, ncp
+    real,                   intent(in)          :: u(np), camber(np), xtop(np), ytop(np), &
+                                                   xbot(np), ybot(np)
+    real,                   intent(in)          :: xcp_thk(ncp), ycp_thk(ncp)
+    real,                   intent(inout)       :: xtop_new(np), ytop_new(np), xbot_new(np), ybot_new(np)
+
+    ! Local variables
+    integer                                     :: i, j, i_LE(1), i_TE(1), n_temp, np1, np2, np3
+    real                                        :: x_1_LE, y_1_LE, x_2_LE, y_2_LE, x_3_LE, y_3_LE, &
+                                                   x_center_LE, y_center_LE, a_LE, b_LE, rot_angle_LE, &
+                                                   x_1_TE, y_1_TE, x_2_TE, y_2_TE, x_3_TE, y_3_TE, &
+                                                   x_center_TE, y_center_TE, a_TE, b_TE, rot_angle_TE, x0_TE, y0_TE
+    real,   parameter                           :: pi = 4.0*atan(1.0)
+    real,   allocatable                         :: t_LE(:), x_ellip_LE(:), y_ellip_LE(:), &
+                                                   t_TE(:), x_ellip_TE(:), y_ellip_TE(:), &
+                                                   x_top_LE(:), y_top_LE(:), x_bot_LE(:), &
+                                                   y_bot_LE(:), x_top_TE(:), y_top_TE(:), &
+                                                   x_bot_TE(:), y_bot_TE(:)
+
+    ! 
+    ! Define the end of the LE and the start of TE with respect to 
+    ! thickness points in the exact thickness table
+    !
+    i_LE                    = minloc(abs(u - xcp_thk(1)))
+    i_TE                    = minloc(abs(u - xcp_thk(ncp)))
+
+    !
+    ! Define ellipse end points and center for the LE
+    !
+    ! 1 - top endpoint of the minor axis of the LE ellipse (y = +b)
+    ! 2 - bottom endpoint of the minor axis of the LE ellipse (y = -b)
+    ! 3 - left endpoint of the major axis of the LE ellipse (x = -a)
+    ! center - center of the LE ellipse
+    x_1_LE                  = xtop(i_LE(1))
+    y_1_LE                  = ytop(i_LE(1))
+    x_2_LE                  = xbot(i_LE(1))
+    y_2_LE                  = ybot(i_LE(1))
+    x_3_LE                  = u(1)
+    y_3_LE                  = camber(1)
+    x_center_LE             = u(i_LE(1))
+    y_center_LE             = camber(i_LE(1))
+
+    ! Major and minor axis of the LE ellipse
+    a_LE                    = sqrt((x_3_LE - x_center_LE)**2 + (y_3_LE - y_center_LE)**2)
+    b_LE                    = sqrt((x_1_LE - x_center_LE)**2 + (y_1_LE - y_center_LE)**2)
+
+    ! Angle of rotation for the LE ellipse
+    rot_angle_LE            = atan((y_3_LE - y_center_LE)/(x_3_LE - x_center_LE))
+
+    ! Define parameter space for the LE ellipse
+    if (allocated(t_LE)) deallocate(t_LE)
+    allocate(t_LE((2*i_LE(1)) - 1))
+    do i = 1,size(t_LE)
+
+        t_LE(i)             =  (pi*(real(i - 1)/real(size(t_LE) - 1))) + (0.5*pi)
+
+    end do
+
+    ! Generate LE ellipse
+    if (allocated(x_ellip_LE) .and. allocated(y_ellip_LE)) deallocate(x_ellip_LE,y_ellip_LE)
+    allocate(x_ellip_LE((2*i_LE(1)) - 1),y_ellip_LE((2*i_LE(1)) - 1))
+    do i = 1,size(t_LE)
+
+        x_ellip_LE(i)       = (a_LE*(1.0 + cos(t_LE(i)))*cos(rot_angle_LE)) - (b_LE*sin(t_LE(i))*sin(rot_angle_LE))
+        y_ellip_LE(i)       = (a_LE*(1.0 + cos(t_LE(i)))*sin(rot_angle_LE)) + (b_LE*sin(t_LE(i))*cos(rot_angle_LE))
+
+    end do
+
+    !
+    ! Ensure matching of ellipse endpoints with the generated ellipse
+    ! Floating point operations cause slight difference in endpoints
+    !
+    x_ellip_LE(1)           = x_1_LE;   y_ellip_LE(1)           = y_1_LE
+    x_ellip_LE(i_LE(1))     = x_3_LE;   y_ellip_LE(i_LE(1))     = y_3_LE    
+    x_ellip_LE(size(t_LE))  = x_2_LE;   y_ellip_LE(size(t_LE))  = y_2_LE
+
+    !
+    ! Define ellipse endpoints and center for the TE
+    !
+    ! 1 - top endpoint of the minor axis of the TE ellipse (y = +b)
+    ! 2 - bottom endpoint of the minor axis of the TE ellipse (y = -b)
+    ! 3 - right endpoint of the major axis of the TE ellipse (x = +a)
+    ! center - center of the TE ellipse
+    !
+    x_1_TE                  = xtop(i_TE(1))
+    y_1_TE                  = ytop(i_TE(1))
+    x_2_TE                  = xbot(i_TE(1))
+    y_2_TE                  = ybot(i_TE(1))
+    x_3_TE                  = u(np)
+    y_3_TE                  = camber(np)
+    x_center_TE             = u(i_TE(1))
+    y_center_TE             = camber(i_TE(1))
+
+    ! Major and minor axis of the TE ellipse
+    a_TE                    = sqrt((x_3_TE - x_center_TE)**2 + (y_3_TE - y_center_TE)**2)
+    b_TE                    = sqrt((x_1_TE - x_center_TE)**2 + (y_1_TE - y_center_TE)**2)
+
+    ! Angle of rotation for the TE ellipse
+    rot_angle_TE            = atan((y_3_TE - y_center_TE)/(x_3_TE - x_center_TE))
+
+    ! Find center of the counter-rotated ellipse
+    x0_TE                   = (x_center_TE*cos(-rot_angle_TE)) - (y_center_TE*sin(-rot_angle_TE))
+    y0_TE                   = (x_center_TE*sin(-rot_angle_TE)) + (y_center_TE*cos(-rot_angle_TE))
+
+    ! Define parameter space for the TE ellipse
+    n_temp                  = size(u(i_TE(1):))
+    if (allocated(t_TE)) deallocate(t_TE)
+    allocate(t_TE((2*n_temp) - 1))
+    do i = 1,size(t_TE)
+
+        t_TE(i)             = (pi*(real(size(t_TE) - 1 - i + 1)/real(size(t_TE) - 1))) - 0.5*pi
+        
+    end do
+
+    ! Generate TE ellipse
+    if (allocated(x_ellip_TE) .and. allocated(y_ellip_TE)) deallocate(x_ellip_TE,y_ellip_TE)
+    allocate(x_ellip_TE(size(t_TE)),y_ellip_TE(size(t_TE)))
+    do i = 1,size(t_TE)
+
+        x_ellip_TE(i)       = ((x0_TE + (a_TE*cos(t_TE(i))))*cos(rot_angle_TE)) - ((y0_TE + (b_TE*sin(t_TE(i))))*sin(rot_angle_TE))
+        y_ellip_TE(i)       = ((x0_TE + (a_TE*cos(t_TE(i))))*sin(rot_angle_TE)) + ((y0_TE + (b_TE*sin(t_TE(i))))*cos(rot_angle_TE))
+
+    end do
+
+    !
+    ! Ensure matching of ellipse endpoints with the generated ellipse
+    ! Floating point operations cause slight difference in endpoints
+    !
+    x_ellip_TE(1)           = x_1_TE;   y_ellip_TE(1)           = y_1_TE
+    x_ellip_TE(n_temp)      = x_3_TE;   y_ellip_TE(n_temp)      = y_3_TE
+    x_ellip_TE(size(t_TE))  = x_2_TE;   y_ellip_TE(size(t_TE))  = y_2_TE
+
+    !
+    ! Split the LE ellipse into top and bottom parts
+    !
+    n_temp                  = (size(t_LE) + 1)/2
+    if (allocated(x_top_LE) .and. allocated(y_top_LE)) deallocate(x_top_LE,y_top_LE)
+    allocate(x_top_LE(n_temp),y_top_LE(n_temp))
+    if (allocated(x_bot_LE) .and. allocated(y_bot_LE)) deallocate(x_bot_LE,y_bot_LE)
+    allocate(x_bot_LE(n_temp),y_bot_LE(n_temp))
+
+    x_top_LE                = x_ellip_LE(n_temp:1:-1)
+    y_top_LE                = y_ellip_LE(n_temp:1:-1)
+    x_bot_LE                = x_ellip_LE(n_temp:)
+    y_bot_LE                = y_ellip_LE(n_temp:)
+
+    !
+    ! Split the TE ellipse into top and bottom parts
+    !
+    n_temp                  = (size(t_TE) + 1)/2
+    if (allocated(x_top_TE) .and. allocated(y_top_TE)) deallocate(x_top_TE,y_top_TE)
+    allocate(x_top_TE(n_temp),y_top_TE(n_temp))
+    if (allocated(x_bot_TE) .and. allocated(y_bot_TE)) deallocate(x_bot_TE,y_bot_TE)
+    allocate(x_bot_TE(n_temp),y_bot_TE(n_temp))
+
+    x_top_TE                = x_ellip_TE(1:n_temp)
+    y_top_TE                = y_ellip_TE(1:n_temp)
+    x_bot_TE                = x_ellip_TE(size(t_TE):n_temp:-1)
+    y_bot_TE                = y_ellip_TE(size(t_TE):n_temp:-1)
+
+    !
+    ! Generate new top curve by concatenating the LE ellipse, TE ellipse
+    ! and remaining part of the existing top curve
+    !
+    np1                     = size(x_top_LE)
+    np2                     = size(xtop(i_LE(1) + 1:i_TE(1) - 1))
+    np3                     = size(x_top_TE)
+    
+    do i = 1,np1
+
+        xtop_new(i)         = x_top_LE(i)
+        ytop_new(i)         = y_top_LE(i)
+
+    end do
+    do i = 1,np2
+
+        xtop_new(np1 + i)   = xtop(np1 + i)
+        ytop_new(np1 + i)   = ytop(np1 + i)
+
+    end do
+    do i = 1,np3
+
+        xtop_new(np1+np2+i) = x_top_TE(i)
+        ytop_new(np1+np2+i) = y_top_TE(i)
+
+    end do
+
+    !
+    ! Generate new bottom curve by concatenating the LE ellipse, TE ellipse
+    ! and remaining part of the existing bottom curve
+    !
+    np1                     = size(x_bot_LE)
+    np2                     = size(xbot(i_LE(1) + 1:i_TE(1) - 1))
+    np3                     = size(x_bot_TE)
+
+    do i = 1,np1
+
+        xbot_new(i)         = x_bot_LE(i)
+        ybot_new(i)         = y_bot_LE(i)
+
+    end do
+    do i = 1,np2
+
+        xbot_new(np1 + i)   = xbot(np1 + i)
+        ybot_new(np1 + i)   = ybot(np1 + i)
+
+    end do
+    do i = 1,np3
+
+        xbot_new(np1+np2+i) = x_bot_TE(i)
+        ybot_new(np1+np2+i) = y_bot_TE(i)
+
+    end do
+
+
+end subroutine add_elliptical_clustering
+!*******************************************************************************************
+
+
+
 
 
 

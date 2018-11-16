@@ -94,7 +94,7 @@ real :: sinl, sext, tempr, chrdx, chrd, stagger, pitch, radius_pitch
 !real xtop(nb), ytop(nb), xbot(nb), ybot(nb), u(nb)
 !real, intent(out) :: xb(nx), yb(nx)
 !real splthick(nb), thickness(nb), angle(nb), camber(nb), slope(nb)
-real, allocatable, dimension(:) :: xtop, ytop, xbot, ybot, u, xb, yb
+real, allocatable, dimension(:) :: xtop, ytop, xbot, ybot, u, xb, yb, xtop_new, ytop_new, xbot_new, ybot_new
 real, allocatable, dimension(:) :: splthick, thickness, angle, camber, slope
 real umin, umax, scaling, deltau, theta_offset
 real vtop_stack, vbot_stack, xb_stk, yb_stk
@@ -202,6 +202,10 @@ if (allocated(xtop      )) deallocate(xtop      )
 if (allocated(ytop      )) deallocate(ytop      )
 if (allocated(xbot      )) deallocate(xbot      )
 if (allocated(ybot      )) deallocate(ybot      )
+if (allocated(xtop_new  )) deallocate(xtop_new  )
+if (allocated(ytop_new  )) deallocate(ytop_new  )
+if (allocated(xbot_new  )) deallocate(xbot_new  )
+if (allocated(ybot_new  )) deallocate(ybot_new  )
 if (allocated(u         )) deallocate(u         )
 if (allocated(splthick  )) deallocate(splthick  )
 if (allocated(thickness )) deallocate(thickness )
@@ -220,6 +224,10 @@ Allocate(xtop(np))
 Allocate(ytop(np))
 Allocate(xbot(np))
 Allocate(ybot(np))
+Allocate(xtop_new(np))
+Allocate(ytop_new(np))
+Allocate(xbot_new(np))
+Allocate(ybot_new(np))
 Allocate(u(np))
 Allocate(splthick(np))
 Allocate(thickness(np))
@@ -236,6 +244,7 @@ Allocate(ymean(np_side))
 !
 u = 0; splthick = 0; thickness = 0;angle = 0;camber = 0; slope = 0; xb = 0; yb = 0
 xtop = 0; ytop = 0; xbot = 0; ybot = 0; splinedata = 0
+xtop_new = 0; ytop_new = 0; xbot_new = 0; ybot_new = 0
 !
 ueq = 0; xmean = 0; ymean = 0
 !
@@ -686,6 +695,9 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
 	xtop = u   - thickness*sin(angle)
 	ytop = camber + thickness*cos(angle)
 
+    call add_elliptical_clustering(np,ncp,u,camber,xtop,ytop,xbot,ybot,xcp_thk,ycp_thk,xtop_new,ytop_new, &
+                                   xbot_new,ybot_new)
+
 	!
 	!deltau = abs(u(np) - u(1))*abs(cos(angle))
 	!
@@ -694,10 +706,20 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
 	! -----------------------------------------------------------------------------
 	if(isdev)then
 		file7 = 'topcurve.'//trim(fext)
-		call fileWrite1D(file7, xtop, ytop, np)
+        open(7, file = file7, status = 'unknown', action = 'write')
+        do i = 1,np
+            write(7,*) xtop(i), ytop(i), xtop_new(i), ytop_new(i)
+        end do
+        close(7)
+		!call fileWrite1D(file7, xtop, ytop, np)
 		!
 		file7 = 'botcurve.'//trim(fext)
-		call fileWrite1D(file7, xbot, ybot, np)
+        open(7, file = file7, status = 'unknown', action = 'write')
+        do i = 1,np
+            write(7,*) xbot(i), ybot(i), xbot_new(i), ybot_new(i)
+        end do
+        close(7)
+		!call fileWrite1D(file7, xbot, ybot, np)
 
 	endif
 	! -----------------------------------------------------------------------------
