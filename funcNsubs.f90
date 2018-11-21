@@ -1548,12 +1548,20 @@ subroutine uniform_clustering(np,u)
 
     integer,                    intent(in)          :: np
     real(kind = 8),             intent(inout)       :: u(*)
+
+    ! Local variables
     integer                                         :: i
+
+
+    ! Print output to screen
+    print *, 'Using uniform clustering distribution'
+    print *, ''
 
     ! Uniform clustering of u from u = 0.0 to u = 1.0
     do i = 1,np
         u(i)        = real(i - 1,8)/real(np - 1,8)
     end do
+
 
 end subroutine uniform_clustering
 !*******************************************************************************************
@@ -1569,8 +1577,15 @@ subroutine sine_clustering(np,u,clustering_parameter)
     integer,                    intent(in)          :: np 
     real(kind = 8),             intent(inout)       :: u(*)
     real(kind = 8),             intent(inout)       :: clustering_parameter
+
+    ! Local variables
     integer                                         :: i
     real(kind = 8)                                  :: ui, du, pi
+
+
+    ! Print output to screen
+    print *, 'Using sine function based clustering distribution'
+    print *, ''
 
     ! First element of u is set to zero
     u(1)            = 0.0
@@ -1601,8 +1616,15 @@ subroutine exponential_clustering(np,u,clustering_parameter)
     integer,                    intent(in)          :: np
     real(kind = 8),             intent(inout)       :: u(*)
     real(kind = 8),             intent(inout)       :: clustering_parameter
+
+    ! Local variables
     integer                                         :: np1, i, j
     real(kind = 8), allocatable                     :: xi(:), u_temp(:)
+
+
+    ! Print output to screen
+    print *, 'Using exponential function based clustering distribution'
+    print *, ''
 
     ! np1 is the size of the stretched arrays from 0.0 to 0.5 and 0.5 to 1.0
     np1                 = (np + 1)/2
@@ -1657,8 +1679,15 @@ subroutine hyperbolic_tan_clustering(np,u,clustering_parameter)
     integer,                    intent(in)          :: np
     real(kind = 8),             intent(inout)       :: u(*)
     real(kind = 8),             intent(inout)       :: clustering_parameter
+
+    ! Local variables
     integer                                         :: np1, i, j
     real(kind = 8), allocatable                     :: xi(:), u_temp(:), temp(:)
+
+
+    ! Print output to screen
+    print *, 'Using hyperbolic tangent function based clustering'
+    print *, ''
 
     ! np1 is the size of the stretched arrays from 0.0 to 0.5 and 0.5 to 1.0
     np1                 = (np + 1)/2

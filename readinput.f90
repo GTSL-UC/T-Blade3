@@ -4,13 +4,13 @@ use globvar
 
 implicit none
 
-character*256 :: fname, temp, temp2, tempr1, fname1, fname2, fname3
-integer :: er
+character*256 :: fname, temp, temp2, tempr1, fname1, fname2, fname3, beta_switch_2
+integer :: er, temp_int, stat, n_temp, n_temp1, n_temp2
 real*8 inBetaInci, outBetaDevn
 real*8, allocatable :: temp_in(:)
 real*8              :: temp_offsets(2)
 real*8, parameter   :: tol = 1E-8
-logical             :: equal
+logical             :: equal, beta_value(5)
 
 if (allocated(x_le          )) deallocate(x_le          )
 if (allocated(x_te          )) deallocate(x_te          )
@@ -120,8 +120,48 @@ read(1, *)nsl
 read(1, *)temp
 spanwise_angle_spline = .False.
 spanwise_inci_dev_spline = .False.
-read(1, *)beta_switch, temp2  ! Input angle switch (0 = BetaZ; 1 = BetaR)
+
+
+read(1, '(A)') beta_switch_2
+beta_value  = [index(beta_switch_2, '0') .ne. 0, index(beta_switch_2, '1') .ne. 0, index(beta_switch_2, '2') .ne. 0, &
+               index(beta_switch_2, '3') .ne. 0, index(beta_switch_2, '4') .ne. 0]
+if (beta_value(1) .and. .not. beta_value(2) .and. .not. beta_value(3) .and. .not. beta_value(4) .and. .not. beta_value(5)) then
+    n_temp1 = index(beta_switch_2, '0')
+    read(beta_switch_2(n_temp1:n_temp1 + 1),*,iostat=stat) beta_switch
+    print *, 'From readinput - CCCCC - ', beta_switch
+elseif (.not. beta_value(1) .and. beta_value(2) .and. .not. beta_value(3) .and. .not. beta_value(4) .and. .not. beta_value(5)) then
+    n_temp1 = index(beta_switch_2, '1')
+    read(beta_switch_2(n_temp1:n_temp1 + 1),*,iostat=stat) beta_switch
+    print *, 'From readinput - DDDDD - ', beta_switch
+elseif (.not. beta_value(1) .and. .not. beta_value(2) .and. beta_value(3) .and. .not. beta_value(4) .and. .not. beta_value(5)) then
+    n_temp1 = index(beta_switch_2, '2')
+    read(beta_switch_2(n_temp1:n_temp1 + 1),*,iostat=stat) beta_switch
+elseif (.not. beta_value(1) .and. .not. beta_value(2) .and. .not. beta_value(3) .and. beta_value(4) .and. .not. beta_value(5)) then
+    n_temp1 = index(beta_switch_2, '3')
+    read(beta_switch_2(n_temp1:n_temp1 + 1),*,iostat=stat) beta_switch
+elseif (.not. beta_value(1) .and. .not. beta_value(2) .and. .not. beta_value(3) .and. .not. beta_value(4) .and. beta_value(5)) then
+    beta_switch = 0
+    wing_flag   = 1
+elseif (.not. beta_value(1) .and. .not. beta_value(2) .and. .not. beta_value(3) .and. .not. beta_value(4) .and. .not. beta_value(5)) then
+    print *, 'FATAL ERROR: Invalid argument for beta_switch'
+    print *, 'Valid arguments are 0, 1, 2, 3 and 4 (refer to T-Blade3 documentation)'
+    stop
+endif
+
+ang_spl_value   = [index(beta_switch_2, 'inletspline') .ne. 0, index(beta_switch_2, 'outletspline') .ne. 0, &
+                   index(beta_switch_2, 'inoutspline') .ne. 0, index(beta_switch_2, 'inci_dev_spline') .ne. 0]
+!print *, index(beta_switch_2, '0')
+!print *, 'From readinput - ', beta_switch_2(13:14)
+!print *, 'From readinput - ', temp_int
+n_temp = index(beta_switch_2, 'inci_dev_spline')
+!print *, 'From readinput - ', len(beta_switch_2(n_temp:n_temp+14))
+!print *, 'From readinput - ', len(beta_switch_2(n_temp:))
+!print *, 'From readinput - ', len(trim(beta_switch_2(n_temp:)))
+!read(1, *)beta_switch, temp2  ! Input angle switch (0 = BetaZ; 1 = BetaR)
+beta_switch = temp_int
+temp2       = trim(beta_switch_2(n_temp:))
 anglespline = temp2 
+read(1, *) temp2
 if ((anglespline .eq. 'inletspline').or.(anglespline .eq. 'outletspline').or.(anglespline .eq. 'inoutspline')) then
 	spanwise_angle_spline = .True.
 	print*, " "

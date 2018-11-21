@@ -265,7 +265,8 @@ else if (clustering_switch .eq. 2) then
 else if (clustering_switch .eq. 3) then
     call hyperbolic_tan_clustering(np,u,clustering_parameter)
 else
-    print *, 'Invalid argument for clustering switch: Quitting!!'
+    print *, 'FATAL ERROR: Invalid argument for clustering switch'
+    print *, 'Valid options are 0, 1, 2 or 3 (refer to T-Blade3 documentation)'
     stop
 end if
 !u(1) = 0.0
