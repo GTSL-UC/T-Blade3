@@ -327,7 +327,7 @@ if (te_flag .eq. 1 .and. te_opt_flag .eq. 0) then
 	open (unit = 81, file = 'thk_dist_te.' // trim(adjustl(sec)) // '.' // trim(cname) // '.dat')
 	write (81, '(12F40.12)') (out_coord_te(i, :), i = 1, np_te)			
 	close (81)	
-	if (fail_flag .ne. 0) print*, 'FATAL ERROR: Trailing edge thickness distribution generation failed. TE angle &
+	if (fail_flag .ne. 0) print*, 'WARNING: Trailing edge thickness distribution generation failed. TE angle &
                                    may be too small/large for specified thickness.'
 	if (dev_flag .eq. 1) then	
 		do i = 1, np_fine
@@ -972,7 +972,7 @@ delu = u_spl(2:nknt) - u_spl(1:nknt-1)
 call thk_ctrl_gen_spl(uthk, thk, n, nknt, d_0, d_1, dAdE, dBdE, dCdE, &
 	dDdE, dEdE, ddB1, ddC1, ddD1, u_spl_bl, np_bl, iknt, niknt, 1, 0, 0, &
 	out_flag, 0, 1, d1_flag, F_spl, G_spl, out_coord_bl, coeff_bl, fail_flag, dev_flag)
-if (out_flag .eq. 1 .and. fail_flag .ne. 0) print*, 'FATAL ERROR: Maximum/minimum thickness point not imposed.'
+if (out_flag .eq. 1 .and. fail_flag .ne. 0) print*, 'WARNING: Maximum/minimum thickness point not imposed.'
 eps = 1.E-9
 if (out_flag .eq. 1 .and. dev_flag .eq. 1) then
 	do i = 1, np_fine
@@ -1031,7 +1031,7 @@ d_0_rot_1 = (/ -d1v_rot, d2v_rot, -d3v_rot /)
 call thk_ctrl_gen_spl(uthk_le, thk_le, n_le, nknt_le, d_0_rot_0, d_0_rot_1, dAdE_le, dBdE_le, dCdE_le, &
 	dDdE_le, dEdE_le, ddB1_le, ddC1_le, ddD1_le, u_spl_le, np_le, iknt_le, niknt_le, d3v_ang_flag_le, 1, 0, &
 	out_flag, 1, 1, d1_flag, F_le, G_le_temp, out_coord_le, coeff_le, fail_flag, dev_flag)
-if (out_flag .eq. 1 .and. fail_flag .ne. 0)  print*, 'FATAL ERROR: Leading edge thickness distribution generation failed.'
+if (out_flag .eq. 1 .and. fail_flag .ne. 0)  print*, 'WARNING: Leading edge thickness distribution generation failed.'
 G_le_temp(1) = G_le_temp(1)/d_0(1)**2
 G_le_temp(2) = G_le_temp(2)/d_0(1)**2
 
@@ -1072,7 +1072,7 @@ if (te_opt_flag .eq. 1 .and. te_flag .eq. 1) then
 	call thk_ctrl_gen_spl(uthk_te, thk_te, n_te, nknt_te, d_1_rot_0, d_1_rot_1, dAdE_te, dBdE_te, dCdE_te, &
 		dDdE_te, dEdE_te, ddB1_te, ddC1_te, ddD1_te, u_spl_te, np_te, iknt_te, niknt_te, 0, 0, 1, &
 		out_flag, 2, 0, d1_flag, F_te, G_te_temp, out_coord_te, coeff_te, fail_flag, dev_flag)
-	if (out_flag .eq. 1 .and. fail_flag .ne. 0)  print*, 'FATAL ERROR: Trailing edge thickness distribution generation failed.'
+	if (out_flag .eq. 1 .and. fail_flag .ne. 0)  print*, 'WARNING: Trailing edge thickness distribution generation failed.'
 	if (out_flag .eq. 1) out_coord(np_le+np_bl+1 : np, :) = out_coord_te
 
 	if (grad_flag .eq. 1) then
@@ -1108,7 +1108,7 @@ elseif (te_opt_flag .eq. 2 .and. te_flag .eq. 1) then
 	call thk_ctrl_gen_spl(uthk_te, thk_te, n_te, nknt_te, d_1_rot_0, d_1_rot_1, dAdE_te, dBdE_te, dCdE_te, &
 		dDdE_te, dEdE_te, ddB1_te, ddC1_te, ddD1_te, u_spl_te, np_te, iknt_te, niknt_te, 0, 0, 1, &
 		out_flag, 2, 0, d1_flag, F_te, G_te_temp, out_coord_te, coeff_te, fail_flag, dev_flag)
-	if (out_flag .eq. 1 .and. fail_flag .ne. 0)  print*, 'FATAL ERROR: Trailing edge thickness distribution generation failed.'
+	if (out_flag .eq. 1 .and. fail_flag .ne. 0)  print*, 'WARNING: Trailing edge thickness distribution generation failed.'
 	if (out_flag .eq. 1) out_coord(np_le+np_bl+1 : np, :) = out_coord_te
 
 	if (grad_flag .eq. 1) then

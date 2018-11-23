@@ -270,7 +270,7 @@ if(curvemesh)then
            print*,'Smoothing converged at: ',k,err,err1
            return
         elseif (k == kmax)then
-           print*,'Reached the max iteration,error,givenerror: ',k,err,err1
+           print*,'Reached the max iteration, error, givenerror: ',k,err,err1
         endif
     !    k = k+1
     enddo
@@ -341,7 +341,7 @@ if(curvemesh.or.(LE.eq.1))then
            print*,'Smoothing converged at: ',k,err,err1
            return
         elseif (k == kmax)then
-           print*,'Reached the max iteration,error,givenerror: ',k,err,err1
+           print*,'Reached the max iteration, error, givenerror: ',k,err,err1
         endif
     !    k = k+1
     enddo
@@ -756,7 +756,7 @@ character*32 fname5,fname6,fext,temp,casename,file1,develop
   else ! error
   
     write(*,*)
-    print*,'ERROR finding the max curvature for linear background grid !'
+    print*,'FATAL ERROR: Not able to find the max curvature for linear background grid'
     stop  
     
   endif ! endif for finding the max/min location in BG grid

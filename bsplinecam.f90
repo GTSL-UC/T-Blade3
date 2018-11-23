@@ -236,7 +236,7 @@ write (*, '(A, F20.15)') 'Total camber is: ', tot_cam/dtor
 det = (intg_d2v_end(ncp-2)**2)+(4*P*(tan(tot_cam)**2))
 write (*, '(A, F20.15)') 'Determinant is: ', det
 if (det.lt.0.) then 
-	write (*, '(A)') 'All possible scaling factors for curvature control points are complex. Aborting'
+	write (*, '(A)') 'WARNING: All possible scaling factors for curvature control points are complex'
 	call exit
 endif
 ! Calculating both possible roots to solve for k

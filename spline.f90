@@ -71,15 +71,20 @@ real, intent (inout) :: d(n), ld(n), ud(n), r(n)
 !!		Other local variables
 integer :: k
 real :: m
+real,   parameter    :: tol = 10e-10
 
 do k = 2, n
-	if (d(k-1) .eq. 0.) stop 'TRIDIAG_SOLVE FAILED: Zero diagonal element'
+    ! If d(k - 1) = 0
+    ! Compare to a tolerance to avoid floating point errors in an equality comparison
+	if (abs(d(k-1)) .le. tol) stop 'FATAL ERROR: tridiag_solved failed - zero diagonal element'
 	m = ld(k)/d(k-1)
 	d(k) = d(k) - m*ud(k-1)
 	r(k) = r(k) - m*r(k-1)
 enddo
 
-if (d(n) .eq. 0.) stop 'TRIDIAG_SOLVE FAILED: Zero diagonal element'
+! If d(n) = 0 
+! Compare to a tolerance to avoid floating point errors in an equality comparison
+if (abs(d(n)) .le. tol) stop 'FATAL ERROR: tridiag_solve failed - zero diagonal element'
 
 r(n) = r(n)/d(n)
 
@@ -222,6 +227,7 @@ real, intent (in) :: y(n), dydt(n), t(n), tt
 !!		Other local variables
 integer :: knt1, knt2, find_knt
 real :: dt, dy, a(4), dt2, frac, spl_eval
+real,   parameter   :: tol = 10e-10
 
 knt1 = find_knt(tt, t, n)
 knt2 = knt1+1
@@ -231,7 +237,10 @@ dy = y(knt2) - y(knt1)
 dt2 = tt-t(knt1)
 frac = dt2/dt
 
-if (dt .eq. 0) stop 'SPL_EVAL FAILED: Identical knot locations'
+
+! If dt = 0
+! Compare to a tolerance to avoid floating point errors in an equality comparison
+if (abs(dt) .le. tol) stop 'FATAL ERROR: spl_eval failed - identical knot locations'
 
 a(1) = y(knt1)
 if (tt .eq. t(knt1)) then
@@ -269,6 +278,7 @@ real, intent (in) ::y(n), dydt(n), t(n), tt
 !!		Other local variables
 integer :: knt1, knt2, find_knt
 real :: dt, dy, a(3), dt2, frac, dspl_eval
+real,   parameter   :: tol = 10e-10
 
 knt1 = find_knt(tt, t, n)
 knt2 = knt1+1
@@ -278,7 +288,9 @@ dy = y(knt2) - y(knt1)
 dt2 = tt-t(knt1)
 frac = dt2/dt
 
-if (dt .eq. 0) stop 'DSPL_EVAL FAILED: Identical knot locations'
+! If dt = 0
+! Compare to a tolerance to avoid floating point errors in an equality comparison
+if (abs(dt) .le. tol) stop 'FATAL ERROR: dspl_eval failed - identical knot locations'
 
 a(1) = dydt(knt1)
 if (tt .eq. t(knt1)) then
@@ -337,16 +349,16 @@ do iter = 1, maxiter
 	dt_newt = -y_newt/dy_newt
 	tt = tt + 0.8*dt_newt
 	if (tt < mint) then
-		write(*, *) 'SPL_INV WARNING: Spline parameter clipped at spline begin.'
+		write(*, *) 'WARNING: spl_inv - spline parameter clipped at spline begin'
 		tt = mint
 	elseif(tt > maxt) then
-		write(*, *) 'SPL_INV WARNING: Spline parameter clipped at spline end.'
+		write(*, *) 'WARNING: spl_inv- spline parameter clipped at spline end'
 		tt = maxt
 	endif
 	if(abs(dt_newt/(t(n)-t(1))) .lt. tol) return
 enddo
 
-write(*,*) 'SPL_INV FAILED: Spline parameter not determined. Maximum iteration reached.'
+write(*,*) 'ERROR: spl_inv - spline parameter not determined. Maximum iteration reached.'
 return
 
 end subroutine spl_inv
@@ -374,13 +386,17 @@ real, intent (out) :: dydt(n)
 
 !!		Other local variables
 integer :: i, seg_start, seg_end, n0
+real,   parameter   :: tol = 10e-10
 
-if(t(1).eq.t(2)) stop 'SPL_DISCJOINT FAILED: Identical knot locations at spline begin'
-if(t(n).eq.t(n-1)) stop 'SPL_DISCJOINT FAILED: Identical knot locations at spline end'
+! If t(1) = t(2)
+! If t(n) = t(n - 1)
+! Compare to a tolerance to avoid floating point errors in an equality comparison
+if(abs(t(1) - t(2)) .le. tol) stop 'FATAL ERROR: spl_discjoint - identical knot locations at spline begin'
+if(abs(t(n) - t(n-1)) .le. tol) stop 'FATAL ERROR: spl_discjoint - identical knot locations at spline end'
 
 seg_start = 1
 do i = 2, n-2
-	if(t(i).eq.t(i+1)) then
+	if(abs(t(i) - t(i+1)) .le. tol) then
 		n0 = i-seg_start+1
 		seg_end = seg_start+n0-1
 		! Implementing zero second derivative segment end conditions
@@ -515,15 +531,16 @@ do iter = 1, 100
 	endif
 enddo
 
-write(*, *) 'SPL_INTERSECT FAILED: Convergence failed. Residuals normalized to arclength:', &
-	F1/min(t1(n1), t2(n2)), F2/min(t1(n1), t2(n2))
-if(trunc1knt1) write (*, *) 'SPL_INTERSECT WARNING: Splines may not intersect. &
+! TODO: No condition for failure?
+!write(*, *) 'SPL_INTERSECT FAILED: Convergence failed. Residuals normalized to arclength:', &
+!	F1/min(t1(n1), t2(n2)), F2/min(t1(n1), t2(n2))
+if(trunc1knt1) write (*, *) 'WARNING: spl_intersect - splines may not intersect. &
 	Knot 1 of spline 1 is closest possible to spline 2.'
-if(trunc1kntn) write (*, *) 'SPL_INTERSECT WARNING: Splines may not intersect. &
+if(trunc1kntn) write (*, *) 'WARNING: spl_intersect - splines may not intersect. &
 	End knot of spline 1 is closest possible to spline 2.'
-if(trunc2knt1) write (*, *) 'SPL_INTERSECT WARNING: Splines may not intersect. &
+if(trunc2knt1) write (*, *) 'WARNING: spl_intersect - splines may not intersect. &
 	Knot 1 of spline 2 is closest possible to spline 1.'
-if(trunc2kntn) write (*, *) 'SPL_INTERSECT WARNING: Splines may not intersect. &
+if(trunc2kntn) write (*, *) 'WARNING: spl_intersect - Splines may not intersect. &
 	End knot of spline 2 is closest possible to spline 1.'
 ! print*, 'tt1, tt2'
 ! write (*, *), tt1, tt2

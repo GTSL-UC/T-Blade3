@@ -26,7 +26,7 @@ do i = 1, n
 	enddo
 	! If all pivot column elements are zero, return fail
 	if (abs(pvt) .lt. eps) then
-		write (*, *) 'GAUSS_JORDAN FAILED: Zero pivot term'
+		write (*, *) 'FATAL ERROR: gauss_jordan - Zero pivot term'
 		fail_flag = 1
 		return
 	endif

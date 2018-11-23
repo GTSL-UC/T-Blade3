@@ -542,7 +542,7 @@ real*8 function bspline_t_newton(cp,u)
         endif
         tt_0 = bspline_t_newton
     enddo
-    print*,"FAILED to converge cubic abs(u-xs_0)", abs(u-xs_0), bspline_t_newton
+    print*,"FATAL ERROR: cubic abs(u-xs_0) not converged - ", abs(u-xs_0), bspline_t_newton
     STOP
 end function
 !********************************************************************************
@@ -660,7 +660,7 @@ real*8 function bspline4_t_newton(cp,u)
         endif
         tt_0 = bspline4_t_newton
     enddo
-    print*,"FAILED to converge Quartic abs(u-xs_0)", abs(u-xs_0), bspline4_t_newton
+    print*,"FATAL ERROR: Quartic abs(u-xs_0) not converged - ", abs(u-xs_0), bspline4_t_newton
     STOP
 end function
 

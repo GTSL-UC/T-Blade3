@@ -18,13 +18,10 @@ call getarg(1,fname)
 !Error message
 if((fname.eq.'help').or.(fname.eq.''))then
  write(*,*)
- print*,'******************************************************'
- print*,'*** ERROR: techop command error.                   ***'
- print*,'******************************************************'
- print*,'*** Usage: > techop blade.#.#.casename points      ***'
- print*,'*** Example: techop blade.1.1.case 8               ***'
- print*,'*** This takes off 8 points from PS and SS curves. ***' 
- print*,'******************************************************'
+ print *, 'FATAL ERROR: techop command line error'
+ print *, 'Usage: techop blade.#.#.casename npoints'
+ print *, 'Example: techop blade.1.1.case 8'
+ print *, 'This takes off 8 points from PS and SS curves'
  write(*,*)
  stop
 endif

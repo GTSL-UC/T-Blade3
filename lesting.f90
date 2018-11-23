@@ -159,7 +159,7 @@
 	! Refined finite difference:----------------------------------------
 		h = (xtop(dimen) - xtop(1))/interval
 		if (abs((h)-(xtop(2)-xtop(1)))>1e-05) then
-			print*,'error calculating h in LE spline top...'
+			print*,'FATAL ERROR: h in LE spline top not calculated'
 			stop
 		endif
 		!print*,'h top',h
@@ -190,7 +190,7 @@
 	! Refined finite difference:----------------------------------------
 		h = (xbot(dimen) - xbot(1))/interval
 		if (abs((h)-(xbot(2)-xbot(1)))>1e-05) then
-			print*,'error calculating h in spline LE bot ...'
+			print*,'FATAL ERROR: h in spline LE bot not calculated'
 			stop
 		endif
 		!print*,'h bot',h

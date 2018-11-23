@@ -354,24 +354,24 @@ A(:, nun+1) = r
 do i = 1, nun
 	do j = 1, nun
 		if (M(i, j) /= M(i, j)) then
-			print*, 'thk_ctrl_gen_Eder_fn Error: Nan value in M matrix', i, j
+			print*, 'FATAL ERROR: tk_ctrl_gen_Eder_fn - Nan value in M matrix', i, j
 			return
 		endif
 	enddo
 	if (r(i) /= r(i)) then
-		print*, 'thk_ctrl_gen_Eder_fn Error: Nan value in r'
+		print*, 'FATAL ERROR: thk_ctrl_gen_Eder_fn - Nan value in r'
 		return
 	endif
 enddo
 call gauss_jordan(nun, 1, A, fail_flag)
 if (fail_flag .eq. 1) then
-     write (*, *) 'Failed to solve linear system: thk_ctrl_gen_Eder_fn'
+     write (*, *) 'FATAL ERROR: thk_ctrl_gen_Eder_fn - failed to solve linear system'
 	 return
 endif
 ddE = A(:, nun+1)
 do i = 1, nun
 	if (ddE(i) /= ddE(i)) then
-		print*, 'thk_ctrl_gen_1der_fn Error: Nan value in solution to linear system'
+		print*, 'FATAL ERROR: thk_ctrl_gen_1der_fn - Nan value in solution to linear system'
 		return
 	endif
 enddo
@@ -792,25 +792,25 @@ A(:, nun+1) = r
 do i = 1, nun
 	do j = 1, nun
 		if (M(i, j) /= M(i, j)) then
-			print*, 'thk_ctrl_gen_1der_fn Error: Nan value in M matrix', i, j
+			print*, 'FATAL ERROR: thk_ctrl_gen_1der_fn - Nan value in M matrix', i, j
 			return
 		endif
 	enddo
 	if (r(i) /= r(i)) then
-		print*, 'thk_ctrl_gen_1der_fn Error: Nan value in r'
+		print*, 'FATAL ERROR: thk_ctrl_gen_1der_fn - Nan value in r'
 		return
 	endif
 enddo
 call gauss_jordan(nun, 1, A, fail_flag)
 if (fail_flag .eq. 1) then
-    write (*, *) 'Failed to solve linear system: thk_ctrl_1der_fn'
+    write (*, *) 'FATAL EROR: thk_ctrl_1der_fn - Failed to solve linear system'
 	print*, der_flag
 	return
 endif
 dd1 = A(:, nun+1)
 do i = 1, nun
 	if (dd1(i) /= dd1(i)) then
-		print*, 'thk_ctrl_gen_1der_fn Error: Nan value in solution to linear system'
+		print*, 'FATAL ERROR: thk_ctrl_gen_1der_fn - Nan value in solution to linear system'
 		return
 	endif
 enddo

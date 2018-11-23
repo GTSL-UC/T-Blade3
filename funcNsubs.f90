@@ -427,7 +427,7 @@ character*20, intent(out):: throat_pos(nsl)
 
 if(throat_index(js) == 0) then
   throat_pos(js) = 'none'
-  print*,'No Throat found'
+  print*,'WARNING: No Throat found'
   !exit
 elseif(throat_index(js) < 0.25*n_normal_distance) then
   throat_pos(js) = 'le'
@@ -978,7 +978,7 @@ enddo
 
 print*, 'n_normal_distance =',n_normal_distance
 if(n_normal_distance == 0) then
-  print*, 'No throats found because of Low number of blades.'
+  print*, 'WARNING: No throats found because of low number of blades'
   return
 endif
 
