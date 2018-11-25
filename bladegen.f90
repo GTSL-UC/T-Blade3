@@ -74,6 +74,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, &
 !******************************************************************************************
 ! Variables Declaration.
 !******************************************************************************************
+use file_operations
 implicit none
 
 integer np, np_side, i, j, l, k, js, naca, chord_switch, istack, thick_distr, nxx
@@ -151,6 +152,9 @@ character*80 file1, file2, file3, file4, file5, file6, file7
 character*20 airfoil, sec
 character*16 thick_distr_3_flag
 logical error, ellip, isdev, isxygrid
+integer                             :: nopen
+character(len = :), allocatable     :: log_file
+logical                             :: file_open
 
 common / BladeSectionPoints /xxa(nxx, nax), yya(nxx, nax) 
 
@@ -181,10 +185,19 @@ if(len_trim(airfoil).eq.4)then
     print*, "naca = ", naca
 endif
 !print*, airfoil
+call log_file_exists(log_file, nopen, file_open)
 write(*, *)
 write(*, *)"---------------------------------------------------------------------------------"
 print*, 'airfoil type:', js, trim(airfoil)
 print*, ' =================================================== '
+
+write(nopen, *)
+write(nopen, *)"---------------------------------------------------------------------------------"
+write(nopen, *) 'airfoil type:', js, trim(airfoil)
+write(nopen, *) ' =================================================== '
+call close_log_file(nopen, file_open)
+
+
 !*******************************************************************************************
 
 !*******************************************************************************************
@@ -300,7 +313,10 @@ fmxthk = thkc  !----- use input t/c thick to chord ratio
 umxthk = umxthk_all(js)
 ! lethk = thk_tm_c_spl(js)*lethk_all(js) ! as thichness of blade changes (tm/c) the LEthk changes too nemnem
 lethk = lethk_all(js)
+call log_file_exists(log_file, nopen, file_open)
 print*, "lethk = ", lethk
+write(nopen,*) "lethk = ", lethk
+call close_log_file(nopen, file_open)
 tethk = tethk_all(js)   
 !
 !---- true for elliptical le/te
@@ -332,7 +348,11 @@ if(curv_camber.eq.0)then
     ! -----------------------------------------------------------------------------
     ! Case without curvature controlled camber ------------------------------------
     ! -----------------------------------------------------------------------------
+    call log_file_exists(log_file, nopen, file_open)
     print*, 'Using specified airfoil definition...'
+    write(nopen,*) 'Using specified airfoil definition...'
+    call close_log_file(nopen, file_open)
+
 
     ! Switch for using a particular type of airfoil shape--------------------------
     ! -----------------------------------------------------------------------------
@@ -469,8 +489,12 @@ if(curv_camber.eq.0)then
     ! Default airfoil 'sect1' which is mixed camber. 
     ! -----------------------------------------------------------------------------
     elseif(trim(airfoil).eq.'sect1')then
+        call log_file_exists(log_file, nopen, file_open)
         print*, 'Using the default airfoil definition'
         write(*, *)
+        write(nopen,*) 'Using the default airfoil definition'
+        write(nopen,*) ''
+        call close_log_file(nopen, file_open)
         !---- calc.stagger angle & set 0 stagger000000000000000000000000  farid
         ! rotation to the axis with stagger angle to go to u-v plane:
         ! First estimation of inlet metal angles:    for circular arc

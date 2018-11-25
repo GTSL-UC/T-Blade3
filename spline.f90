@@ -416,6 +416,7 @@ end subroutine spl_discjoint
 
 
 subroutine spl_intersect(tt1, tt2, x1, dxdt1, y1, dydt1, t1, n1, x2, dxdt2, y2, dydt2, t2, n2) ! used by(3dbgb)
+    use file_operations
 
 !		This subroutine determines intersection of two cubic splines t1 and t2 in x-y space.
 !		Spline parameters tt1, tt2 at intersection point are calculated.
@@ -449,8 +450,10 @@ logical :: GS_flag, trunc1knt1, trunc1kntn, trunc2knt1, trunc2kntn
 real :: dt1, dt2, r, ra, rb, rt1, rt2, F, Fa, Fb, Ft1, Ft2, &
 	F1, F2, J11, J12, J21, J22, xx1, xx2, yy1, yy2, tt1old, tt2old, &
 	mint1, mint2, maxt1, maxt2
-integer :: iter, i, l
+integer :: iter, i, l, nopen
 real :: dspl_eval
+character(len = :), allocatable :: log_file
+logical                         :: file_open
 
 mint1 = minval(t1); maxt1 = maxval(t1)
 mint2 = minval(t2); maxt2 = maxval(t2)
@@ -534,14 +537,26 @@ enddo
 ! TODO: No condition for failure?
 !write(*, *) 'SPL_INTERSECT FAILED: Convergence failed. Residuals normalized to arclength:', &
 !	F1/min(t1(n1), t2(n2)), F2/min(t1(n1), t2(n2))
-if(trunc1knt1) write (*, *) 'WARNING: spl_intersect - splines may not intersect. &
-	Knot 1 of spline 1 is closest possible to spline 2.'
-if(trunc1kntn) write (*, *) 'WARNING: spl_intersect - splines may not intersect. &
-	End knot of spline 1 is closest possible to spline 2.'
-if(trunc2knt1) write (*, *) 'WARNING: spl_intersect - splines may not intersect. &
-	Knot 1 of spline 2 is closest possible to spline 1.'
-if(trunc2kntn) write (*, *) 'WARNING: spl_intersect - Splines may not intersect. &
-	End knot of spline 2 is closest possible to spline 1.'
+call log_file_exists(log_file, nopen, file_open)
+if(trunc1knt1) then
+    write (*, *) 'WARNING: spl_intersect - splines may not intersect. Knot 1 of spline 1 is closest possible to spline 2.'
+    write(nopen,*) 'WARNING: spl_intersect - splines may not intersect. Knot 1 of spline 1 is closest possible to spline 2.'
+end if
+if(trunc1kntn) then
+    write (*, *) 'WARNING: spl_intersect - splines may not intersect. End knot of spline 1 is closest possible to spline 2.'
+    write(nopen,*) 'WARNING: spl_intersect - splines may not intersect. End knot of spline 1 is closest possible to spline 2.'
+end if
+if(trunc2knt1) then
+    write (*, *) 'WARNING: spl_intersect - splines may not intersect. Knot 1 of spline 2 is closest possible to spline 1.'
+    write(nopen,*) 'WARNING: spl_intersect - splines may not intersect. Knot 1 of spline 2 is closest possible to spline 1.'
+end if
+if(trunc2kntn) then
+    write (*, *) 'WARNING: spl_intersect - Splines may not intersect. End knot of spline 2 is closest possible to spline 1.'
+    write(nopen,*) 'WARNING: spl_intersect - Splines may not intersect. End knot of spline 2 is closest possible to spline 1.'
+end if
+
+call close_log_file(nopen, file_open)
+
 ! print*, 'tt1, tt2'
 ! write (*, *), tt1, tt2
 ! print*, 't1'

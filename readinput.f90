@@ -1,16 +1,17 @@
 subroutine readinput(fname)
 ! reads the 3dbgbinput file
 use globvar
-
+use file_operations
 implicit none
 
 character*256 :: fname, temp, temp2, tempr1, fname1, fname2, fname3, beta_switch_2
-integer :: er, temp_int, stat, n_temp, n_temp1, n_temp2
+character(len = :), allocatable :: log_file
+integer :: er, temp_int, stat, n_temp, n_temp1, n_temp2, nopen
 real*8 inBetaInci, outBetaDevn
 real*8, allocatable :: temp_in(:)
 real*8              :: temp_offsets(2)
 real*8, parameter   :: tol = 1E-8
-logical             :: equal, beta_value(5), ang_spl_value(5)
+logical             :: equal, beta_value(5), ang_spl_value(5), file_open
 
 if (allocated(x_le          )) deallocate(x_le          )
 if (allocated(x_te          )) deallocate(x_te          )
@@ -80,7 +81,11 @@ abs_zero = 0.0000000000000000
 
 open(1, file = fname, status = 'unknown')
 rewind(1)
+call log_file_exists(log_file, nopen, file_open)
 print*, fname
+write(nopen,*) ''
+write(nopen,*) fname
+call close_log_file(nopen, file_open)
 !write(*, *)
 !write(*, *) 'Reading inputs from -88dbgbinput file'
 !write(*, *)
@@ -197,6 +202,8 @@ ang_spl_value   = [len(beta_switch_2(:n_temp1)) .eq. len(trim(beta_switch_2)), &
                    index(beta_switch_2, 'inoutspline') .ne. 0, index(beta_switch_2, 'inci_dev_spline') .ne. 0]
 
 
+call log_file_exists(log_file, nopen, file_open)
+
 !
 ! Check for all possible valid inputs of the secondary argument
 !
@@ -218,6 +225,10 @@ elseif (.not. ang_spl_value(1) .and. ang_spl_value(2) .and. .not. ang_spl_value(
     print *, 'Angles defined spanwise as a B-spline using control points'
     print *, ''
     print *, trim(anglespline)
+    write(nopen,*) ''
+    write(nopen,*) 'Angles defined spanwise as a B-spline using control points'
+    write(nopen,*) ''
+    write(nopen,*) trim(anglespline)
     read(1,*) temp
 
 ! Case 3 -spline outlet angles only
@@ -232,6 +243,10 @@ elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. ang_spl_value(
     print *, 'Angles defined spanwise as a B-spline using control points'
     print *, ''
     print *, trim(anglespline)
+    write(nopen,*) ''
+    write(nopen,*) 'Angles defined spanwise as a B-spline using control points'
+    write(nopen,*) ''
+    write(nopen,*) trim(anglespline)
     read(1,*) temp
 
 ! Case 4 - spline inlet and outlet angles
@@ -246,6 +261,10 @@ elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_
     print *, 'Angles defined spanwise as a B-spline using control points'
     print *, ''
     print *, trim(anglespline)
+    write(nopen,*) ''
+    write(nopen,*) 'Angles defined spanwise as a B-spline using control points'
+    write(nopen,*) ''
+    write(nopen,*) trim(anglespline)
     read(1,*) temp
 
 ! Case 5 - spline incidence and deviation
@@ -260,6 +279,10 @@ elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_
     print *, 'Incidence and Deviation defined spanwise as a B-spline using control points'
     print *, ''
     print *, trim(anglespline)
+    write(nopen,*) ''
+    write(nopen,*) 'Incidence and Deviation defined spanwise as a B-spline using control points'
+    write(nopen,*) ''
+    write(nopen,*) trim(anglespline)
     read(1,*) temp
 
 ! Case 6 - invalid input
@@ -274,6 +297,8 @@ elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_
     stop
 end if
 
+
+call close_log_file(nopen, file_open)
 
 
 
@@ -783,17 +808,22 @@ subroutine readcontrolinput(row_type, path)
 !**********************************************************************************
 ! reads the controlinput.dat when the appropriate swittches are activated.
 use globvar
-
+use file_operations
 implicit none
 
 ! character*(*) fname5
 character*(*) path
 character*256 temp, fname4, row_type
 character*256 fname5
-integer :: phantom_n
+character(len = :), allocatable :: log_file
+integer :: phantom_n, nopen
+logical :: file_open
 
 !if(curv.ne.0.or.thick.ne.0.or.LE.ne.0.or.thick_distr.ne.0)then
 print*
+call log_file_exists(log_file, nopen, file_open)
+write(nopen,*) ''
+call close_log_file(nopen, file_open)
 !print*, 'using the controlinput file ....'
 ! Reading the input file of curv, thk, and LE for the bladegen:
 fname5 = trim(path)//'controlinputs.'//trim(row_type)//'.dat'
@@ -949,7 +979,10 @@ if(LE .ne.0) then
     read (11, *) temp
     read (11, *) temp
     read (11, *) LEdegree, no_LE_segments
+    call log_file_exists(log_file, nopen, file_open)
     print*, 'LEdegree = ', LEdegree, 'no_LE_segments = ', no_LE_segments
+    write(nopen,*) 'LEdegree = ', LEdegree, 'no_LE_segments = ', no_LE_segments
+    call close_log_file(nopen, file_open)
     do i = 1, nsl
         read (11, *) temp
         read (11, *) temp
@@ -967,8 +1000,12 @@ if(LE .ne.0) then
         do i = 1, nsl
             read(11, *) te_angle_cp(i)
         enddo
+        call log_file_exists(log_file, nopen, file_open)
         print*, 'TE Angle'
         write(*, '(F10.5)') (te_angle_cp(i), i = 1, nsl)
+        write(nopen,*) 'TE Angle'
+        write(nopen, '(F10.5)') (te_angle_cp(i), i = 1, nsl)
+        call close_log_file(nopen, file_open)
     endif
 elseif (thick_distr .eq. 4) then ! end if for LE spline parameters
     if (allocated(te_angle_cp)) deallocate(te_angle_cp)
@@ -979,8 +1016,12 @@ elseif (thick_distr .eq. 4) then ! end if for LE spline parameters
     do i = 1, nsl
         read(11, *) te_angle_cp(i)
     enddo
+    call log_file_exists(log_file, nopen, file_open)
     print*, 'TE Angle'
     write(*, '(F10.5)') (te_angle_cp(i), i = 1, nsl)
+    write(nopen,*) 'TE Angle'
+    write(nopen, '(F10.5)') (te_angle_cp(i), i = 1, nsl)
+    call close_log_file(nopen, file_open)
 endif
 close(11)
 !endif ! end if for curvature, thickness, thickness dist and LE spline definition.
@@ -1002,17 +1043,20 @@ subroutine read_spanwise_input(row_type, path)
 !thickness or curvature is activated and the word "spline" is typed
 !after the curvature switch.
 use globvar
+use file_operations
 implicit none
 character*256 row_type
 ! character*(*) file_name
 character*(*) path
 character*256 file_name
+character(len = :), allocatable   :: log_file
 !opening files to read inputs
 real :: span_dum
 real*8, allocatable, dimension(:) :: temp, temp_exact
 integer                           :: temp_thk_flag(3)
 integer jj
-integer     :: i_local
+integer     :: i_local, nopen
+logical     :: file_open
 
 file_name = trim(path)//'spancontrolinputs.'//trim(row_type)//'.dat'
 open(10, file = file_name)
@@ -1262,6 +1306,11 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
         print*, 'TE flag:', te_flag
         print*, 'LE optimization flag:', le_opt_flag
         print*, 'TE optimization flag:', te_opt_flag
+        call log_file_exists(log_file, nopen,  file_open)
+        write(nopen,*) 'TE flag:', te_flag
+        write(nopen,*) 'LE optimization flag:', le_opt_flag
+        write(nopen,*) 'TE optimization flag:', te_opt_flag
+        call close_log_file(nopen, file_open)
     else
         read(10, *)ncp_span_thk, ncp_chord_thickness
     endif
@@ -1600,7 +1649,10 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
 close(10)
 !---------------------------------------------------------------------------
 
+call log_file_exists(log_file, nopen, file_open)
 print*, 'spanwise input file read successfully'
+write(nopen,*) 'spanwise input file read successfully'
+call close_log_file(nopen, file_open)
 !--------------------------------------------------------------------------------------------------
 !This part of the program is used to check if the input data has been read correctly.
 !It is not required and is therefore commented. Uncomment to create controlinupts_check.dat file 

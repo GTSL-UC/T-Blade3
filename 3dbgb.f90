@@ -111,7 +111,6 @@ row_type = fname(k:j)
 call bgb3d_sub(fname, 'spancontrolinputs.'//trim(row_type)//'.dat', arg2, arg3, arg4)
 end program bgb3d
 ! Variable override subroutines for ESP intergation
-! Added by Simon Livingston
 !subroutine     override_chord(n, a)
 !   real*8 a(*)
 !end subroutine override_chord
@@ -250,6 +249,7 @@ end subroutine override_offsets
 subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4) ! 3d blade geometry builder
 
 use globvar
+use file_operations
 implicit none
 !
 real spl_eval, dspl_eval
@@ -259,9 +259,10 @@ real*8 inBetaInci, outBetaDevn
 character*(*) :: fname_in, aux_in
 character*256 :: fname, temp, tempr1, fname1, fname2, fname3, fname4, row_type, path
 character*(*) :: arg2, arg3, arg4
+character(len = :),  allocatable     :: log_file
 ! !
-logical axial_LE, radial_LE, axial_TE, radial_TE
-integer     :: i_local
+logical axial_LE, radial_LE, axial_TE, radial_TE, file_open
+integer     :: i_local, nopen
 axial_LE = .False.
 radial_LE = .False.
 axial_TE = .False.
@@ -283,59 +284,87 @@ call displayMessage
 !--------counting the number of command line arguments passed: --------------
 fname = fname_in
 
+! Initialize T-Blade3 log file for this run
+!log_file    = 'T-Blade3_run.log'
+!inquire(file = log_file, exist=exist)
+!if (exist) then
+!    open(101, file = log_file, status = 'old', position = 'append', action = 'write')
+!else
+!    open(101, file = log_file, status = 'new', action = 'write')
+!end if
+
+call log_file_exists(log_file, nopen, file_open)
+
 ! Types of 2nd argument
 if (trim(arg2).eq.'dev') then
 	print*, '2nd Argument:', 'develop'
+    write(nopen,*) '2nd Argument:', 'develop'
 	isdev = .true.
 elseif (trim(arg2).eq.'xygrid') then ! Only for the 2d grids in xy
 	print*, '2nd Argument:', 'xygrid'
+    write(nopen,*) '2nd Argument:', 'xygrid'
 	isxygrid = .true.
 elseif (trim(arg2).eq.'xyzstreamlines') then ! only when you want the xyz streamlines.sldcrv
 	print*, '2nd Argument:', 'xyzstreamlines'
+    write(nopen,*) '2nd Argument:', 'xyzstreamlines'
 	is_xyzstreamlines = .true.
 elseif ((trim(arg2).eq.'2d') .or. (trim(arg2).eq.'2D')) then
 	print*, '2nd Argument:', '2D'
+    write(nopen,*) '2nd Argument:', '2D'
 	is2d = .True.
 elseif ((trim(arg2).eq.'v0') .or. (trim(arg2).eq.'V0')) then
 	print*, '2nd Argument:', 'V0'
+    write(nopen,*) '2nd Argument:', 'V0'
 	isold = .True.
 endif
 
 ! Types of 3rd argument
 if (trim(arg3).eq.'dev') then
 	print*, '3rd Argument:', 'develop'
+    write(nopen,*) '3rd Argument:', 'develop'
 	isdev = .true.
 elseif (trim(arg3).eq.'xygrid') then ! Only for the 2d grids in xy
 	print*, '3rd Argument:', 'xygrid'
+    write(nopen,*) '3rd Argument:', 'xygrid'
 	isxygrid = .true.
 elseif (trim(arg3).eq.'xyzstreamlines') then ! only when you want the xyz streamlines.sldcrv
 	print*, '3rd Argument:', 'xyzstreamlines'
+    write(nopen,*) '3rd Argument:', 'xyzstreamlines'
 	is_xyzstreamlines = .true.
 elseif ((trim(arg3).eq.'2d') .or. (trim(arg3).eq.'2D')) then
 	print*, '3rd Argument:', '2D'
+    write(nopen,*) '3rd Argument:', '2D'
 	is2d = .True.
 elseif ((trim(arg3).eq.'v0') .or. (trim(arg3).eq.'V0')) then
 	print*, '3rd Argument:', 'V0'
+    write(nopen,*) '3rd Argument:', 'V0'
 	isold = .True.	
 endif
 
 ! Types of 4th argument
 if (trim(arg4).eq.'dev') then
 	print*, '4th Argument:', 'develop'
+    write(nopen,*) '4th Argument:', 'develop'
 	isdev = .true.
 elseif (trim(arg4).eq.'xygrid') then ! Only for the 2d grids in xy
 	print*, '4th Argument:', 'xygrid'
+    write(nopen,*) '4th Argument:', 'xygrid'
 	isxygrid = .true.
 elseif (trim(arg4).eq.'xyzstreamlines') then ! only when you want the xyz streamlines.sldcrv
 	print*, '4th Argument:', 'xyzstreamlines'
+    write(nopen,*) '4th Argument:', 'xyzstreamlines'
 	is_xyzstreamlines = .true.
 elseif ((trim(arg4).eq.'2d') .or. (trim(arg4).eq.'2D')) then
 	print*, '4th Argument:', '2D'
+    write(nopen,*) '4th Argument:', '2D'
 	is2d = .True.
 elseif ((trim(arg4).eq.'v0') .or. (trim(arg4).eq.'V0')) then
 	print*, '4th Argument:', 'V0'
+    write(nopen,*) '4th Argument:', 'V0'
 	isold = .True.	
 endif
+
+call close_log_file(nopen,file_open)
 
 control_inp_flag = 0
 j = -1
@@ -369,13 +398,21 @@ do i = len(trim(fname)), 1, -1
 enddo
 row_type = fname(k:j)
 
+call log_file_exists(log_file, nopen, file_open)
 print*, 'Row number and blade type is ', row_type
+write(nopen,*) 'Row number and blade  type is ', row_type
+call close_log_file(nopen, file_open)
 
 !****************************************************************************
 !---reading the primary input file---------------------------------------
 call readinput(fname)
+call  log_file_exists(log_file, nopen, file_open)
 write(*,*)
 write(*,*) 'Reading inputs from file : ', fname
+write(nopen,*) ''
+write(nopen,*) 'Reading inputs from file: ', fname
+call close_log_file(nopen, file_open)
+
 
 if((curv.ne.0.or.thick.ne.0.or.LE.ne.0&
 .or.thick_distr.ne.0).and.trim(spanwise_spline).ne.'spanwise_spline')then
@@ -384,11 +421,15 @@ elseif((curv.ne.0.or.thick.ne.0.or.LE.ne.0&
 .or.thick_distr.ne.0).and.trim(spanwise_spline).eq.'spanwise_spline')then
 	control_inp_flag = 2
 endif
+call log_file_exists(log_file, nopen, file_open)
 if (control_inp_flag .eq. 1 .and. isold) then
 	!---reading secondary input file (controlinputdat)-----------------------
 	write(*, *)
 	print*, 'Reading the controlinput file ....'
 	write(*, *)
+    write(nopen,*) ''
+    write(nopen,*) 'Reading the controlinput file ....'
+    write(nopen,*) ''
 	! call readcontrolinput(aux_in)
 	call readcontrolinput(row_type, path)
 elseif (control_inp_flag .eq. 1 .and. .not. isold) then
@@ -396,6 +437,9 @@ elseif (control_inp_flag .eq. 1 .and. .not. isold) then
 	write(*, *)
 	print*, 'Reading the spanwise_input file ....'
 	write(*, *)
+    write(nopen,*) ''
+    write(nopen,*) 'Reading the spanwise_input file ....'
+    write(nopen,*) ''
 	! call read_spanwise_input(aux_in)
 	call read_spanwise_input(row_type, path)
 elseif (control_inp_flag .eq. 2) then
@@ -403,9 +447,13 @@ elseif (control_inp_flag .eq. 2) then
 	write(*, *)
 	print*, 'Reading the spanwise_input file ....'
 	write(*, *)
+    write(nopen,*) ''
+    write(nopen,*) 'Reading the spanwise_input file ....'
+    write(nopen,*)
 	! call read_spanwise_input(aux_in)
 	call read_spanwise_input(row_type, path)
 endif
+call close_log_file(nopen, file_open)
 
 
 !****************************************************************************
@@ -413,6 +461,7 @@ endif
 !****************************************************************************
 !--Messages to the screen----------------------------------------------------
 
+call log_file_exists(log_file, nopen, file_open)
 write(*, *)
 write(*, *)'case:', fext
 write(*, *)'bladerow #:', ibrow
@@ -423,19 +472,45 @@ write(*, *)'bsf:', scf
 write(*, *)
 print*, 'Number of streamlines:', nsl
 write(*, *)
+
+write(nopen, *)
+write(nopen, *)'case:', fext
+write(nopen, *)'bladerow #:', ibrow
+write(nopen, *) ibrowc
+write(nopen, *)
+write(nopen, *) 'Number of blades in this row:', nbls
+write(nopen, *)'bsf:', scf
+write(nopen, *)
+print*, 'Number of streamlines:', nsl
+write(nopen, *)
+call close_log_file(nopen, file_open)
+
 if (.not. spanwise_angle_spline) then
+    call log_file_exists(log_file, nopen, file_open)
 	print*, '   in_betaZ*    out_betaZ*'
+    write(nopen,*) '   in_betaZ*    out_betaZ*'
 	do js = 1, nspn
 		print*, in_beta(js), out_beta(js)
+        write(nopen,*) in_beta(js), out_beta(js)
 	enddo
+    call close_log_file(nopen, file_open)
 endif
 
+
+
 !! splining the LE and TE coordinates from the input file
+call log_file_exists(log_file, nopen, file_open)
 write(*, *)
 write(*, *)'LE/TE defined by a curve with no. of points as:', npoints
 write(*, *)'xLE    rLE     xTE     rTE'
+
+write(nopen, *)
+write(nopen, *)'LE/TE defined by a curve with no. of points as:', npoints
+write(nopen, *)'xLE    rLE     xTE     rTE'
+
 do i = 1, npoints
 	print*, xle(i), rle(i), xte(i), rte(i)
+    write(nopen,*) xle(i), rle(i), xte(i), rte(i)
 	!Spline LE curve
 	call arclength(xle(1), rle(1), sle(1), npoints)
 	call spline(xle(1), xles(1), sle(1), npoints, 999.0, -999.0)
@@ -445,39 +520,64 @@ do i = 1, npoints
 	call spline(xte(1), xtes(1), ste(1), npoints, 999.0, -999.0)
 	call spline(rte(1), rtes(1), ste(1), npoints, 999.0, -999.0)
 enddo
+
+call close_log_file(nopen, file_open)
 !----------------------------------------
 
+call log_file_exists(log_file, nopen, file_open)
+write(nopen,*) ''
 if(LE.ne.0) then ! LE spline options
 	do js = 1, nspn
 		print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), jcellblade_all(js), etawidth_all(js), &
                 BGgrid_all(js)
+        write(nopen,*) airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), jcellblade_all(js),            &
+                       etawidth_all(js), BGgrid_all(js)
 	enddo
 elseif(LE == 0) then ! elliptical LE
 	do js = 1, nspn
 		print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), tethk_all(js),         &
                 jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+        write(nopen,*) airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), tethk_all(js),  &
+                       jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+                       
 	enddo
 endif
+
+call close_log_file(nopen, file_open)
 
 !****************************************************************************
 !SWEEP and LEAN
 ! Differentiating between true and axial SWEEP
+
+call log_file_exists(log_file, nopen, file_open)
 if(trim(trueleansweep).ne.'')then
 	print*, 'Sweep along the chord (1 = yes): ', chrdsweep
 	write(*, *)
+    write(nopen,*) ''
+    write(nopen,*) 'Sweep along the chord (1 = yes): ', chrdsweep
+    write(nopen,*) ''
 else
 	print*, 'Sweep in the axial direction (m-prime).'
 	write(*, *)
+    write(nopen,*) ''
+    write(nopen,*) 'Sweep in the axial direction (m-prime).'
+    write(nopen,*) ''
 endif
 
 ! Differentiating between true and axial LEAN
 if(trim(trueleansweep).ne.'')then
 	print*, 'Lean normal to the chord (1 = yes): ', chrdlean
 	write(*, *)
+    write(nopen,*) 'Lean normal to the chord (1 = yes): ', chrdlean
+    write(nopen,*)
 else
 	print*, 'Lean in the tangential direction (theta).'
 	write(*, *)
+    write(nopen,*) 'Lean in the tangential direction (theta).'
+    write(nopen,*) ''
 endif
+
+call close_log_file(nopen, file_open)
 
 !--------------------------------------------------------------------------------
 ! ! Writing dimensional hub and casing streamlines 
@@ -493,11 +593,21 @@ call hubTipStreamline(xm(1, 1), rm(1, 1), nsp(1), xt, rt, nsp(nsl), nsl, scf, ca
 ! Calculating m prime coordinates...
 ! using x, r coordinates as the input for streamlines
 !****************************************************************************
+call log_file_exists(log_file, nopen, file_open)
 write(*, *)
 print*, 'Using x_s and r_s coordinates for streamline from the input file...'
 write(*, *)
 print*, 'Calculating the m_prime coordinates for each streamline...'
 write(*, *)
+
+write(nopen, *)
+write(nopen, *) 'Using x_s and r_s coordinates for streamline from the input file...'
+write(nopen, *)
+write(nopen, *) 'Calculating the m_prime coordinates for each streamline...'
+write(nopen, *)
+
+call close_log_file(nopen, file_open)
+
 !
 
 ! if (rm(1, 1) .eq. abs_zero .and.  rm(1, nsp(1)) .eq. abs_zero) then
@@ -530,13 +640,16 @@ do ia = 1, nsl
 	mp(1, ia) = 0.
 	k = 0
 	! !print*, ' mp         xm         rm'
+    call log_file_exists(log_file, nopen, file_open)
 	do i = 2, nsp(ia)
 		if (rm(i, ia)< radius_tolerance) then
 			k = k + 1	! nemnem 6 10 2014
 			print*, 'Radius less than', radius_tolerance, ', excluding point number', k
+            write(nopen,*) 'Radius less than', radius_tolerance, ', excluding point number', k
 			xm(1, ia) = xm(i, ia)  ! switch to new intial value after elimination zero radius points
 			rm(1, ia) = rm(i, ia)
 			print*, 'xm(1, ia)', xm(1, ia), 'rm(1, ia)', rm(1, ia)
+            write(nopen,*) 'xm(1, ia)', xm(1, ia), 'rm(1, ia)', rm(1, ia)
 		else
 			!print*, 'i-k, nsp(ia)', i-k, nsp(ia)
 			! if (rad_in_flag(ia) .eq. 1) then
@@ -552,11 +665,16 @@ do ia = 1, nsl
 			rm(i-k, ia) = rm(i, ia)	! Reindex the mp, xm, rm for hub
 		endif
 	enddo
+    call close_log_file(nopen, file_open)
+
+    call log_file_exists(log_file, nopen, file_open)
 	if (k /= 0) then
 		nsp_hub = nsp(ia)		! nsp_hub is used for full hub streamline extraction nemnem 6 10 2014
 		nsp(ia) = i-k-1         ! Update the hub number of valid points
 		print*, 'nsp for streamline', ia, 'changed from', nsp_hub, 'to', nsp(ia)
+        write(nopen,*) 'nsp for streamline', ia, 'changed from', nsp_hub, 'to', nsp(ia)
 	endif
+    call close_log_file(nopen, file_open)
 	if (is_xyzstreamlines) then
 		if ((ia .ge. 1).and.(ia .le. nsl)) then
 			call streamlines(xm(:, ia), rm(:, ia), nsp(ia), scf, casename, ia) ! Ahmed nemnem 4 23 2014 extracting streamlines
@@ -644,10 +762,17 @@ enddo
 !---------------------------------------------------------------------------
 !Calculating offsets for the streamlines if the offset is given as input.
 !---------------------------------------------------------------------------
+call log_file_exists(log_file, nopen, file_open)
 write(*, *)
 print*, 'hub offset:', hub
 print*, 'tip offset:', tip
 write(*, *)
+
+write(nopen,*) ''
+write(nopen,*) 'hub offset:', hub
+write(nopen,*) 'tip offset:', tip
+write(nopen,*)
+call close_log_file(nopen, file_open)
 
 !HUB offset
 if(hub.ne.0)then
@@ -717,9 +842,14 @@ endif
 ! Obtaining LE/TE x, r values on each streamline using the LE/TE curve and...
 ! ...the streamline curve intersection 3/27/12----
 !----------------------------------------------------------------------------------
+call log_file_exists(log_file, nopen, file_open)
 write(*, *)'xLE    rLE     xTE     rTE'
+write(nopen,*) 'xLE    rLE     xTE     rTE'
+write(nopen,*) ''
 ! LE curve intersection with the streamline curve---------
 print*, 'Calculating LE x, r points... '
+write(nopen,*) 'Calculating LE x, r points... '
+call close_log_file(nopen, file_open)
 
 do ia = 1, na
 	! if (npoints.eq.nsl)then ! LE, TE points same as no. of streamlines
@@ -748,7 +878,11 @@ enddo
 
 ! TE curve intersection with the streamline curve---------
 !if(xslope_TE.ge.rslope_TE)then
+call log_file_exists(log_file, nopen, file_open)
 print*, 'Calculating TE x, r points...'
+write(nopen,*) ''
+write(nopen,*) 'Calculating TE x, r points...'
+call close_log_file(nopen, file_open)
 
 do ia = 1, na
 	!!	Modified by Karthik Balasubramanian
@@ -799,6 +933,8 @@ close(3)
 ! Checking if r_slope > x_slope for non-axial machines
 !--------------------------------------------------------------------
 ! i_slope = 1
+call log_file_exists(log_file, nopen, file_open)
+write(nopen,*) ''
 do ia = 1, na
 	i_slope = 0
 	do i = 1, nsp(ia)
@@ -807,12 +943,16 @@ do ia = 1, na
 		if(rm_slope.ge.xm_slope.and.i_slope.eq.0) i_slope = i  
 	enddo
 	print*, 'i_slope', i_slope
+    write(nopen,*) 'i_slope', i_slope
 enddo
+call close_log_file(nopen, file_open)
 
 !--------------------------------------------------------------------
 ! Calculating msLE and msTE using LE, TE (x, r) and determining axial/radial/mixed flow
 !--------------------------------------------------------------------
 ! Obtaining initial guesss values for msle and mste to calculate the correct values-----
+call log_file_exists(log_file, nopen, file_open)
+write(nopen,*) ''
 do ia = 1, na
 	xsle = x_le(ia)
 	xste = x_te(ia)
@@ -847,6 +987,7 @@ do ia = 1, na
 		endif     
 	enddo
 	print*, 'ile:', ile
+    write(nopen,*) 'ile:', ile
 	! if(ile.le.2)then
 	 ! msle(ia) = 0.
 	! else
@@ -877,16 +1018,21 @@ do ia = 1, na
 	  endif     
 	enddo
 	print*, 'ite:', ite
+    write(nopen,*) 'ite:', ite
 	! mste(ia) = mp(ite+2, ia)
 	! print*, 'mste-initial guess', mste(ia)
 	! write(*, *) 
 enddo
+
+call close_log_file(nopen, file_open)
 
 !-----------------------------------------------------------------------
 
 !--------------------------------------------------------------------
 !!Determining purely axial, purely radial, mixed flow
 !--------------------------------------------------------------------
+call log_file_exists(log_file, nopen, file_open)
+write(nopen,*)
 do ia = 1, na
 	!!	Modified by Karthik Balasubramanian
 	msle(ia) = s1le(ia)
@@ -905,6 +1051,9 @@ do ia = 1, na
      ! call spl_inv(mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
 		!print*, 'mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia) after'
 		!print*, mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia)
+     write(nopen,*) 'Using x values for msLE due to a purely axial flow.'
+     write(nopen,*) 'Using x values for msTE due to a purely axial flow.'
+     
      
      !---Evaluating span  for an axial blade
      lref = abs(r_le(na) - r_le(1))
@@ -916,6 +1065,7 @@ do ia = 1, na
      if(axial_LE)then ! axial flow at LE
      
        print*, 'Using x values for msLE due to axial flow at LE.'
+       write(nopen,*) 'Using x values for msLE due to axial flow at LE.'
        ! call spl_inv(msle(ia), x_le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
        
        !---Evaluating span  for an axial blade
@@ -925,6 +1075,7 @@ do ia = 1, na
      elseif(radial_LE)then! non-axial flow at LE
      
        print*, 'Using r values for msLE due to non-axial flow at LE.'
+       write(nopen,*) 'Using r values for msLE due to non-axial flow at LE.'
        ! call spl_inv(msle(ia), r_le(ia), rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))
        
        !---Evaluating span for a non-axial blade
@@ -938,11 +1089,13 @@ do ia = 1, na
      if(axial_TE)then ! axial flow at TE
      
        print*, 'Using x values for msTE due to axial flow at TE.'
+       write(nopen,*) 'Using x values for msTE due to axial flow at TE.'
        ! call spl_inv(mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
  
      elseif(radial_TE)then ! non-axial flow at TE
      
        print*, 'Using r values for msTE due to non-axial flow at TE.'
+       write(nopen,*) 'Using r values for msTE due to non-axial flow at TE.'
        ! call spl_inv(mste(ia), r_te(ia), rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))
 
      endif ! end if for TE  
@@ -953,12 +1106,20 @@ do ia = 1, na
    print*, 'mste:', mste(ia)
    chordm(ia) = abs(mste(ia) - msle(ia))
    print*, 'chordm:', chordm(ia)
+
+   write(nopen,*) 'msle:', msle(ia)
+   write(nopen,*) 'mste:', mste(ia)
+   write(nopen,*) 'chordm:',  chordm(ia)
    ! write(*, *)
 enddo
+
+call close_log_file(nopen, file_open)
 
 !--------------------------------------------------------------------
 !Calculating the phi to adjust for BetaZ conversion
 !--------------------------------------------------------------------
+call log_file_exists(log_file, nopen, file_open)
+write(nopen,*) ''
 do ia = 1, na
    xmsle(ia) = 0.
    rmsle(ia) = 0.
@@ -968,6 +1129,7 @@ do ia = 1, na
    !-----Calculating dphi_s_in = dr/dx = (dr/dm')/(dx/dm') -------
    phi_s_in(ia) = (atan(rmsle(ia)/xmsle(ia)))
    print*, 'phi_s_in(ia)', phi_s_in(ia)/dtor
+   write(nopen,*) 'phi_s_in(ia)', phi_s_in(ia)/dtor
 enddo
 do ia = 1, na
    xmste(ia) = 0.
@@ -978,7 +1140,10 @@ do ia = 1, na
    !-----Calculating dphi_s_out = dr/dx = (dr/dm')/(dx/dm') -------
    phi_s_out(ia) = (atan(rmste(ia)/xmste(ia)))
    print*, 'phi_s_out(ia)', phi_s_out(ia)/dtor
+   write(nopen,*) 'phi_s_out(ia)', phi_s_out(ia)/dtor
 enddo
+write(nopen,*) ''
+call close_log_file(nopen, file_open)
 
 !--------------------------------------------------------------------------------------
 !**************************************************************************************
@@ -1005,87 +1170,133 @@ enddo
 
 !----------------------------------------------------------------------
 !!-Control points for spanwise inlet Betaz------------------------------------------
+call log_file_exists(log_file, nopen, file_open)
 if((trim(anglespline).eq.'inletspline').or.(trim(anglespline).eq.'inoutspline'))then
   write(*, *)
   write(*, *)' Inlet Beta defined spanwise by a cubic B-spline using control points.'
   write(*, *)'   span         in_Beta (spline)'
+  write(nopen,*) ''
+  write(nopen,*) ' Inlet Beta defined spanwise by a cubic B-spline using control points.'
+  write(nopen,*) '   span         in_Beta (spline)'
+
   call cubicspline(xcpinbeta, spaninbeta, cpinbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
   call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, inbeta_s, na, xbs, ybs)
   do ia = 1, na
 	 print*, span(ia), inbeta_s(ia)
+     write(nopen,*) span(ia), inbeta_s(ia)
      in_beta(ia) = inbeta_s(ia)
   enddo
 elseif (trim(anglespline).eq.'inci_dev_spline')then
   write(*, *)
   write(*, *)' Inlet Beta incidence defined spanwise by a cubic B-spline using control points.'
   write(*, *)'   span         in_Beta (spline)'
+  write(nopen, *)
+  write(nopen, *)' Inlet Beta incidence defined spanwise by a cubic B-spline using control points.'
+  write(nopen, *)'   span         in_Beta (spline)'
+
   call cubicspline(xcpinbeta, spaninbeta, cpinbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
   call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, inci_s, na, xbs, ybs)
   do ia = 1, na
      in_beta(ia) = inBetaInci(in_beta(ia), inci_s(ia))
 	 print*, span(ia), in_beta(ia)
+     write(nopen,*) span(ia), in_beta(ia)
   enddo
 endif
+call close_log_file(nopen, file_open)
 !----------------------------------------------------------------------
 !!-Control points for panwise outlet BetaZ------------------------------------------
+call log_file_exists(log_file, nopen, file_open)
 if((trim(anglespline).eq.'outletspline').or.(trim(anglespline).eq.'inoutspline'))then
   write(*, *)
   write(*, *)' Outlet Beta defined spanwise by a cubic B-spline using control points.'
   write(*, *)'   span        out_Beta (spline)'
+
+  write(nopen, *)
+  write(nopen, *)' Outlet Beta defined spanwise by a cubic B-spline using control points.'
+  write(nopen, *)'   span        out_Beta (spline)'
+
   call cubicspline(xcpoutbeta, spanoutbeta, cpoutbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
   call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, outbeta_s, na, xbs, ybs)
   do ia = 1, na
 	 print*, span(ia), outbeta_s(ia)
+     write(nopen,*) span(ia),  outbeta_s(ia)
      out_beta(ia) = outbeta_s(ia)     
   enddo
 elseif (trim(anglespline).eq.'inci_dev_spline')then
   write(*, *)
   write(*, *)' Outlet Beta deviation defined spanwise by a cubic B-spline using control points.'
   write(*, *)'   span        out_Beta (spline)'
+
+  write(nopen, *)
+  write(nopen, *)' Outlet Beta deviation defined spanwise by a cubic B-spline using control points.'
+  write(nopen, *)'   span        out_Beta (spline)'
+
   call cubicspline(xcpoutbeta, spanoutbeta, cpoutbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
   call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, dev_s, na, xbs, ybs)
   do ia = 1, na
 	 out_beta(ia) = outBetaDevn(in_beta(ia), out_beta(ia), dev_s(ia))
 	 print*, span(ia), out_beta(ia)
+     write(nopen,*) span(ia), out_beta(ia)
   enddo
 endif
+call close_log_file(nopen, file_open)
 !----------------------------------------------------------------------
 ! Splining Control points for chord, stagger, outbeta, tm/c
 !----------------------------------------------------------------------
 !!---Control points for chord -----------------------------------------
 if(chord_switch.eq.2)then   ! Changed to spline multiplier 9 3 2014 Nemnem (default = 1)
+  call log_file_exists(log_file, nopen, file_open)
   write(*, *)
   write(*, *)'   span        chord_multipliers'
+  write(nopen,*) ''
+  write(nopen,*) '   span        chord_multipliers'
+
   call cubicspline(xcpchord, spanchord, cpchord, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
   call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, chords, na, xbs, ybs)
   do ia = 1, na
      print*, span(ia), chords(ia)
+     write(nopen,*) span(ia), chords(ia)
   enddo
+  call close_log_file(nopen, file_open)
 endif
 
 !----------------------------------------------------------------------
 !!-Control points for stagger------------------------------------------
 staggspline = in_beta(1)
 if(staggspline.eq.999.)then
+  call log_file_exists(log_file, nopen, file_open)
   write(*, *)
   write(*, *)' Stagger defined spanwise by a cubic B-spline using control points.'
   write(*, *)'   span        stagger'
+
+  write(nopen, *)
+  write(nopen, *)' Stagger defined spanwise by a cubic B-spline using control points.'
+  write(nopen, *)'   span        stagger'
+
   call cubicspline(xcpinbeta, spaninbeta, cpinbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
   call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, inbeta_s, na, xbs, ybs)
   do ia = 1, na
 	 print*, span(ia), inbeta_s(ia)
+     write(nopen,*) span(ia), inbeta_s(ia)
   enddo
+  call close_log_file(nopen, file_open)
 endif
 
 !----------------------------------------------------------------------
 !!-Control points for tm/c spline multiplier---------------------------------------
 if(tm_c_spline)then
+  call log_file_exists(log_file, nopen, file_open)
+  write(*, *)
   write(*, *)' tm/c thickness ratio defined radially with 2D spline using control points.'
+  write(nopen,*) ''
+  write(nopen,*) 'tm/c thickness ratio defined radially with 2D spline using control points.'
   call cubicspline(xcptm_c, spantm_c, cptm_c, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
   call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, thk_tm_c_spl, na, xbs, ybs)
   do ia = 1, na
 	 print*, span(ia), thk_tm_c_spl(ia)
+     write(nopen,*) span(ia), thk_tm_c_spl(ia)
   enddo
+  call close_log_file(nopen, file_open)
 endif
 
 !-------------------------------------------------------------
@@ -1143,23 +1354,32 @@ do js = 1, nspn
    !----------------------------------------------------------------------
    !chord switches
    !----------------------------------------------------------------------
+   if (js == 1) then
+        call log_file_exists(log_file, nopen, file_open)
+        write(nopen,*) ''
+   end if
    if(chord_switch.eq.1)then
      print*, 'Non-dimensional chord from the input...'
+     if (js == 1) write(nopen,*) 'Non-dimensional chord from the input...'
      chrdx = chord(js)
      axchrd(js) = chord(js)
    elseif(chord_switch.eq.0)then
      print*, 'Internally calculated chord...'
+     if (js == 1) write(nopen,*) 'Internally calculated chord...'
      chrdx = chordm(js)
      axchrd(js) = chord(js)
    elseif(chord_switch.eq.2)then
      print*, 'Chord multiplier calculated using spline control points...'
+     if (js == 1) write(nopen,*) 'Chord multiplier calculated using spline control points...'
      chrdx = chordm(js) * chords(js)
      axchrd(js) = chord(js)
    endif ! endif for chord options
+   if (js ==1) call close_log_file(nopen, file_open)
 
    !----------------------------------------------------------------------
    !stagger switches
    !----------------------------------------------------------------------
+   if (js ==1) call log_file_exists(log_file, nopen, file_open)
    if(staggspline.eq.999.)then ! stagger from the spline control table
      stgr = inbeta_s(js)
    elseif(chord_switch.ne.0)then
@@ -1167,7 +1387,10 @@ do js = 1, nspn
    else
      stgr = 0.
      print*, 'Stagger calculated from the inlet and exit angles...'
+     if (js == 1) write(nopen,*) 'Stagger calculated from the inlet and exit angles...'
    endif ! endif for stagger options
+   if (js == 1) call close_log_file(nopen, file_open)
+
    !
    !----------------------------------------------------------------------
    ! if(curv.ne.0 .and. LE.ne.2)then
@@ -1191,12 +1414,15 @@ do js = 1, nspn
    !----------------------------------------------------------------------
    !tm/c thickness spline switch
    !----------------------------------------------------------------------
+   if (js == 1) call log_file_exists(log_file, nopen, file_open)
    if(tm_c_spline)then
      print*, 'Thickness t/c will be multiplied by tm/c 2D spline definition...'
+     if (js == 1) write(nopen,*) 'Thickness t/c will be multiplied by tm/c 2D spline definition...'
      thkc = thk_c(js)*thk_tm_c_spl(js)
    else
 	 thkc = thk_c(js)
    endif
+   if (js == 1) call close_log_file(nopen, file_open)
    
    !----------------------------------------------------------------------
    call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js), &

@@ -5,6 +5,12 @@
 ! Subroutine to display the welcome message
 !---------------------------------------------------------
 subroutine displayMessage
+    use file_operations
+
+
+character(len = :), allocatable :: log_file
+integer                         :: nopen
+logical                         :: file_open, initial
 
 write(*,*)
 write(*,*)'************************************************************'
@@ -59,6 +65,67 @@ write(*,*)
 write(*,*)'************************************************************'
 write(*,*)
 
+! Check if log file exists or not
+! Write screen output to the log file
+initial = .true.
+call log_file_exists(log_file, nopen, file_open, initial)
+
+write(nopen,*)
+write(nopen,*)'************************************************************'
+write(nopen,*)'************************************************************'
+write(nopen,*)'****  T-BLADE3:Turbomachinery BLADE 3D Geometry Builder ****'
+write(nopen,*)'****                                                    ****' 
+write(nopen,*)'****  Version 1.0	                                   ****' 
+write(nopen,*)'****                                                    ****'
+write(nopen,*)'****  ...was also called as below till Aug 2016...      ****' 
+write(nopen,*)'****  3DBGB: 3 Dimensional Blade Geometry Builder       ****'
+write(nopen,*)'****                                                    ****'  
+write(nopen,*)'****  Version 1.3                                       ****' 
+write(nopen,*)'****                                                    ****'
+write(nopen,*)'****  This software comes with ABSOLUTELY NO WARRANTY   ****'
+write(nopen,*)'****                                                    ****'
+write(nopen,*)'****  This is a program which generates a 3D blade...   ****' 
+write(nopen,*)'****  ...shape and outputs 3D blade section files.      ****'
+write(nopen,*)'****                                                    ****'
+write(nopen,*)'****  Inputs: LE and TE curve(x,r), inlet angle,        ****' 
+write(nopen,*)'****          exit angle, chord, tm/c, incidence,       ****'
+write(nopen,*)'****          deviation, secondary flow angles,         ****'
+write(nopen,*)'****          streamline coordinates:(x,r)              ****'   
+write(nopen,*)'****          control points for sweep, lean,           ****'
+write(nopen,*)'****          blade scaling factor.                     ****'
+write(nopen,*)'****                                                    ****'
+write(nopen,*)'****  Outputs: 3D blade sections (x,y,z),               ****'
+write(nopen,*)'****           2D airfoils (mprime,theta).              ****'
+write(nopen,*)'****                                                    ****'
+write(nopen,*)'****  ---------------by Kiran Siddappaji         ----   ****'
+write(nopen,*)'****  ---------------by Mark G. Turner           ----   ****'
+write(nopen,*)'****  ------------------- turnermr@ucmail.uc.edu ----   ****'
+write(nopen,*)'****  ---------------by Karthik Balasubramanian  ----   ****'
+write(nopen,*)'****  ---------------by Syed Moez Hussain Mahmood----   ****'
+write(nopen,*)'****  ---------------by Ahmed Nemnem             ----   ****'
+write(nopen,*)'****  ---------------by Marshall C. Galbraith    ----   ****'
+write(nopen,*)'************************************************************'
+write(nopen,*)'************************************************************'
+write(nopen,*)
+write(nopen,*) 'T-Blade3 Copyright (C) 2017 University of Cincinnati, developed by Kiran Siddappaji,' 
+write(nopen,*) 'Dr. Mark G. Turner, Karthik  Balasubramanian, Syed Moez Hussain, Ahmed Farid Nemnem '
+write(nopen,*) ' and Marshall C. Galbraith.'
+write(nopen,*)
+write(nopen,*) 'This program is free software; you can redistribute it and/or modify it under the '
+write(nopen,*) 'terms of the GNU General Public License as published by the Free Software Foundation; '
+write(nopen,*) 'either version 2 of the License, or (at your option) any later version.'
+write(nopen,*)
+write(nopen,*) 'This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;'
+write(nopen,*) 'without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. '
+write(nopen,*) 'See the GNU General Public License for more details.  For the complete terms of the '
+write(nopen,*) 'GNU General Public License, please see this URL: http://www.gnu.org/licenses/gpl-2.0.html'
+write(nopen,*)
+write(nopen,*)'************************************************************'
+write(nopen,*)
+
+! Close the log file if it is open
+call close_log_file(nopen, file_open)
+
 return
 end subroutine displayMessage
 !---------------------------------------------------------
@@ -107,15 +174,22 @@ end function
 !subroutine to write the dimensional hub and casing streamlines
 !--------------------------------------------------------------
 subroutine hubTipStreamline(xhub,rhub,nphub,xtip,rtip,nptip,nsl,scf,casename)
+use file_operations
 implicit none
 
-integer i,nphub,nptip,nsl
+integer i,nphub,nptip,nsl,nopen
 real*8 xhub(nphub,1),rhub(nphub,1),xtip(nptip,1),rtip(nptip,1)
 real*8 scf
 character*80 fname1,fname2
 character*32 casename
+character(len = :), allocatable :: log_file
+logical                         :: file_open
 
+
+call log_file_Exists(log_file, nopen, file_open)
 print*,' Writing dimensional hub and casing streamlines...'
+write(nopen,*) 'Writing dimensional hub and casing streamlines...'
+call close_log_file(nopen, file_open)
 fname1 = 'hub.'//trim(casename)//'.sldcrv'
 open(1,file = fname1,status ='unknown')
 do i = 1,nphub
@@ -139,16 +213,22 @@ end subroutine
 !subroutine to write the dimensional streamlines (without hub or casing streamlines)nemnem
 !--------------------------------------------------------------
 subroutine streamlines(xml,rml,np,scf,casename,ia)
+use file_operations
 implicit none
 
-integer i,ia,np
+integer i,ia,np, nopen
 real*8 xml(np),rml(np)
 real*8 scf
 character*80 fname
 character*32 casename,temp
+character(len = :), allocatable :: log_file
+logical                         :: file_open
 
 write(temp,*)ia
+call log_file_exists(log_file, nopen, file_open)
 print*,' Writing dimensional streamline'//trim(adjustl(temp))//'...'
+write(nopen,*) 'Writing dimensional streamline'//trim(adjustl(temp))//'...'
+call close_log_file(nopen, file_open)
 fname = 'streamlines'//trim(adjustl(temp))//'.'//trim(casename)//'.sldcrv'
 open(1,file = fname,status ='unknown')
 	do i = 1,np
@@ -164,9 +244,10 @@ end subroutine
 ! subroutine calculating hub offset
 !--------------------------------------------------------------
 subroutine huboffset(mphub,x,r,dxds,drds,hub,nphub,scf,casename)
+use file_operations
 implicit none
 
-integer i,nphub
+integer i,nphub, nopen
 
 real*8, intent(out):: mphub(nphub,1)
 real*8 xhub(nphub,1),rhub(nphub,1),xms_hub(nphub,1),rms_hub(nphub,1)
@@ -175,6 +256,9 @@ real*8 b,xnorm(nphub,1),rnorm(nphub,1),dxn(nphub,1),drn(nphub,1)
 
 character*80 fname1, fname2
 character*32 casename
+
+character(len = :), allocatable :: log_file
+logical                         :: file_open
 
 !Calcultating the normal and offset coordinates
 do i = 1, nphub   
@@ -197,8 +281,13 @@ write(*,*)
 !writing the offset coordinates to a file
 fname1 = 'hub-offset.'//trim(casename)//'.dat'
 open(1,file = fname1, status = 'unknown')
+call log_file_exists(log_file, nopen, file_open)
 write(*,*)'Calculating hub-offset streamline coordinates...'
 write(*,*)'Writing the coordinates to hub-offset.dat file'
+
+write(nopen,*) 'Calculating hub-offset streamline coordinates...'
+write(nopen,*) 'Writing the coordinates to hub-offset.dat file'
+call close_log_file(nopen, file_open)
 
 !writing the dimensionless offset coordinates to a file
 fname1 = 'hub-offset-dimlss.'//trim(casename)//'.dat'
@@ -247,10 +336,11 @@ end subroutine
 ! subroutine calculating tip offset
 !--------------------------------------------------------------
 subroutine tipoffset(mptip,x,r,dxds,drds,tip,nptip,scf,nsl,casename)
+use file_operations
 implicit none
 
 integer i,nptip,nsl
-
+integer :: nopen
 real*8,intent(out) :: mptip(nptip,1)
 real*8 xtip(nptip,1),rtip(nptip,1),xms_tip(nptip,1),rms_tip(nptip,1)
 real*8 x(nptip,1),r(nptip,1),dxds(nptip,1),drds(nptip,1),tip,scf
@@ -258,6 +348,8 @@ real*8 b,xnorm(nptip,1),rnorm(nptip,1),dxn(nptip,1),drn(nptip,1),deltan
 
 character*80 fname1, fname2
 character*32 casename
+character(len = :), allocatable :: log_file
+logical                         :: file_open
 
 !Calcultating the normal and offset coordinates
 
@@ -279,8 +371,13 @@ write(*,*)
 !writing the offset coordinates to a file
 fname1 = 'tip-offset.'//trim(casename)//'.dat'
 open(1,file = fname1, status = 'unknown')
+call log_file_exists(log_file, nopen, file_open)
 write(*,*)'Calculating tip-offset streamline coordinates...'
 write(*,*)'Writing the coordinates to tip-offset.dat file'
+
+write(nopen,*) 'Calculating tip-offset streamline coordinates...'
+write(nopen,*) 'Writing the coordinates to tip-offset.dat file'
+call close_log_file(nopen, file_open)
 
 !writing the dimenstionless offset coordinates to a file
 fname1 = 'tip-offset-dimlss.'//trim(casename)//'.dat'
@@ -1544,18 +1641,26 @@ end subroutine constantslopemeanline3D
 !
 !*******************************************************************************************
 subroutine uniform_clustering(np,u)
+    use file_operations
     implicit none
 
     integer,                    intent(in)          :: np
     real(kind = 8),             intent(inout)       :: u(*)
 
     ! Local variables
-    integer                                         :: i
+    integer                                         :: i, nopen
+    character(len = :), allocatable                 :: log_file
+    logical                                         :: file_open
 
 
-    ! Print output to screen
+    ! Print output to screen and write to log file
+    call log_file_exists(log_file, nopen, file_open)
     print *, 'Using uniform clustering distribution'
     print *, ''
+    write(nopen,*) 'Using uniform clustering distribution'
+    write(nopen,*) ''
+    call close_log_file(nopen, file_open)
+
 
     ! Uniform clustering of u from u = 0.0 to u = 1.0
     do i = 1,np
@@ -1572,6 +1677,7 @@ end subroutine uniform_clustering
 !
 !*******************************************************************************************
 subroutine sine_clustering(np,u,clustering_parameter)
+    use file_operations
     implicit none
 
     integer,                    intent(in)          :: np 
@@ -1579,13 +1685,20 @@ subroutine sine_clustering(np,u,clustering_parameter)
     real(kind = 8),             intent(inout)       :: clustering_parameter
 
     ! Local variables
-    integer                                         :: i
+    integer                                         :: i, nopen
     real(kind = 8)                                  :: ui, du, pi
+    character(len = :),     allocatable             :: log_file
+    logical                                         :: file_open
 
 
-    ! Print output to screen
+    ! Print output to screen and write to log file
+    call log_file_exists(log_file, nopen, file_open)
     print *, 'Using sine function based clustering distribution'
     print *, ''
+    write(nopen,*) 'Using sine function based clustering distribution'
+    write(nopen,*) ''
+    call close_log_file(nopen, file_open)
+
 
     ! First element of u is set to zero
     u(1)            = 0.0
@@ -1611,6 +1724,7 @@ end subroutine sine_clustering
 !
 !*******************************************************************************************
 subroutine exponential_clustering(np,u,clustering_parameter)
+    use file_operations
     implicit none
 
     integer,                    intent(in)          :: np
@@ -1618,13 +1732,20 @@ subroutine exponential_clustering(np,u,clustering_parameter)
     real(kind = 8),             intent(inout)       :: clustering_parameter
 
     ! Local variables
-    integer                                         :: np1, i, j
+    integer                                         :: np1, i, j, nopen
     real(kind = 8), allocatable                     :: xi(:), u_temp(:)
+    character(len = :), allocatable                 :: log_file
+    logical                                         :: file_open
 
 
-    ! Print output to screen
+    ! Print output to screen and write to log file
+    call log_file_exists(log_file, nopen, file_open)
     print *, 'Using exponential function based clustering distribution'
     print *, ''
+    write(nopen,*) 'Using exponential function based clustering distribution'
+    write(nopen,*) ''
+    call close_log_file(nopen, file_open)
+
 
     ! np1 is the size of the stretched arrays from 0.0 to 0.5 and 0.5 to 1.0
     np1                 = (np + 1)/2
@@ -1674,6 +1795,7 @@ end subroutine exponential_clustering
 !
 !*******************************************************************************************
 subroutine hyperbolic_tan_clustering(np,u,clustering_parameter)
+    use file_operations
     implicit none
 
     integer,                    intent(in)          :: np
@@ -1681,13 +1803,20 @@ subroutine hyperbolic_tan_clustering(np,u,clustering_parameter)
     real(kind = 8),             intent(inout)       :: clustering_parameter
 
     ! Local variables
-    integer                                         :: np1, i, j
+    integer                                         :: np1, i, j, nopen
     real(kind = 8), allocatable                     :: xi(:), u_temp(:), temp(:)
+    character(len = :), allocatable                 :: log_file
+    logical                                         :: file_open
 
 
-    ! Print output to screen
+    ! Print output to screen and write to log file
+    call log_file_exists(log_file, nopen, file_open)
     print *, 'Using hyperbolic tangent function based clustering'
     print *, ''
+    write(nopen,*) 'Using hyperbolic tangent function based clustering'
+    write(nopen,*) ''
+    call close_log_file(nopen, file_open)
+
 
     ! np1 is the size of the stretched arrays from 0.0 to 0.5 and 0.5 to 1.0
     np1                 = (np + 1)/2

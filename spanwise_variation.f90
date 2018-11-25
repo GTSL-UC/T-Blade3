@@ -4,7 +4,7 @@ subroutine span_variation()
 !taken from spancontrolinputs file and calls span_output() subroutine
 !span_output selects the variables for all the sections by comparing
 !its spanwise location and incorporates them into 3dbgb.
-
+use file_operations
 use globvar
 implicit none
 
@@ -14,6 +14,9 @@ real, allocatable, dimension(:, :) :: out_coord_u_fine, out_coord_v_fine
 real :: out_coord_u(na, 12), out_coord_v(na, 12)
 real :: intersec_u(nspan), intersec_v(nspan)
 character*20 ind
+integer ::  nopen
+character(len = :), allocatable :: log_file
+logical                         :: file_open
 
 if (allocated(bspline_chord_curv)) deallocate(bspline_chord_curv)
 if (allocated(bspline_thk       )) deallocate(bspline_thk       )
@@ -36,12 +39,17 @@ allocate(out_coord_v_fine(np_fine, 12))
 
 !Calling cubicbspline subroutine to create Bspline by using the given data points
 !The subroutine is called in a do loop and Bspline for each variable is created
+call log_file_exists(log_file, nopen, file_open)
 if (thick_distr .eq. 4) then
 	print*, 'Creating spanwise thickness and TE angle distributions'
 	print*, 'Creating cubic Bspline with spancontrolinput file for spanwise curvature'
+    write(nopen,*) 'Creating spanwise thickness and TE angle distributions'
+    write(nopen,*) 'Creating cubic Bspline with spancontrolinput file for spanwise curvature'
 else
 	print*, 'creating cubic bspline with spancontrolinput file'
+    write(nopen,*) 'Creating cubic bspline with spancontrolinput file'
 endif
+call close_log_file(nopen, file_open)
 
 do i = 1, np_fine
 	span_fine(i) = (i-1.)/(np_fine-1)*(span(na) - span(1)) + span(1)
@@ -153,13 +161,19 @@ if(LE .ne. 0) then
 	end do
 endif
 
+call log_file_exists(log_file, nopen, file_open)
 if (thick_distr .eq. 4) then
 	print*, 'Spanwise curvature Bspline created successfully'
 	print*, 'Spanwise thickness and TE angle distributions created successfully:'
 	print*, 'Files prefixed with thk_span_dist and te_angle_span_dist created'
+    write(nopen,*) 'Spanwise curvature Bspline created successfully'
+    write(nopen,*) 'Spanwise thickness and TE angle distributions created successfully:'
+    write(nopen,*) 'Files prefixed with thk_span_dist and te_angle_span_dist created'
 else
 	print*, 'bspline created successfully'
+    write(nopen,*) 'bspline created successfully'
 endif
+call close_log_file(nopen, file_open)
 
 !calling subroutine to calculate the location of sections
 !------------------------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 subroutine thk_ctrl_gen_driver (cname, isdev, sec, uthk, thk, n, u_spl, np, le_angle, te_angle, te_flag, le_opt_flag, &
                                 te_opt_flag, out_coord)
-
+use file_operations
 implicit none
 
 real, parameter :: dtor = 4.*atan(1.)/180.
@@ -30,6 +30,10 @@ real, allocatable, dimension(:, :) :: dAdE, dBdE, dCdE, dDdE, dEdE, ddB1, ddC1, 
 	dDdE_te, dEdE_te, ddB1_te, ddC1_te, ddD1_te, coeff_te
 real, allocatable, dimension(:) :: u_spl_fine
 real, allocatable, dimension(:, :) :: out_coord_fine	
+integer                             :: nopen
+character(len = :), allocatable     :: log_file
+logical                             :: file_open
+
 
 dev_flag = 0
 if (isdev) dev_flag = 1
@@ -327,8 +331,14 @@ if (te_flag .eq. 1 .and. te_opt_flag .eq. 0) then
 	open (unit = 81, file = 'thk_dist_te.' // trim(adjustl(sec)) // '.' // trim(cname) // '.dat')
 	write (81, '(12F40.12)') (out_coord_te(i, :), i = 1, np_te)			
 	close (81)	
-	if (fail_flag .ne. 0) print*, 'WARNING: Trailing edge thickness distribution generation failed. TE angle &
-                                   may be too small/large for specified thickness.'
+    !call log_file_exists(log_file, nopen, file_open)
+	if (fail_flag .ne. 0) then
+        print*, 'WARNING: Trailing edge thickness distribution generation failed. TE angle &
+                 may be too small/large for specified thickness.'
+        !write(nopen,*) 'WARNING: Trailing edge thickness distribution generation failed. TE angle &
+        !                may be too small/large for specified thickness'
+    end if
+    !call close_log_file(nopen, file_open)
 	if (dev_flag .eq. 1) then	
 		do i = 1, np_fine
 			u_spl_fine(i) = (i-1.)/(np_fine-1)*(1. - thk_te(1)) + thk_te(1)
@@ -388,7 +398,10 @@ do while (i .lt. iter_max)
 	enddo
 	Gn = sqrt(Gn)
 	if (abs(Gn) .lt. 1.E-13) then
+        !call log_file_exists(log_file, nopen, file_open)
 		print*, 'Zero gradient.'
+        !write(nopen,*) 'Zero gradient.'
+        !call close_log_file(nopen, file_open)
 		d_0_opt = d_0
 		d_1_opt = d_1
 		exit
@@ -444,7 +457,10 @@ do while (i .lt. iter_max)
 			ddD1_te, iknt_te, niknt_te, u_spl_te, np_te, le_opt_flag, te_opt_flag, te_flag, grad_flag, u, &
 			F3, G_temp, out_coord)		
         if (a3 .lt. tol/2.) then
+            !call log_file_exists(log_file, nopen, file_open)
 			print*, 'No improvement likely.'
+            !write(nopen,*) 'No improvement likely.'
+            !call close_log_file(nopen, file_open)
 			d_0_opt = d_0
 			d_1_opt = d_1
 			exit
@@ -536,6 +552,7 @@ d_1_opt = d_1
 	ddD1_te, iknt_te, niknt_te, u_spl_te, np_te, le_opt_flag, te_opt_flag, te_flag, grad_flag, u, &	
 	F_opt, G_opt, out_coord)
 
+!call log_file_exists(log_file, nopen, file_open)
 print*, 'Number of iterations: ', i
 print*, 'Optimum parameters: ', d_0_opt(1)/dtor, d_0_opt(2), d_0_opt(3), d_1_opt(1)/dtor, d_1_opt(2), d_1_opt(3)
 ! print*, 'Slope angle (deg) at LE: ', d_0_opt(1)/dtor
@@ -543,6 +560,13 @@ print*, 'Optimum parameters: ', d_0_opt(1)/dtor, d_0_opt(2), d_0_opt(3), d_1_opt
 ! print*, 'Third derivative at LE: ', d_0_opt(3)
 print*, 'Objective: ', F_opt
 print*, 'Gradient: ', G_opt
+
+!write(nopen,*) 'Number of iterations: ', i
+!write(nopen,*) 'Optimum parameters: ', d_0_opt(1)/dtor, d_0_opt(2), d_0_opt(3), d_1_opt(1)/dtor, d_1_opt(2), d_1_opt(3)
+!write(nopen,*) 'Objective: ', F_opt
+!write(nopen,*) 'Gradient: ', G_opt
+!
+!call close_log_file(nopen, file_open)
 
 if (allocated(u)) deallocate(u)
 if (allocated(iknt_spl)) deallocate(iknt_spl)
@@ -626,7 +650,7 @@ end subroutine thk_ctrl_gen_driver
 
 
 subroutine thk_ctrl_gen_driver_span (isdev, uthk, thk, n, u_spl, np, opt_flag, out_coord)
-
+use file_operations
 implicit none
 
 real, parameter :: dtor = 4.*atan(1.)/180.
@@ -643,6 +667,9 @@ integer, allocatable, dimension(:) :: iknt_spl, imin, imax
 real, allocatable, dimension(:) :: u, dAdB1, dBdB1, dCdB1, dDdB1, dEdB1, &
 	dAdC1, dBdC1, dCdC1, dDdC1, dEdC1, dAdD1, dBdD1, dCdD1, dDdD1, dEdD1
 real, allocatable, dimension(:, :) :: dAdE, dBdE, dCdE, dDdE, dEdE, ddB1, ddC1, ddD1
+integer                                 :: nopen
+character(len = :), allocatable         :: log_file
+logical                                 :: file_open
 
 dev_flag = 0
 if (isdev) dev_flag = 1
@@ -666,7 +693,10 @@ do i = 1, n
 	endif
 enddo
 if (sl_flag .eq. 1) then
+    call log_file_exists(log_file, nopen, file_open)
 	print*, 'Skipping spline routine - straight line.'
+    write(nopen,*) 'Skipping spline routine - straight line.'
+    call close_log_file(nopen, file_open)
 	out_coord(:, 1) = u_spl
 	do i = 1, np
 		out_coord(i, 2) = d1v_le*(u_spl(i)-u_spl(1)) + thk(1)
@@ -777,7 +807,9 @@ d_0_init = (/ d1v_le, d2v_le, d3v_le /)
 iter_max = 500; tol = 1.E-8
 d_0 = d_0_init
 d_0_opt = d_0; d_1_opt = d_1
+
 goto 40
+
 i = 1
 do while (i .lt. iter_max)
 	call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, d_0, d_1, dAdE, dBdE, dCdE, dDdE, dEdE, &
@@ -789,7 +821,10 @@ do while (i .lt. iter_max)
 	enddo
 	Gn = sqrt(Gn)
 	if (abs(Gn) .lt. 1.E-13) then
+        !call log_file_exists(log_file, nopen, file_open)
 		print*, 'Zero gradient.'
+        !write(nopen,*) 'Zero gradient.'
+        !call close_log_file(nopen, file_open)
 		d_0_opt = d_0
 		d_1_opt = d_1
 		exit
@@ -826,7 +861,10 @@ do while (i .lt. iter_max)
                                                G_temp, out_coord)	
 		endif
         if (a3 .lt. tol/2.) then
+            !call log_file_exists(log_file, nopen, file_open)
 			print*, 'No improvement likely.'
+            !write(nopen,*) 'No imporvement likely.'
+            !call close_log_file(nopen, file_open)
 			d_0_opt = d_0
 			d_1_opt = d_1
 			exit
@@ -881,8 +919,9 @@ do while (i .lt. iter_max)
 enddo
 d_0_opt = d_0
 d_1_opt = d_1
-print*, 'Number of iterations: ', i
-40 print*, 'Optimum parameters: ', d_0_opt/dtor, d_1_opt/dtor
+
+40 print*, 'Number of iterations: ', i
+print*, 'Optimum parameters: ', d_0_opt/dtor, d_1_opt/dtor
 
 call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, d_0_opt, d_1_opt, dAdE, dBdE, dCdE, dDdE, dEdE, &
 	np, iknt_spl, niknt_spl, ddB1, ddC1, ddD1, 1, u_spl, opt_flag, &
@@ -890,6 +929,13 @@ call thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt_spl, d_0_opt, d_
 
 print*, 'Objective: ', F_opt
 print*, 'Gradient: ', G_opt
+!goto 50
+call log_file_exists(log_file, nopen, file_open)
+write(nopen,*) 'Number of iterations: ', i
+write(nopen,*) 'Optimum parameters: ', d_0_opt/dtor, d_1_opt/dtor
+write(nopen,*) 'Objective: ', F_opt
+write(nopen,*) 'Gradient: ', G_opt
+call close_log_file(nopen, file_open)
 
 if (allocated(u)) deallocate(u)
 if (allocated(iknt_spl)) deallocate(iknt_spl)
@@ -926,7 +972,7 @@ subroutine thk_ctrl_gen_driver_aux (cname, dev_flag, sec, uthk, thk, n, nknt, d_
 	uthk_te, thk_te, n_te, nknt_te, dAdE_te, dBdE_te, dCdE_te, dDdE_te, dEdE_te, ddB1_te, ddC1_te, &
 	ddD1_te, iknt_te, niknt_te, u_spl_te, np_te, le_opt_flag, te_opt_flag, te_flag, grad_flag, u_spl, &
 	F, G, out_coord)
-
+use file_operations
 implicit none
 
 character (len = 20), intent(in) :: sec
@@ -955,6 +1001,9 @@ real :: F_spl, G_spl(6), G_spl_temp(6), d1v_rot, d2v_rot, d3v_rot, d_0_rot_0(3),
 	coeff_le(nknt_le-1, 5), coeff_te(nknt_te-1, 5), delu(nknt-1)
 real, allocatable, dimension(:) :: u_spl_fine
 real, allocatable, dimension(:, :) :: out_coord_fine	
+integer                             :: nopen
+character(len = :), allocatable     :: log_file
+logical                             :: file_open
 
 d3v_ang_flag_le = 0
 F = 0.; G = 0.
@@ -972,7 +1021,12 @@ delu = u_spl(2:nknt) - u_spl(1:nknt-1)
 call thk_ctrl_gen_spl(uthk, thk, n, nknt, d_0, d_1, dAdE, dBdE, dCdE, &
 	dDdE, dEdE, ddB1, ddC1, ddD1, u_spl_bl, np_bl, iknt, niknt, 1, 0, 0, &
 	out_flag, 0, 1, d1_flag, F_spl, G_spl, out_coord_bl, coeff_bl, fail_flag, dev_flag)
-if (out_flag .eq. 1 .and. fail_flag .ne. 0) print*, 'WARNING: Maximum/minimum thickness point not imposed.'
+!call log_file_exists(log_file, nopen, file_open)
+if (out_flag .eq. 1 .and. fail_flag .ne. 0) then
+    print*, 'WARNING: Maximum/minimum thickness point not imposed.'
+    !write(nopen,*) 'WARNING: Maximum/minimum thickness point not imposed.'
+end if
+!call close_log_file(nopen, file_open)
 eps = 1.E-9
 if (out_flag .eq. 1 .and. dev_flag .eq. 1) then
 	do i = 1, np_fine
@@ -1031,7 +1085,12 @@ d_0_rot_1 = (/ -d1v_rot, d2v_rot, -d3v_rot /)
 call thk_ctrl_gen_spl(uthk_le, thk_le, n_le, nknt_le, d_0_rot_0, d_0_rot_1, dAdE_le, dBdE_le, dCdE_le, &
 	dDdE_le, dEdE_le, ddB1_le, ddC1_le, ddD1_le, u_spl_le, np_le, iknt_le, niknt_le, d3v_ang_flag_le, 1, 0, &
 	out_flag, 1, 1, d1_flag, F_le, G_le_temp, out_coord_le, coeff_le, fail_flag, dev_flag)
-if (out_flag .eq. 1 .and. fail_flag .ne. 0)  print*, 'WARNING: Leading edge thickness distribution generation failed.'
+!call log_file_exists(log_file, nopen, file_open)
+if (out_flag .eq. 1 .and. fail_flag .ne. 0)  then
+    print*, 'WARNING: Leading edge thickness distribution generation failed.'
+    !write(nopen,*) 'WARNING: Leading edge thickness distribution generation failed.'
+end if
+!call close_log_file(nopen, file_open)
 G_le_temp(1) = G_le_temp(1)/d_0(1)**2
 G_le_temp(2) = G_le_temp(2)/d_0(1)**2
 
@@ -1072,7 +1131,12 @@ if (te_opt_flag .eq. 1 .and. te_flag .eq. 1) then
 	call thk_ctrl_gen_spl(uthk_te, thk_te, n_te, nknt_te, d_1_rot_0, d_1_rot_1, dAdE_te, dBdE_te, dCdE_te, &
 		dDdE_te, dEdE_te, ddB1_te, ddC1_te, ddD1_te, u_spl_te, np_te, iknt_te, niknt_te, 0, 0, 1, &
 		out_flag, 2, 0, d1_flag, F_te, G_te_temp, out_coord_te, coeff_te, fail_flag, dev_flag)
-	if (out_flag .eq. 1 .and. fail_flag .ne. 0)  print*, 'WARNING: Trailing edge thickness distribution generation failed.'
+    !call log_file_exists(log_file, nopen, file_open)
+	if (out_flag .eq. 1 .and. fail_flag .ne. 0)  then
+        print*, 'WARNING: Trailing edge thickness distribution generation failed.'
+        !write(nopen,*) 'WARNING: Trailing edge thickness distribution generation failed.'
+    end if
+    !call close_log_file(nopen, file_open)
 	if (out_flag .eq. 1) out_coord(np_le+np_bl+1 : np, :) = out_coord_te
 
 	if (grad_flag .eq. 1) then
@@ -1108,7 +1172,12 @@ elseif (te_opt_flag .eq. 2 .and. te_flag .eq. 1) then
 	call thk_ctrl_gen_spl(uthk_te, thk_te, n_te, nknt_te, d_1_rot_0, d_1_rot_1, dAdE_te, dBdE_te, dCdE_te, &
 		dDdE_te, dEdE_te, ddB1_te, ddC1_te, ddD1_te, u_spl_te, np_te, iknt_te, niknt_te, 0, 0, 1, &
 		out_flag, 2, 0, d1_flag, F_te, G_te_temp, out_coord_te, coeff_te, fail_flag, dev_flag)
-	if (out_flag .eq. 1 .and. fail_flag .ne. 0)  print*, 'WARNING: Trailing edge thickness distribution generation failed.'
+    !call log_file_exists(log_file, nopen, file_open)
+	if (out_flag .eq. 1 .and. fail_flag .ne. 0)  then
+        print*, 'WARNING: Trailing edge thickness distribution generation failed.'
+        !write(nopen,*) 'WARNING: Trailing edge thickness distribution generation failed.'
+    end if
+    !call close_log_file(nopen, file_open)
 	if (out_flag .eq. 1) out_coord(np_le+np_bl+1 : np, :) = out_coord_te
 
 	if (grad_flag .eq. 1) then
@@ -1154,7 +1223,7 @@ end subroutine thk_ctrl_gen_driver_aux
 subroutine thk_ctrl_gen_driver_aux_span (uthk, dev_flag, thk, n, nknt, d_0, d_1, dAdE, dBdE, dCdE, dDdE, dEdE, &
     np, iknt, niknt, ddB1, ddC1, ddD1, out_flag, u_spl, te_opt_flag, &
 	F, G, out_coord)
-
+use file_operations
 implicit none
 
 integer, intent(in) :: n, nknt, np, niknt, out_flag, &
@@ -1166,6 +1235,9 @@ real, intent(out) ::  F, G(6), out_coord(np, 12)
 integer :: i, j, d3v_ang_flag, fail_flag
 real :: F_spl, G_spl(6), G_spl_temp(6), F_spl_eps, eps, d_0_eps(3), u_spl(np), out_coord_temp(np, 12), &
 	d_1_eps(3), coeff(nknt-1, 5)
+integer                         :: nopen
+character(len = :), allocatable :: log_file
+logical                         :: file_open
 
 F = 0.; G = 0.
 G_spl = 0.
@@ -1173,7 +1245,12 @@ d3v_ang_flag = 1
 call thk_ctrl_gen_spl(uthk, thk, n, nknt, d_0, d_1, dAdE, dBdE, dCdE, &
 	dDdE, dEdE, ddB1, ddC1, ddD1, u_spl, np, iknt, niknt, d3v_ang_flag, 10, 0, &
 	out_flag, 0, 1, 0, F_spl, G_spl, out_coord, coeff, fail_flag, dev_flag)
-if (fail_flag .eq. 1) print*, 'WARNING: Failed to impose local minimum/maximum spanwise thickness constraints'
+!call log_file_exists(log_file, nopen, file_open)
+if (fail_flag .eq. 1) then
+    print*, 'WARNING: Failed to impose local minimum/maximum spanwise thickness constraints'
+    !write(nopen,*) 'WARNING: Failed to impose local minimum/maximum spanwise thickness constraints.'
+end if
+!call close_log_file(nopen, file_open)
 eps = 1.E-9
 if (te_opt_flag .eq. 1) then
     do i = 1,1
