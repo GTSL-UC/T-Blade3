@@ -517,25 +517,35 @@ end subroutine
 !*******************************************************
 !***************************************************************
 subroutine throatindex(throat_pos,throat_index,n_normal_distance,js,nsl)
+use file_operations
 implicit none
 integer, intent(inout):: js
 integer, intent(in):: nsl,throat_index(nsl),n_normal_distance
 character*20, intent(out):: throat_pos(nsl)
+integer                             :: nopen
+character(:),   allocatable         :: log_file
+logical                             :: file_open
 
+call log_file_exists(log_file, nopen, file_open)
 if(throat_index(js) == 0) then
   throat_pos(js) = 'none'
   print*,'WARNING: No Throat found'
+  write(nopen,*) 'WARNING: No Throat Found'
   !exit
 elseif(throat_index(js) < 0.25*n_normal_distance) then
   throat_pos(js) = 'le'
   print*,'throat_index',js,throat_index(js)
+  write(nopen,*) 'throat_index', js, throat_index(js)
 elseif(throat_index(js) > 0.75*n_normal_distance) then
   throat_pos(js) = 'te' 
   print*,'throat_index',js,throat_index(js)
+  write(nopen,*) 'throat_index', js, throat_index(js)
 else
   throat_pos(js) = 'btween'
   print*,'throat_index',js,throat_index(js)
+  write(nopen,*) 'throat_index', js, throat_index(js)
 endif! end if for throat options
+call close_log_file(nopen, file_open)
 
 return
 end subroutine
@@ -699,6 +709,7 @@ end subroutine
 
 !*******************************************************************
 subroutine stacking(xb,yb,xbot,ybot,xtop,ytop,js,np,stack_switch,stack,stk_u,stk_v,area,LE)
+use file_operations
 !---------------------------------------------------------------------------------------------------
 ! Airfoil Stacking options-----------------------Nov 2012
 ! Sample Input value : -053075 means stacked at 53% chord and 75% below meanline.
@@ -729,9 +740,14 @@ real umin,umax,sb(nx)
 real u_stack,v_stack,vtop_stack,vbot_stack,v_zero_stack
 real const_stk_u,const_stk_v,stku,stkv 
 real area,ucen,vcen,ei11,ei22,apx1,apx2
+integer                             :: nopen
+character(len  = :),    allocatable :: log_file
+logical                             :: file_open
 
 ! Calculating the area centroid cordinates of the airfoil ucen,vcen.
+call log_file_exists(log_file, nopen, file_open)
 print*,np
+write(nopen,*) np
 call aecalc(np,xb,yb,sb,1,area,ucen,vcen,ei11,ei22,apx1,apx2)
 !
 if(mod(np,2).eq.0)then
@@ -757,17 +773,22 @@ endif
 write(*,*)
 print*,'Stacking position on the chord as % of chord:',stku
 print*,'Stacking position in % above(+ve) or below(-ve) meanline :',stkv
+write(nopen,*) ''
+write(nopen,*) 'Stacking position on the chord as % of chord:', stku
+write(nopen,*) 'Stacking position in % above(+ve) or below(-ve) meanline :', stkv
 ! stacking on the chord...........
 if(stku.eq.200.)then ! 200 is for stacking at the area centroid.
   u_stack = ucen
   v_stack = vcen
   print*,'Stacking at the area centroid of the airfoil...'
+  write(nopen,*) 'Stacking at the area centroid of the airfoil...'
   goto 16
 else
   ! Calculating u_stack using the % chord stacking information
   !nphalf = (np+1)/2
   if(LE.eq.2)then ! sting LE option
     print*,'LE with sting.'
+    write(nopen,*) 'LE with sting.'
     !  nphalf = nphalf+2
     !xb(nphalf) = 0.5*(xb(nphalf-2) + xb(nphalf+2))
     !yb(nphalf) = 0.5*(yb(nphalf-2) + yb(nphalf+2))
@@ -792,6 +813,7 @@ do i = 1, np_side-1 ! from 1 to 99 (top curve) for 199 points [moving from right
    endif
 enddo
 print*,'top curve points index range for % chord stacking:',j,j+1
+write(nopen,*) 'top curve points index range for % chord stacking:',j,j+1
 vbot_stack =  ybot(j) + ((u_stack - xbot(j))*(ybot(j+1) - ybot(j))/(xbot(j+1) - xbot(j))) !*sqrt((xbot(j+1) - xbot(j))**2 + (ybot(j+1) - ybot(j))**2) 
 k = 1
 do i = 1, np_side-1 ! from 101 to 198 for 199 points (bottom curve)
@@ -803,6 +825,7 @@ do i = 1, np_side-1 ! from 101 to 198 for 199 points (bottom curve)
    endif
 enddo
 print*,'bottom curve points index range for % chord stacking:',k,k+1
+write(nopen,*) 'bottom curve points index range for % chord stacking:',k,k+1
 vtop_stack =  ytop(k) + ((u_stack - xtop(k))*(ytop(k+1) - ytop(k))/(xtop(k+1) - xtop(k))) !*sqrt((xtop(k+1) - xtop(k))**2 + (ytop(k+1) - ytop(k))**2) 
 ! Stacking on meanline: v_stack = 0
 ! v_zero_stack = average of yb(istack) and yb(1+np - istack)  
@@ -810,18 +833,25 @@ vtop_stack =  ytop(k) + ((u_stack - xtop(k))*(ytop(k+1) - ytop(k))/(xtop(k+1) - 
 ! Below meanline stack: vstack= v_zero_stack - %age(stack)*(distance between meanline and 100% BELOW meanline @ istack)
 v_zero_stack = (vtop_stack + vbot_stack)/2
 print*, "vtop_stack  vbot_stack", vtop_stack, vbot_stack
+write(nopen,*) 'vtop_stack vbot_stack', vtop_stack, vbot_stack
 if(stku.ne.200.and.stkv.gt.0)then! above meanline stacking
   v_stack = v_zero_stack + (real(stkv)/100)*(abs(vtop_stack - v_zero_stack))
   print*,'+ve stack v_stack',v_stack,(real(stkv)/100)
+  write(nopen,*) '+ve stack v_stack', v_stack, (real(stkv)/100)
 elseif(stku.ne.200.and.stkv.eq.0)then
   v_stack = 0.!v_zero_stack
 elseif(stku.ne.200.and.stkv.lt.0)then !below meanline stacking
   v_stack = v_zero_stack + (real(stkv)/100)*(abs(vbot_stack - v_zero_stack))
   print*,'v_stack',v_stack,(real(stkv)/100)
+  write(nopen,*) 'v_stack', v_stack, (real(stkv)/100)
 endif
 write(*,*)
 print*,'u_stack  v_stack', u_stack, v_stack
 write(*,*)
+write(nopen,*) ''
+write(nopen,*) 'u_stack  v_stack', u_stack, v_stack
+write(nopen,*) ''
+call close_log_file(nopen, file_open)
 !-----stacked coordinates
 16 do i = 1,np
       xb(i) = xb(i) - u_stack
@@ -978,7 +1008,7 @@ END subroutine
 ! calculating the throat from bottom point on the blade ---(for +ve ainl and -ve aext)---
 subroutine throat_calc_pitch_line(xb,yb,np,camber,angle,sang,u,pi,pitch,throat_coord, mouth_coord,exit_coord, &
                                   min_throat_2D,throat_index,n_normal_distance,casename,js,nsl,develop,isdev)
-				
+use file_operations
 ! np = 2*np_sidee-1
 ! All data used is nondimensional
 
@@ -1000,6 +1030,10 @@ character*32 casename,develop
 
 logical isdev
 
+integer                                         :: nopen
+character(len = :), allocatable                 :: log_file
+logical                                         :: file_open
+
 if(mod(np,2).eq.0)then
   np_sidee = np/2 ! For even no. of points LE = np/2. So, the current formula (np+1)/2 ==> np/2 with this change.
 else
@@ -1007,7 +1041,9 @@ else
   np_sidee = (np+1)/2
 endif
 !np_sidee = (np+1)/2
+call log_file_exists(log_file, nopen, file_open)
 print*,'np_sidee',np_sidee
+write(nopen,*) 'np_sidee', np_sidee
 ! intializing the values to 0...
 n_normal_distance = 0
 throat_index = 0
@@ -1074,8 +1110,10 @@ do j = 1, np_sidee
 enddo
 
 print*, 'n_normal_distance =',n_normal_distance
+write(nopen,*) 'n_normal_distance = ', n_normal_distance
 if(n_normal_distance == 0) then
   print*, 'WARNING: No throats found because of low number of blades'
+  write(nopen,*) 'WARNING: No throats found because of low number of blades'
   return
 endif
 
@@ -1084,6 +1122,7 @@ mouth_coord = inter_coord(:,1)
 exit_coord = inter_coord(:,n_normal_distance)
 
 print*,'number of intersection points (k) =',k-1,'from np_side of',np_sidee
+write(nopen,*) 'Number of intersection points (k) = ',k-1,'from np_side of',np_sidee
 
 if (allocated(throat)) deallocate(throat)
 Allocate (throat(n_normal_distance))
@@ -1105,10 +1144,14 @@ if(isdev)then
   print*,""
   print*,'Writing non-dimensional throat points to a file for debugging...'
   print*,""
+  write(nopen,*) ''
+  write(nopen,*) 'Writing non-dimensional throat points to a file for debugging...'
+  write(nopen,*) ''
   if(js==1) then 
     file4 = 'throat_points.'//trim(casename)//'.txt'
     open(unit= 85,file=file4, form="formatted")
     print*,file4
+    write(nopen,*) file4
     write(85,*)'pitch',pitch
   endif
   write(85,*)'section',js
@@ -1137,6 +1180,8 @@ if(isdev)then
     close(85)
   endif
 endif   
+
+call close_log_file(nopen, file_open)
 
 return
 END subroutine throat_calc_pitch_line

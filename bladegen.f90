@@ -154,7 +154,7 @@ character*16 thick_distr_3_flag
 logical error, ellip, isdev, isxygrid
 integer                             :: nopen
 character(len = :), allocatable     :: log_file
-logical                             :: file_open
+logical                             :: file_open, write_to_file
 
 common / BladeSectionPoints /xxa(nxx, nax), yya(nxx, nax) 
 
@@ -548,7 +548,10 @@ elseif (curv_camber.eq.1) then ! using curvature control for camber instead of m
     ! Airfoil camber defined by curvature control through spline using control points-
     !--Karthik Balasubramanian--
     !-------- Ahmed Nemnem------
+    call log_file_exists(log_file, nopen, file_open)
     write (*, '(/, A)') 'Using curvature control for camber definition...'
+    write (nopen, '(/, A)') 'Using curvature control for camber definition...'
+    call close_log_file(nopen, file_open)
     ainl = atan(sinl)
     aext = atan(sext)
     ! Reading the section control points:
@@ -631,8 +634,10 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
     !---- generate airfoil thickness: =============================== 
     ! -----------------------------------------------------------------------------
     if (thick_distr.eq.4) then
+        call log_file_exists(log_file, nopen, file_open)
         ! Added by Karthik Balasubramanian
         write (*, '(/, A)') 'Implementing exact thickness control'
+        write(nopen, '(/, A)') 'Implementing exact thickness control'
         ncp = ncp_thk(js)
         if (allocated(xcp_thk)) deallocate(xcp_thk)
         if (allocated(ycp_thk)) deallocate(ycp_thk)
@@ -643,16 +648,26 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
             ycp_thk(i) = thk_cp(i, 2*js)
         enddo
         print*, 'Exact thickness points:'
+        write(nopen,*) 'Exact thickness points:'
         write(*, '(2F10.5)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
+        write(nopen, '(2F10.5)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
         print*, 'LE Angle', le_angle_all(js)
         print*, 'TE Angle', te_angle_all(js)
+        write(nopen,*) 'LE Angle', le_angle_all(js)
+        write(nopen,*) 'TE Angle', te_angle_all(js)
         ! thk_ctrl_gen_driver (uthk, thk, n, u_spl, np, te_angle_all, te_flag, out_coord)
         print*, 'TE flag', te_flag
         print*, 'LE optimization flag', le_opt_flag
         print*, 'TE optimization flag', te_opt_flag
+        write(nopen,*) 'TE flag', te_flag
+        write(nopen,*) 'LE optimization flag', le_opt_flag
+        write(nopen,*) 'TE optimization flag', te_opt_flag
+        write_to_file   = .true.
         call thk_ctrl_gen_driver(casename, isdev, sec, xcp_thk, ycp_thk, ncp, u, np, le_angle_all(js), &
-                                 te_angle_all(js), te_flag, le_opt_flag, te_opt_flag, thickness_data)
+                                 te_angle_all(js), te_flag, le_opt_flag, te_opt_flag, thickness_data,  &
+                                 write_to_file)
         thickness = thickness_data(:, 2)
+        call close_log_file(nopen, file_open)
         ! if(isdev) then
         open (unit = 81, file = 'thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
         write (81, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
@@ -665,7 +680,9 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         ! endif
     elseif (thick_distr.eq.3) then
         ! Added by Karthik Balasubramanian
+        call log_file_exists(log_file, nopen, file_open)
         write (*, '(/, A)') 'Implementing direct thickness control'
+        write (nopen, '(/, A)') 'Implementing direct thickness control'
         ncp = ncp_thk(js)
                 if (allocated(xcp_thk)) deallocate(xcp_thk)
                 if (allocated(ycp_thk)) deallocate(ycp_thk)
@@ -677,6 +694,8 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         enddo
         write (*, '(A)') 'User input thickness control points including internally generated dummy points : '
         write (*, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
+        write (nopen, '(A)') 'User input thickness control points including internally generated dummy points : '
+        write (nopen, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
         call splinethickcontrol(umxthk, thkc, ncp, xcp_thk, ycp_thk, np, u, thickness, thick_distr_3_flag)
         ! if(isdev) then
             open (unit = 81, file = 'thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
@@ -686,16 +705,21 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
             write (81, '(2F20.16)') (u(i), thickness(i), i = 1, np)
             close (81)
         ! endif
+        call close_log_file(nopen, file_open)
     elseif(thick_distr.ne.0) then
         ! -----------------------------------------------------------------------------
         !Spline thickness distr. with LE control
         ! -----------------------------------------------------------------------------
+        call log_file_exists(log_file, nopen, file_open)
         print*, 'np = ', np
         print*, ' the thickness segment points'
+        write(nopen,*) 'mp = ', np
+        write(nopen,*) ' the thickness segment points'
+        call close_log_file(nopen, file_open)
         call splinethick(thickness, u, np, lethk, umxthk, fmxthk, tethk, i_le, i_te, uin_le, thick_distr, &
         ucp_top, vcp_top, ucp_bot, vcp_bot, casename, js, develop, isdev, np_side, spline_data, splinedata)
         thickness = thickness*(1 + splthick)
-
+        
     elseif (thick_distr == 0)then
         do i = 1, np
             ui = u(i)
@@ -705,8 +729,12 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         enddo
     endif ! end if for thickness distribution options
 
+    call log_file_exists(log_file, nopen, file_open)
     print*, 'i_le = ', i_le
     print*, 'i_te = ', i_te
+    write(nopen,*) 'i_le = ', i_le
+    write(nopen,*) 'i_te = ', i_te
+    call close_log_file(nopen, file_open)
     ! -----------------------------------------------------------------------------
     ! Creating the top and bottom curve coordinates. ---------
     ! -----------------------------------------------------------------------------
@@ -749,8 +777,11 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         !print*, 'u = ', u(le_pos+i-1), 'thickness = ', thickness(le_pos+i-1)
         !print*, 'camber_ang = ', camber_ang(i), 'camber_le = ', camber_le(i)
         !enddo
+        call log_file_exists(log_file, nopen, file_open)
         print*, 'uin_le bladgen = ', uin_le
         print*, 'le_pos bladgen = ', le_pos
+        write(nopen,*) 'uin_le bladegen = ', uin_le
+        write(nopen,*) 'le_pos_bladegen = ', le_pos
         !print*, 'le_camber_ang in radian = ', camber_ang(1), 'in Degree = ', 1/dtor*camber_ang(1)
         !print*, 'cam_le = ', camber_le(1)
         !00000000000000000000000000000000000000000000000000000000000000000
@@ -772,6 +803,8 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         Allocate(cam_refine(interval+1))
         Allocate(u_refine(interval+1))
         print*, '!! KB reached fini_diff_refine in bladegen'
+        write(nopen,*) '!! KB reached fini_diff_refine in bladegen'
+        call close_log_file(nopen ,file_open)
         call fini_diff_refine(curv_camber, thick, thick_distr, &
                             xcp_curv, ycp_curv, ncp_curv(js), xcp_thk, ycp_thk, ncp_thk(js), &
                             u(le_pos), interval, ucp_top, vcp_top, ucp_bot, vcp_bot, &
@@ -811,7 +844,10 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
             ! LE sting definition
             ! -----------------------------------------------------------------------------
             ncp = LEdegree+2 ! for the top and bottom let there are 2 spline segments for each.
+            call log_file_exists(log_file, nopen, file_open)
             print*, 'ncp_sting', ncp
+            write(nopen,*) 'ncp_sting', ncp
+            call close_log_file(nopen, file_open)
             call lesting (xtop_refine,ytop_refine,xbot_refine,ybot_refine,interval+1,&
                         camber_ang,camber_le,uin_le,le_pos,pi,x_le_spl,y_le_spl,js,nsl, &
                         s_all,ee_all,C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all,sang,&
@@ -852,7 +888,10 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         ! Elliptical LE options (default)
         ! -----------------------------------------------------------------------------
         !---- fill in blade arrays ------------------
+        call log_file_exists(log_file, nopen, file_open)
         print*, np
+        write(nopen,*) np
+        call close_log_file(nopen, file_open)
         do i = 1, np
             xb(i) = xtop(np-i+1)
             yb(i) = ytop(np-i+1)
@@ -882,7 +921,10 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         ! close(22)
     endif
 
+    call log_file_exists(log_file, nopen, file_open)
     print*, 'chrd bladegen: ', chrd
+    write(nopen,*) 'chrd bladegen: ', chrd
+    call close_log_file(nopen, file_open)
     do i = 1, np
         !print*, xb(i), yb(i)
         xi = xb(i)
@@ -915,6 +957,9 @@ bladedata(9, js) = area*(chrd*scf)**2   ; bladedata(10, js) = lethk*chrd*scf    
 bladedata(13, js) = pitch               ! nondimesional r_deltatheta 
 radius_pitch = pitch*sec_radius(js, 1)  ! at the LE tip non-dimensional
 print*, 'pitch ', pitch 
+call log_file_exists(log_file, nopen, file_open)
+write(nopen,*) 'pitch ', pitch
+call close_log_file(nopen, file_open)
 
 !******************************************************************************************
 ! Calculation of the 2D throat:	--- new approach in 9 19 2013 Nemnem ---
@@ -953,8 +998,10 @@ call throat_calc_pitch_line(xb, yb, np, camber, angle, sang, u, pi, pitch, inter
 ! Writing the section properties into a single file
 !******************************************************************************************
 if(curv_camber.ne.0) then ! only for curvature control airfoils. 11 20 2013
+    call log_file_exists(log_file, nopen, file_open)
     file7 = 'splinedata_section.'//trim(adjustl(sec))//'.'//trim(casename)//'.dat'
     print*, file7
+    write(nopen,*) file7
     open(unit = 33, file = file7, form = "formatted")  
     write(33, *) trim(casename), ' :', ' Spline Data'
     write(33, *) 'section : ', trim(adjustl(sec))
@@ -978,13 +1025,18 @@ if(curv_camber.ne.0) then ! only for curvature control airfoils. 11 20 2013
     enddo
     stingl = sting_l_all(js)
     print*, 'stingl: ', stingl
+    write(nopen,*) 'stingl: ', stingl
+    call close_log_file(nopen, file_open)
 endif
 
 !******************************************************************************************
 ! 2D blade grid generation.
 !******************************************************************************************
 if (isxygrid) then
+    call log_file_exists(log_file, nopen, file_open)
     print*, 'i_slope in bladgen: ', i_slope
+    write(nopen,*) 'i_slope in bladegen: ', i_slope
+    call close_log_file(nopen, file_open)
     if((nbls.ge.5).and.(i_slope.eq.0))then ! No 2D grid files for wind turbines and cases which have less than 5 blades.
         jcellblade = jcellblade_all(js)
         etawidth = etawidth_all(js)
@@ -1016,6 +1068,9 @@ endif
 ! Format Statements
 !******************************************************************************************
 301 format(i3, 2x, 6(f19.16, 2x))
+call log_file_exists(log_file, nopen, file_open)
 print*, '******************************************'
+write(nopen,*) '******************************************'
+call close_log_file(nopen, file_open)
 return
 end subroutine bladegen

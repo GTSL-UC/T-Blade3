@@ -129,6 +129,7 @@ end function
 
 subroutine camline(casename, isdev, xcp, ycp, ncp, u, np, ainl, aext, chrdx, wing_flag, &
 	sang, chrd, init_angles, init_cams, u_end, splinedata)
+    use file_operations
 
 !!		Added by Karthik Balasubramanian
 ! 			This subroutine constructs a curve (camber line) using second derivative, 
@@ -161,6 +162,9 @@ integer, intent (in) :: np, ncp, wing_flag
 real, intent (in) :: xcp(ncp), ycp(ncp), u(np), ainl, aext, chrdx
 character (len = 32), intent (in) :: casename
 logical, intent (in) :: isdev
+integer                             :: nopen
+character(len = :), allocatable     :: log_file
+logical                             :: file_open
 
 !!		Outputs from this subroutine
 !			sang		Real,			Stagger/Twist angle
@@ -191,8 +195,12 @@ real :: scalefactor, P, knew, det, k1, k2, &
 	d1v_end(ncp-2), v_end(ncp-2), xcp_seg(4), ycp_seg(4), &
 	t, angle0, camber0, intg_d2v_end(ncp-2), &
 	intg_d1v_end(ncp-2)
+call log_file_exists(log_file, nopen, file_open)
 print*, 'xcp', xcp
 print*, 'ycp', ycp
+write(nopen,*) 'xcp', xcp
+write(nopen,*) 'ycp', ycp
+
 !!
 ! write (*, '(A)'), 'Executing subroutine camline in bsplinecam.f90'
 if (wing_flag .eq. 0) then
@@ -232,9 +240,11 @@ enddo
 ! P is a grouping of terms in the scaling factor equation
 P = (intg_d2v_end(ncp-2)*intg_d1v_end(ncp-2))-(intg_d1v_end(ncp-2)**2)
 write (*, '(A, F20.15)') 'Total camber is: ', tot_cam/dtor
+write (nopen, '(A, F20.15)') 'Total camber is: ', tot_cam/dtor
 ! det is the determinant of quadratic equation in k (scaling factor)
 det = (intg_d2v_end(ncp-2)**2)+(4*P*(tan(tot_cam)**2))
 write (*, '(A, F20.15)') 'Determinant is: ', det
+write (nopen, '(A, F20.15)') 'Determinant is: ', det
 if (det.lt.0.) then 
 	write (*, '(A)') 'WARNING: All possible scaling factors for curvature control points are complex'
 	call exit
@@ -244,6 +254,7 @@ k1 = (-intg_d2v_end(ncp-2) + sqrt(det))/(2*P*tan(tot_cam))
 k2 = (-intg_d2v_end(ncp-2) - sqrt(det))/(2*P*tan(tot_cam))
 ! Choosing appropriate root
 write (*, '(A, 2F25.15)') 'Possible values of scaling factor are: ', k1, k2
+write (nopen, '(A, 2F25.15)') 'Possible values of scaling factor are: ', k1, k2
 knew = min(k1, k2)
 d1v_end = knew*(intg_d2v_end-intg_d1v_end(ncp-2))
 if (abs((atan(d1v_end(ncp-2))-atan(d1v_end(1)) - tot_cam)/tot_cam) .gt. 1E-7) then
@@ -253,6 +264,9 @@ endif
 v_end = knew*(intg_d1v_end-(u_end*intg_d1v_end(ncp-2)))
 write (*, '(A, F20.15)') 'Camber line second derivative scaling factor: ', knew
 write (*, '(A, F20.15, /, A, F20.15)') 'Inlet u-v metal angle in deg: ', atan(d1v_end(1))/dtor, &
+'Exit u-v metal angle in deg: ', atan(d1v_end(ncp-2))/dtor
+write (nopen, '(A, F20.15)') 'Camber line second derivative scaling factor: ', knew
+write (nopen, '(A, F20.15, /, A, F20.15)') 'Inlet u-v metal angle in deg: ', atan(d1v_end(1))/dtor, &
 'Exit u-v metal angle in deg: ', atan(d1v_end(ncp-2))/dtor
 
 init_angles = knew*(intg_d2v_end-intg_d1v_end(ncp-2))
@@ -297,10 +311,14 @@ enddo
 if (wing_flag .eq. 0) then
 	sang = (ainl-atan(cam_u(1)))
 	write (*, '(A, F20.15)') 'Stagger angle in deg: ', sang/dtor
+	write (nopen, '(A, F20.15)') 'Stagger angle in deg: ', sang/dtor
 elseif (wing_flag .eq. 1) then
 	sang = ainl
 	write (*, '(A, F20.15)') 'Twist angle in deg: ', sang/dtor
+	write (nopen, '(A, F20.15)') 'Twist angle in deg: ', sang/dtor
 endif
+
+call close_log_file(nopen, file_open)
 ! Calculation of actual chord after stagger/twist
 chrd = chrdx/abs(cos(sang))
 

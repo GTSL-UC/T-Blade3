@@ -8,6 +8,7 @@ subroutine gauseI2D( ni, nj, x, y, err, curvemesh, ellipsmooth )
 !         curvemesh, ellipsmooth are logical variables
 ! Outputs: X,Y grid points which are smoothed.
 !-----------------------------------------------------
+use file_operations
 integer ni, nj, i, j, k,kmax, info, order, istart,ilast,nsmooth
 real*8, intent(inout):: x(ni,nj), y(ni,nj), err
 real*8 xtemp, ytemp, err1
@@ -15,6 +16,9 @@ real*8 g11, g12, g22
 real*8 x1,x2,x3,x4,x5,x6,x7
 real*8 y1,y2,y3,y4,y5,y6,y7,mat(4,5),A,B,C,D
 logical curvemesh,ellipsmooth
+integer                     :: nopen
+character(:),   allocatable :: log_file
+logical                     :: file_open
 
 if(ellipsmooth)then
   !Smoothing the top and bottom periodic bounday grid curve.
@@ -36,7 +40,10 @@ if(ellipsmooth)then
      endif
        !print*,'i: ',i
   enddo
+  call log_file_exists(log_file, nopen, file_open)
   print*,'istart bottom curve: ',istart  
+  write(nopen,*) 'istart bottom curve: ', istart
+  call close_log_file(nopen, file_open)
   !Smoothing the corner by taking midpoints of    
   !...5 points before and after istart...
   !...where istart is the point where the upstream ends...
@@ -86,7 +93,10 @@ if(ellipsmooth)then
        exit
      endif
   enddo
+  call log_file_exists(log_file, nopen, file_open)
   print*,'ilast bottom curve: ',ilast
+  write(nopen,*) 'ilast bottom curve: ', ilast
+  call close_log_file(nopen, file_open)
   !
   !Smoothing the corner by taking midpoints of    
   !...5 points before and after ilast...
@@ -142,7 +152,10 @@ if(ellipsmooth)then
      endif
        !print*,'i: ',i
   enddo
+  call log_file_exists(log_file, nopen, file_open)
   print*,'istart top curve: ',istart  
+  write(nopen,*) 'istart top curve: ', istart
+  call close_log_file(nopen, file_open)
   !Smoothing the corner by taking midpoints of    
   !...5 points before and after istart...
   !...where istart is the point where the upstream ends...
@@ -191,7 +204,10 @@ if(ellipsmooth)then
        exit
      endif
   enddo
+  call log_file_exists(log_file, nopen, file_open)
   print*,'ilast top curve: ',ilast
+  write(nopen,*) 'ilast top curve: ', ilast
+  call close_log_file(nopen, file_open)
   !
   !Smoothing the corner by taking midpoints of    
   !...5 points before and after ilast...
@@ -233,7 +249,10 @@ endif
   !---------------------------------------------------------------
   !---------------------------------------------------------------
 if(curvemesh)then
+  call log_file_exists(log_file, nopen, file_open)
   print*,"Elliptic grid smoothing..."
+  write(nopen,*) 'Elliptic grid smoothing...'
+  call close_log_file(nopen, file_open)
   !print*,'Error coming in :',err
   !k = 0
   kmax = 2000
@@ -266,12 +285,16 @@ if(curvemesh)then
         err1 = SQRT( err1/((nj-2)*(ni-2)) )
         !print*,'error: ',k,err1
         !print*,'iteration,error,inputerror : ',k,err1,err
+        call log_file_exists(log_file, nopen, file_open)
         if(abs(err1) < err)then
            print*,'Smoothing converged at: ',k,err,err1
+           write(nopen,*) 'Smoothing converged at: ', k, err, err1
            return
         elseif (k == kmax)then
            print*,'Reached the max iteration, error, givenerror: ',k,err,err1
+           write(nopen,*) 'Reached the max iteration, error, givenerror: ', k, err, err1
         endif
+        call close_log_file(nopen, file_open)
     !    k = k+1
     enddo
     !print*,'Smoothing converged with error: ',k
@@ -284,6 +307,7 @@ end subroutine gauseI2D
 !*******************************************************************
 !*******************************************************************
 subroutine gauseI2Dblade( ni, nj, x, y, err, curvemesh, ellipsmooth,LE )
+use file_operations
 !-----------------------------------------------------
 !Calculates the smoothed grid points of blade.
 ! Solves for the laplace equation.
@@ -300,11 +324,17 @@ real*8 g11, g12, g22
 real*8 x1,x2,x3,x4,x5,x6,x7
 real*8 y1,y2,y3,y4,y5,y6,y7,mat(4,5),A,B,C,D
 logical curvemesh,ellipsmooth
+integer                     :: nopen
+character(:),   allocatable :: log_file
+logical                     :: file_open
 
 !---------------------------------------------------------------
 !---------------------------------------------------------------
 if(curvemesh.or.(LE.eq.1))then
+  call log_file_exists(log_file, nopen, file_open)
   print*,"Elliptic grid smoothing..."
+  write(nopen,*) 'Elliptic grid smoothing...'
+  call close_log_file(nopen, file_open)
   !print*,'Error coming in :',err
   !k = 0
   kmax = 2000
@@ -337,12 +367,16 @@ if(curvemesh.or.(LE.eq.1))then
         err1 = SQRT( err1/((nj-2)*(ni-2)) )
         !print*,'error: ',k,err1
         !print*,'iteration,error,inputerror : ',k,err1,err
+        call log_file_exists(log_file, nopen, file_open)
         if(abs(err1) < err)then
            print*,'Smoothing converged at: ',k,err,err1
+           write(nopen,*) 'Smoothing converged at: ', k, err, err1 
            return
         elseif (k == kmax)then
            print*,'Reached the max iteration, error, givenerror: ',k,err,err1
+           write(nopen,*) 'Reached the max iteration, error, givenerror: ', k, err, err1
         endif
+        call close_log_file(nopen, file_open)
     !    k = k+1
     enddo
     !print*,'Smoothing converged with error: ',k
@@ -371,6 +405,7 @@ subroutine curveBG(imax,jmax,xblade,yblade, &
 !          xline,yline is the upstream+meanline+downstream coordinates
 !          It is defined in the module 'gridvar'
 !-----------------------------------------------------
+use file_operations
 use gridvar
 implicit none
 integer i,j,k,dwnstrm,j1,j2,np_side
@@ -383,6 +418,9 @@ real*8 cellwidth, dbmean
 character*32 fname,fname1,fname2,fname3,fname4
 character*32 fname5,fname6,fext,temp,casename,file1,develop
 logical isdev
+character(:),   allocatable :: log_file
+integer                     :: nopen
+logical                     :: file_open
 
 !allocate(xline(10),yline(10))
 np_side = uplmt
@@ -392,7 +430,10 @@ np_side = uplmt
   endif
   ! Using half the points as np_side.
   np_side = (0.5*(np_side+1))
+  call log_file_exists(log_file, nopen, file_open)
   print*,'half np_side for curvemesh: ',np_side  
+  write(nopen,*) 'half np_side for curvemesh: ', np_side
+  call close_log_file(nopen, file_open)
   !-----------------------------------------------------
   !Meanline with uniform clustering.
   !-----------------------------------------------------
@@ -543,8 +584,11 @@ np_side = uplmt
   j1 = int((jmax-1)*0.5)
   j2 = j1 + 1
   !
+  call log_file_exists(log_file, nopen, file_open)
   print*,'imax x jmax begin: ',imax, jmax
   print*,'np_side,j1,j2 :',np_side,j1,j2
+  write(nopen,*) 'imax x jmax begin: ', imax, jmax
+  write(nopen,*) 'np_side,j1,j2 :', np_side, j1, j2
   !print*,'j1 + np_side + (dwnstrm*j1)',j1 + np_side + (dwnstrm*j1)
   if (allocated(xmeanline)) deallocate(xmeanline)
   if (allocated(ymeanline)) deallocate(ymeanline)
@@ -553,6 +597,8 @@ np_side = uplmt
   if (allocated(yline)) deallocate(yline)
   Allocate(xline(j1 + np_side + (dwnstrm*j1)),yline(j1 + np_side + (dwnstrm*j1)))
   print*,'j1 + np_side + (dwnstrm*j1)',j1 + np_side + (dwnstrm*j1)
+  write(nopen,*) 'j1 + np_side + (dwnstrm*j1)', j1 + np_side + (dwnstrm*j1)
+  call close_log_file(nopen, file_open)
   !---------------------------------------
   ! coordinates upstream to the meanline.
   !---------------------------------------
@@ -588,8 +634,12 @@ np_side = uplmt
   elseif(mod(imax,4).eq.3)then
     imax = imax - 2
   endif
+  call log_file_exists(log_file, nopen, file_open)
   print*,'imax x jmax final: ',imax,'x',jmax
   write(*,*)
+  write(nopen,*) 'imax x jmax final: ', imax, 'x', jmax
+  write(nopen,*) ''
+  call close_log_file(nopen, file_open)
     ! print*,'xline inside curveBG subroutine'
   ! do i = 1, imax
      ! print*,xline(i),yline(i)

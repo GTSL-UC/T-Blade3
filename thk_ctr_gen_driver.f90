@@ -1,5 +1,5 @@
 subroutine thk_ctrl_gen_driver (cname, isdev, sec, uthk, thk, n, u_spl, np, le_angle, te_angle, te_flag, le_opt_flag, &
-                                te_opt_flag, out_coord)
+                                te_opt_flag, out_coord, write_to_file)
 use file_operations
 implicit none
 
@@ -12,6 +12,7 @@ integer, intent(inout) :: te_flag
 real, intent(in) :: uthk(n), thk(n), u_spl(np)
 real, intent(inout) :: le_angle, te_angle
 real, intent(out) :: out_coord(np, 12)
+logical,    optional,   intent(in)  :: write_to_file
 integer :: i, j, k, i_te, iter_max, niknt_spl, nknt_spl, nseg_spl, thkmx_i, nseg1, nseg2, d3v_ang_flag_le, &
 	n_le, niknt_le, nknt_le, nseg_le, n_te, niknt_te, nknt_te, nseg_te, np_le, np_te, np_bl, grad_flag, &
 	d1_flag, np_fine, nmax, nmin, fail_flag, dev_flag
@@ -32,7 +33,7 @@ real, allocatable, dimension(:) :: u_spl_fine
 real, allocatable, dimension(:, :) :: out_coord_fine	
 integer                             :: nopen
 character(len = :), allocatable     :: log_file
-logical                             :: file_open
+logical                             :: file_open, write_to_file_aux
 
 
 dev_flag = 0
@@ -335,8 +336,12 @@ if (te_flag .eq. 1 .and. te_opt_flag .eq. 0) then
 	if (fail_flag .ne. 0) then
         print*, 'WARNING: Trailing edge thickness distribution generation failed. TE angle &
                  may be too small/large for specified thickness.'
-        !write(nopen,*) 'WARNING: Trailing edge thickness distribution generation failed. TE angle &
-        !                may be too small/large for specified thickness'
+        if (present(write_to_file) .and. write_to_file) then
+            call log_file_exists(log_file, nopen, file_open)
+            write(nopen,*) 'WARNING: Trailing edge thickness distribution generation failed. TE angle &
+                            may be too small/large for specified thickness'
+            call close_log_file(nopen, file_open)
+        end if
     end if
     !call close_log_file(nopen, file_open)
 	if (dev_flag .eq. 1) then	
@@ -385,12 +390,13 @@ d_0 = d_0_init
 i = 1
 ! goto 40
 do while (i .lt. iter_max)
+    write_to_file_aux   = .false.
 	call thk_ctrl_gen_driver_aux (cname, dev_flag, sec, uthk, thk, n, nknt_spl, d_0, d_1, dAdE, dBdE, dCdE, dDdE, dEdE, &
 		np, iknt_spl, niknt_spl, uthk_le, thk_le, n_le, nknt_le, dAdE_le, dBdE_le, dCdE_le, dDdE_le, dEdE_le, &
 		ddB1, ddC1, ddD1, ddB1_le, ddC1_le, ddD1_le, iknt_le, niknt_le, 0, u_spl_le, np_le, u_spl_bl, np_bl, &
 		uthk_te, thk_te, n_te, nknt_te, dAdE_te, dBdE_te, dCdE_te, dDdE_te, dEdE_te, ddB1_te, ddC1_te, &
 		ddD1_te, iknt_te, niknt_te, u_spl_te, np_te, le_opt_flag, te_opt_flag, te_flag, grad_flag, u, &		
-		F1, G, out_coord)
+		F1, G, out_coord, write_to_file_aux)
 
 	Gn = 0.
 	do j = 1, 6
@@ -398,10 +404,12 @@ do while (i .lt. iter_max)
 	enddo
 	Gn = sqrt(Gn)
 	if (abs(Gn) .lt. 1.E-13) then
-        !call log_file_exists(log_file, nopen, file_open)
 		print*, 'Zero gradient.'
-        !write(nopen,*) 'Zero gradient.'
-        !call close_log_file(nopen, file_open)
+        if (present(write_to_file) .and. write_to_file) then
+            call log_file_exists(log_file, nopen, file_open)
+            write(nopen,*) 'Zero gradient.'
+            call close_log_file(nopen, file_open)
+        end if
 		d_0_opt = d_0
 		d_1_opt = d_1
 		exit
@@ -426,12 +434,13 @@ do while (i .lt. iter_max)
 	elseif (te_opt_flag .eq. 2) then
 		d_1_temp = d_1-a3*G(4:6)
 	endif
+    write_to_file_aux   = .false.
 	call thk_ctrl_gen_driver_aux (cname, dev_flag, sec, uthk, thk, n, nknt_spl, d_0_temp, d_1_temp, dAdE, dBdE, dCdE, dDdE, dEdE, &
 		3, iknt_spl, niknt_spl, uthk_le, thk_le, n_le, nknt_le, dAdE_le, dBdE_le, dCdE_le, dDdE_le, dEdE_le, &
 		ddB1, ddC1, ddD1, ddB1_le, ddC1_le, ddD1_le, iknt_le, niknt_le, 0, u_spl_le, np_le, u_spl_bl, np_bl, &
 		uthk_te, thk_te, n_te, nknt_te, dAdE_te, dBdE_te, dCdE_te, dDdE_te, dEdE_te, ddB1_te, ddC1_te, &
 		ddD1_te, iknt_te, niknt_te, u_spl_te, np_te, le_opt_flag, te_opt_flag, te_flag, grad_flag, u, &			
-		F3, G_temp, out_coord)	
+		F3, G_temp, out_coord, write_to_file_aux)	
 	do while (F3 .ge. F1)
         a3 = a3/2.
 		if (d1_flag .eq. 0 .and. (le_opt_flag .eq. 1 .or. le_opt_flag .eq. 2)) then
@@ -450,17 +459,20 @@ do while (i .lt. iter_max)
 		elseif (te_opt_flag .eq. 2) then
 			d_1_temp = d_1-a3*G(4:6)
 		endif
+        write_to_file_aux   = .false.
 		call thk_ctrl_gen_driver_aux (cname, dev_flag, sec, uthk, thk, n, nknt_spl, d_0_temp, d_1_temp, dAdE, dBdE, dCdE, dDdE, dEdE, &
 			3, iknt_spl, niknt_spl, uthk_le, thk_le, n_le, nknt_le, dAdE_le, dBdE_le, dCdE_le, dDdE_le, dEdE_le, &
 			ddB1, ddC1, ddD1, ddB1_le, ddC1_le, ddD1_le, iknt_le, niknt_le, 0, u_spl_le, np_le, u_spl_bl, np_bl, &
 			uthk_te, thk_te, n_te, nknt_te, dAdE_te, dBdE_te, dCdE_te, dDdE_te, dEdE_te, ddB1_te, ddC1_te, &
 			ddD1_te, iknt_te, niknt_te, u_spl_te, np_te, le_opt_flag, te_opt_flag, te_flag, grad_flag, u, &
-			F3, G_temp, out_coord)		
+			F3, G_temp, out_coord, write_to_file_aux)		
         if (a3 .lt. tol/2.) then
-            !call log_file_exists(log_file, nopen, file_open)
-			print*, 'No improvement likely.'
-            !write(nopen,*) 'No improvement likely.'
-            !call close_log_file(nopen, file_open)
+            print*, 'No improvement likely.'
+            if (present(write_to_file) .and. write_to_file) then
+                call log_file_exists(log_file, nopen, file_open)
+                write(nopen,*) 'No improvement likely.'
+                call close_log_file(nopen, file_open)
+            end if
 			d_0_opt = d_0
 			d_1_opt = d_1
 			exit
@@ -487,12 +499,13 @@ do while (i .lt. iter_max)
 	elseif (te_opt_flag .eq. 2) then
 		d_1_temp = d_1-a2*G(4:6)
 	endif
+    write_to_file_aux   = .false.
 	call thk_ctrl_gen_driver_aux (cname, dev_flag, sec, uthk, thk, n, nknt_spl, d_0_temp, d_1_temp, dAdE, dBdE, dCdE, dDdE, dEdE, &
 		3, iknt_spl, niknt_spl, uthk_le, thk_le, n_le, nknt_le, dAdE_le, dBdE_le, dCdE_le, dDdE_le, dEdE_le, &
 		ddB1, ddC1, ddD1, ddB1_le, ddC1_le, ddD1_le, iknt_le, niknt_le, 0, u_spl_le, np_le, u_spl_bl, np_bl, &
 		uthk_te, thk_te, n_te, nknt_te, dAdE_te, dBdE_te, dCdE_te, dDdE_te, dEdE_te, ddB1_te, ddC1_te, &
 		ddD1_te, iknt_te, niknt_te, u_spl_te, np_te, le_opt_flag, te_opt_flag, te_flag, grad_flag, u, &			
-		F2, G_temp, out_coord)	
+		F2, G_temp, out_coord, write_to_file_aux)	
     h1 = (F2 - F1)/a2; h2 = (F3 - F2)/(a3 - a2)
     h3 = (h2 - h1)/a3
     a0 = 0.5*(a2 - h1/h3)
@@ -513,12 +526,13 @@ do while (i .lt. iter_max)
 	elseif (te_opt_flag .eq. 2) then
 		d_1_temp = d_1-a0*G(4:6)
 	endif
+    write_to_file_aux   = .false.
 	call thk_ctrl_gen_driver_aux (cname, dev_flag, sec, uthk, thk, n, nknt_spl, d_0_temp, d_1_temp, dAdE, dBdE, dCdE, dDdE, dEdE, &
 		3, iknt_spl, niknt_spl, uthk_le, thk_le, n_le, nknt_le, dAdE_le, dBdE_le, dCdE_le, dDdE_le, dEdE_le, &
 		ddB1, ddC1, ddD1, ddB1_le, ddC1_le, ddD1_le, iknt_le, niknt_le, 0, u_spl_le, np_le, u_spl_bl, np_bl, &
 		uthk_te, thk_te, n_te, nknt_te, dAdE_te, dBdE_te, dCdE_te, dDdE_te, dEdE_te, ddB1_te, ddC1_te, &
 		ddD1_te, iknt_te, niknt_te, u_spl_te, np_te, le_opt_flag, te_opt_flag, te_flag, grad_flag, u, &			
-		F0, G_temp, out_coord)	
+		F0, G_temp, out_coord, write_to_file_aux)	
     if (F0 .lt. F3) then
         a = a0
     else
@@ -545,14 +559,14 @@ enddo
 d_0_opt = d_0
 d_1_opt = d_1
 
+write_to_file_aux = .true.
 40 call thk_ctrl_gen_driver_aux (cname, dev_flag, sec, uthk, thk, n, nknt_spl, d_0_opt, d_1_opt, dAdE, dBdE, dCdE, dDdE, dEdE, &
     np, iknt_spl, niknt_spl, uthk_le, thk_le, n_le, nknt_le, dAdE_le, dBdE_le, dCdE_le, dDdE_le, dEdE_le, &
     ddB1, ddC1, ddD1, ddB1_le, ddC1_le, ddD1_le, iknt_le, niknt_le, 1, u_spl_le, np_le, u_spl_bl, np_bl, &
 	uthk_te, thk_te, n_te, nknt_te, dAdE_te, dBdE_te, dCdE_te, dDdE_te, dEdE_te, ddB1_te, ddC1_te, &
 	ddD1_te, iknt_te, niknt_te, u_spl_te, np_te, le_opt_flag, te_opt_flag, te_flag, grad_flag, u, &	
-	F_opt, G_opt, out_coord)
+	F_opt, G_opt, out_coord, write_to_file_aux)
 
-!call log_file_exists(log_file, nopen, file_open)
 print*, 'Number of iterations: ', i
 print*, 'Optimum parameters: ', d_0_opt(1)/dtor, d_0_opt(2), d_0_opt(3), d_1_opt(1)/dtor, d_1_opt(2), d_1_opt(3)
 ! print*, 'Slope angle (deg) at LE: ', d_0_opt(1)/dtor
@@ -561,12 +575,15 @@ print*, 'Optimum parameters: ', d_0_opt(1)/dtor, d_0_opt(2), d_0_opt(3), d_1_opt
 print*, 'Objective: ', F_opt
 print*, 'Gradient: ', G_opt
 
-!write(nopen,*) 'Number of iterations: ', i
-!write(nopen,*) 'Optimum parameters: ', d_0_opt(1)/dtor, d_0_opt(2), d_0_opt(3), d_1_opt(1)/dtor, d_1_opt(2), d_1_opt(3)
-!write(nopen,*) 'Objective: ', F_opt
-!write(nopen,*) 'Gradient: ', G_opt
-!
-!call close_log_file(nopen, file_open)
+if (present(write_to_file) .and. write_to_file) then
+    call log_file_exists(log_file, nopen, file_open)
+    write(nopen,*) 'Number of iterations: ', i
+    write(nopen,*) 'Optimum parameters: ', d_0_opt(1)/dtor, d_0_opt(2), d_0_opt(3), d_1_opt(1)/dtor, d_1_opt(2), d_1_opt(3)
+    write(nopen,*) 'Objective: ', F_opt
+    write(nopen,*) 'Gradient: ', G_opt
+    call close_log_file(nopen, file_open)
+end if
+
 
 if (allocated(u)) deallocate(u)
 if (allocated(iknt_spl)) deallocate(iknt_spl)
@@ -971,7 +988,7 @@ subroutine thk_ctrl_gen_driver_aux (cname, dev_flag, sec, uthk, thk, n, nknt, d_
     ddB1, ddC1, ddD1, ddB1_le, ddC1_le, ddD1_le, iknt_le, niknt_le, out_flag, u_spl_le, np_le, u_spl_bl, np_bl, &
 	uthk_te, thk_te, n_te, nknt_te, dAdE_te, dBdE_te, dCdE_te, dDdE_te, dEdE_te, ddB1_te, ddC1_te, &
 	ddD1_te, iknt_te, niknt_te, u_spl_te, np_te, le_opt_flag, te_opt_flag, te_flag, grad_flag, u_spl, &
-	F, G, out_coord)
+	F, G, out_coord, write_to_file)
 use file_operations
 implicit none
 
@@ -991,6 +1008,7 @@ real, intent(in) :: uthk(n), thk(n), uthk_le(n_le), thk_le(n_le), &
 	dDdE_te(nknt_te-1, niknt_te), dEdE_te(nknt_te-1, niknt_te), u_spl(nknt)
 real, intent(inout) :: d_0(3)
 real, intent(out) ::  F, G(6), out_coord(np, 12)
+logical,    intent(in)  :: write_to_file
 
 integer :: i, j, d3v_ang_flag_le, grad_end_le, grad_end_te, d1_flag, np_fine, fail_flag
 real :: F_spl, G_spl(6), G_spl_temp(6), d1v_rot, d2v_rot, d3v_rot, d_0_rot_0(3), d_0_rot_1(3), G_le(6), &
@@ -1021,12 +1039,14 @@ delu = u_spl(2:nknt) - u_spl(1:nknt-1)
 call thk_ctrl_gen_spl(uthk, thk, n, nknt, d_0, d_1, dAdE, dBdE, dCdE, &
 	dDdE, dEdE, ddB1, ddC1, ddD1, u_spl_bl, np_bl, iknt, niknt, 1, 0, 0, &
 	out_flag, 0, 1, d1_flag, F_spl, G_spl, out_coord_bl, coeff_bl, fail_flag, dev_flag)
-!call log_file_exists(log_file, nopen, file_open)
 if (out_flag .eq. 1 .and. fail_flag .ne. 0) then
     print*, 'WARNING: Maximum/minimum thickness point not imposed.'
-    !write(nopen,*) 'WARNING: Maximum/minimum thickness point not imposed.'
+    if (write_to_file) then
+        call log_file_exists(log_file, nopen, file_open)
+        write(nopen,*) 'WARNING: Maximum/minimum thickness point not imposed.'
+        call close_log_file(nopen, file_open)
+    end if
 end if
-!call close_log_file(nopen, file_open)
 eps = 1.E-9
 if (out_flag .eq. 1 .and. dev_flag .eq. 1) then
 	do i = 1, np_fine

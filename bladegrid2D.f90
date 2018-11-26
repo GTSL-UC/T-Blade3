@@ -59,7 +59,7 @@ subroutine bladegrid2D(xb,yb,np,nbls,chrd,thkc,fext,LE,le_pos,thick_distr, &
 !******************************************************************************************
 ! Variables Declaration.
 !******************************************************************************************
-
+use file_operations
 use gridvar
 implicit none
 integer i,j,k,t,np,nbls,uplmt,n,j1,j2,ile_ps,cgrid,cgrid_cells,js,nspn,ispline
@@ -87,6 +87,9 @@ real*8 xinterp(np),yinterp(np),answer
 real*8 thkc,thick_distr,etawidth,stingl,xellip(np),yellip(np)
 
 logical curvemesh, ellipsmooth, translateUp, translateDown, isdev
+integer                                     :: nopen
+character(:),   allocatable                 :: log_file
+logical                                     :: file_open
 
 character*32 fname,fname1,fname2,fname3,fname4,fname5,fname6,fext,temp,casename,file1,develop
 
@@ -96,7 +99,9 @@ pi = 4.*atan(1.0)
 dtor = PI/180.
 err = 0.000001
 !
+call log_file_exists(log_file, nopen, file_open)
 print*,'Creating the grid...'
+write(nopen,*) 'Creating the grid...'
 if (allocated(xblade)) deallocate(xblade)
 if (allocated(yblade)) deallocate(yblade)
 allocate(xblade(np),yblade(np))
@@ -111,6 +116,9 @@ enddo
 pitch = 2*pi/nbls 
 print*,'pitch: ',pitch
 write(*,*)
+write(nopen,*) 'pitch: ', pitch
+write(nopen,*) ''
+call close_log_file(nopen, file_open)
 !---------------------------------------------------------------------------------------
 !Calculating the meanline coordinates' max index for both even and odd number of points.
 !---------------------------------------------------------------------------------------
@@ -214,7 +222,10 @@ Allocate(Xbg2(imax,jmax),Ybg2(imax,jmax))
    Ybg2(i,j) = numoffset(yline(i),increment)	 
   enddo 
  enddo
+ call log_file_exists(log_file, nopen, file_open)
  print*,'Filling the background grid points...'
+ write(nopen,*) 'Filling the background grid points...'
+ call close_log_file(nopen, file_open)
 !-----------------------------------------------------------------
 !Filling the arrays to the background grid points
 !-----------------------------------------------------------------
@@ -301,12 +312,15 @@ endif
 !-------------------------------------------------------- 
 ! Creating the INFLATED BLADE grid points
 !-------------------------------------------------------- 
+call log_file_exists(log_file, nopen, file_open)
 if(thick_distr == 2)then
   jcells = 10!8!33
 else
   jcells = jcellblade!33
   print*,'jcells: ',jcells
+  write(nopen,*) 'jcells: ', jcells
 endif
+call close_log_file(nopen, file_open)
 jmax1 = (4*jcells)+1!33
 !-----------------------------------------------------------
 ! sting LE blade grid (C-grid)
@@ -644,6 +658,7 @@ if((BGgrid.ne.0).and.(LE.ne.2))then
   enddo
   ! Translate the blade grid by 3 cellwidths downwards/upwards.
   if(translateDown)then
+    call log_file_exists(log_file, nopen, file_open)
     write(*,*)
     print*,'-----------------------------------------------------------'
     print*,'Grid Error: '
@@ -651,8 +666,17 @@ if((BGgrid.ne.0).and.(LE.ne.2))then
     print*,'Blade grid outside the top background grid !'
     print*,'Grid correction: Translating the blade grid by 3*cellwidth.'
     print*,'-----------------------------------------------------------'
+    write(nopen,*) ''
+    write(nopen,*)'-----------------------------------------------------------'
+    write(nopen,*)'Grid Error: '
+    write(nopen,*)'-----------------------------------------------------------'
+    write(nopen,*)'Blade grid outside the top background grid !'
+    write(nopen,*)'Grid correction: Translating the blade grid by 3*cellwidth.'
+    write(nopen,*)'-----------------------------------------------------------'
+    call close_log_file(nopen, file_open)
     Yg = Yg - 3*cellwidth  
   elseif(translateUp)then
+    call log_file_exists(log_file, nopen, file_open)
     write(*,*)
     print*,'-----------------------------------------------------------'
     print*,'Grid Error: '
@@ -660,6 +684,14 @@ if((BGgrid.ne.0).and.(LE.ne.2))then
     print*,'Blade grid outside the bottom background grid !'
     print*,'Grid correction: Translating the blade grid by 3*cellwidth.'
     print*,'-----------------------------------------------------------'
+    write(nopen,*) ''
+    write(nopen,*)'-----------------------------------------------------------'
+    write(nopen,*),'Grid Error: '
+    write(nopen,*),'-----------------------------------------------------------'
+    write(nopen,*),'Blade grid outside the bottom background grid !'
+    write(nopen,*),'Grid correction: Translating the blade grid by 3*cellwidth.'
+    write(nopen,*),'-----------------------------------------------------------'
+    call close_log_file(nopen, file_open)
     Yg = Yg + 3*cellwidth  
   endif
 
@@ -678,7 +710,10 @@ endif
 !******************************************************* 
 !! Background grid
 if(BGgrid.eq.2)then
+  call log_file_exists(log_file, nopen, file_open)
   print*,'Smoothing the background grid...'
+  write(nopen,*) 'Smoothing the background grid...'
+  call close_log_file(nopen, file_open)
   call gauseI2D( imax, jmax, Xg1, Yg1, err, curvemesh, ellipsmooth )
 endif
 !
@@ -688,15 +723,25 @@ endif
 fname2 = "2Dbladegrid."//trim(adjustl(fext))//".x"
 OPEN(unit=2,file=fname2,status='unknown')
 
+call log_file_exists(log_file, nopen, file_open)
 write(*,*)
 write(*,*)"Writing the 2D grid to a plot3D file..."
 write(*,*)
+write(nopen,*) ''
+write(nopen,*) 'Writing the 2D grid to a plot3D file...'
+write(nopen,*) ''
+call close_log_file(nopen, file_open)
 
 if(BGgrid.eq.0.)then ! no background grid for splitter blades.
 
+  call log_file_exists(log_file, nopen, file_open)
   print*,trim(casename)
   print*,' Writing the grid file for the splitter blade...'
   write(*,*)
+  write(nopen,*) trim(casename)
+  write(nopen,*) 'Writing the grid file for the splitter blade...'
+  write(nopen,*) ''
+  call close_log_file(nopen, file_open)
   write(2,*) 1 ! ngrid=1
   !-------------------------------------------------------- 
   !Writing the inflated blade grid coordinates
@@ -774,7 +819,10 @@ if(BGgrid.eq.0.)then ! no background grid for splitter blades.
   
     ! Elliptical grid smoothing 
     if(LE.eq.1)then
+      call log_file_exists(log_file, nopen, file_open)
       print*,'Smoothing the background grid...'
+      write(nopen,*) 'Smoothing the background grid...'
+      call close_log_file(nopen, file_open)
       call gauseI2Dblade( imax1, jmax1, Xg, Yg, err, curvemesh, ellipsmooth, LE )
     endif
     !-------------------------------------------------

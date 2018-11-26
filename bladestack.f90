@@ -51,6 +51,7 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,xcg,ycg, &
 !******************************************************************************************
 ! Variables Declaration.
 !******************************************************************************************
+use file_operations
 implicit none
 
 character*80 bname,fname,fname1,fname2,fname3,fname4,fname5,fname6,fname7,line,fext
@@ -125,6 +126,9 @@ real*8, allocatable, dimension(:,:):: xneglean,yneglean,zneglean
 
 integer nwork,lenc,nd,ndep,np,n,nt,ctrlpts, nspline
 logical axial_LE,radial_LE
+integer                                 :: nopen
+character(:),   allocatable             :: log_file
+logical                                 :: file_open
 common / BladeSectionPoints /xxa(nxx,nax),yya(nxx,nax)
 
 ! -----------------------------------------------------------------------------
@@ -167,7 +171,9 @@ endif
 ! For more stream files (if defined) to be read increase na upper bound
 !*******************************************************************************************
 na = nspn
+call log_file_exists(log_file, nopen, file_open)
 print*,'Number of airfoil coordinates:',np
+write(nopen,*) 'Number of airfoil coordinates:', np
 do ia = 1, na
    nap(ia) = np!199
    iap = nap(ia)
@@ -180,8 +186,12 @@ enddo
 write(*,*)
 print*,'Stacking Axis location:',stack 
 write(*,*)
+write(nopen,*) ''
+write(nopen,*) 'Stacking Axis location:', stack
+write(nopen,*) ''
 do ia = 1,na
    print*,'Section #',ia
+   write(nopen,*) 'Section #', ia
 enddo
 write(*,*) 
 
@@ -200,7 +210,9 @@ do ia = 1,na
    enddo
    !write(*,*)
    print*,'i_slope',i_slope
+   write(nopen,*) 'i_slope', i_slope
 enddo
+call close_log_file(nopen, file_open)
 
 !--------------------------------------------------------------------
 ! Span calculation for axial and non axial machines.
@@ -254,56 +266,75 @@ call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,delta_theta,na,xbs,ybs)
 
 ! write(*,*)
 ! print*,'Stagger in bladestack: ',stagger(1:na)
+call log_file_exists(log_file, nopen, file_open)
+write(nopen,*) ''
 if(chrdsweep.eq.1)then ! sweep along the blade chord; true sweep
   write(*,*)'span          true_sweep'
+  write(nopen,*)'span          true_sweep'
   do ia = 1, na
 	 delmp(ia) = (delmp(ia)*abs(cos(stagger(ia))))! + (delmp(ia)*abs(sin(stagger(ia))))
 	 print*,span(ia),delmp(ia)
+    write(nopen,*) span(ia), delmp(ia)
   enddo 
 elseif(chrdlean.eq.1)then ! true lean
   write(*,*)'span          delta_m for true_lean'
+  write(nopen,*)'span          delta_m for true_lean'
   do ia = 1, na
 	 delmp(ia) = (delta_theta(ia)*abs(sin(stagger(ia))))
      print*,span(ia),delmp(ia)
+     write(nopen,*) span(ia), delmp(ia)
   enddo
 else !axial sweep
   write(*,*)'span          delta_m'
+  write(nopen,*) 'span          delta_m'
   do ia = 1, na       
 	 print*,span(ia),delmp(ia)
+     write(nopen,*) span(ia), delmp(ia)
   enddo 
 endif 
 do ia = 1, na
    bladedata(7,ia)= delmp(ia)
 enddo
+call close_log_file(nopen, file_open)
 
 !*******************************************************************************************
 ! LEAN DEFINITION 
 !-Control points for delta theta----
 !******************************************************************************************* 
 
+call log_file_exists(log_file, nopen, file_open)
 write(*,*)
+write(nopen,*) ''
 if(chrdlean.eq.1)then ! lean normal to the blade chord; true lean.
   write(*,*)'span         true_lean'
+  write(nopen,*)'span         true_lean'
   do ia = 1, na
 	 delta_theta(ia) = (delta_theta(ia)*abs(cos(stagger(ia))))! + (delta_theta(ia)*abs(sin(stagger(ia))))
 	 print*,span(ia),delta_theta(ia)
+     write(nopen,*) span(ia), delta_theta(ia)
   enddo
 elseif(chrdsweep.eq.1)then ! true sweep
   write(*,*)'span         delta_theta for true_sweep'
+  write(nopen,*)'span         delta_theta for true_sweep'
   do ia = 1, na
 	 delta_theta(ia) = (delmp(ia)*abs(sin(stagger(ia))))
      print*,span(ia),delta_theta(ia)
+     write(nopen,*) span(ia), delta_theta(ia)
   enddo
 else ! tangential lean
   write(*,*)'span         delta_theta'
+  write(nopen,*)'span         delta_theta'
   do ia = 1, na      
 	 print*,span(ia),delta_theta(ia)
+     write(nopen,*) span(ia), delta_theta(ia)
   enddo
 endif
 do ia = 1, na
    bladedata(8,ia)= delta_theta(ia)
 enddo
 write(*,*)
+write(nopen,*) ''
+call close_log_file(nopen, file_open)
 
 !*******************************************************************************************
 ! Calculating the streamwise m' values for mapping of airfoils and streamlines ----
@@ -400,6 +431,7 @@ enddo
 !*******************************************************************************************
 ! Calculation of the 3D Throat length:  Nemnem 9 17 2013
 !*******************************************************************************************
+call log_file_exists(log_file, nopen, file_open)
 do ia = 1,na
    throat_3D(ia) = sqrt((inter_xb(1,ia)-inter_xb(2,ia))**2+&
 				(inter_yb(1,ia)-inter_yb(2,ia))**2+ &
@@ -415,6 +447,10 @@ do ia = 1,na
 	 print*,'3D throat line [',units,'] =',throat_3D(ia)*scf
 	 print*,'3D mouth line [',units,'] =',mouth_3D(ia)*scf
 	 print*,'3D exit line [',units,'] =',exit_3D(ia)*scf
+	 write(nopen,*)'section(',ia,')'
+	 write(nopen,*),'3D throat line [',units,'] =',throat_3D(ia)*scf
+	 write(nopen,*),'3D mouth line [',units,'] =',mouth_3D(ia)*scf
+	 write(nopen,*),'3D exit line [',units,'] =',exit_3D(ia)*scf
    endif
 enddo
 
@@ -422,12 +458,16 @@ enddo
 ! Dimensional Chord calculation and writing dimensional coordinates into a single file 'blade3D.casename.dat'.
 !*******************************************************************************************
 write(*,*)"Number of radial sections:",nsec
+write(nopen,*) 'Number of radial sections:', nsec
 !---- output ...
 fname1 = 'blade3d.'//trim(casename)//'.dat'
 open(3,file=fname1,status='unknown')
 write(*,*)
 write(*,*) 'Writing 3D blade geometry ...'
 write(*,*)
+write(nopen,*) ''
+write(nopen,*) 'Writing 3D blade geometry ...'
+write(nopen,*) ''
 write(3,*) iap,nsec
 !scaled output
 do ia = 1,nsec
@@ -436,6 +476,7 @@ do ia = 1,nsec
    enddo
    chord_actual(ia) = scf*sqrt((xb(ile,ia)-xb(iap,ia))**2 + (yb(ile,ia)-yb(iap,ia))**2 + (zb(ile,ia)-zb(iap,ia))**2)
    print*,'chord_actual(',units,'):',chord_actual(ia)
+   write(nopen,*) 'chord_actual(',units,'):',chord_actual(ia)
    bladedata(6,ia)= chord_actual(ia) ! in input file units
 enddo
 close(3)
@@ -448,6 +489,12 @@ print*,'Calculating the meanline by taking the average of PS and SS in 3D...'
 print*,'Writing the meanline in 3D to meanline.sec#.dat files...'
 write(*,*)
 print*,'Writing the top and bottom periodic wall coordinates...'
+write(nopen,*) ''
+write(nopen,*) 'Calculating the meanline by taking the average of PS ans SS in 3D...'
+write(nopen,*) 'Writing the meanline in 3D to meanline.sec#.dat files...'
+write(nopen,*) ''
+write(nopen,*) 'Writing the top and bottom periodic wall coordinates...'
+call close_log_file(nopen, file_open)
 uplmt = (0.5*(iap+1))-1 !uplmt+1 is 100 for 199 as iap.
 
 ! call meanline3DNperiodicwall(xb,yb,zb,xposlean,yposlean,zposlean, &

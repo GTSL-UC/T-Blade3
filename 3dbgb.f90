@@ -1354,32 +1354,30 @@ do js = 1, nspn
    !----------------------------------------------------------------------
    !chord switches
    !----------------------------------------------------------------------
-   if (js == 1) then
-        call log_file_exists(log_file, nopen, file_open)
-        write(nopen,*) ''
-   end if
+   call log_file_exists(log_file, nopen, file_open)
+   write(nopen,*) ''
    if(chord_switch.eq.1)then
      print*, 'Non-dimensional chord from the input...'
-     if (js == 1) write(nopen,*) 'Non-dimensional chord from the input...'
+     write(nopen,*) 'Non-dimensional chord from the input...'
      chrdx = chord(js)
      axchrd(js) = chord(js)
    elseif(chord_switch.eq.0)then
      print*, 'Internally calculated chord...'
-     if (js == 1) write(nopen,*) 'Internally calculated chord...'
+     write(nopen,*) 'Internally calculated chord...'
      chrdx = chordm(js)
      axchrd(js) = chord(js)
    elseif(chord_switch.eq.2)then
      print*, 'Chord multiplier calculated using spline control points...'
-     if (js == 1) write(nopen,*) 'Chord multiplier calculated using spline control points...'
+     write(nopen,*) 'Chord multiplier calculated using spline control points...'
      chrdx = chordm(js) * chords(js)
      axchrd(js) = chord(js)
    endif ! endif for chord options
-   if (js ==1) call close_log_file(nopen, file_open)
+   call close_log_file(nopen, file_open)
 
    !----------------------------------------------------------------------
    !stagger switches
    !----------------------------------------------------------------------
-   if (js ==1) call log_file_exists(log_file, nopen, file_open)
+   call log_file_exists(log_file, nopen, file_open)
    if(staggspline.eq.999.)then ! stagger from the spline control table
      stgr = inbeta_s(js)
    elseif(chord_switch.ne.0)then
@@ -1387,9 +1385,9 @@ do js = 1, nspn
    else
      stgr = 0.
      print*, 'Stagger calculated from the inlet and exit angles...'
-     if (js == 1) write(nopen,*) 'Stagger calculated from the inlet and exit angles...'
+     write(nopen,*) 'Stagger calculated from the inlet and exit angles...'
    endif ! endif for stagger options
-   if (js == 1) call close_log_file(nopen, file_open)
+   call close_log_file(nopen, file_open)
 
    !
    !----------------------------------------------------------------------
@@ -1414,15 +1412,15 @@ do js = 1, nspn
    !----------------------------------------------------------------------
    !tm/c thickness spline switch
    !----------------------------------------------------------------------
-   if (js == 1) call log_file_exists(log_file, nopen, file_open)
+   call log_file_exists(log_file, nopen, file_open)
    if(tm_c_spline)then
      print*, 'Thickness t/c will be multiplied by tm/c 2D spline definition...'
-     if (js == 1) write(nopen,*) 'Thickness t/c will be multiplied by tm/c 2D spline definition...'
+     write(nopen,*) 'Thickness t/c will be multiplied by tm/c 2D spline definition...'
      thkc = thk_c(js)*thk_tm_c_spl(js)
    else
 	 thkc = thk_c(js)
    endif
-   if (js == 1) call close_log_file(nopen, file_open)
+   call close_log_file(nopen, file_open)
    
    !----------------------------------------------------------------------
    call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js), &
@@ -1484,7 +1482,12 @@ do i = 1, nsl-1
 enddo
 
 bladedata(amount_data, nsl) = sum(bladedata(amount_data, 1:nsl-1))
+
+call log_file_exists(log_file, nopen, file_open)
+write(nopen,*) ''
 print*, (np+1)/2
+write(nopen,*) (np + 1)/2
+call close_log_file(nopen, file_open)
 
 !----------------------------------------------------------------------------
 ! writing the 3D nondimensional throat, span, in_beta & out_beta:
