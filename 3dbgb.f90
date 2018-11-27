@@ -165,6 +165,24 @@ end subroutine override_u5
 subroutine     override_u6(n, a)
    real*8 a(*)
 end subroutine override_u6
+subroutine     override_span_del_m_ctrl(n, a)
+   real*8 a(*)
+end subroutine override_span_del_m_ctrl
+subroutine     override_span_del_theta_ctrl(n, a)
+   real*8 a(*)
+end subroutine override_span_del_theta_ctrl
+subroutine     override_span_in_beta_ctrl(n, a)
+   real*8 a(*)
+end subroutine override_span_in_beta_ctrl
+subroutine     override_span_out_beta_ctrl(n, a)
+   real*8 a(*)
+end subroutine override_span_out_beta_ctrl
+subroutine     override_span_chord_ctrl(n, a)
+   real*8 a(*)
+end subroutine override_span_chord_ctrl
+subroutine     override_span_thk_c_ctrl(n, a)
+   real*8 a(*)
+end subroutine override_span_thk_c_ctrl
 subroutine     override_span_del_m(n, a)
    real*8 a(*)
 end subroutine override_span_del_m

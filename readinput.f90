@@ -606,6 +606,12 @@ endif
 
 if (allocated(temp_in)) deallocate(temp_in)
 allocate(temp_in(cpdeltam))
+temp_in = spanmp(1:cpdeltam)
+call override_span_del_m_ctrl(cpdeltam, temp_in)
+spanmp(1:cpdeltam) = temp_in
+
+if (allocated(temp_in)) deallocate(temp_in)
+allocate(temp_in(cpdeltam))
 temp_in = xcpdelm(1:cpdeltam)
 call override_span_del_m(cpdeltam, temp_in)
 xcpdelm(1:cpdeltam) = temp_in
@@ -630,6 +636,12 @@ else
         read(1, *)spantheta(i), xcpdeltheta(i)
     enddo
 endif
+
+if (allocated(temp_in)) deallocate(temp_in)
+allocate(temp_in(cpdeltheta))
+temp_in = spantheta(1:cpdeltheta)
+call override_span_del_theta_ctrl(cpdeltheta, temp_in)
+spantheta(1:cpdeltheta) = temp_in
  
 if (allocated(temp_in)) deallocate(temp_in)
 allocate(temp_in(cpdeltheta))
@@ -652,6 +664,12 @@ enddo
 
 if (allocated(temp_in)) deallocate(temp_in)
 allocate(temp_in(cpinbeta))
+temp_in = spaninbeta(1:cpinbeta)
+call override_span_in_beta_ctrl(cpinbeta, temp_in)
+spaninbeta(1:cpinbeta) = temp_in
+
+if (allocated(temp_in)) deallocate(temp_in)
+allocate(temp_in(cpinbeta))
 temp_in = xcpinbeta(1:cpinbeta)
 call override_span_in_beta(cpinbeta, temp_in)
 xcpinbeta(1:cpinbeta) = temp_in
@@ -668,6 +686,12 @@ read(1, *)temp
 do i = 1, cpoutbeta
     read(1, *)spanoutbeta(i), xcpoutbeta(i)
 enddo
+
+if (allocated(temp_in)) deallocate(temp_in)
+allocate(temp_in(cpoutbeta))
+temp_in = spanoutbeta(1:cpoutbeta)
+call override_span_out_beta_ctrl(cpoutbeta, temp_in)
+spanoutbeta(1:cpoutbeta) = temp_in
 
 if (allocated(temp_in)) deallocate(temp_in)
 allocate(temp_in(cpoutbeta))
@@ -688,6 +712,12 @@ do i = 1, cpchord
     read(1, *)spanchord(i), xcpchord(i)
     xcpchord(i) = xcpchord(i) + 1.0
 enddo
+
+if (allocated(temp_in)) deallocate(temp_in)
+allocate(temp_in(cpchord))
+temp_in = spanchord(1:cpchord)
+call override_span_chord_ctrl(cpchord, temp_in)
+spanchord(1:cpchord) = temp_in
 
 if (allocated(temp_in)) deallocate(temp_in)
 allocate(temp_in(cpchord))
@@ -724,6 +754,12 @@ do i = 1, cptm_c
     read(1, *)spantm_c(i), xcptm_c(i)
     xcptm_c(i) = xcptm_c(i) + 1.0
 enddo
+
+if (allocated(temp_in)) deallocate(temp_in)
+allocate(temp_in(cptm_c))
+temp_in = spantm_c(1:cptm_c)
+call override_span_thk_c_ctrl(cptm_c, temp_in)
+spantm_c(1:cptm_c) = temp_in
 
 if(allocated(temp_in)) deallocate(temp_in)
 allocate(temp_in(cptm_c))
