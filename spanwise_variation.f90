@@ -33,8 +33,11 @@ else
 endif
 allocate(bspline_LE(nsl,ncp_LE+1))
 np_fine = 1000
+if (allocated(span_fine)) deallocate(span_fine)
 allocate(span_fine(np_fine))
+if (allocated(out_coord_u_fine)) deallocate(out_coord_u_fine)
 allocate(out_coord_u_fine(np_fine, 12))
+if (allocated(out_coord_v_fine)) deallocate(out_coord_v_fine)
 allocate(out_coord_v_fine(np_fine, 12))
 
 !Calling cubicbspline subroutine to create Bspline by using the given data points
