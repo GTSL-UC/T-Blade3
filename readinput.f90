@@ -493,7 +493,8 @@ read(1, *)clustering_switch, clustering_parameter
 
 ! Invalid input for the clustering distribution switch
 ! Warn user and stop execution
-if (clustering_switch .ne. 0 .and. clustering_switch .ne. 1 .and. clustering_switch .ne. 2 .and. clustering_switch .ne. 3) then
+if (clustering_switch .ne. 0 .and. clustering_switch .ne. 1 .and. clustering_switch .ne. 2 .and. &
+    clustering_switch .ne. 3 .and. clustering_switch .ne. 4) then
 
     print *, ''
     print *, 'FATAL ERROR: Invalid argument for clustering_switch'

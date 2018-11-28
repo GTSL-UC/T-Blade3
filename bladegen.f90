@@ -77,7 +77,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, &
 use file_operations
 implicit none
 
-integer np, np_side, i, j, l, k, js, naca, chord_switch, istack, thick_distr, nxx
+integer np, np_side, i, j, l, k, js, naca, chord_switch, istack, thick_distr, nxx, np_cluster
 integer nx, nax, nrow, nspn, nspan, npoints, nsl, nbls, ncp, le_pos, wing_flag
 integer const_stk_u, const_stk_v, stack, stack_switch, clustering_switch, te_flag, le_opt_flag, te_opt_flag
 integer curv_camber, thick, LE, LEdegree, n_normal_distance
@@ -95,7 +95,7 @@ real :: sinl, sext, tempr, chrdx, chrd, stagger, pitch, radius_pitch
 !real xtop(nb), ytop(nb), xbot(nb), ybot(nb), u(nb)
 !real, intent(out) :: xb(nx), yb(nx)
 !real splthick(nb), thickness(nb), angle(nb), camber(nb), slope(nb)
-real, allocatable, dimension(:) :: xtop, ytop, xbot, ybot, u, xb, yb!, u_new - 11/20/18
+real, allocatable, dimension(:) :: xtop, ytop, xbot, ybot, u, xb, yb, u_new !- 11/20/18
 real, allocatable, dimension(:) :: splthick, thickness, angle, camber, slope
 real umin, umax, scaling, deltau, theta_offset
 real vtop_stack, vbot_stack, xb_stk, yb_stk
@@ -216,8 +216,8 @@ if (allocated(ytop      )) deallocate(ytop      )
 if (allocated(xbot      )) deallocate(xbot      )
 if (allocated(ybot      )) deallocate(ybot      )
 if (allocated(u         )) deallocate(u         )
-!if (allocated(u_new     )) deallocate(u_new     ) - Commented out until elliptical clustering can be 
-!                                                    added back - (11/20/18)
+if (allocated(u_new     )) deallocate(u_new     ) !- Commented out until elliptical clustering can be 
+                                                  !added back - (11/20/18)
 if (allocated(splthick  )) deallocate(splthick  )
 if (allocated(thickness )) deallocate(thickness )
 if (allocated(angle     )) deallocate(angle     )
@@ -236,7 +236,7 @@ Allocate(ytop(np))
 Allocate(xbot(np))
 Allocate(ybot(np))
 Allocate(u(np))
-!Allocate(u_new(np)) - Commented out until elliptical clustering can be added back (11/20/18)
+Allocate(u_new(np)) !- Commented out until elliptical clustering can be added back (11/20/18)
 Allocate(splthick(np))
 Allocate(thickness(np))
 Allocate(thickness_data(np, 12))
@@ -266,8 +266,6 @@ ueq = 0; xmean = 0; ymean = 0!; u_new = 0 - Commented out until elliptical clust
 ! This increases the points in leading and trailing edges...Clustering
 ! Subroutine definition found in funcNsubs.f90
 ! Subroutine call for the elliptical clustering at LE and TE (comment - 11/20/18)
-!call add_elliptical_clustering(js,np,nsl,ncp_thk(js),thk_cp,u_new)
-
 if (clustering_switch .eq. 0) then
     call uniform_clustering(np,u)
 else if (clustering_switch .eq. 1) then
@@ -277,11 +275,12 @@ else if (clustering_switch .eq. 2) then
     call exponential_clustering(np,u,clustering_parameter)
 else if (clustering_switch .eq. 3) then
     call hyperbolic_tan_clustering(np,u,clustering_parameter)
-else
-    print *, 'FATAL ERROR: Invalid argument for clustering switch'
-    print *, 'Valid options are 0, 1, 2 or 3 (refer to T-Blade3 documentation)'
-    stop
+else if (clustering_switch .eq. 4) then
+    np_cluster  = int(clustering_parameter)
+    call elliptical_clustering(js,np,nsl,ncp_thk(js),thk_cp,np_cluster,u)
 end if
+
+
 !u(1) = 0.0
 !ueq(1) = 0.0 ! uniform clustering
 !do i = 2, np
