@@ -1399,6 +1399,10 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
         Allocate(ycp(ncp_thk(i)))
         if (thick_distr .eq. 4) then
             read(10, *) cp_chord_thk(i, 1:ncp_chord_thk), le_angle_cp(i), te_angle_cp(i)
+            ! TODO: Push to develop
+            do j = 2 + ncp_chord_thickness,ncp_chord_thk
+                cp_chord_thk(i,j) = 0.5*cp_chord_thk(i,j)
+            end do
             if(control_inp_flag .eq. 1) then
                 xcp = cp_chord_thk(i, 2:ncp_chord_thickness+1)
                 ycp = cp_chord_thk(i, ncp_chord_thickness+2:ncp_chord_thk)
@@ -1684,6 +1688,7 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
         ! endif
     endif
 close(10)
+
 !---------------------------------------------------------------------------
 
 call log_file_exists(log_file, nopen, file_open)
