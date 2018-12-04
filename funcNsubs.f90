@@ -2156,6 +2156,8 @@ subroutine LE_clustering_parameter_solver(xi,K,delta)
     end interface
 
 
+    ! Define initial bisection interval "[a,b]" and interval midpoint "c"
+    ! Compute function values at a, b and c
     a               = 0.05
     b               = 10.0
     c               = 0.5*(a + b)
@@ -2214,18 +2216,24 @@ end subroutine LE_clustering_parameter_solver
 ! Add hyperbolic clustering for LE side middle part
 !
 !*******************************************************************************************
-subroutine LE_mid_hyperbolic_clustering(np_cluster,u_LE,u_TE,np_mid_LE)
+subroutine mid_hyperbolic_clustering(np_cluster,np_mid,u_LE,u_TE,u_mid)
     implicit none
 
     integer,                    intent(in)          :: np_cluster
+    integer,                    intent(in)          :: np_mid
     real,                       intent(in)          :: u_LE(np_cluster)
     real,                       intent(in)          :: u_TE(np_cluster)
-    integer,                    intent(in)          :: np_mid_LE
+    real,                       intent(inout)       :: u_mid(np_mid)
 
     ! Local variables
-    real,   allocatable                             :: xi(:)
-    real                                            :: du_LE, u_mid_pt, du_mid_LE, K, delta, test
-    integer                                         :: i, j
+    integer                                         :: i, j, np_mid_LE, np_mid_TE
+    real,   allocatable                             :: xi(:), u_mid_LE(:), u_mid_TE(:)
+    real                                            :: du_LE, u_mid_pt, du_mid_LE, du_mid_TE, K, delta, test
+
+
+    ! Calculate array sizes
+    np_mid_LE   = (np_mid + 1)/2
+    np_mid_TE   = np_mid_LE
 
 
     ! du_LE     - distance between the last two LE points
@@ -2233,6 +2241,7 @@ subroutine LE_mid_hyperbolic_clustering(np_cluster,u_LE,u_TE,np_mid_LE)
     du_LE       = abs(u_LE(np_cluster) - u_LE(np_cluster - 1))
     u_mid_pt    = 0.5*(u_LE(np_cluster) + u_TE(1))
     du_mid_LE   = abs(u_mid_pt - u_LE(np_cluster))
+    du_mid_TE   = abs(u_TE(1) - u_mid_pt)
 
 
     ! Compute the uniform reference space xi
@@ -2255,7 +2264,44 @@ subroutine LE_mid_hyperbolic_clustering(np_cluster,u_LE,u_TE,np_mid_LE)
     call LE_clustering_parameter_solver(xi(2),K,delta)
 
 
-end subroutine LE_mid_hyperbolic_clustering
+    ! Cluster u_LE_mid
+    if (allocated(u_mid_LE)) deallocate(u_mid_LE)
+    allocate(u_mid_LE(np_mid_LE))
+    u_mid_LE(1) = u_LE(np_cluster)
+    do i = 2,np_mid_LE
+
+        u_mid_LE(i) = u_mid_LE(1) + (du_mid_LE*(1.0 + ((tanh(0.5*delta*(xi(i) - 1.0)))/(tanh(0.5*delta)))))
+
+    end do
+    u_mid_LE(np_mid_LE) = u_mid_pt
+
+
+    ! Cluster u_TE_mid
+    if (allocated(u_mid_TE)) deallocate(u_mid_TE)
+    allocate(u_mid_TE(np_mid_TE))
+    u_mid_TE(1) = u_mid_pt
+    do i = 2,np_mid_TE
+
+        u_mid_TE(i) = u_mid_TE(1) + (du_mid_TE*((tanh(0.5*delta*xi(i)))/(tanh(0.5*delta))))
+
+    end do
+    u_mid_TE(np_mid_TE) = u_TE(1)
+
+
+    ! Generate u_mid
+    do i = 1,np_mid_LE
+
+        u_mid(i)    = u_mid_LE(i)
+
+    end do
+    do i = 2,np_mid_TE
+
+        u_mid(np_mid_LE + i - 1)    = u_mid_TE(i)
+
+    end do
+
+
+end subroutine mid_hyperbolic_clustering
 !*******************************************************************************************
 
 
@@ -2275,12 +2321,11 @@ subroutine elliptical_clustering(js,np,nsl,ncp,thk_cp,np_cluster,u_new)
     real,                       intent(inout)       :: u_new(np)
 
     ! Local variables
-    integer                                         :: i, j, k, np_mid, nopen, np_LE_mid
+    integer                                         :: i, j, k, np_mid, nopen
     real,           allocatable                     :: xcp_thk(:), ycp_thk(:)
     real,           allocatable                     :: x_ellip_LE(:), y_ellip_LE(:), &
                                                        x_ellip_TE(:), y_ellip_TE(:), &
-                                                       u_LE(:), u_TE(:), u_mid(:), &
-                                                       u_LE_mid(:), u_TE_mid(:)
+                                                       u_LE(:), u_TE(:), u_mid(:)
     character(:),   allocatable                     :: log_file
     logical                                         :: file_open
 
@@ -2330,18 +2375,18 @@ subroutine elliptical_clustering(js,np,nsl,ncp,thk_cp,np_cluster,u_new)
 
     ! Cluster the middle part of the blade section
     ! Use uniform clustering
-    np_mid  = np - (2*np_cluster) + 2
-    if (allocated(u_mid)) deallocate(u_mid)
-    allocate(u_mid(np_mid))
-    call cluster_mid(u_LE(np_cluster),u_TE(1),np_mid,u_mid)
+    !np_mid  = np - (2*np_cluster) + 2
+    !if (allocated(u_mid)) deallocate(u_mid)
+    !allocate(u_mid(np_mid))
+    !call cluster_mid(u_LE(np_cluster),u_TE(1),np_mid,u_mid)
 
 
     ! Cluster the middle part of the blade section using
-    ! hyperbolic clustering
+    ! Use hyperbolic clustering
     np_mid  = np - (2*np_cluster) + 2
-    np_LE_mid   = (np_mid + 1)/2
-    call LE_mid_hyperbolic_clustering(np_cluster,u_LE,u_TE,np_LE_mid)
-
+    if (allocated(u_mid)) deallocate(u_mid)
+    allocate(u_mid(np_mid))
+    call mid_hyperbolic_clustering(np_cluster,np_mid,u_LE,u_TE,u_mid)
 
 
     ! Generate u_new by combining u_LE, u_mid and u_TE
