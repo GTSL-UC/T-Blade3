@@ -251,7 +251,7 @@ u(1) = 0.0
 ueq(1) = 0.0 ! uniform clustering
 do i = 2, np
 	ui = real(i-1)/real(np) ! Marshall 8/19/13
-	du = (sin(pi*ui))**5.5
+	du = (sin(pi*ui))**2.0
 	u(i) = u(i-1) + du 
 	!! uniform clustering
 	dueq = ui 
