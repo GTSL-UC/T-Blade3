@@ -2130,16 +2130,39 @@ end function LE_clustering_parameter_func
 
 
 !
-! Bisection solver for the LE clustering parameter
+! Define hyperbolic clustering function for TE side mid clustering
+! This function is used in the bisection method when solving for the TE side
+! clustering parameter
 !
 !*******************************************************************************************
-subroutine LE_clustering_parameter_solver(xi,K,delta)
+real function TE_clustering_parameter_func(K,xi,func_coordinate) result(func)
+    implicit none
+
+    real,                       intent(in)          :: K
+    real,                       intent(in)          :: xi
+    real,                       intent(in)          :: func_coordinate
+
+
+    func            = K - ((tanh(0.5*func_coordinate*xi))/(tanh(0.5*func_coordinate)))
+
+
+end function TE_clustering_parameter_func
+!*******************************************************************************************
+
+
+
+!
+! Bisection solver for the LE side clustering parameter
+!
+!*******************************************************************************************
+subroutine LE_clustering_parameter_solver(xi,K,delta,solver_flag)
     use file_operations
     implicit none
 
     real,                       intent(in)          :: xi
     real,                       intent(in)          :: K
     real,                       intent(inout)       :: delta
+    logical,                    intent(inout)       :: solver_flag
 
     ! Local variables
     real                                            :: a, b, c, f1, f2, f3, &
@@ -2165,7 +2188,6 @@ subroutine LE_clustering_parameter_solver(xi,K,delta)
     f2              = LE_clustering_parameter_func(K,xi,b)
     f3              = LE_clustering_parameter_func(K,xi,c)
    
-    ! TODO: Error message and revert control to main program 
     call log_file_exists(log_file, nopen, file_open)
 
     ! Bisection interval should contain a zero
@@ -2199,16 +2221,110 @@ subroutine LE_clustering_parameter_solver(xi,K,delta)
         end do
 
     else
-        print *, "WARNING: Could not find initial guesses for the LE bisection solver"
-        write(nopen,*) 'WARNING: Could not find initial guesses for the LE bisection solver'
+        print *, "WARNING: Could not find initial guesses for the clustering_parameter bisection solver"
+        print *, "WARNING: Returning to uniform midchord clustering"
+        write(nopen,*) 'WARNING: Could not find initial guesses for the clustering_parameter bisection solver'
+        write(nopen,*) 'WARNING: Returning to uniform midchord clustering'
+        delta       = 0.0
+        solver_flag = .false.
     end if
     call close_log_file(nopen, file_open)
 
     ! Set clustering_parameter
-    delta   = c
+    delta       = c
+    solver_flag = .true.
 
 
 end subroutine LE_clustering_parameter_solver
+!*******************************************************************************************
+
+
+
+!
+! Bisection solver for TE side clustering parameter
+!
+!*******************************************************************************************
+subroutine TE_clustering_parameter_solver(xi,K,delta,solver_flag)
+    use file_operations
+    implicit none
+
+    real,                       intent(in)          :: xi
+    real,                       intent(in)          :: K
+    real,                       intent(inout)       :: delta
+    logical,                    intent(inout)       :: solver_flag
+
+    ! Local variables
+    real                                            :: a, b, c, f1, f2, f3, &
+                                                       tol = 10E-6
+    integer                                         :: i, j, nopen, niter
+    character(:),   allocatable                     :: log_file
+    logical                                         :: file_open
+    interface TE_clustering_parameter_func
+        real function TE_clustering_parameter_func(Kf,xif,func_coordinate)
+            real                                    :: Kf
+            real                                    :: xif
+            real                                    :: func_coordinate
+        end function TE_clustering_parameter_func
+    end interface
+    
+    
+    ! Define initial bisection interval "[a,b]" and interval midpoint "c"
+    ! Compute function values at a, b and c
+    a               = 0.05
+    b               = 10.0
+    c               = 0.5*(a + b)
+    f1              = TE_clustering_parameter_func(K,xi,a)
+    f2              = TE_clustering_parameter_func(K,xi,b)
+    f3              = TE_clustering_parameter_func(K,xi,c)
+
+    call log_file_exists(log_file, nopen, file_open)
+    
+    ! Bisection interval should contain a zero    
+    if ((f1 < 0. .and. f2 > 0.) .or. (f1 > 0. .and. f2 < 0.)) then
+
+        ! Iteration counter
+        niter       = 0
+        do while (niter .le. 40) 
+
+            ! Determine whether sign(a) = sign(c) or
+            !                   sign(b) = sign(c) and
+            ! reinterpret bisection interval
+            if ((f1 < 0 .and. f3 < 0) .or. (f1 > 0 .and. f3 > 0)) then
+                a   = c
+            else if ((f2 < 0 .and. f3 < 0) .or. (f2 > 0 .and. f3 > 0)) then
+                b   = c
+            end if
+
+            ! Compute new midpoint c and new function values
+            c       = 0.5*(a + b)
+            f1      = TE_clustering_parameter_func(K,xi,a)
+            f2      = TE_clustering_parameter_func(K,xi,b)
+            f3      = TE_clustering_parameter_func(K,xi,c)
+
+            ! Update iteration counter
+            niter   = niter + 1
+            
+            ! Exit condition
+            if (abs(f3) < tol) exit
+                
+        end do 
+
+    else
+        print *, 'WARNING: Could not find initial guesses for the TE clustering_parameter bisection solver'
+        print *, 'WARNING: Returning to uniform midchord clustering'
+        write(nopen,*) 'WARNING: Could not find initial guesses for the TE clustering_parameter bisection solver'
+        write(nopen,*) 'wARNING: Returning to uniform midchord clustering'
+        delta       = 0.0
+        solver_flag = .false.
+    end if
+    call close_log_file(nopen, file_open)
+
+    ! Set clustering parameter
+    delta           = c
+    solver_flag     = .true.
+
+
+end subroutine TE_clustering_parameter_solver
 !*******************************************************************************************
 
 
@@ -2217,6 +2333,7 @@ end subroutine LE_clustering_parameter_solver
 !
 !*******************************************************************************************
 subroutine mid_hyperbolic_clustering(np_cluster,np_mid,u_LE,u_TE,u_mid)
+    use file_operations
     implicit none
 
     integer,                    intent(in)          :: np_cluster
@@ -2226,9 +2343,12 @@ subroutine mid_hyperbolic_clustering(np_cluster,np_mid,u_LE,u_TE,u_mid)
     real,                       intent(inout)       :: u_mid(np_mid)
 
     ! Local variables
-    integer                                         :: i, j, np_mid_LE, np_mid_TE
+    integer                                         :: i, j, np_mid_LE, np_mid_TE, nopen
     real,   allocatable                             :: xi(:), u_mid_LE(:), u_mid_TE(:)
-    real                                            :: du_LE, u_mid_pt, du_mid_LE, du_mid_TE, K, delta, test
+    real                                            :: du_LE, u_mid_pt, du_mid_LE, du_mid_TE, K_LE, delta_LE, &
+                                                       du_TE, K_TE, delta_TE
+    character(:),   allocatable                     :: log_file
+    logical                                         :: solver_flag_LE, solver_flag_TE, file_open
 
 
     ! Calculate array sizes
@@ -2239,6 +2359,7 @@ subroutine mid_hyperbolic_clustering(np_cluster,np_mid,u_LE,u_TE,u_mid)
     ! du_LE     - distance between the last two LE points
     ! du_mid_LE - distance between blade mid point and LE
     du_LE       = abs(u_LE(np_cluster) - u_LE(np_cluster - 1))
+    du_TE       = abs(u_TE(2) - u_TE(1))
     u_mid_pt    = 0.5*(u_LE(np_cluster) + u_TE(1))
     du_mid_LE   = abs(u_mid_pt - u_LE(np_cluster))
     du_mid_TE   = abs(u_TE(1) - u_mid_pt)
@@ -2256,49 +2377,68 @@ subroutine mid_hyperbolic_clustering(np_cluster,np_mid,u_LE,u_TE,u_mid)
 
     ! Compute the equation constant for the clustering parameter equation
     ! Equation defined in LE_clustering_parameter_func
-    K           = 1.0 - (du_LE/du_mid_LE)
+    K_LE        = 1.0 - (du_LE/du_mid_LE)
+    K_TE        = 1.0 - (du_TE/du_mid_TE)
 
 
     ! Solve the clustering parameter equation
     ! TODO: Add Newton's solver
-    call LE_clustering_parameter_solver(xi(2),K,delta)
+    call LE_clustering_parameter_solver(xi(2),K_LE,delta_LE,solver_flag_LE)
+    call TE_clustering_parameter_solver(xi(np_mid_LE - 1),K_TE,delta_TE,solver_flag_TE)
 
 
-    ! Cluster u_LE_mid
-    if (allocated(u_mid_LE)) deallocate(u_mid_LE)
-    allocate(u_mid_LE(np_mid_LE))
-    u_mid_LE(1) = u_LE(np_cluster)
-    do i = 2,np_mid_LE
+    if (solver_flag_LE .and. solver_flag_TE) then
 
-        u_mid_LE(i) = u_mid_LE(1) + (du_mid_LE*(1.0 + ((tanh(0.5*delta*(xi(i) - 1.0)))/(tanh(0.5*delta)))))
+        call log_file_exists(log_file, nopen, file_open)
+        print *, 'Hyperbolic midchord clustering with delta_LE = ', delta_LE
+        print *, 'Hyperbolic midchord clustering with delta_TE = ', delta_TE
+        write(nopen,*) 'Hyperbolic midchord clustering with delta_TE = ', delta_LE 
+        write(nopen,*) 'Hyperbolic midchord clustering with delta_TE = ', delta_TE
+        call close_log_file(nopen, file_open)
+               
+        ! Cluster u_LE_mid
+        if (allocated(u_mid_LE)) deallocate(u_mid_LE)
+        allocate(u_mid_LE(np_mid_LE))
+        u_mid_LE(1) = u_LE(np_cluster)
+        do i = 2,np_mid_LE
 
-    end do
-    u_mid_LE(np_mid_LE) = u_mid_pt
+            u_mid_LE(i) = u_mid_LE(1) + (du_mid_LE*(1.0 + ((tanh(0.5*delta_LE*(xi(i) - 1.0)))/(tanh(0.5*delta_LE)))))
 
-
-    ! Cluster u_TE_mid
-    if (allocated(u_mid_TE)) deallocate(u_mid_TE)
-    allocate(u_mid_TE(np_mid_TE))
-    u_mid_TE(1) = u_mid_pt
-    do i = 2,np_mid_TE
-
-        u_mid_TE(i) = u_mid_TE(1) + (du_mid_TE*((tanh(0.5*delta*xi(i)))/(tanh(0.5*delta))))
-
-    end do
-    u_mid_TE(np_mid_TE) = u_TE(1)
+        end do
+        u_mid_LE(np_mid_LE) = u_mid_pt
 
 
-    ! Generate u_mid
-    do i = 1,np_mid_LE
+        ! Cluster u_TE_mid
+        if (allocated(u_mid_TE)) deallocate(u_mid_TE)
+        allocate(u_mid_TE(np_mid_TE))
+        u_mid_TE(1) = u_mid_pt
+        do i = 2,np_mid_TE
 
-        u_mid(i)    = u_mid_LE(i)
+            u_mid_TE(i) = u_mid_TE(1) + (du_mid_TE*((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE))))
 
-    end do
-    do i = 2,np_mid_TE
+        end do
+        u_mid_TE(np_mid_TE) = u_TE(1)
 
-        u_mid(np_mid_LE + i - 1)    = u_mid_TE(i)
 
-    end do
+        ! Generate u_mid
+        do i = 1,np_mid_LE
+
+            u_mid(i)    = u_mid_LE(i)
+
+        end do
+        do i = 2,np_mid_TE
+
+            u_mid(np_mid_LE + i - 1)    = u_mid_TE(i)
+
+        end do
+
+    else
+        
+        ! If clustering parameter for midchord hyperbolic clustering is not found
+        ! use uniform clustering
+        call cluster_mid(u_LE(np_cluster),u_TE(1),np_mid,u_mid)
+
+    end if
 
 
 end subroutine mid_hyperbolic_clustering
@@ -2372,14 +2512,6 @@ subroutine elliptical_clustering(js,np,nsl,ncp,thk_cp,np_cluster,u_new)
 
     end do
     
-
-    ! Cluster the middle part of the blade section
-    ! Use uniform clustering
-    !np_mid  = np - (2*np_cluster) + 2
-    !if (allocated(u_mid)) deallocate(u_mid)
-    !allocate(u_mid(np_mid))
-    !call cluster_mid(u_LE(np_cluster),u_TE(1),np_mid,u_mid)
-
 
     ! Cluster the middle part of the blade section using
     ! Use hyperbolic clustering
