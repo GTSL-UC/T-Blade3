@@ -6,12 +6,12 @@ implicit none
 
 character*256 :: fname, temp, temp2, tempr1, fname1, fname2, fname3, beta_switch_2
 character(len = :), allocatable :: log_file
-integer :: er, temp_int, stat, n_temp, n_temp1, n_temp2, nopen
+integer :: er, temp_int, stat, n_temp, n_temp1, n_temp2, nopen, nopen1
 real*8 inBetaInci, outBetaDevn
 real*8, allocatable :: temp_in(:)
 real*8              :: temp_offsets(2)
 real*8, parameter   :: tol = 1E-8
-logical             :: equal, beta_value(5), ang_spl_value(5), file_open
+logical             :: equal, beta_value(5), ang_spl_value(5), file_open, file_open_1
 
 if (allocated(x_le          )) deallocate(x_le          )
 if (allocated(x_te          )) deallocate(x_te          )
@@ -86,27 +86,36 @@ print*, fname
 write(nopen,*) ''
 write(nopen,*) fname
 call close_log_file(nopen, file_open)
+call open_maininput_log_file(trim(adjustl(fname)), nopen1, file_open_1)
 !write(*, *)
 !write(*, *) 'Reading inputs from -88dbgbinput file'
 !write(*, *)
 !---reading parameters from input file----
-read(1, *)temp
+read(1, '(A)')temp
+write(nopen1,'(A)') temp
 !reading the casename
 read(1, *)fext
+write(nopen1,'(A)') fext
 !write(*, *)'case:', fext
 casename = trim(fext)
-read(1, *)temp
+read(1, '(A)')temp
 read(1, *)ibrow
+write(nopen1,'(A)') temp
+write(nopen1,*) ibrow
 !write(*, *)'bladerow #:', ibrow
 write(ibrowc, '(i3)')ibrow
 !print*, ibrowc
 !write(*, *)
-read(1, *)temp
+read(1, '(A)')temp
 read(1, *) nbls ! number of blades in this row
+write(nopen1, '(A)') temp
+write(nopen1, *) nbls
 !print*, 'Number of blades in this row:', nbls
 read(1, '(A)') temp
+write(nopen1,'(A)') temp
 units = temp(24:25)
 read(1, *)scf, temp
+write(nopen1,*) scf
 temp = adjustl(trim(temp))
 read(temp, *, iostat = er) theta_offset
 if (er .ne. 0) then
@@ -118,12 +127,14 @@ if (er .ne. 0) then
 endif
 !write(*, *)'bsf:', scf
 !write(*, *) 
-read(1, *)temp
+read(1, '(A)')temp
 read(1, *)nsl
+write(nopen1, '(A)') temp
+write(nopen1, *) nsl
 !print*, 'Number of streamlines:', nsl
 !write(*, *)
-read(1, *)temp
-
+read(1, '(A)')temp
+write(nopen1, '(A)') temp
 
 !
 ! Input angle switch
@@ -138,7 +149,7 @@ spanwise_inci_dev_spline = .False.
 ! Also read secondary argument for angle spanwise splines if present 
 !
 read(1, '(A)') beta_switch_2
-
+write(nopen1, '(A)') beta_switch_2
 
 !
 ! All possible valid inputs are stored as logical variables in an array
@@ -211,7 +222,7 @@ call log_file_exists(log_file, nopen, file_open)
 ! Case 1 - No splining required
 if (ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_value(3) .and. .not. ang_spl_value(4) .and.     &
     .not. ang_spl_value(5)) then
-    read(1,*) temp
+    read(1,'(A)') temp
 
 ! Case 2 - spline inlet angles only   
 elseif (.not. ang_spl_value(1) .and. ang_spl_value(2) .and. .not. ang_spl_value(3) .and. .not. ang_spl_value(4) .and. &
@@ -229,7 +240,7 @@ elseif (.not. ang_spl_value(1) .and. ang_spl_value(2) .and. .not. ang_spl_value(
     write(nopen,*) 'Angles defined spanwise as a B-spline using control points'
     write(nopen,*) ''
     write(nopen,*) trim(anglespline)
-    read(1,*) temp
+    read(1,'(A)') temp
 
 ! Case 3 -spline outlet angles only
 elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. ang_spl_value(3) .and. .not. ang_spl_value(4) .and. &
@@ -247,7 +258,7 @@ elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. ang_spl_value(
     write(nopen,*) 'Angles defined spanwise as a B-spline using control points'
     write(nopen,*) ''
     write(nopen,*) trim(anglespline)
-    read(1,*) temp
+    read(1,'(A)') temp
 
 ! Case 4 - spline inlet and outlet angles
 elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_value(3) .and. ang_spl_value(4) .and. &
@@ -265,7 +276,7 @@ elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_
     write(nopen,*) 'Angles defined spanwise as a B-spline using control points'
     write(nopen,*) ''
     write(nopen,*) trim(anglespline)
-    read(1,*) temp
+    read(1,'(A)') temp
 
 ! Case 5 - spline incidence and deviation
 elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_value(3) .and. .not. ang_spl_value(4) &
@@ -283,7 +294,7 @@ elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_
     write(nopen,*) 'Incidence and Deviation defined spanwise as a B-spline using control points'
     write(nopen,*) ''
     write(nopen,*) trim(anglespline)
-    read(1,*) temp
+    read(1,'(A)') temp
 
 ! Case 6 - invalid input
 !          warn user and stop execution
@@ -297,20 +308,18 @@ elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_
     stop
 end if
 
-
 call close_log_file(nopen, file_open)
-
-
-
-
+write(nopen1, '(A)') temp
 
 ! 
 ! Curvature control switch
 ! Error trap added - 11/21/18 (Mayank Sharma @UC)
 !
 !---------------------------------------------------------------------------------------------------------------------------------------------
-read(1,*)curv, spanwise_spline              
-
+read(1,*)curv, spanwise_spline   
+backspace(1)
+read(1,'(A)') temp
+write(nopen1, '(A)') temp
 
 ! Invalid input for the camber definition switch
 ! Warn user and stop execution 
@@ -339,7 +348,8 @@ end if
 
 ! Read next line in the input file if spanwise_spline has been specified
 if (trim(spanwise_spline).eq.'spanwise_spline')then
-    read(1,*)temp
+    read(1,'(A)')temp
+    write(nopen1,'(A)') temp
 endif
 
 
@@ -353,8 +363,11 @@ endif
 ! Error trap added - 11/21/18 (Mayank Sharma @UC)
 !
 !---------------------------------------------------------------------------------------------------------------------------------------------
-read(1, *)thick_distr, temp2  
-
+read(1, *)thick_distr, temp2
+backspace(1)
+read(1,'(A)') temp
+write(nopen1, *) thick_distr
+write(nopen1,'(A)') temp
 ! Invalid input for the thickness distribution switch
 ! Warn user and stop execution
 if (thick_distr .ne. 0 .and. thick_distr .ne. 1 .and. thick_distr .ne. 2 .and. thick_distr .ne. 3 .and. thick_distr .ne. 4) then
@@ -384,7 +397,7 @@ endif
 !
 !---------------------------------------------------------------------------------------------------------------------------------------------
 read(1, *)thick       
-
+write(nopen1,*) thick
 ! Invalid input for the thickness multiplier switch
 ! Warn user and stop execution
 if (thick .ne. 0 .and. thick .ne. 1) then
@@ -408,9 +421,10 @@ end if
 !
 !---------------------------------------------------------------------------------------------------------------------------------------------
 ! Read next line
-read(1, *)temp
+read(1, '(A)')temp
 read(1, *)LE         
-
+write(nopen1,'(A)') temp
+write(nopen1,*) LE
 ! Invalid input for the LE spline control switch
 ! Warn user and stop execution
 if (LE .ne. 0 .and. LE .ne. 1) then
@@ -434,9 +448,10 @@ end if
 !
 !---------------------------------------------------------------------------------------------------------------------------------------------
 ! Read next line
-read(1, *)temp
+read(1, '(A)')temp
 read(1, *)chord_switch ! non-dimensional actual chord switch
-
+write(nopen1,'(A)') temp
+write(nopen1,*) chord_switch
 ! Invalid input for the non-dimensional actual chord switch
 ! Warn user and stop execution
 if (chord_switch .ne. 0 .and. chord_switch .ne. 1 .and. chord_switch .ne. 2) then
@@ -460,9 +475,10 @@ end if
 !
 !---------------------------------------------------------------------------------------------------------------------------------------------
 ! Read next line
-read(1, *)temp
+read(1, '(A)')temp
 read(1, *)leansweep_switch 
-
+write(nopen1,'(A)') temp
+write(nopen1,*) leansweep_switch
 ! If there is an invalid input for the true lean and sweep switch
 ! Warn user and stop execution
 if (leansweep_switch .eq. 0) then
@@ -488,9 +504,12 @@ end if
 !
 !---------------------------------------------------------------------------------------------------------------------------------------------
 ! Read next line
-read(1, *)temp
+read(1, '(A)')temp
+write(nopen1,'(A)') temp
 read(1, *)clustering_switch, clustering_parameter
-
+backspace(1)
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
 ! Invalid input for the clustering distribution switch
 ! Warn user and stop execution
 if (clustering_switch .ne. 0 .and. clustering_switch .ne. 1 .and. clustering_switch .ne. 2 .and. &
@@ -505,8 +524,10 @@ if (clustering_switch .ne. 0 .and. clustering_switch .ne. 1 .and. clustering_swi
 end if
 
 ! Read next lines
-read(1, *)temp
-read(1, *)temp
+read(1, '(A)')temp
+write(nopen1, '(A)') temp
+read(1, '(A)')temp
+write(nopen1, '(A)') temp
 !
 !---- blade file names
 do i = 1, nsl
@@ -519,11 +540,20 @@ do js = 1, nspn
     if (spanwise_angle_spline)then   ! Not reading it here since it is splined spanwise
         read(1, *, end = 35)tempr, tempr, tempr, &
         mrel1(js), chord(js), thk_c(js), inci(js), devn(js), sec_flow_ang(js)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1, '(A)') temp
     elseif (spanwise_inci_dev_spline) then 
         !reading inlet & outlet angles from table but not adding incidence and deviation from the table
         read(1, *, end = 35)tempr, in_beta(js), out_beta(js), mrel1(js), chord(js), thk_c(js), inci(js), devn(js), sec_flow_ang(js)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1, '(A)') temp
     else ! Reading the inlet and outlet angles from this table
         read(1, *, end = 35)tempr, in_beta(js), out_beta(js), mrel1(js), chord(js), thk_c(js), inci(js), devn(js), sec_flow_ang(js)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1, '(A)') temp
         !Adding incidence and deviation angles-------------------3/10/11
         !print*, in_beta(js), out_beta(js)   
     endif
@@ -540,28 +570,49 @@ endif
 
 !write(*, *)
 ! Reading the LE/TE curve definition---------
-read(1, *)temp
-read(1, *)temp 
+read(1, '(A)')temp
+write(nopen1,'(A)') temp
+read(1, '(A)')temp
+write(nopen1,'(A)') temp 
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
 read(1, *)npoints
-read(1, *)temp
+write(nopen1,*) npoints
+read(1, '(A)')temp
+write(nopen1,'(A)') temp
 ! write(*, *)'LE/TE defined by a curve with no. of points as:', npoints
 ! write(*, *)'xLE    rLE     xTE     rTE'
 do i = 1, npoints
     read(1, *)xle(i), rle(i), xte(i), rte(i)
+    backspace(1)
+    read(1,'(A)') temp
+    write(nopen1,'(A)') temp
 enddo
-read(1, *)temp
-read(1, *)temp
-read(1, *)temp
-read(1, *)temp
-read(1, *)temp
-read(1, *)stack_switch
-read(1, *)temp
+read(1,'(A)')temp
+write(nopen1,'(A)') temp
+read(1,'(A)')temp
+write(nopen1,'(A)') temp
+read(1,'(A)')temp
+write(nopen1,'(A)') temp
+read(1,'(A)')temp
+write(nopen1,'(A)') temp
+read(1,'(A)')temp
+write(nopen1,'(A)') temp
+read(1,'(A)')temp
+write(nopen1,'(A)') temp
+read(1,*)stack_switch
+write(nopen1,*) stack_switch
+read(1,'(A)')temp
+write(nopen1,'(A)') temp
 if (allocated(umxthk_all)) deallocate(umxthk_all)
 Allocate(umxthk_all(nsl))
 if (LE.ne.0) then
     do js = 1, nspn
         read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), tempr, tempr,  &
                   jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1,'(A)') temp
         !print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
     enddo
 elseif (LE == 0) then
@@ -572,6 +623,9 @@ elseif (LE == 0) then
     do js = 1, nspn
         read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), &
                   tethk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1,'(A)') temp
         ! print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), tethk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
     enddo
 endif
@@ -828,7 +882,7 @@ enddo
 
 ! Close input file
 35 close(1)
-
+call close_maininput_log_file(nopen1, file_open_1)
 return
 
 
