@@ -4,7 +4,7 @@ use globvar
 use file_operations
 implicit none
 
-character*256 :: fname, temp, temp2, tempr1, fname1, fname2, fname3, beta_switch_2
+character*256 :: fname, temp, temp1, temp2, tempr1, fname1, fname2, fname3, beta_switch_2
 character(len = :), allocatable :: log_file
 integer :: er, temp_int, stat, n_temp, n_temp1, n_temp2, nopen, nopen1
 real*8 inBetaInci, outBetaDevn
@@ -95,21 +95,27 @@ read(1, '(A)')temp
 write(nopen1,'(A)') temp
 !reading the casename
 read(1, *)fext
-write(nopen1,'(A)') fext
+backspace(1)
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
 !write(*, *)'case:', fext
 casename = trim(fext)
 read(1, '(A)')temp
-read(1, *)ibrow
 write(nopen1,'(A)') temp
-write(nopen1,*) ibrow
+read(1, *)ibrow
+backspace(1)
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
 !write(*, *)'bladerow #:', ibrow
 write(ibrowc, '(i3)')ibrow
 !print*, ibrowc
 !write(*, *)
 read(1, '(A)')temp
+write(nopen1,'(A)') temp
 read(1, *) nbls ! number of blades in this row
+backspace(1)
+read(1,'(A)') temp
 write(nopen1, '(A)') temp
-write(nopen1, *) nbls
 !print*, 'Number of blades in this row:', nbls
 read(1, '(A)') temp
 write(nopen1,'(A)') temp
@@ -316,10 +322,19 @@ write(nopen1, '(A)') temp
 ! Error trap added - 11/21/18 (Mayank Sharma @UC)
 !
 !---------------------------------------------------------------------------------------------------------------------------------------------
-read(1,*)curv, spanwise_spline   
-backspace(1)
-read(1,'(A)') temp
-write(nopen1, '(A)') temp
+read(1,*)curv, spanwise_spline  
+if (trim(spanwise_spline) .eq. 'spanwise_spline') then
+    backspace(1)
+    read(1,'(A)') temp
+    write(nopen1, '(A)') temp
+else
+    backspace(1)
+    backspace(1)
+    read(1,'(A)') temp
+    write(nopen1, '(A)') temp
+    read(1,'(A)') temp
+    write(nopen1, '(A)') temp
+end if
 
 ! Invalid input for the camber definition switch
 ! Warn user and stop execution 
@@ -586,7 +601,7 @@ do i = 1, npoints
     read(1, *)xle(i), rle(i), xte(i), rte(i)
     backspace(1)
     read(1,'(A)') temp
-    write(nopen1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
 enddo
 read(1,'(A)')temp
 write(nopen1,'(A)') temp
@@ -629,33 +644,58 @@ elseif (LE == 0) then
         ! print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), tethk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
     enddo
 endif
-read(1, *)temp
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
+read(1,'(A)')temp
+write(nopen1,'(A)') temp
 read(1, *)cpbsv, bsv1, bsv2
-read(1, *)temp
+write(nopen1,*) cpbsv, bsv1, bsv2
+read(1,'(A)')temp
+write(nopen1,'(A)') temp
 do i = 1, cpbsv
     read(1, *)spanbsv(i), bf1(i), bf2(i)
+    backspace(1)
+    read(1,'(A)') temp
+    write(nopen1,'(A)') temp
 enddo
-read(1, *)temp
+
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
 read(1, *)stack! Reading the stacking value
+write(nopen1,*) stack
 
 
 
 !
 ! Read sweep spline control points and call ESP override subroutine 
 !
-read(1, *)temp
-read(1, '(A)')temp 
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
+read(1,'(A)')temp 
+write(nopen1,'(A)') temp
 read(temp(12:12), *)cpdeltam
 if(trim(trueleansweep).ne.'')then
     chrdsweep = 1
-    read(1, *)temp
+    read(1,'(A)')temp
+    write(nopen1,'(A)') temp
     do i = 1, cpdeltam
         read(1, *)spanmp(i), xcpdelm(i)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1,'(A)') temp
     enddo
 else
-    read(1, *)temp
+    read(1,'(A)')temp
+    write(nopen1,'(A)') temp
     do i = 1, cpdeltam
         read(1, *)spanmp(i), xcpdelm(i)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1,'(A)') temp
     enddo
 endif
 
@@ -676,19 +716,31 @@ xcpdelm(1:cpdeltam) = temp_in
 !
 ! Read lean spline control points and call ESP override subroutine
 !
-read(1, *)temp
-read(1, '(A)')temp 
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
+read(1,'(A)')temp
+write(nopen1,'(A)') temp
+read(1,'(A)')temp 
+write(nopen1,'(A)') temp
 read(temp(12:12), *)cpdeltheta
 if(trim(trueleansweep).ne.'')then
     chrdlean = 1
-    read(1, *)temp
+    read(1,'(A)')temp
+    write(nopen1,'(A)') temp
     do i = 1, cpdeltheta
         read(1, *)spantheta(i), xcpdeltheta(i)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1,'(A)') temp
     enddo
 else
-    read(1, *)temp
+    read(1,'(A)')temp
+    write(nopen1,'(A)') temp
     do i = 1, cpdeltheta
         read(1, *)spantheta(i), xcpdeltheta(i)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1,'(A)') temp
     enddo
 endif
 
@@ -710,11 +762,19 @@ xcpdeltheta(1:cpdeltheta) = temp_in
 ! Read inBeta* spline control points and call ESP override subroutine
 ! inBeta* can be used to spline either inlet flow angle or incidence
 !
-read(1, *)temp
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
+read(1,'(A)')temp
+write(nopen1,'(A)') temp
 read(1, *)cpinbeta 
-read(1, *)temp
+write(nopen1,*) cpinbeta
+read(1,'(A)')temp
+write(nopen1,'(A)') temp
 do i = 1, cpinbeta
     read(1, *)spaninbeta(i), xcpinbeta(i)
+    backspace(1)
+    read(1,'(A)') temp
+    write(nopen1,'(A)') temp
 enddo
 
 if (allocated(temp_in)) deallocate(temp_in)
@@ -735,11 +795,19 @@ xcpinbeta(1:cpinbeta) = temp_in
 ! Read outBeta* spline control points and call ESP override subroutine
 ! outBeta* can be used to spline either exit flow angle or deviation
 !
-read(1, *)temp
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
 read(1, *)cpoutbeta
-read(1, *)temp
+write(nopen1,*) cpoutbeta
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
 do i = 1, cpoutbeta
     read(1, *)spanoutbeta(i), xcpoutbeta(i)
+    backspace(1)
+    read(1,'(A)') temp
+    write(nopen1,'(A)') temp
 enddo
 
 if (allocated(temp_in)) deallocate(temp_in)
@@ -760,11 +828,19 @@ xcpoutbeta(1:cpoutbeta) = temp_in
 ! Read chord multiplier spline control points and call ESP override subroutine
 ! TODO: chord_multiplier > 1?
 !
-read(1, *)temp
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
 read(1, *)cpchord
-read(1, *)temp
+write(nopen1,*) cpchord
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
 do i = 1, cpchord
     read(1, *)spanchord(i), xcpchord(i)
+    backspace(1)
+    read(1,'(A)') temp
+    write(nopen1,'(A)') temp
     xcpchord(i) = xcpchord(i) + 1.0
 enddo
 
@@ -794,9 +870,14 @@ end if
 ! Read tm/c spline control points and call ESP override subroutine
 ! TODO: tm/c > 1?
 !
-read(1, *)temp
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
+read(1,'(A)')temp
+write(nopen1,'(A)') temp
 read(1, *)cptm_c ! control points for tm/c
-read(1, *)temp
+write(nopen1,*) cptm_c
+read(1,'(A)') temp
+write(nopen1,'(A)') temp
 
 !next line to always use the thickness tm/c as it is a multiplier (default = 1):
 if ((thick_distr .ne. 0) .and. .not. is2d) then
@@ -807,6 +888,9 @@ endif
 
 do i = 1, cptm_c
     read(1, *)spantm_c(i), xcptm_c(i)
+    backspace(1)
+    read(1,'(A)') temp
+    write(nopen1,'(A)') temp
     xcptm_c(i) = xcptm_c(i) + 1.0
 enddo
 
@@ -836,10 +920,16 @@ end if
 ! Read hub and tip offsets and call ESP override subroutine
 ! TODO: Negative hub offset?
 !
-read(1, *)temp 
+read(1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
+read(1,'(A)') temp 
+write(nopen1,'(A)') trim(temp)
 read(1, *)hub
-read(1, *)temp
+write(nopen1,*) hub
+read(1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1, *)tip
+write(nopen1,*) tip
 
 temp_offsets(1) = hub
 temp_offsets(2) = tip
@@ -852,9 +942,15 @@ tip = temp_offsets(2)
 !
 ! Read streamline data from input file
 !
-read(1, *)temp
+read(1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
+read(1,'(A)')temp
+write(nopen1,'(A)') trim(temp)
 do while(temp.ne.'x_s')
     read(1, *)temp
+    backspace(1)
+    read(1,'(A)') temp1
+    write(nopen1,'(A)') trim(temp1)
 enddo
 
 !
@@ -865,6 +961,9 @@ do ia = 1, nsl
     nsp(ia) = 0
     do while(.true.)
         read(1, *)trarray(1), trarray(2)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
         !print*, trarray(1), trarray(2)
         if(trarray(2).ne.0)then
             nsp(ia) = nsp(ia) + 1
