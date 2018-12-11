@@ -92,33 +92,33 @@ call open_maininput_log_file(trim(adjustl(fname)), nopen1, file_open_1)
 !write(*, *)
 !---reading parameters from input file----
 read(1, '(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 !reading the casename
 read(1, *)fext
 backspace(1)
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 !write(*, *)'case:', fext
 casename = trim(fext)
 read(1, '(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1, *)ibrow
 backspace(1)
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 !write(*, *)'bladerow #:', ibrow
 write(ibrowc, '(i3)')ibrow
 !print*, ibrowc
 !write(*, *)
 read(1, '(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1, *) nbls ! number of blades in this row
 backspace(1)
 read(1,'(A)') temp
-write(nopen1, '(A)') temp
+write(nopen1, '(A)') trim(temp)
 !print*, 'Number of blades in this row:', nbls
 read(1, '(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 units = temp(24:25)
 read(1, *)scf, temp
 write(nopen1,*) scf
@@ -135,12 +135,12 @@ endif
 !write(*, *) 
 read(1, '(A)')temp
 read(1, *)nsl
-write(nopen1, '(A)') temp
+write(nopen1, '(A)') trim(temp)
 write(nopen1, *) nsl
 !print*, 'Number of streamlines:', nsl
 !write(*, *)
 read(1, '(A)')temp
-write(nopen1, '(A)') temp
+write(nopen1, '(A)') trim(temp)
 
 !
 ! Input angle switch
@@ -155,7 +155,7 @@ spanwise_inci_dev_spline = .False.
 ! Also read secondary argument for angle spanwise splines if present 
 !
 read(1, '(A)') beta_switch_2
-write(nopen1, '(A)') beta_switch_2
+write(nopen1, '(A)') trim(beta_switch_2)
 
 !
 ! All possible valid inputs are stored as logical variables in an array
@@ -315,7 +315,7 @@ elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_
 end if
 
 call close_log_file(nopen, file_open)
-write(nopen1, '(A)') temp
+write(nopen1, '(A)') trim(temp)
 
 ! 
 ! Curvature control switch
@@ -326,14 +326,14 @@ read(1,*)curv, spanwise_spline
 if (trim(spanwise_spline) .eq. 'spanwise_spline') then
     backspace(1)
     read(1,'(A)') temp
-    write(nopen1, '(A)') temp
+    write(nopen1, '(A)') trim(temp)
 else
     backspace(1)
     backspace(1)
     read(1,'(A)') temp
-    write(nopen1, '(A)') temp
+    write(nopen1, '(A)') trim(temp)
     read(1,'(A)') temp
-    write(nopen1, '(A)') temp
+    write(nopen1, '(A)') trim(temp)
 end if
 
 ! Invalid input for the camber definition switch
@@ -364,7 +364,7 @@ end if
 ! Read next line in the input file if spanwise_spline has been specified
 if (trim(spanwise_spline).eq.'spanwise_spline')then
     read(1,'(A)')temp
-    write(nopen1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
 endif
 
 
@@ -382,7 +382,7 @@ read(1, *)thick_distr, temp2
 backspace(1)
 read(1,'(A)') temp
 write(nopen1, *) thick_distr
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 ! Invalid input for the thickness distribution switch
 ! Warn user and stop execution
 if (thick_distr .ne. 0 .and. thick_distr .ne. 1 .and. thick_distr .ne. 2 .and. thick_distr .ne. 3 .and. thick_distr .ne. 4) then
@@ -438,7 +438,7 @@ end if
 ! Read next line
 read(1, '(A)')temp
 read(1, *)LE         
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 write(nopen1,*) LE
 ! Invalid input for the LE spline control switch
 ! Warn user and stop execution
@@ -465,7 +465,7 @@ end if
 ! Read next line
 read(1, '(A)')temp
 read(1, *)chord_switch ! non-dimensional actual chord switch
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 write(nopen1,*) chord_switch
 ! Invalid input for the non-dimensional actual chord switch
 ! Warn user and stop execution
@@ -492,7 +492,7 @@ end if
 ! Read next line
 read(1, '(A)')temp
 read(1, *)leansweep_switch 
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 write(nopen1,*) leansweep_switch
 ! If there is an invalid input for the true lean and sweep switch
 ! Warn user and stop execution
@@ -520,11 +520,11 @@ end if
 !---------------------------------------------------------------------------------------------------------------------------------------------
 ! Read next line
 read(1, '(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1, *)clustering_switch, clustering_parameter
 backspace(1)
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 ! Invalid input for the clustering distribution switch
 ! Warn user and stop execution
 if (clustering_switch .ne. 0 .and. clustering_switch .ne. 1 .and. clustering_switch .ne. 2 .and. &
@@ -540,9 +540,9 @@ end if
 
 ! Read next lines
 read(1, '(A)')temp
-write(nopen1, '(A)') temp
+write(nopen1, '(A)') trim(temp)
 read(1, '(A)')temp
-write(nopen1, '(A)') temp
+write(nopen1, '(A)') trim(temp)
 !
 !---- blade file names
 do i = 1, nsl
@@ -557,18 +557,18 @@ do js = 1, nspn
         mrel1(js), chord(js), thk_c(js), inci(js), devn(js), sec_flow_ang(js)
         backspace(1)
         read(1,'(A)') temp
-        write(nopen1, '(A)') temp
+        write(nopen1, '(A)') trim(temp)
     elseif (spanwise_inci_dev_spline) then 
         !reading inlet & outlet angles from table but not adding incidence and deviation from the table
         read(1, *, end = 35)tempr, in_beta(js), out_beta(js), mrel1(js), chord(js), thk_c(js), inci(js), devn(js), sec_flow_ang(js)
         backspace(1)
         read(1,'(A)') temp
-        write(nopen1, '(A)') temp
+        write(nopen1, '(A)') trim(temp)
     else ! Reading the inlet and outlet angles from this table
         read(1, *, end = 35)tempr, in_beta(js), out_beta(js), mrel1(js), chord(js), thk_c(js), inci(js), devn(js), sec_flow_ang(js)
         backspace(1)
         read(1,'(A)') temp
-        write(nopen1, '(A)') temp
+        write(nopen1, '(A)') trim(temp)
         !Adding incidence and deviation angles-------------------3/10/11
         !print*, in_beta(js), out_beta(js)   
     endif
@@ -586,15 +586,15 @@ endif
 !write(*, *)
 ! Reading the LE/TE curve definition---------
 read(1, '(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1, '(A)')temp
-write(nopen1,'(A)') temp 
+write(nopen1,'(A)') trim(temp) 
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1, *)npoints
 write(nopen1,*) npoints
 read(1, '(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 ! write(*, *)'LE/TE defined by a curve with no. of points as:', npoints
 ! write(*, *)'xLE    rLE     xTE     rTE'
 do i = 1, npoints
@@ -604,21 +604,21 @@ do i = 1, npoints
     write(nopen1,'(A)') trim(temp)
 enddo
 read(1,'(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1,'(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1,'(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1,'(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1,'(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1,'(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1,*)stack_switch
 write(nopen1,*) stack_switch
 read(1,'(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 if (allocated(umxthk_all)) deallocate(umxthk_all)
 Allocate(umxthk_all(nsl))
 if (LE.ne.0) then
@@ -627,7 +627,7 @@ if (LE.ne.0) then
                   jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
         backspace(1)
         read(1,'(A)') temp
-        write(nopen1,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
         !print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
     enddo
 elseif (LE == 0) then
@@ -640,29 +640,31 @@ elseif (LE == 0) then
                   tethk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
         backspace(1)
         read(1,'(A)') temp
-        write(nopen1,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
         ! print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), tethk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
     enddo
 endif
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1,'(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1, *)cpbsv, bsv1, bsv2
-write(nopen1,*) cpbsv, bsv1, bsv2
+backspace(1)
+read(1,'(A)') temp
+write(nopen1,*) trim(temp)
 read(1,'(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 do i = 1, cpbsv
     read(1, *)spanbsv(i), bf1(i), bf2(i)
     backspace(1)
     read(1,'(A)') temp
-    write(nopen1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
 enddo
 
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1, *)stack! Reading the stacking value
 write(nopen1,*) stack
 
@@ -672,30 +674,30 @@ write(nopen1,*) stack
 ! Read sweep spline control points and call ESP override subroutine 
 !
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1,'(A)')temp 
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(temp(12:12), *)cpdeltam
 if(trim(trueleansweep).ne.'')then
     chrdsweep = 1
     read(1,'(A)')temp
-    write(nopen1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
     do i = 1, cpdeltam
         read(1, *)spanmp(i), xcpdelm(i)
         backspace(1)
         read(1,'(A)') temp
-        write(nopen1,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
     enddo
 else
     read(1,'(A)')temp
-    write(nopen1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
     do i = 1, cpdeltam
         read(1, *)spanmp(i), xcpdelm(i)
         backspace(1)
         read(1,'(A)') temp
-        write(nopen1,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
     enddo
 endif
 
@@ -717,30 +719,30 @@ xcpdelm(1:cpdeltam) = temp_in
 ! Read lean spline control points and call ESP override subroutine
 !
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1,'(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1,'(A)')temp 
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(temp(12:12), *)cpdeltheta
 if(trim(trueleansweep).ne.'')then
     chrdlean = 1
     read(1,'(A)')temp
-    write(nopen1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
     do i = 1, cpdeltheta
         read(1, *)spantheta(i), xcpdeltheta(i)
         backspace(1)
         read(1,'(A)') temp
-        write(nopen1,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
     enddo
 else
     read(1,'(A)')temp
-    write(nopen1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
     do i = 1, cpdeltheta
         read(1, *)spantheta(i), xcpdeltheta(i)
         backspace(1)
         read(1,'(A)') temp
-        write(nopen1,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
     enddo
 endif
 
@@ -763,18 +765,18 @@ xcpdeltheta(1:cpdeltheta) = temp_in
 ! inBeta* can be used to spline either inlet flow angle or incidence
 !
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1,'(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1, *)cpinbeta 
 write(nopen1,*) cpinbeta
 read(1,'(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 do i = 1, cpinbeta
     read(1, *)spaninbeta(i), xcpinbeta(i)
     backspace(1)
     read(1,'(A)') temp
-    write(nopen1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
 enddo
 
 if (allocated(temp_in)) deallocate(temp_in)
@@ -796,18 +798,18 @@ xcpinbeta(1:cpinbeta) = temp_in
 ! outBeta* can be used to spline either exit flow angle or deviation
 !
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1, *)cpoutbeta
 write(nopen1,*) cpoutbeta
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 do i = 1, cpoutbeta
     read(1, *)spanoutbeta(i), xcpoutbeta(i)
     backspace(1)
     read(1,'(A)') temp
-    write(nopen1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
 enddo
 
 if (allocated(temp_in)) deallocate(temp_in)
@@ -829,18 +831,18 @@ xcpoutbeta(1:cpoutbeta) = temp_in
 ! TODO: chord_multiplier > 1?
 !
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1, *)cpchord
 write(nopen1,*) cpchord
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 do i = 1, cpchord
     read(1, *)spanchord(i), xcpchord(i)
     backspace(1)
     read(1,'(A)') temp
-    write(nopen1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
     xcpchord(i) = xcpchord(i) + 1.0
 enddo
 
@@ -871,13 +873,13 @@ end if
 ! TODO: tm/c > 1?
 !
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1,'(A)')temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 read(1, *)cptm_c ! control points for tm/c
 write(nopen1,*) cptm_c
 read(1,'(A)') temp
-write(nopen1,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 
 !next line to always use the thickness tm/c as it is a multiplier (default = 1):
 if ((thick_distr .ne. 0) .and. .not. is2d) then
@@ -890,7 +892,7 @@ do i = 1, cptm_c
     read(1, *)spantm_c(i), xcptm_c(i)
     backspace(1)
     read(1,'(A)') temp
-    write(nopen1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
     xcptm_c(i) = xcptm_c(i) + 1.0
 enddo
 
@@ -1006,8 +1008,8 @@ character*(*) path
 character*256 temp, fname4, row_type
 character*256 fname5
 character(len = :), allocatable :: log_file
-integer :: phantom_n, nopen
-logical :: file_open
+integer :: phantom_n, nopen, nopen1
+logical :: file_open, file_open_1
 
 !if(curv.ne.0.or.thick.ne.0.or.LE.ne.0.or.thick_distr.ne.0)then
 print*
@@ -1018,6 +1020,7 @@ call close_log_file(nopen, file_open)
 ! Reading the input file of curv, thk, and LE for the bladegen:
 fname5 = trim(path)//'controlinputs.'//trim(row_type)//'.dat'
 ! print*, fname5
+call open_auxinput_log_file(trim(adjustl(fname5)), nopen1, file_open_1)
 open(11, file = fname5)
 rewind(11)
 !----------------------------------------------------------------------
@@ -1027,13 +1030,20 @@ if (allocated(ncp_curv)) deallocate(ncp_curv)
 if (allocated(curv_cp )) deallocate(curv_cp )
 Allocate(ncp_curv(nsl))
 Allocate(curv_cp(20, 2*nsl))
-read (11, *) temp   ! the test case name (added 6 23 2013)
-read (11, *) temp
+read (11,'(A)') temp   ! the test case name (added 6 23 2013)
+write(nopen1,'(A)') trim(temp)
+read (11,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 current = 0
 do i = 1, nsl
-    read (11, *) temp
-    read (11, *) temp
+    read (11,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read (11,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
     read (11, *) ncp_curv(i)
+    backspace(11)
+    read(11,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
     ncp_curv(i) = ncp_curv(i) + 2
         if (allocated(xcp)) deallocate(xcp)
         if (allocated(ycp)) deallocate(ycp)
@@ -1043,11 +1053,15 @@ do i = 1, nsl
     !print*, 'ycp = ', ycp 
     current = i 
     !print*, 'current', current
-    read (11, *) temp
+    read (11,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
     write(radialsec, *)current ! write out control points to a file to plot. Kiran 8/9/13
     ! reading the control points: 
     do j = 1, (ncp_curv(i)-2)
         read(11, *) xcp(j+1), ycp(j+1)
+        backspace(11)
+        read(11,'(A)') temp
+        write(nopen1,'(A)') temp
     enddo
 
     if(isdev) then
@@ -1090,22 +1104,35 @@ elseif (thick_distr.eq.3) then
 else
     phantom_n = 4
 endif
-read (11, *) temp
+
+read(11,'(A)') temp
+write(nopen1,'(A)') trim(temp)
+read (11,'(A)') temp
+write(nopen1,'(A)') trim(temp)
 do i = 1, nsl
-    read (11, *) temp
-    read (11, *) temp
+    read (11,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read (11,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
     read (11, *) ncp_thk(i)
+    backspace(11)
+    read (11,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
     ncp_thk(i) = ncp_thk(i) + phantom_n
     if (allocated(xcp)) deallocate(xcp)
     if (allocated(ycp)) deallocate(ycp)
     Allocate(xcp(ncp_thk(i)))
     Allocate(ycp(ncp_thk(i)))
-    read (11, *) temp
+    read (11,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
     ! reading the control points: 
     !do j = 1, (ncp_thk(i)-2)
     do j = 1, (ncp_thk(i)-phantom_n)
         !read(11, *), xcp(j+1), ycp(j+1)  ! for cubic spline
         read(11, *) xcp(j+(phantom_n/2)), ycp(j+(phantom_n/2))  ! for quartic spline
+        backspace(11)
+        read(11,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
         !print*, xcp(j+1), ycp(j+1)
     enddo
     if (thick_distr.eq.4) then
@@ -1166,21 +1193,34 @@ if(LE .ne.0) then
     !Allocate(sting_l_all(nsl))
     Allocate(sting_h_all(nsl, 2))
     ! 5 ... is the number of parameters to read
-    read (11, *) temp
-    read (11, *) temp
+    read (11,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read (11,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read (11,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
     read (11, *) LEdegree, no_LE_segments
+    backspace(11)
+    read (11,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
     call log_file_exists(log_file, nopen, file_open)
     print*, 'LEdegree = ', LEdegree, 'no_LE_segments = ', no_LE_segments
     write(nopen,*) 'LEdegree = ', LEdegree, 'no_LE_segments = ', no_LE_segments
     call close_log_file(nopen, file_open)
     do i = 1, nsl
-        read (11, *) temp
-        read (11, *) temp
+        read (11,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
+        read (11,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
         read (11, *) lethk_all(i), tethk_all(i), s_all(i), ee_all(i), C_le_x_top_all(i), C_le_x_bot_all(i), &
         C_le_y_top_all(i), C_le_y_bot_all(i), LE_vertex_ang_all(i), LE_vertex_dis_all(i), &
         sting_l_all(i), sting_h_all(i, 1), sting_h_all(i, 2)
+        backspace(11)
+        read (11,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
         ! print*, 'C_le_y_top_all(i), C_le_y_bot_all(i), LE_vertex_ang_all(i), LE_vertex_dis_all(i)', C_le_y_top_all(i), C_le_y_bot_all(i), LE_vertex_ang_all(i), LE_vertex_dis_all(i)
     enddo
+    ! TODO: Get corresponding controlinputs file from Karthik?
     if (thick_distr .eq. 4) then
         if (allocated(te_angle_cp)) deallocate(te_angle_cp)
         Allocate(te_angle_cp(nsl))
@@ -1214,6 +1254,7 @@ elseif (thick_distr .eq. 4) then ! end if for LE spline parameters
     call close_log_file(nopen, file_open)
 endif
 close(11)
+call close_auxinput_log_file(nopen1, file_open_1)
 !endif ! end if for curvature, thickness, thickness dist and LE spline definition.
 
 return
@@ -1235,7 +1276,7 @@ subroutine read_spanwise_input(row_type, path)
 use globvar
 use file_operations
 implicit none
-character*256 row_type
+character*256 row_type, temps
 ! character*(*) file_name
 character*(*) path
 character*256 file_name
@@ -1245,20 +1286,34 @@ real :: span_dum
 real*8, allocatable, dimension(:) :: temp, temp_exact
 integer                           :: temp_thk_flag(3)
 integer jj
-integer     :: i_local, nopen
-logical     :: file_open
+integer     :: i_local, nopen, nopen1
+logical     :: file_open, file_open_1
 
 file_name = trim(path)//'spancontrolinputs.'//trim(row_type)//'.dat'
+call open_auxinput_log_file(trim(adjustl(file_name)), nopen1, file_open_1)
 open(10, file = file_name)
 rewind(10)
 
-do i = 1, 5
-    read(10, *)
-end do
+!do i = 1, 5
+!    read(10, *)
+!end do
+read(10,'(A)') temps
+write(nopen1,'(A)') trim(temps)
+read(10,'(A)') temps
+write(nopen1,'(A)') trim(temps)
+read(10,'(A)') temps
+write(nopen1,'(A)') trim(temps)
+read(10,'(A)') temps
+write(nopen1,'(A)') trim(temps)
+read(10,'(A)') temps
+write(nopen1,'(A)') trim(temps)
 
 !--------------------------------------------------------------------------
 !Reading curvature and chord control points
 read(10, *) ncp_span_curv, ncp_chord
+backspace(10)
+read(10,'(A)') temps
+write(nopen1,'(A)') trim(temps)
 if(control_inp_flag .eq. 1 .and. ncp_span_curv .ne. nsl) then
     print*, 'ERROR: In auxiliary file inputs, number of spanwise curvature specifications &
              must equal number of streamlines if spanwise spline is not used.'
@@ -1289,9 +1344,13 @@ endif
 if (allocated(cp_chord_curv)) deallocate(cp_chord_curv)
 allocate(cp_chord_curv(ncp_span_curv, ncp_chord_curv))
 !LINE 7
-read(10, *)
+read(10,'(A)') temps
+write(nopen1,'(A)') temps
 do i = 1, ncp_span_curv
     read(10, *) cp_chord_curv(i, 1:ncp_chord_curv)
+    backspace(10)
+    read(10,'(A)') temps
+    write(nopen1,'(A)') temps
     if(control_inp_flag .eq. 1) then
         if (allocated(xcp)) deallocate(xcp)
         if (allocated(ycp)) deallocate(ycp)
@@ -1485,14 +1544,19 @@ enddo
 
 !deallocate(temp)
 endif
-
+print *, 'From read_spanwise_input - ', thick, LE, thick_distr
 if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4) then
     !--------------------------------------------------------------------------
     !Reading thickness control points
-    read(10, *)
-    read(10, *)
+    read(10,'(A)') temps
+    write(nopen1,'(A)') trim(temps)
+    read(10,'(A)') temps
+    write(nopen1,'(A)') trim(temps)
     if (thick_distr .eq. 4) then
         read(10, *) ncp_span_thk, ncp_chord_thickness, te_flag, le_opt_flag, te_opt_flag
+        backspace(10)
+        read(10,'(A)') temps
+        write(nopen1,'(A)') trim(temps)
         print*, 'TE flag:', te_flag
         print*, 'LE optimization flag:', le_opt_flag
         print*, 'TE optimization flag:', te_opt_flag
@@ -1503,6 +1567,9 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
         call close_log_file(nopen, file_open)
     else
         read(10, *)ncp_span_thk, ncp_chord_thickness
+        backspace(10)
+        read(10,'(A)') temps
+        write(nopen1,'(A)') temps
     endif
     if(control_inp_flag .eq. 1 .and. ncp_span_thk .ne. nsl) then
         print*, 'FATAL ERROR: In auxiliary file inputs, number of spanwise thickness specifications &
@@ -1544,7 +1611,8 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
     if (allocated(te_angle_cp)) deallocate(te_angle_cp)
     Allocate(te_angle_cp(ncp_span_thk))
 
-    read(10, *)
+    read(10,'(A)') temps
+    write(nopen1,'(A)') temps
     do i = 1, ncp_span_thk
         if (allocated(xcp)) deallocate(xcp)
         if (allocated(ycp)) deallocate(ycp)
@@ -1552,7 +1620,9 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
         Allocate(ycp(ncp_thk(i)))
         if (thick_distr .eq. 4) then
             read(10, *) cp_chord_thk(i, 1:ncp_chord_thk), le_angle_cp(i), te_angle_cp(i)
-            ! TODO: Push to develop
+            backspace(10)
+            read(10,'(A)') temps
+            write(nopen1,'(A)') temps
             do j = 2 + ncp_chord_thickness,ncp_chord_thk
                 cp_chord_thk(i,j) = 0.5*cp_chord_thk(i,j)
             end do
@@ -1562,6 +1632,9 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
             endif
         elseif (thick_distr .eq. 3) then
             read(10, *) cp_chord_thk(i, 1:ncp_chord_thk)
+            backspace(10)
+            read(10,'(A)') temps
+            write(nopen1,'(A)') temps
             if(control_inp_flag .eq. 1) then
                 xcp(1) = 0.
                 xcp(2) = 0.
@@ -1574,6 +1647,9 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
             endif
         else
             read(10, *) cp_chord_thk(i, 1:ncp_chord_thickness)
+            backspace(10)
+            read(10,'(A)') temps
+            write(nopen1,'(A)') temps
             if(control_inp_flag .eq. 1) then
                 xcp(1) = 2*xcp(3)-xcp(5)
                 ycp(1) = 2*ycp(3)-ycp(5)
@@ -1806,13 +1882,25 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
     if (LE .ne. 0) then
         !--------------------------------------------------------------------------
         !Reading LE control points
-        do i = 1, 3
-            read(10, *)  
-        end do
+        !do i = 1, 3
+        !    read(10, *)  
+        !end do
+        read(10,'(A)') temps
+        write(nopen1,'(A)') temps
+        read(10,'(A)') temps
+        write(nopen1,'(A)') temps
+        read(10,'(A)') temps
+        write(nopen1,'(A)') temps
         read(10, *)LE_deg, LE_seg
-        read(10, *)
+        backspace(10)
+        read(10,'(A)') temps
+        write(nopen1,'(A)') temps
+        read(10,'(A)') temps
+        write(nopen1,'(A)') temps
         read(10, *)ncp_span_LE
-
+        backspace(10)
+        read(10,'(A)') temps
+        write(nopen1,'(A)') temps
         ncp_LE = 13 !there are 13 different control points
         !Giving the same variable name as in controlinputs
         LEdegree = LE_deg
@@ -1824,9 +1912,13 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
         allocate(cp_LE(ncp_span_LE, ncp_LE+1))
 
 
-        read(10, *)
+        read(10,'(A)') temps
+        write(nopen1,'(A)') temps
         do i = 1, ncp_span_LE
             read(10, *)cp_LE(i, 1:ncp_LE+1)
+            backspace(10)
+            read(10,'(A)') temps
+            write(nopen1,'(A)') temps
         end do
     endif
         ! if (thick_distr .eq. 4) then
@@ -1841,6 +1933,7 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
         ! endif
     endif
 close(10)
+call close_auxinput_log_file(nopen1, file_open_1)
 
 !---------------------------------------------------------------------------
 

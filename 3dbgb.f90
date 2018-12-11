@@ -295,6 +295,7 @@ dtor = pi/180.
 radius_tolerance = 1e-05
 abs_zero = 0.0000000000000000
 
+call execute_command_line('mkdir log_files')
 !****************************************************************************
 !Displays the welcome message and some info about the code capabilities
 call displayMessage
