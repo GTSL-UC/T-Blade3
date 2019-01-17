@@ -126,7 +126,7 @@ real Zweifel(nsl), sting_l_all(nsl), sting_h_all(nsl, 2)
 real jcellblade_all(nspn), etawidth_all(nspn), jcellblade, etawidth
 real, allocatable, dimension(:) :: xtop_refine, ytop_refine, xbot_refine, ybot_refine
 real, allocatable, dimension(:) :: init_angles, init_cambers, x_spl_end_curv, cam_refine, u_refine
-real ucp_top(11), vcp_top(11), ucp_bot(11), vcp_bot(11)
+real ucp_top(11), vcp_top(11), ucp_bot(11), vcp_bot(11), a_temp(4), d_temp(4), t_max, u_max
 real le_throat, te_throat, intersec_coord(12, nsl), min_throat_2D, attach_angle
 real u_translation, camber_trans
 ! variables for s809 profile
@@ -152,7 +152,7 @@ character*80 file1, file2, file3, file4, file5, file6, file7
 character*20 airfoil, sec
 character*16 thick_distr_3_flag
 logical error, ellip, isdev, isxygrid
-integer                             :: nopen
+integer                             :: nopen, LE_round
 character(len = :), allocatable     :: log_file
 logical                             :: file_open, write_to_file
 
@@ -279,7 +279,6 @@ else if (clustering_switch .eq. 4) then
     np_cluster  = int(clustering_parameter)
     call elliptical_clustering(js,np,nsl,ncp_thk(js),thk_cp,np_cluster,u)
 end if
-
 
 !u(1) = 0.0
 !ueq(1) = 0.0 ! uniform clustering

@@ -2545,6 +2545,186 @@ end subroutine elliptical_clustering
 
 
 
+!
+! Find inverse of a 2x2 matrix
+!
+! Input parameters: A   = 2x2 matrix whose inverse is to be computed
+!
+!*******************************************************************************************
+subroutine matrix_inverse_2x2(A,A_inv)
+    use file_operations
+    implicit none
+
+    real,                 intent(in)        :: A(2,2)
+    real,                 intent(inout)     :: A_inv(2,2)
+
+    ! Local variables
+    real                                    :: det_A, tol = 10E-8
+
+
+    ! Compute determinant of incoming matrix
+    det_A       = (A(1,1)*A(2,2)) - (A(1,2)*A(2,1))
+
+    ! Compute matrix inverse if det(A) is not 0
+    if (abs(det_A) .le. tol) then
+        print *, 'FATAL ERROR: Trying to invert a singular matrix'
+        stop
+    else
+        A_inv(1,:)  = (1.0/det_A)*[A(2,2), -A(1,2)]
+        A_inv(2,:)  = (1.0/det_A)*[-A(2,1), A(1,1)]
+    end if
+
+
+end subroutine matrix_inverse_2x2
+!*******************************************************************************************
+
+
+
+!
+! Find inverse of a 3x3 matrix
+!
+! Input parameters: A   = 3x3 matrix whose inverse is to be computed
+!
+!*******************************************************************************************
+subroutine matrix_inverse_3x3(A,A_inv)
+    use file_operations
+    implicit none
+
+    real,               intent(in)      :: A(3,3)
+    real,               intent(inout)   :: A_inv(3,3)
+
+    ! Local variables
+    real                                :: det_A, tol = 10E-8
+    real                                :: A_minors(3,3), A_cofacs(3,3), A_adjoint(3,3)
+
+
+    ! Create matrix of minors
+    A_minors(1,1)       = (A(2,2)*A(3,3)) - (A(3,2)*A(2,3))
+    A_minors(1,2)       = (A(2,1)*A(3,3)) - (A(3,1)*A(2,3))
+    A_minors(1,3)       = (A(2,1)*A(3,2)) - (A(3,1)*A(2,2))
+    A_minors(2,1)       = (A(1,2)*A(3,3)) - (A(3,2)*A(1,3))
+    A_minors(2,2)       = (A(1,1)*A(3,3)) - (A(3,1)*A(1,3))
+    A_minors(2,3)       = (A(1,1)*A(3,2)) - (A(3,1)*A(1,2))
+    A_minors(3,1)       = (A(1,2)*A(2,3)) - (A(2,2)*A(1,3))
+    A_minors(3,2)       = (A(1,1)*A(2,3)) - (A(2,1)*A(1,3))
+    A_minors(3,3)       = (A(1,1)*A(2,2)) - (A(2,1)*A(1,2))
+
+    ! Find determinant of the incoming matrix
+    det_A               = (A(1,1)*A_minors(1,1)) - (A(1,2)*A_minors(1,2)) + &
+                          (A(1,3)*A_minors(1,3))
+
+    ! Create matrix of cofactors
+    A_cofacs(1,:)       = [A_minors(1,1), -A_minors(1,2), A_minors(1,3)]
+    A_cofacs(2,:)       = [-A_minors(2,1), A_minors(2,2), -A_minors(2,3)]
+    A_cofacs(3,:)       = [A_minors(3,1), -A_minors(3,2), A_minors(3,3)]
+
+    ! Create adjoint matrix
+    A_adjoint           = transpose(A_cofacs)
+
+    ! Compute matrix inverse if det(A) is not 0
+    if (abs(det_A) .le. tol) then
+        print *, 'FATAL ERROR: Trying to invert a singular matrix'
+        stop
+    else
+        A_inv               = (1.0/det_A)*A_adjoint
+    end if
+
+
+end subroutine matrix_inverse_3x3
+!*******************************************************************************************
+
+
+
+!
+! Compute coefficients of modified NACA four-digit thickness
+!
+! For u < u_max: y_t = a_0*sqrt(u) + a_1*u + a_2*(u**2) + a_3*(u**3)
+! For u > u_max: y_t = d_0 + d_1*(1 - u) + d_2*((1 - u)**2) + d_3*((1 - u)**3)
+!
+! Input parameters: t_max = half max. thickness for the blade section in fraction chord
+!                   u_max = chordwise location of max. thickness for the blade section
+!                   I     = integer parameter governing roundedness of the leading edge
+!                           (default = 6, sharp LE = 0)
+!
+! Reference: Abbott, I.H, von Doenhoff, A.E., "Families of Wing Sections", Theory of Wing
+!            Sections, Dover Publications, New York, 1999, pp. 116-118
+!
+!*******************************************************************************************
+subroutine modified_NACA_four_digit_thickness_coeffs(t_max,u_max,I,a,d)
+    use file_operations
+    implicit none
+
+    real,                       intent(in)      :: t_max
+    real,                       intent(in)      :: u_max
+    integer,                    intent(in)      :: I
+    real,                       intent(inout)   :: a(4)
+    real,                       intent(inout)   :: d(4)
+
+    ! Local variables
+    integer                                     :: j, k
+    real                                        :: A_d_coeffs(2,2), b_d_coeffs(2), A_d_coeffs_inv(2,2), &
+                                                   A_a_coeffs(3,3), b_a_coeffs(3), A_a_coeffs_inv(3,3), &
+                                                   temp
+
+
+    !
+    ! Compute d_0 and d_1
+    ! TODO: Create TE_slope table for d_1
+    !       Currently d_1 set for u_max = 0.5
+    !
+    d(1)            = 0.02*t_max
+    d(2)            = 4.65*t_max
+    
+    !
+    ! Compute d_2 and d_3
+    ! Enforce the following conditions: yd_t(u_max)     = t_max
+    !                                   yd'_t(u_max)    = 0
+    ! Solve the linear system:          A_d_coeffs*d_23 = b_d_coeffs 
+    ! with                              d_23            = [d_2, d_3]
+    !  
+    A_d_coeffs(1,:) = [(1.0 - u_max)**2,  (1.0 - u_max)**3]
+    A_d_coeffs(2,:) = [2.0*(u_max - 1.0), -3.0*((u_max - 1.0)**2)]
+
+    b_d_coeffs      = [t_max - d(1) - (d(2)*(1.0 - u_max)), d(2)]
+
+    ! Find inverse of A_d_coeffs
+    call matrix_inverse_2x2(A_d_coeffs,A_d_coeffs_inv)
+
+    ! Compute d_2 and d_3
+    d(3:)           = matmul(A_d_coeffs_inv,b_d_coeffs)
+
+    
+    !
+    ! Compute a_0
+    !
+    a(1)            = sqrt(2.2038)*(2.0*t_max*(real(I,8)/6.0))
+
+    !
+    ! Compute a_1, a_2 and a_3
+    ! Enforce the following conditions: ya_t(u_max)         = t_max
+    !                                   ya'_t(u_max)        = 0
+    !                                   ya''_t(u_max)       = yd''_t(u_max)
+    ! Solve the linear system:          A_a_coeffs*a_123    = b_a_coeffs
+    ! with                              a_123               = [a_1, a_2, a_3]
+    !
+    A_a_coeffs(1,:) = [u_max, u_max**2,  u_max**3]
+    A_a_coeffs(2,:) = [1.0,   2.0*u_max, 3.0*(u_max**2)]
+    A_a_coeffs(3,:) = [0.0,   2.0,       6.0*u_max]
+
+    temp            = (2.0*d(3)) + (6.0*(1.0 - u_max)*d(4)) + (0.25*a(1)/(u_max*sqrt(u_max)))
+    b_a_coeffs      = [t_max - (a(1)*sqrt(u_max)), (-0.5*a(1)/sqrt(u_max)), temp]
+
+    ! Find inverse of A_a_coeffs
+    call matrix_inverse_3x3(A_a_coeffs,A_a_coeffs_inv)
+
+    ! Compute a_1, a_2 and a_3
+    a(2:)           = matmul(A_a_coeffs_inv,b_a_coeffs)
+
+
+end subroutine modified_NACA_four_digit_thickness_coeffs
+!*******************************************************************************************
+
+
 
 
 
