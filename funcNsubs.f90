@@ -2,7 +2,7 @@
 !--------------------------Kiran Siddappaji
 
 !---------------------------------------------------------
-! Subroutine to display the welcome message
+! Subroutine to display the welcome message 
 !---------------------------------------------------------
 subroutine displayMessage
     use file_operations
@@ -2567,7 +2567,7 @@ subroutine matrix_inverse_2x2(A,A_inv)
 
     ! Compute matrix inverse if det(A) is not 0
     if (abs(det_A) .le. tol) then
-        print *, 'FATAL ERROR: Trying to invert a singular matrix'
+        print *, 'FATAL ERROR: Trying to invert a singular 2x2 matrix'
         stop
     else
         A_inv(1,:)  = (1.0/det_A)*[A(2,2), -A(1,2)]
@@ -2623,7 +2623,7 @@ subroutine matrix_inverse_3x3(A,A_inv)
 
     ! Compute matrix inverse if det(A) is not 0
     if (abs(det_A) .le. tol) then
-        print *, 'FATAL ERROR: Trying to invert a singular matrix'
+        print *, 'FATAL ERROR: Trying to invert a singular 3x3 matrix'
         stop
     else
         A_inv               = (1.0/det_A)*A_adjoint
@@ -2631,6 +2631,27 @@ subroutine matrix_inverse_3x3(A,A_inv)
 
 
 end subroutine matrix_inverse_3x3
+!*******************************************************************************************
+
+
+
+!
+!
+!
+!*******************************************************************************************
+subroutine compute_TE_angle(u_max,trail_angle)
+    use file_operations
+    implicit none
+
+    real,                       intent(in)      :: u_max
+    real,                       intent(inout)   :: trail_angle
+
+
+    trail_angle = 0.775 + (2.51666667*u_max) + (-13.625*(u_max**2)) + (35.83333333*(u_max**3)) &
+                  + (-12.5*(u_max**4))
+
+
+end subroutine compute_TE_angle
 !*******************************************************************************************
 
 
@@ -2650,12 +2671,13 @@ end subroutine matrix_inverse_3x3
 !            Sections, Dover Publications, New York, 1999, pp. 116-118
 !
 !*******************************************************************************************
-subroutine modified_NACA_four_digit_thickness_coeffs(t_max,u_max,I,a,d)
+subroutine modified_NACA_four_digit_thickness_coeffs(t_max,u_max,dy_dx_TE,I,a,d)
     use file_operations
     implicit none
 
     real,                       intent(in)      :: t_max
     real,                       intent(in)      :: u_max
+    real,                       intent(in)      :: dy_dx_TE
     integer,                    intent(in)      :: I
     real,                       intent(inout)   :: a(4)
     real,                       intent(inout)   :: d(4)
@@ -2673,7 +2695,7 @@ subroutine modified_NACA_four_digit_thickness_coeffs(t_max,u_max,I,a,d)
     !       Currently d_1 set for u_max = 0.5
     !
     d(1)            = 0.02*t_max
-    d(2)            = 4.65*t_max
+    d(2)            = 2.0*dy_dx_TE*t_max
     
     !
     ! Compute d_2 and d_3
@@ -2723,6 +2745,46 @@ subroutine modified_NACA_four_digit_thickness_coeffs(t_max,u_max,I,a,d)
 
 end subroutine modified_NACA_four_digit_thickness_coeffs
 !*******************************************************************************************
+
+
+
+!
+!
+!
+!*******************************************************************************************
+subroutine modified_NACA_four_digit_thickness(np,u,u_max,t_max,a,d,thk)
+    use file_operations
+    implicit none
+
+    integer,                intent(in)      :: np
+    real,                   intent(in)      :: u(np)
+    real,                   intent(in)      :: u_max
+    real,                   intent(in)      :: t_max
+    real,                   intent(in)      :: a(4)
+    real,                   intent(in)      :: d(4)
+    real,                   intent(inout)   :: thk(np)
+
+    ! Local variables
+    integer                                 :: i, j, k
+    real                                    :: tol = 10E-8
+
+
+    do i = 1,np
+
+        if (abs(u(i) - u_max) .le. tol) then
+            thk(i)      = t_max
+        else if (u(i) .lt. u_max) then
+            thk(i)      = (a(1)*sqrt(u(i))) + (a(2)*u(i)) + (a(3)*(u(i)**2)) + (a(4)*(u(i)**3))
+        else if (u(i) .gt. u_max) then
+            thk(i)      = d(1) + (d(2)*(1.0 - u(i))) + (d(3)*((1.0 - u(i))**2)) + (d(4)*((1.0 - u(i))**3))
+        end if
+
+    end do
+
+
+end subroutine modified_NACA_four_digit_thickness
+!*******************************************************************************************
+
 
 
 

@@ -126,7 +126,8 @@ real Zweifel(nsl), sting_l_all(nsl), sting_h_all(nsl, 2)
 real jcellblade_all(nspn), etawidth_all(nspn), jcellblade, etawidth
 real, allocatable, dimension(:) :: xtop_refine, ytop_refine, xbot_refine, ybot_refine
 real, allocatable, dimension(:) :: init_angles, init_cambers, x_spl_end_curv, cam_refine, u_refine
-real ucp_top(11), vcp_top(11), ucp_bot(11), vcp_bot(11), a_temp(4), d_temp(4), t_max, u_max
+real ucp_top(11), vcp_top(11), ucp_bot(11), vcp_bot(11), a_NACA(4), d_NACA(4), t_max, u_max, thk_NACA(121), &
+     y_trail(2), x_trail(2), ycp_trail(5), xcp_trail(5), dy_dx_TE, loc(1)
 real le_throat, te_throat, intersec_coord(12, nsl), min_throat_2D, attach_angle
 real u_translation, camber_trans
 ! variables for s809 profile
@@ -152,7 +153,7 @@ character*80 file1, file2, file3, file4, file5, file6, file7
 character*20 airfoil, sec
 character*16 thick_distr_3_flag
 logical error, ellip, isdev, isxygrid
-integer                             :: nopen, LE_round
+integer                             :: nopen, LE_round, deg_trail
 character(len = :), allocatable     :: log_file
 logical                             :: file_open, write_to_file
 
@@ -631,7 +632,59 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
     ! -----------------------------------------------------------------------------
     !---- generate airfoil thickness: =============================== 
     ! -----------------------------------------------------------------------------
-    if (thick_distr.eq.4) then
+    if (thick_distr .eq. 5) then
+        call log_file_exists(log_file, nopen, file_open)
+        print *, ''
+        print *, 'Using modified NACA four digit thickness distribution'
+        write(nopen,*) ''
+        write(nopen,*) 'Using modified NACA four digit thickness distribution'
+        
+        ncp     = ncp_thk(js)
+        if (allocated(xcp_thk)) deallocate(xcp_thk)
+        if (allocated(ycp_thk)) deallocate(ycp_thk)
+        allocate(xcp_thk(ncp))
+        allocate(ycp_thk(ncp))
+
+        do i = 1,ncp
+            xcp_thk(i)  = thk_cp(i, 2*js-1)
+            ycp_thk(i)  = thk_cp(i, 2*js)
+        end do 
+         
+        t_max    = maxval(ycp_thk)
+        loc      = maxloc(ycp_thk)
+        u_max    = xcp_thk(loc(1))
+        I        = te_flag
+
+        print *, 'Maximum thickness for the blade section = ', t_max
+        write(nopen,*) 'Maximum thickness for the blade section = ', t_max
+        print *, 'Chordwise location for the maximum thickness = ', u_max
+        write(nopen,*) 'Chordwise location for the maximum thickness = ', u_max
+        print *, 'Leading edge rounding factor = ', I
+        write(nopen,*) 'Leading edge rounding factor = ', I
+
+        ! Compute TE angle value for u_max
+        call compute_TE_angle(u_max,dy_dx_TE)
+
+        print *, 'TE angle for maximum thickness chordwise location = ', dy_dx_TE 
+        write(nopen,*) 'TE angle for maximum thickness chordwise location = ', dy_dx_TE
+
+        !
+        ! Find coefficients for modified NACA four digit thickness
+        ! Apply modified NACA four digit thickness
+        !
+        call modified_NACA_four_digit_thickness_coeffs(t_max,u_max,dy_dx_TE,I,a_NACA,d_NACA)
+        call modified_NACA_four_digit_thickness(np,u,u_max,t_max,a_NACA,d_NACA,thickness)
+        
+        print *, 'Modified NACA thickness coefficients (u < u_max) = ', a_NACA
+        write(nopen,*) 'Modified NACA thickness coefficients (u < u_max) = ', a_NACA
+        print *, 'Modified NACA thickness coefficients (u > u_max) = ', d_NACA
+        write(nopen,*) 'Modified NACA thickness coefficients (u > u_max) = ', d_NACA
+        print *, ''
+        write(nopen,*) ''
+
+        call close_log_file(nopen, file_open)
+
+    else if (thick_distr.eq.4) then
         call log_file_exists(log_file, nopen, file_open)
         ! Added by Karthik Balasubramanian
         write (*, '(/, A)') 'Implementing exact thickness control'

@@ -1,5 +1,5 @@
 subroutine span_variation()
-!Description(Syed Moez 03/02/2014):-------------------------------------------------------------------------
+    !Description(Syed Moez 03/02/2014):-------------------------------------------------------------------------
 !This subroutine is used to create a cubic bspline between variable
 !taken from spancontrolinputs file and calls span_output() subroutine
 !span_output selects the variables for all the sections by comparing
@@ -26,7 +26,7 @@ if (allocated(le_angle_all)) deallocate(le_angle_all)
 Allocate(le_angle_all(na))
 if (allocated(te_angle_all)) deallocate(te_angle_all)
 Allocate(te_angle_all(na))
-if (thick_distr .eq. 4) then
+if (thick_distr .eq. 4 .or. thick_distr .eq. 5) then
 	allocate(bspline_thk(nsl, 2*ncp_thickness+1))
 else
 	allocate(bspline_thk(nsl, ncp_chord_thk))
@@ -85,7 +85,7 @@ if(thick .ne. 0 .or. thick_distr .eq. 3) then
 			bspline_thk(j,i)=intersec(j)
 		end do
 	end do
-elseif (thick_distr .eq. 4) then
+elseif (thick_distr .eq. 4 .or. thick_distr .eq. 5) then
 	do j = 1,na
 		bspline_thk(j,1) = span(j)
 	enddo

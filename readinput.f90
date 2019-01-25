@@ -385,11 +385,12 @@ write(nopen1, *) thick_distr
 write(nopen1,'(A)') trim(temp)
 ! Invalid input for the thickness distribution switch
 ! Warn user and stop execution
-if (thick_distr .ne. 0 .and. thick_distr .ne. 1 .and. thick_distr .ne. 2 .and. thick_distr .ne. 3 .and. thick_distr .ne. 4) then
+if (thick_distr .ne. 0 .and. thick_distr .ne. 1 .and. thick_distr .ne. 2 .and. thick_distr .ne. 3 .and. &
+    thick_distr .ne. 4 .and. thick_distr .ne. 5) then
 
     print *, ''
     print *, 'FATAL ERROR: Invalid argument for thickness distribution switch'
-    print *, 'Valid arguments are 0, 1, 2, 3, or 4 (refer to T-Blade3 documentation)'
+    print *, 'Valid arguments are 0, 1, 2, 3, 4 or 5 (refer to T-Blade3 documentation)'
     print *, ''
     stop
 
@@ -1544,15 +1545,14 @@ enddo
 
 !deallocate(temp)
 endif
-print *, 'From read_spanwise_input - ', thick, LE, thick_distr
-if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4) then
+if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4 .or. thick_distr .eq. 5) then
     !--------------------------------------------------------------------------
     !Reading thickness control points
     read(10,'(A)') temps
     write(nopen1,'(A)') trim(temps)
     read(10,'(A)') temps
     write(nopen1,'(A)') trim(temps)
-    if (thick_distr .eq. 4) then
+    if (thick_distr .eq. 4 .or. thick_distr .eq. 5) then
         read(10, *) ncp_span_thk, ncp_chord_thickness, te_flag, le_opt_flag, te_opt_flag
         backspace(10)
         read(10,'(A)') temps
@@ -1582,7 +1582,8 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
 
     ncp_chord_thk = ncp_chord_thickness-2+ncp_thickness-2+1
     if (thick_distr .eq. 3) ncp_chord_thk = ncp_chord_thickness-2+ncp_thickness+2+1
-    if (thick_distr .eq. 4) ncp_chord_thk = ncp_chord_thickness+ncp_thickness+1
+    if (thick_distr .eq. 4 .or. thick_distr .eq. 5) &
+                            ncp_chord_thk = ncp_chord_thickness+ncp_thickness+1
 
     !Initializing values for variables defined by Ahmed
     if (allocated(ncp_thk)) deallocate(ncp_thk)
@@ -1593,7 +1594,7 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
         do i = 1, nsl
             ncp_thk(i) = ncp_thickness+4
         enddo
-    elseif (thick_distr .eq. 4) then
+    elseif (thick_distr .eq. 4 .or. thick_distr .eq. 5) then
         do i = 1, nsl
             ncp_thk(i) = ncp_thickness
         enddo
@@ -1618,7 +1619,7 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
         if (allocated(ycp)) deallocate(ycp)
         Allocate(xcp(ncp_thk(i)))
         Allocate(ycp(ncp_thk(i)))
-        if (thick_distr .eq. 4) then
+        if (thick_distr .eq. 4 .or. thick_distr .eq. 5) then
             read(10, *) cp_chord_thk(i, 1:ncp_chord_thk), le_angle_cp(i), te_angle_cp(i)
             backspace(10)
             read(10,'(A)') temps
@@ -1663,12 +1664,20 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
         endif
 
         do k = 1, ncp_thk(i)
-            thk_cp(k, 2*i-1) = xcp(k)
-            thk_cp(k, 2*i) = ycp(k)
+            !if (thick_distr == 5) then
+            !    thk_cp(k, 2*i - 1) = cp_chord_thk(i, 2 + k - 1)
+            !    thk_cp(k, 2*i)     = cp_chord_thk(i, ncp_chord_thickness + 2 + k - 1)
+            !    if (i == 1) then
+            !        print *, 'From readinput - ', thk_cp(k, 2*i - 1), thk_cp(k, 2*i)
+            !    end if
+            !else
+                thk_cp(k, 2*i-1) = xcp(k)
+                thk_cp(k, 2*i) = ycp(k)
+            !end if
         enddo
     enddo
 
-    if (control_inp_flag .eq. 2 .and. isold .eqv. .false. .and. thick_distr .eq. 4) then
+    if (control_inp_flag .eq. 2 .and. isold .eqv. .false. .and. (thick_distr .eq. 4 .or. thick_distr .eq. 5)) then
 
         if (allocated(temp_exact)) deallocate(temp_exact)
         allocate(temp_exact(ncp_span_thk))

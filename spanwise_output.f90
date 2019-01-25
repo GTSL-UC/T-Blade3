@@ -6,9 +6,13 @@ subroutine span_output ()
 !These variables are being used for calculation by bladegen in creating airfoil sections.
 
 use globvar
+use file_operations
 implicit none
 
 integer cp_start
+character(:),   allocatable :: log_file
+integer                     :: nopen
+logical                     :: file_open
 
 if (allocated(curv_cp)) deallocate(curv_cp)
 Allocate(curv_cp(20,2*na))
@@ -114,7 +118,7 @@ elseif (thick_distr .eq. 3) then
 			k=k+1
 		end if
 	end do
-elseif(thick_distr .eq. 4) then
+elseif(thick_distr .eq. 4 .or. thick_distr .eq. 5) then
 	!writing Thickness control points
 	if (allocated(thk_cp)) deallocate(thk_cp)
 	Allocate(thk_cp(20, 2*na))
