@@ -4,7 +4,7 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,xcg,ycg, &
 					cpinbeta,spaninbeta,xcpinbeta,cpoutbeta,spanoutbeta,xcpoutbeta, &
 					hub,tip,xm,rm,xms,rms,mp,nsp,bladedata,amount_data,intersec_coord, &
 					throat_3D,mouth_3D,exit_3D,casename,nbls,LE,axchrd,mble, &
-                    mbte,units,stagger,chrdsweep,chrdlean,axial_LE,radial_LE)
+                    mbte,units,stagger,chrdsweep,chrdlean,axial_LE,radial_LE,thick_distr)
 
 !******************************************************************************************
 ! subroutine bladestack: Creates Mapping of streamlines to 2D airfoils and generates...
@@ -64,7 +64,7 @@ integer k,ile,j,nl,switch2,nk,ik,istack,islope
 integer nc,nsec,nbld,ncp
 integer nspn,nrow,nspan,nbls
 integer nx,nax,nbx,nby,nxx,LE
-integer cpdeltam,cpdeltheta,cpinbeta,cpoutbeta,cpchord,cptm_c,uplmt
+integer cpdeltam,cpdeltheta,cpinbeta,cpoutbeta,cpchord,cptm_c,uplmt,thick_distr
 
 parameter (nspan=200,nx=500,nxx=1000,nax=50,nbx=500,nby=100,nrow=1)
 
@@ -432,27 +432,29 @@ enddo
 ! Calculation of the 3D Throat length:  Nemnem 9 17 2013
 !*******************************************************************************************
 call log_file_exists(log_file, nopen, file_open)
-do ia = 1,na
-   throat_3D(ia) = sqrt((inter_xb(1,ia)-inter_xb(2,ia))**2+&
-				(inter_yb(1,ia)-inter_yb(2,ia))**2+ &
-		(inter_zb(1,ia)-inter_zb(2,ia))**2)! 3D throat
-   mouth_3D(ia) = sqrt((inter_xb(3,ia)-inter_xb(4,ia))**2+&
-				(inter_yb(3,ia)-inter_yb(4,ia))**2+ &
-		(inter_zb(3,ia)-inter_zb(4,ia))**2)
-   exit_3D(ia) = sqrt((inter_xb(5,ia)-inter_xb(6,ia))**2+&
-				(inter_yb(5,ia)-inter_yb(6,ia))**2+ &
-		(inter_zb(5,ia)-inter_zb(6,ia))**2)
-   if(throat_3D(ia).ne.0) then 
-	 print*,'section(',ia,')'
-	 print*,'3D throat line [',units,'] =',throat_3D(ia)*scf
-	 print*,'3D mouth line [',units,'] =',mouth_3D(ia)*scf
-	 print*,'3D exit line [',units,'] =',exit_3D(ia)*scf
-	 write(nopen,*)'section(',ia,')'
-	 write(nopen,*),'3D throat line [',units,'] =',throat_3D(ia)*scf
-	 write(nopen,*),'3D mouth line [',units,'] =',mouth_3D(ia)*scf
-	 write(nopen,*),'3D exit line [',units,'] =',exit_3D(ia)*scf
-   endif
-enddo
+if (thick_distr .ne. 5) then
+    do ia = 1,na
+       throat_3D(ia) = sqrt((inter_xb(1,ia)-inter_xb(2,ia))**2+&
+                    (inter_yb(1,ia)-inter_yb(2,ia))**2+ &
+            (inter_zb(1,ia)-inter_zb(2,ia))**2)! 3D throat
+       mouth_3D(ia) = sqrt((inter_xb(3,ia)-inter_xb(4,ia))**2+&
+                    (inter_yb(3,ia)-inter_yb(4,ia))**2+ &
+            (inter_zb(3,ia)-inter_zb(4,ia))**2)
+       exit_3D(ia) = sqrt((inter_xb(5,ia)-inter_xb(6,ia))**2+&
+                    (inter_yb(5,ia)-inter_yb(6,ia))**2+ &
+            (inter_zb(5,ia)-inter_zb(6,ia))**2)
+       if(throat_3D(ia).ne.0) then 
+         print*,'section(',ia,')'
+         print*,'3D throat line [',units,'] =',throat_3D(ia)*scf
+         print*,'3D mouth line [',units,'] =',mouth_3D(ia)*scf
+         print*,'3D exit line [',units,'] =',exit_3D(ia)*scf
+         write(nopen,*)'section(',ia,')'
+         write(nopen,*),'3D throat line [',units,'] =',throat_3D(ia)*scf
+         write(nopen,*),'3D mouth line [',units,'] =',mouth_3D(ia)*scf
+         write(nopen,*),'3D exit line [',units,'] =',exit_3D(ia)*scf
+       endif
+    enddo
+end if
 
 !*******************************************************************************************
 ! Dimensional Chord calculation and writing dimensional coordinates into a single file 'blade3D.casename.dat'.

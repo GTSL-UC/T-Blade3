@@ -1484,7 +1484,7 @@ do js = 1, nrow ! called for each bladerow (only once since nrow = 1)
 				   cpinbeta, spaninbeta, xcpinbeta, cpoutbeta, spanoutbeta, xcpoutbeta, &
 				   hub, tip, xm, rm, xms, rms, mp, nsp, bladedata, amount_data, intersec_coord, &
                    throat_3D, mouth_3D, exit_3D, casename, nbls, LE, axchrd, mprime_ble, &
-                   mprime_bte, units, stagger, chrdsweep, chrdlean, axial_LE, radial_LE)
+                   mprime_bte, units, stagger, chrdsweep, chrdlean, axial_LE, radial_LE,thick_distr)
 enddo
 
 ! --------------------------------------------------------------------------------
@@ -1518,7 +1518,7 @@ do js = 1, nsl
    bladedata(3, js) = out_beta(js)
 
    ! subroutine which prints throat_index---------------------------
-   call throatindex(throat_pos, throat_index, n_normal_distance, js, nsl)
+   call throatindex(throat_pos, throat_index, n_normal_distance, js, nsl, thick_distr)
 
    bladedata(12, js) = throat_3D(js)*scf ! dimensional throat
 enddo

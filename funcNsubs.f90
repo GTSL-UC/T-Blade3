@@ -516,37 +516,39 @@ end subroutine
 
 !*******************************************************
 !***************************************************************
-subroutine throatindex(throat_pos,throat_index,n_normal_distance,js,nsl)
+subroutine throatindex(throat_pos,throat_index,n_normal_distance,js,nsl,thick_distr)
 use file_operations
 implicit none
 integer, intent(inout):: js
 integer, intent(in):: nsl,throat_index(nsl),n_normal_distance
 character*20, intent(out):: throat_pos(nsl)
+integer, intent(in)     :: thick_distr
 integer                             :: nopen
 character(:),   allocatable         :: log_file
 logical                             :: file_open
 
 call log_file_exists(log_file, nopen, file_open)
-if(throat_index(js) == 0) then
-  throat_pos(js) = 'none'
-  print*,'WARNING: No Throat found'
-  write(nopen,*) 'WARNING: No Throat Found'
-  !exit
-elseif(throat_index(js) < 0.25*n_normal_distance) then
-  throat_pos(js) = 'le'
-  print*,'throat_index',js,throat_index(js)
-  write(nopen,*) 'throat_index', js, throat_index(js)
-elseif(throat_index(js) > 0.75*n_normal_distance) then
-  throat_pos(js) = 'te' 
-  print*,'throat_index',js,throat_index(js)
-  write(nopen,*) 'throat_index', js, throat_index(js)
-else
-  throat_pos(js) = 'btween'
-  print*,'throat_index',js,throat_index(js)
-  write(nopen,*) 'throat_index', js, throat_index(js)
-endif! end if for throat options
+if (thick_distr .ne. 5) then
+    if(throat_index(js) == 0) then
+      throat_pos(js) = 'none'
+      print*,'WARNING: No Throat found'
+      write(nopen,*) 'WARNING: No Throat Found'
+      !exit
+    elseif(throat_index(js) < 0.25*n_normal_distance) then
+      throat_pos(js) = 'le'
+      print*,'throat_index',js,throat_index(js)
+      write(nopen,*) 'throat_index', js, throat_index(js)
+    elseif(throat_index(js) > 0.75*n_normal_distance) then
+      throat_pos(js) = 'te' 
+      print*,'throat_index',js,throat_index(js)
+      write(nopen,*) 'throat_index', js, throat_index(js)
+    else
+      throat_pos(js) = 'btween'
+      print*,'throat_index',js,throat_index(js)
+      write(nopen,*) 'throat_index', js, throat_index(js)
+    endif! end if for throat options
+end if
 call close_log_file(nopen, file_open)
-
 return
 end subroutine
 
@@ -2546,97 +2548,12 @@ end subroutine elliptical_clustering
 
 
 !
-! Find inverse of a 2x2 matrix
+! Interpolate trailing edge angle
 !
-! Input parameters: A   = 2x2 matrix whose inverse is to be computed
+! Input parameters: u_max = chordwise location of max. thickness for the blade section
 !
-!*******************************************************************************************
-subroutine matrix_inverse_2x2(A,A_inv)
-    use file_operations
-    implicit none
-
-    real,                 intent(in)        :: A(2,2)
-    real,                 intent(inout)     :: A_inv(2,2)
-
-    ! Local variables
-    real                                    :: det_A, tol = 10E-8
-
-
-    ! Compute determinant of incoming matrix
-    det_A       = (A(1,1)*A(2,2)) - (A(1,2)*A(2,1))
-
-    ! Compute matrix inverse if det(A) is not 0
-    if (abs(det_A) .le. tol) then
-        print *, 'FATAL ERROR: Trying to invert a singular 2x2 matrix'
-        stop
-    else
-        A_inv(1,:)  = (1.0/det_A)*[A(2,2), -A(1,2)]
-        A_inv(2,:)  = (1.0/det_A)*[-A(2,1), A(1,1)]
-    end if
-
-
-end subroutine matrix_inverse_2x2
-!*******************************************************************************************
-
-
-
-!
-! Find inverse of a 3x3 matrix
-!
-! Input parameters: A   = 3x3 matrix whose inverse is to be computed
-!
-!*******************************************************************************************
-subroutine matrix_inverse_3x3(A,A_inv)
-    use file_operations
-    implicit none
-
-    real,               intent(in)      :: A(3,3)
-    real,               intent(inout)   :: A_inv(3,3)
-
-    ! Local variables
-    real                                :: det_A, tol = 10E-8
-    real                                :: A_minors(3,3), A_cofacs(3,3), A_adjoint(3,3)
-
-
-    ! Create matrix of minors
-    A_minors(1,1)       = (A(2,2)*A(3,3)) - (A(3,2)*A(2,3))
-    A_minors(1,2)       = (A(2,1)*A(3,3)) - (A(3,1)*A(2,3))
-    A_minors(1,3)       = (A(2,1)*A(3,2)) - (A(3,1)*A(2,2))
-    A_minors(2,1)       = (A(1,2)*A(3,3)) - (A(3,2)*A(1,3))
-    A_minors(2,2)       = (A(1,1)*A(3,3)) - (A(3,1)*A(1,3))
-    A_minors(2,3)       = (A(1,1)*A(3,2)) - (A(3,1)*A(1,2))
-    A_minors(3,1)       = (A(1,2)*A(2,3)) - (A(2,2)*A(1,3))
-    A_minors(3,2)       = (A(1,1)*A(2,3)) - (A(2,1)*A(1,3))
-    A_minors(3,3)       = (A(1,1)*A(2,2)) - (A(2,1)*A(1,2))
-
-    ! Find determinant of the incoming matrix
-    det_A               = (A(1,1)*A_minors(1,1)) - (A(1,2)*A_minors(1,2)) + &
-                          (A(1,3)*A_minors(1,3))
-
-    ! Create matrix of cofactors
-    A_cofacs(1,:)       = [A_minors(1,1), -A_minors(1,2), A_minors(1,3)]
-    A_cofacs(2,:)       = [-A_minors(2,1), A_minors(2,2), -A_minors(2,3)]
-    A_cofacs(3,:)       = [A_minors(3,1), -A_minors(3,2), A_minors(3,3)]
-
-    ! Create adjoint matrix
-    A_adjoint           = transpose(A_cofacs)
-
-    ! Compute matrix inverse if det(A) is not 0
-    if (abs(det_A) .le. tol) then
-        print *, 'FATAL ERROR: Trying to invert a singular 3x3 matrix'
-        stop
-    else
-        A_inv               = (1.0/det_A)*A_adjoint
-    end if
-
-
-end subroutine matrix_inverse_3x3
-!*******************************************************************************************
-
-
-
-!
-!
+! Reference: Abbott, I.H., van Doenhoff, A.E., "Families of Wing Sections", Theory of Wing
+!            Sections, Dover Publications, New York, 1999, pp. 116-118
 !
 !*******************************************************************************************
 subroutine compute_TE_angle(u_max,trail_angle)
@@ -2662,39 +2579,40 @@ end subroutine compute_TE_angle
 ! For u < u_max: y_t = a_0*sqrt(u) + a_1*u + a_2*(u**2) + a_3*(u**3)
 ! For u > u_max: y_t = d_0 + d_1*(1 - u) + d_2*((1 - u)**2) + d_3*((1 - u)**3)
 !
-! Input parameters: t_max = half max. thickness for the blade section in fraction chord
-!                   u_max = chordwise location of max. thickness for the blade section
-!                   I     = integer parameter governing roundedness of the leading edge
-!                           (default = 6, sharp LE = 0)
+! Input parameters: t_max    = half max. thickness for the blade section in fraction chord
+!                   u_max    = chordwise location of max. thickness for the blade section
+!                   dy_dx_TE = trailing edige angle
+!                   I        = integer parameter governing roundedness of the leading edge
+!                              (default = 6, sharp LE = 0)
 !
 ! Reference: Abbott, I.H, von Doenhoff, A.E., "Families of Wing Sections", Theory of Wing
 !            Sections, Dover Publications, New York, 1999, pp. 116-118
 !
 !*******************************************************************************************
-subroutine modified_NACA_four_digit_thickness_coeffs(t_max,u_max,dy_dx_TE,I,a,d)
+subroutine modified_NACA_four_digit_thickness_coeffs(t_max,u_max,TE_thk,dy_dx_TE,I,a,d)
     use file_operations
     implicit none
 
     real,                       intent(in)      :: t_max
     real,                       intent(in)      :: u_max
+    real,                       intent(in)      :: TE_thk
     real,                       intent(in)      :: dy_dx_TE
-    integer,                    intent(in)      :: I
+    real,                       intent(in)      :: I
     real,                       intent(inout)   :: a(4)
     real,                       intent(inout)   :: d(4)
 
     ! Local variables
-    integer                                     :: j, k
-    real                                        :: A_d_coeffs(2,2), b_d_coeffs(2), A_d_coeffs_inv(2,2), &
-                                                   A_a_coeffs(3,3), b_a_coeffs(3), A_a_coeffs_inv(3,3), &
-                                                   temp
+    integer                                     :: j, k, fail_flag, nopen
+    real                                        :: temp
+    real,           allocatable                 :: aug_matrix(:,:)
+    character(:),   allocatable                 :: log_file
+    logical                                     :: file_open
 
 
     !
     ! Compute d_0 and d_1
-    ! TODO: Create TE_slope table for d_1
-    !       Currently d_1 set for u_max = 0.5
     !
-    d(1)            = 0.02*t_max
+    d(1)            = TE_thk!0.02*t_max
     d(2)            = 2.0*dy_dx_TE*t_max
     
     !
@@ -2704,18 +2622,18 @@ subroutine modified_NACA_four_digit_thickness_coeffs(t_max,u_max,dy_dx_TE,I,a,d)
     ! Solve the linear system:          A_d_coeffs*d_23 = b_d_coeffs 
     ! with                              d_23            = [d_2, d_3]
     !  
-    A_d_coeffs(1,:) = [(1.0 - u_max)**2,  (1.0 - u_max)**3]
-    A_d_coeffs(2,:) = [2.0*(u_max - 1.0), -3.0*((u_max - 1.0)**2)]
+    if (allocated(aug_matrix)) deallocate(aug_matrix)
+    allocate(aug_matrix(2,3))
 
-    b_d_coeffs      = [t_max - d(1) - (d(2)*(1.0 - u_max)), d(2)]
+    aug_matrix(1,:) = [(1.0 - u_max)**2 , (1.0 - u_max)**3       , t_max - d(1) - (d(2)*(1.0 - u_max))]
+    aug_matrix(2,:) = [2.0*(u_max - 1.0), -3.0*((u_max - 1.0)**2), d(2)                               ]
 
-    ! Find inverse of A_d_coeffs
-    call matrix_inverse_2x2(A_d_coeffs,A_d_coeffs_inv)
+    call gauss_jordan(2,1,aug_matrix,fail_flag)
 
     ! Compute d_2 and d_3
-    d(3:)           = matmul(A_d_coeffs_inv,b_d_coeffs)
-
+    d(3:)           = aug_matrix(:,3)
     
+
     !
     ! Compute a_0
     !
@@ -2729,18 +2647,19 @@ subroutine modified_NACA_four_digit_thickness_coeffs(t_max,u_max,dy_dx_TE,I,a,d)
     ! Solve the linear system:          A_a_coeffs*a_123    = b_a_coeffs
     ! with                              a_123               = [a_1, a_2, a_3]
     !
-    A_a_coeffs(1,:) = [u_max, u_max**2,  u_max**3]
-    A_a_coeffs(2,:) = [1.0,   2.0*u_max, 3.0*(u_max**2)]
-    A_a_coeffs(3,:) = [0.0,   2.0,       6.0*u_max]
+    if (allocated(aug_matrix)) deallocate(aug_matrix)
+    allocate(aug_matrix(3,4))
 
     temp            = (2.0*d(3)) + (6.0*(1.0 - u_max)*d(4)) + (0.25*a(1)/(u_max*sqrt(u_max)))
-    b_a_coeffs      = [t_max - (a(1)*sqrt(u_max)), (-0.5*a(1)/sqrt(u_max)), temp]
+    
+    aug_matrix(1,:) = [u_max, u_max**2 , u_max**3      , t_max - (a(1)*sqrt(u_max))]
+    aug_matrix(2,:) = [1.0  , 2.0*u_max, 3.0*(u_max**2), (-0.5*a(1)/sqrt(u_max))   ]
+    aug_matrix(3,:) = [0.0  , 2.0      , 6.0*u_max     , temp                      ]
 
-    ! Find inverse of A_a_coeffs
-    call matrix_inverse_3x3(A_a_coeffs,A_a_coeffs_inv)
+    call gauss_jordan(3,1,aug_matrix,fail_flag)
 
     ! Compute a_1, a_2 and a_3
-    a(2:)           = matmul(A_a_coeffs_inv,b_a_coeffs)
+    a(2:)           = aug_matrix(:,4)
 
 
 end subroutine modified_NACA_four_digit_thickness_coeffs
@@ -2749,10 +2668,110 @@ end subroutine modified_NACA_four_digit_thickness_coeffs
 
 
 !
+! Compute coefficients of modified NACA four-digit thickness
 !
+! This subroutine solves for the coefficients with an elliptical TE
+!
+! For u < u_max: y_t = a_0*sqrt(u) + a_1*u + a_2*(u**2) + a_3*(u**3)
+! For u > u_max: y_t = d_0 + d_1*(1 - u) + d_2*((1 - u)**2) + d_3*((1 - u)**3)
+!
+! Input parameters: t_max     = half max. thickness for the blade section 
+!                   u_max     = chordwise location of max. thickness for the blade section
+!                   TE_thk    = half thickness at the trailing edge
+!                   u_TE      = chordwise location of trailing edge
+!                   dy_dx_TE  = trailiing edge angle
+!                   LE_radius = radius of the leading edge
+!
+! Reference: Abbott, I.H., von Doenhoff, A.E., "Families of Wing Sections", Theory of Wing
+!            Sections, Dover Publications, New York, 1999, pp. 116-118
 !
 !*******************************************************************************************
-subroutine modified_NACA_four_digit_thickness(np,u,u_max,t_max,a,d,thk)
+subroutine modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,u_TE,dy_dx_TE, &
+                                                       LE_radius, a, d)
+    use file_operations
+    implicit none
+
+    real,                   intent(in)      :: t_max
+    real,                   intent(in)      :: u_max
+    real,                   intent(in)      :: t_TE
+    real,                   intent(in)      :: u_TE
+    real,                   intent(in)      :: dy_dx_TE
+    real,                   intent(in)      :: LE_radius
+    real,                   intent(inout)   :: a(4)
+    real,                   intent(inout)   :: d(4)
+
+    ! Local variables
+    integer                                 :: i, j, k, nopen, fail_flag
+    real                                    :: temp
+    real,           allocatable             :: aug_matrix(:,:)
+    character(:),   allocatable             :: log_file
+    logical                                 :: file_open
+
+
+    !
+    ! Compute d_0, d_1, d_2 and d_3
+    ! Enforce the following conditions: yd_t(u_max)     = t_max
+    !                                   yd_t(u_TE)      = t_TE
+    !                                   yd'_t(u_max)    = 0.0
+    !                                   yd'_t(u_TE)     = dy_dx_TE
+    !
+    ! Gauss Jordan method used to solve the resulting linear system
+    !
+    if (allocated(aug_matrix)) deallocate(aug_matrix)
+    allocate(aug_matrix(4,5))
+
+    aug_matrix(1,:) = [1.0, 1.0 - u_TE , (1.0 - u_TE)**2  , (1.0 - u_TE)**3        , t_TE    ]
+    aug_matrix(2,:) = [1.0, 1.0 - u_max, (1.0 - u_max)**2 , (1.0 - u_max)**3       , t_max   ]
+    aug_matrix(3,:) = [0.0, -1.0       , 2.0*(u_TE - 1.0) , -3.0*((1.0 - u_TE)**2) , dy_dx_TE]
+    aug_matrix(4,:) = [0.0, -1.0       , 2.0*(u_max - 1.0), -3.0*((1.0 - u_max)**2), 0.0     ]
+
+    call gauss_jordan(4,1,aug_matrix,fail_flag)
+
+    d               = aug_matrix(:,5)
+
+
+    ! Compute a_0
+    a(1)            = sqrt(2.2038)*(2.0*t_max*LE_radius/6.0)
+
+    !
+    ! Compute a_1, a_2 and a_3
+    ! Enforce the following conditions: ya_t(u_max)     = t_max
+    !                                   ya'_t(u_max)    = 0.0
+    !                                   ya''_t(u_max)   = yd''_t(u_max)
+    !
+    ! Gauss Jordan method used to solve the resulting linear system
+    !
+    if (allocated(aug_matrix)) deallocate(aug_matrix)
+    allocate(aug_matrix(3,4)) 
+    
+    temp            = (2.0*d(3)) + (6.0*(1.0 - u_max)*d(4)) + (0.25*a(1)/(u_max*sqrt(u_max)))
+
+    aug_matrix(1,:) = [u_max, u_max**2 , u_max**3      , t_max - (a(1)*sqrt(u_max))]
+    aug_matrix(2,:) = [1.0  , 2.0*u_max, 3.0*(u_max**2), (-0.5*a(1)/sqrt(u_max))   ]
+    aug_matrix(3,:) = [0.0  , 2.0      , 6.0*u_max     , temp                      ]
+
+    call gauss_jordan(3,1,aug_matrix,fail_flag)
+
+    a(2:)           = aug_matrix(:,4)
+    
+     
+end subroutine modified_NACA_four_digit_thickness_coeffs_2
+!*******************************************************************************************
+
+
+
+!
+! Obtain thickness distribution with the computed coefficients a_i and d_i
+!
+! Input parameters: np    = number of points along the blade section meanline
+!                   u     = points along chord
+!                   u_max = chordwise location of max. thickness for the blade section
+!                   t_max = half max. thickness for the blade section in fraction chord
+!                   a     = thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
+!                   d     = thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
+!           
+!*******************************************************************************************
+subroutine modified_NACA_four_digit_thickness(np,u,u_max,t_max,a,d,thk_data)
     use file_operations
     implicit none
 
@@ -2762,21 +2781,43 @@ subroutine modified_NACA_four_digit_thickness(np,u,u_max,t_max,a,d,thk)
     real,                   intent(in)      :: t_max
     real,                   intent(in)      :: a(4)
     real,                   intent(in)      :: d(4)
-    real,                   intent(inout)   :: thk(np)
+    real,                   intent(inout)   :: thk_data(np,3)
+    !real,                   intent(inout)   :: thk_der(np)
 
     ! Local variables
     integer                                 :: i, j, k
     real                                    :: tol = 10E-8
 
 
+    ! Compute thickness distribution
     do i = 1,np
 
         if (abs(u(i) - u_max) .le. tol) then
-            thk(i)      = t_max
+            thk_data(i,1)   = t_max
         else if (u(i) .lt. u_max) then
-            thk(i)      = (a(1)*sqrt(u(i))) + (a(2)*u(i)) + (a(3)*(u(i)**2)) + (a(4)*(u(i)**3))
+            thk_data(i,1)   = (a(1)*sqrt(u(i))) + (a(2)*u(i)) + (a(3)*(u(i)**2)) + (a(4)*(u(i)**3))
         else if (u(i) .gt. u_max) then
-            thk(i)      = d(1) + (d(2)*(1.0 - u(i))) + (d(3)*((1.0 - u(i))**2)) + (d(4)*((1.0 - u(i))**3))
+            thk_data(i,1)   = d(1) + (d(2)*(1.0 - u(i))) + (d(3)*((1.0 - u(i))**2)) + (d(4)*((1.0 - u(i))**3))
+        end if
+
+    end do
+
+
+    ! Compute first and second derivatives of thickness distribution
+    do i = 1,np
+
+        if (abs(u(i) - u_max) .le. tol) then
+            thk_data(i,2)   = 0.0
+            thk_data(i,3)   = (2.0*d(3)) + (6.0*d(4)*(1.0 - u_max))
+        else if (abs(u(i)) .le. tol) then
+            thk_data(i,2)   = (0.5*a(1)/sqrt(tol)) + a(2) + (2.0*a(3)*tol) + (3.0*a(4)*(tol**2))
+            thk_data(i,3)   = (-0.25*a(1)/((sqrt(tol))**3)) + (2.0*a(3)) + (6.0*a(4)*tol)
+        else if (u(i) .lt. u_max) then
+            thk_data(i,2)   = (0.5*a(1)/sqrt(u(i))) + a(2) + (2.0*a(3)*u(i)) + (3.0*a(4)*(u(i)**2))
+            thk_data(i,3)   = (-0.25*a(1)/((sqrt(u(i)))**3)) + (2.0*a(3)) + (6.0*a(4)*u(i))
+        else if (u(i) .gt. u_max) then
+            thk_data(i,2)   = -d(2) + (2.0*(u(i) - 1.0)*d(3)) - (3.0*((u(i) - 1.0)**2)*d(4))
+            thk_data(i,3)   = (2.0*d(3)) + (6.0*d(4)*(1.0 - u(i)))
         end if
 
     end do
@@ -2786,6 +2827,130 @@ end subroutine modified_NACA_four_digit_thickness
 !*******************************************************************************************
 
 
+
+!
+! Add circular TE to a NACA four digit thickness airfoil and rescale 
+!
+!*******************************************************************************************
+subroutine add_circular_TE(np,u,np_circ,utop,vtop,ubot,vbot,ptop,pbot,u_new)
+    use file_operations
+    implicit none
+
+    integer,                intent(in)      :: np
+    real,                   intent(in)      :: u(np)
+    integer,                intent(in)      :: np_circ
+    real,                   intent(in)      :: utop(np)
+    real,                   intent(in)      :: vtop(np)
+    real,                   intent(in)      :: ubot(np)
+    real,                   intent(in)      :: vbot(np)
+    real,                   intent(inout)   :: ptop(2, np + ((np_circ - 1)/2))
+    real,                   intent(inout)   :: pbot(2, np + ((np_circ - 1)/2))
+    real,                   intent(inout)   :: u_new(np + ((np_circ - 1)/2))
+
+    ! Local variables
+    integer                                 :: i, j, k, nopen, ntemp
+    real                                    :: uTE(np_circ), vTE(np_circ), m_top, m_top_normal, c_top, &
+                                               m_bot, m_bot_normal, c_bot, u_center, v_center, radius, &
+                                               t_start, t_end, dt, t_TE(np_circ)
+    real,               parameter           :: pi = 4.0*atan(1.0)
+    character(len = :), allocatable         :: log_file
+    logical                                 :: file_open
+
+
+    
+    
+    !
+    ! Compute slope of normal and intercept for the top curve
+    !
+    m_top               = (vtop(np) - vtop(np - 1))/(utop(np) - utop(np - 1))
+    m_top_normal        = -1.0/m_top
+    c_top               = vtop(np) - (m_top_normal*utop(np))
+    
+    !
+    ! Compute slope of normal and intercept for the bottom curve
+    !
+    m_bot               = (vbot(np) - vbot(np - 1))/(ubot(np) - ubot(np - 1))
+    m_bot_normal        = -1.0/m_bot
+    c_bot               = vbot(np) - (m_bot_normal*ubot(np))
+
+    !
+    ! Find center and radius of TE circle (intersection of top and bottom normals)
+    !
+    u_center            = (c_top - c_bot)/(m_bot_normal - m_top_normal)
+    v_center            = (m_top_normal*u_center) + c_top
+    radius              = sqrt((u_center - utop(np))**2 + (v_center - vtop(np))**2)
+
+    !
+    ! Determine angular positions of circular TE start and end
+    if (atan(m_top_normal) .lt. 0.0) then
+        t_start         = atan(m_top_normal) + pi
+    else if (atan(m_top_normal) .gt. 0.0) then
+        t_start         = atan(m_top_normal)
+    end if 
+
+    if (atan(m_bot_normal) .lt. 0.0) then
+        t_end           = atan(m_bot_normal)
+    else if (atan(m_bot_normal) .gt. 0.0) then
+        t_end           = (-0.5*pi) - atan(m_bot_normal)
+    end if
+
+    !
+    ! Generate parameter space for the circular TE
+    ! 
+    dt                  = t_start - t_end
+    t_TE(1)             = t_start
+    do i = 2,np_circ
+
+        t_TE(i)         = t_start - (dt*(real(i - 1)/real(np_circ - 1)))
+        
+    end do 
+    t_TE(np_circ)       = t_end
+  
+    !
+    ! Compute (u,v) coordinates of circular TE 
+    ! Set endpoints of circular TE equal to endpoints of bottom and top curves
+    !
+    do i = 1,np_circ
+
+        uTE(i)          = u_center + (radius*cos(t_TE(i)))
+        vTE(i)          = v_center + (radius*sin(t_TE(i)))
+
+    end do
+    uTE(1)              = utop(np)
+    vTE(1)              = vtop(np)
+    uTE(np_circ)        = ubot(np)
+    vTE(np_circ)        = vbot(np)
+     
+    !
+    ! Combine the incoming blade section with the circular TE
+    !
+    do i = 1,np
+
+        ptop(1,i)       = utop(i)
+        ptop(2,i)       = vtop(i)
+        pbot(1,i)       = ubot(i)
+        pbot(2,i)       = vbot(i)
+        u_new(i)        = u(i)
+
+    end do
+    ntemp               = (np_circ - 1)/2
+    do i = 1,ntemp
+
+        ptop(1,np + i)  = uTE(1 + i)
+        ptop(2,np + i)  = vTE(1 + i)
+        pbot(1,np + i)  = uTE(np_circ - i)
+        pbot(2,np + i)  = vTE(np_circ - i)
+        u_new(np + i)   = 0.5*(ptop(1,np + i) + pbot(1,np + i))
+
+    end do
+
+    ptop(1,:)           = ptop(1,:)/maxval(uTE)
+    pbot(1,:)           = pbot(1,:)/maxval(uTE)
+    u_new               = u_new/u_new(np + ntemp)
+    
+
+end subroutine add_circular_TE
+!*******************************************************************************************
 
 
 

@@ -95,24 +95,30 @@ elseif (thick_distr .eq. 4 .or. thick_distr .eq. 5) then
                                        1, out_coord_v)
 		intersec_v(1:na) = out_coord_v(:, 2)
 		call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+1), ncp_span_thk, span, na, 1, out_coord_u)
-		intersec_u(1:na) = out_coord_u(:, 2)		
-		open (unit = 81, file = 'thk_span_dist_v.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
-		write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
-		close (81)
-		open (unit = 81, file = 'thk_span_dist_u.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
-		write (81, '(12F30.12)') (out_coord_u(k, :), k = 1, na)
-		close (81)		
+		intersec_u(1:na) = out_coord_u(:, 2)
+        if (thick_distr .eq. 4) then
+            open (unit = 81, file = 'thk_span_dist_v.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
+            write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
+            close (81)
+            open (unit = 81, file = 'thk_span_dist_u.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
+            write (81, '(12F30.12)') (out_coord_u(k, :), k = 1, na)
+            close (81)
+        end if
 		if (isdev) then
 			call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+1), ncp_span_thk, span_fine, np_fine, &
-                                           1, out_coord_u_fine)		
-			open (unit = 81, file = 'thk_span_dist_u_fine.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
-			write (81, '(12F30.12)') (out_coord_u_fine(k, :), k = 1, np_fine)
-			close (81)
+                                           1, out_coord_u_fine)
+            if (thick_distr .eq. 4) then
+                open (unit = 81, file = 'thk_span_dist_u_fine.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
+                write (81, '(12F30.12)') (out_coord_u_fine(k, :), k = 1, np_fine)
+                close (81)
+            end if
 			call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+ncp_thickness+1), ncp_span_thk,       &
-                                           span_fine, np_fine, 1, out_coord_v_fine)		
-			open (unit = 81, file = 'thk_span_dist_v_fine.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
-			write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
-			close (81)			
+                                           span_fine, np_fine, 1, out_coord_v_fine)
+            if (thick_distr .eq. 4) then
+                open (unit = 81, file = 'thk_span_dist_v_fine.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
+                write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
+                close (81)
+            end if
 		endif
 		! do j = 2, ncp_span_thk
 			! if (cp_chord_thk(j, i+1) /= cp_chord_thk(1, i+1)) then
@@ -127,25 +133,33 @@ elseif (thick_distr .eq. 4 .or. thick_distr .eq. 5) then
 	enddo
 	call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), te_angle_cp, ncp_span_thk, span, na, 1, out_coord_v)
 	te_angle_all(1:na) = out_coord_v(:, 2)
-	open (unit = 81, file = 'te_angle_span_dist.' // trim(casename) // '.dat')
-	write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
-	close (81)
+    if (thick_distr .eq. 4) then
+        open (unit = 81, file = 'te_angle_span_dist.' // trim(casename) // '.dat')
+        write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
+        close (81)
+    end if
 	if (isdev) then
-		call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), te_angle_cp, ncp_span_thk, span_fine, np_fine, 1, out_coord_v_fine)	
-		open (unit = 81, file = 'te_angle_span_dist_fine.' // trim(casename) // '.dat')
-		write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
-		close (81)
-	endif	
+		call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), te_angle_cp, ncp_span_thk, span_fine, np_fine, 1, out_coord_v_fine)
+        if (thick_distr .eq. 4) then
+            open (unit = 81, file = 'te_angle_span_dist_fine.' // trim(casename) // '.dat')
+            write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
+            close (81)
+        end if
+	endif
 	call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), le_angle_cp, ncp_span_thk, span, na, 1, out_coord_v)	
 	le_angle_all(1:na) = out_coord_v(:, 2)
-	open (unit = 81, file = 'le_angle_span_dist.' // trim(casename) // '.dat')
-	write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
-	close (81)	
+    if (thick_distr .eq. 4) then
+        open (unit = 81, file = 'le_angle_span_dist.' // trim(casename) // '.dat')
+        write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
+        close (81)
+    end if
 	if (isdev) then
 		call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), le_angle_cp, ncp_span_thk, span_fine, np_fine, 1, out_coord_v_fine)
-		open (unit = 81, file = 'le_angle_span_dist_fine.' // trim(casename) // '.dat')
-		write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
-		close (81)
+        if (thick_distr .eq. 4) then
+            open (unit = 81, file = 'le_angle_span_dist_fine.' // trim(casename) // '.dat')
+            write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
+            close (81)
+        end if
 	endif
 endif
 if(LE .ne. 0) then

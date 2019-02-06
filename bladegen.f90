@@ -77,7 +77,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, &
 use file_operations
 implicit none
 
-integer np, np_side, i, j, l, k, js, naca, chord_switch, istack, thick_distr, nxx, np_cluster
+integer np, np_side, i, j, l, k, js, naca, chord_switch, istack, thick_distr, nxx, np_cluster, np_circ
 integer nx, nax, nrow, nspn, nspan, npoints, nsl, nbls, ncp, le_pos, wing_flag
 integer const_stk_u, const_stk_v, stack, stack_switch, clustering_switch, te_flag, le_opt_flag, te_opt_flag
 integer curv_camber, thick, LE, LEdegree, n_normal_distance
@@ -126,8 +126,9 @@ real Zweifel(nsl), sting_l_all(nsl), sting_h_all(nsl, 2)
 real jcellblade_all(nspn), etawidth_all(nspn), jcellblade, etawidth
 real, allocatable, dimension(:) :: xtop_refine, ytop_refine, xbot_refine, ybot_refine
 real, allocatable, dimension(:) :: init_angles, init_cambers, x_spl_end_curv, cam_refine, u_refine
-real ucp_top(11), vcp_top(11), ucp_bot(11), vcp_bot(11), a_NACA(4), d_NACA(4), t_max, u_max, thk_NACA(121), &
-     y_trail(2), x_trail(2), ycp_trail(5), xcp_trail(5), dy_dx_TE, loc(1)
+real ucp_top(11), vcp_top(11), ucp_bot(11), vcp_bot(11)
+real a_NACA(4), d_NACA(4), t_max, u_max, dy_dx_TE, loc(1), LE_round, a_temp(4), d_temp(4)
+real,   allocatable             :: ptop(:,:), pbot(:,:), u_circ_TE(:)
 real le_throat, te_throat, intersec_coord(12, nsl), min_throat_2D, attach_angle
 real u_translation, camber_trans
 ! variables for s809 profile
@@ -153,9 +154,10 @@ character*80 file1, file2, file3, file4, file5, file6, file7
 character*20 airfoil, sec
 character*16 thick_distr_3_flag
 logical error, ellip, isdev, isxygrid
-integer                             :: nopen, LE_round, deg_trail
-character(len = :), allocatable     :: log_file
-logical                             :: file_open, write_to_file
+integer                             :: nopen, deg_trail, np_new
+character(len = :), allocatable     :: log_file, thickness_file_name
+logical                             :: file_open, write_to_file, dir_exist, file_exist
+logical,    allocatable             :: thk_der(:)
 
 common / BladeSectionPoints /xxa(nxx, nax), yya(nxx, nax) 
 
@@ -206,6 +208,9 @@ call close_log_file(nopen, file_open)
 !*******************************************************************************************
 !---- # of points
 np = 121! nodes for the grid generator100
+if (thick_distr .eq. 5) then
+    np = 111
+end if
 np_side = np
 
 !*******************************************************************************************
@@ -633,12 +638,25 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
     !---- generate airfoil thickness: =============================== 
     ! -----------------------------------------------------------------------------
     if (thick_distr .eq. 5) then
+
+        !
+        ! Allocate necessary arrays
+        !
+        if (allocated(thickness_data)) deallocate(thickness_data)
+        allocate(thickness_data(np,3))
+
+        if (allocated(thk_der)) deallocate(thk_der)
+        allocate(thk_der(np - 1))
+
         call log_file_exists(log_file, nopen, file_open)
         print *, ''
         print *, 'Using modified NACA four digit thickness distribution'
         write(nopen,*) ''
         write(nopen,*) 'Using modified NACA four digit thickness distribution'
         
+        !
+        ! Allocate and read thickness arrays
+        !
         ncp     = ncp_thk(js)
         if (allocated(xcp_thk)) deallocate(xcp_thk)
         if (allocated(ycp_thk)) deallocate(ycp_thk)
@@ -650,19 +668,31 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
             ycp_thk(i)  = thk_cp(i, 2*js)
         end do 
          
+        ! 
+        ! Compute maximum thickness and maximum thickness location
+        ! TODO: Set LE radius
+        !
         t_max    = maxval(ycp_thk)
         loc      = maxloc(ycp_thk)
         u_max    = xcp_thk(loc(1))
-        I        = te_flag
+        LE_round = 5.5
 
+        ! 
+        ! Print input values to screen and write to log file
+        !
         print *, 'Maximum thickness for the blade section = ', t_max
         write(nopen,*) 'Maximum thickness for the blade section = ', t_max
         print *, 'Chordwise location for the maximum thickness = ', u_max
         write(nopen,*) 'Chordwise location for the maximum thickness = ', u_max
-        print *, 'Leading edge rounding factor = ', I
-        write(nopen,*) 'Leading edge rounding factor = ', I
+        print *, 'Thickness at TE = ', ycp_thk(ncp)!0.02*t_max
+        write(nopen,*) 'Thickness at TE = ', ycp_thk(ncp)!0.02*t_max
+        print *, 'Leading edge radius = ', LE_round
+        write(nopen,*) 'Leading edge radius = ', LE_round
 
+        !
         ! Compute TE angle value for u_max
+        ! Display on screen and write to log file
+        !
         call compute_TE_angle(u_max,dy_dx_TE)
 
         print *, 'TE angle for maximum thickness chordwise location = ', dy_dx_TE 
@@ -672,9 +702,30 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         ! Find coefficients for modified NACA four digit thickness
         ! Apply modified NACA four digit thickness
         !
-        call modified_NACA_four_digit_thickness_coeffs(t_max,u_max,dy_dx_TE,I,a_NACA,d_NACA)
-        call modified_NACA_four_digit_thickness(np,u,u_max,t_max,a_NACA,d_NACA,thickness)
-        
+        call modified_NACA_four_digit_thickness_coeffs(t_max,u_max,ycp_thk(ncp),dy_dx_TE,LE_round,a_NACA,d_NACA)
+        if (js == 1) then
+            call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,ycp_thk(ncp),0.96,dy_dx_TE,LE_round,a_temp,d_temp)
+        end if
+        call modified_NACA_four_digit_thickness(np,u,u_max,t_max,a_NACA,d_NACA,thickness_data)
+        thickness       = thickness_data(:,1)
+
+        !
+        ! Check for monotonicity
+        !
+        do i = 1,np - 1
+
+            thk_der(i)  = (thickness_data(i + 1,3) .lt. 0.0)
+            if (thk_der(i) .eqv. .false.) then
+                print *, "WARNING: Thickness distribution for blade section = ", js, " isn't monotonic"
+                write(nopen,*) "WARNING: Thickness distribution for blade section = ", js, " isn't monotonic"
+                exit
+            end if
+
+        end do
+
+        !
+        ! Print coefficients to screen and write to log file
+        !
         print *, 'Modified NACA thickness coefficients (u < u_max) = ', a_NACA
         write(nopen,*) 'Modified NACA thickness coefficients (u < u_max) = ', a_NACA
         print *, 'Modified NACA thickness coefficients (u > u_max) = ', d_NACA
@@ -682,7 +733,37 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         print *, ''
         write(nopen,*) ''
 
+        !
+        ! If command line option "dev" is selected, write thickness data to sectionwise files
+        !
+        if (isdev) then
+
+            print *, 'Writing thickness data to file'
+            print *, ''
+            write(nopen,*) 'Writing thickness data to file'
+            write(nopen,*) ''
+
+            inquire(file = './thickness_files/', exist = dir_exist)
+            if (.not. dir_exist) call execute_command_line('mkdir thickness_files')
+
+            thickness_file_name = 'thickness_files/thickness_data.'//trim(adjustl(sec))//'.'//trim(casename)
+            inquire(file = thickness_file_name, exist=file_exist)
+            if (file_exist) then
+                open(11, file = thickness_file_name, status = 'old', action = 'write', form = 'formatted')
+            else
+                open(11, file = thickness_file_name, status = 'new', action = 'write', form = 'formatted')
+            end if
+            do i = 1,np
+
+                write(11,'(4F40.16)') u(i), thickness_data(i,1), thickness_data(i,2), thickness_data(i,3)
+
+            end do 
+            close(11)
+
+        end if
+
         call close_log_file(nopen, file_open)
+
 
     else if (thick_distr.eq.4) then
         call log_file_exists(log_file, nopen, file_open)
@@ -714,6 +795,7 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         write(nopen,*) 'LE optimization flag', le_opt_flag
         write(nopen,*) 'TE optimization flag', te_opt_flag
         write_to_file   = .true.
+        write(nopen,*) 'te_angle_all(j) = ', te_angle_all(js)
         call thk_ctrl_gen_driver(casename, isdev, sec, xcp_thk, ycp_thk, ncp, u, np, le_angle_all(js), &
                                  te_angle_all(js), te_flag, le_opt_flag, te_opt_flag, thickness_data,  &
                                  write_to_file)
@@ -796,6 +878,38 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
     ybot = camber - thickness*cos(angle)
     xtop = u   - thickness*sin(angle)
     ytop = camber + thickness*cos(angle)
+
+    if (thick_distr .eq. 5) then
+        np_circ = 21
+        np_new  = np + ((np_circ - 1)/2)
+
+        if (allocated(ptop) .and. allocated(pbot)) deallocate(ptop,pbot)
+        allocate(ptop(2,np_new),pbot(2,np_new))
+
+        if (allocated(u_circ_TE)) deallocate(u_circ_TE)
+        allocate(u_circ_TE(np_new)) 
+
+        call add_circular_TE(np,u,np_circ,xtop,ytop,xbot,ybot,ptop,pbot,u_circ_TE)
+
+        np      = np_new
+        if (allocated(xtop) .and. allocated(ytop) .and. allocated(xbot) .and. allocated(ybot)) &
+            deallocate(xtop,ytop,xbot,ybot)
+        allocate(xtop(np), ytop(np), xbot(np), ybot(np))
+        xtop    = ptop(1,:)
+        ytop    = ptop(2,:)
+        xbot    = pbot(1,:)
+        ybot    = pbot(2,:)
+
+        if (allocated(u)) deallocate(u)
+        allocate(u(np))
+
+        u       = u_circ_TE
+
+        if (allocated(xb) .and. allocated(yb)) deallocate(xb,yb)
+        allocate(xb((2*np) - 1), yb((2*np) - 1))
+
+    end if
+
 
     !
     !deltau = abs(u(np) - u(1))*abs(cos(angle))
@@ -1018,67 +1132,69 @@ call close_log_file(nopen, file_open)
 !------------------------------------------------------------------------	
 ! rotate, scale and translate the camber line
 !------------------------------------------------------------------------
-if(trim(airfoil) == 'sect1') then
-    u_translation = u(1)
-    camber_trans = camber(1)
+if (thick_distr .ne. 5) then
+    if(trim(airfoil) == 'sect1') then
+        u_translation = u(1)
+        camber_trans = camber(1)
 
-    if(chord_switch.eq.1)then
-    scaling = chrdx
+        if(chord_switch.eq.1)then
+        scaling = chrdx
+        else
+        scaling = chrd
+        endif
+
+        do i = 1, (np+1)/2
+            call rotate2 (u_rot, camber_rot, u(i), camber(i), sang)
+            u(i) = scaled (u_rot, scaling)
+            camber(i) = scaled (camber_rot, scaling)
+            u(i) = u(i) + (xb((np+1)/2)-u_translation)
+            camber(i) = camber(i) + (yb((np+1)/2)-camber_trans)
+        enddo
     else
-    scaling = chrd
+        ! averaging top and bottom curves to obtain the camber
+        call averaged_camber(xb, yb, np, u, camber, angle, sinl)
     endif
 
-    do i = 1, (np+1)/2
-        call rotate2 (u_rot, camber_rot, u(i), camber(i), sang)
-        u(i) = scaled (u_rot, scaling)
-        camber(i) = scaled (camber_rot, scaling)
-        u(i) = u(i) + (xb((np+1)/2)-u_translation)
-        camber(i) = camber(i) + (yb((np+1)/2)-camber_trans)
-    enddo
-else
-    ! averaging top and bottom curves to obtain the camber
-    call averaged_camber(xb, yb, np, u, camber, angle, sinl)
-endif
-
-! note: in intersection coordinate array, the throat, mouth and exit lines are added respectively.
-call throat_calc_pitch_line(xb, yb, np, camber, angle, sang, u, pi, pitch, intersec_coord(1:4, js), &
-                            intersec_coord(5:8, js), intersec_coord(9:12, js), min_throat_2D,       &
-                            throat_index(js), n_normal_distance, casename, js, nsl, develop, isdev)
+    !! note: in intersection coordinate array, the throat, mouth and exit lines are added respectively.
+    call throat_calc_pitch_line(xb, yb, np, camber, angle, sang, u, pi, pitch, intersec_coord(1:4, js), &
+                                intersec_coord(5:8, js), intersec_coord(9:12, js), min_throat_2D,       &
+                                throat_index(js), n_normal_distance, casename, js, nsl, develop, isdev)
+end if
 
 !******************************************************************************************            
 ! Writing the section properties into a single file
 !******************************************************************************************
-if(curv_camber.ne.0) then ! only for curvature control airfoils. 11 20 2013
-    call log_file_exists(log_file, nopen, file_open)
-    file7 = 'splinedata_section.'//trim(adjustl(sec))//'.'//trim(casename)//'.dat'
-    print*, file7
-    write(nopen,*) file7
-    open(unit = 33, file = file7, form = "formatted")  
-    write(33, *) trim(casename), ' :', ' Spline Data'
-    write(33, *) 'section : ', trim(adjustl(sec))
-    write(33, *)
-    write(33, *) ' #     u         camber       camber_slope    camber_curvature  thick_distribution  thick_multiplier'  
-    do j = 1, np_side
-        write(33, 301)j, splinedata(1:(spline_data), j)
-    enddo 
-    write(33, *)
-    write(33, *) 'Control points for the thickness distribution spline (symmetric bottom curve):'
-    write(33, *) 'ucp_top    vcp_top'
-    do i = 1, 11
-        write(33, *) ucp_top(i), vcp_top(i)   
-    enddo
-    close(33)
-    !---------------------------------------------------------  
-        if (allocated(curvature)) deallocate(curvature)
-    Allocate(curvature(np_side))
-    do i = 1, np_side
-        curvature(i) = splinedata(4, i)
-    enddo
-    stingl = sting_l_all(js)
-    print*, 'stingl: ', stingl
-    write(nopen,*) 'stingl: ', stingl
-    call close_log_file(nopen, file_open)
-endif
+!if(curv_camber.ne.0) then ! only for curvature control airfoils. 11 20 2013
+!    call log_file_exists(log_file, nopen, file_open)
+!    file7 = 'splinedata_section.'//trim(adjustl(sec))//'.'//trim(casename)//'.dat'
+!    print*, file7
+!    write(nopen,*) file7
+!    open(unit = 33, file = file7, form = "formatted")  
+!    write(33, *) trim(casename), ' :', ' Spline Data'
+!    write(33, *) 'section : ', trim(adjustl(sec))
+!    write(33, *)
+!    write(33, *) ' #     u         camber       camber_slope    camber_curvature  thick_distribution  thick_multiplier'  
+!    do j = 1, np_side
+!        write(33, 301)j, splinedata(1:(spline_data), j)
+!    enddo 
+!    write(33, *)
+!    write(33, *) 'Control points for the thickness distribution spline (symmetric bottom curve):'
+!    write(33, *) 'ucp_top    vcp_top'
+!    do i = 1, 11
+!        write(33, *) ucp_top(i), vcp_top(i)   
+!    enddo
+!    close(33)
+!    !---------------------------------------------------------  
+!        if (allocated(curvature)) deallocate(curvature)
+!    Allocate(curvature(np_side))
+!    do i = 1, np_side
+!        curvature(i) = splinedata(4, i)
+!    enddo
+!    stingl = sting_l_all(js)
+!    print*, 'stingl: ', stingl
+!    write(nopen,*) 'stingl: ', stingl
+!    call close_log_file(nopen, file_open)
+!endif
 
 !******************************************************************************************
 ! 2D blade grid generation.
