@@ -261,6 +261,18 @@ end subroutine override_thk_flags
 subroutine     override_offsets(a)
   integer a(*)
 end subroutine override_offsets
+subroutine     override_naca_le_radius(n, a)
+  real*8 a(*)
+end subroutine override_naca_le_radius
+subroutine     override_naca_u_max(n, a)
+  real*8 a(*)
+end subroutine override_naca_u_max
+subroutine     override_naca_t_max(n, a)
+  real*8 a(*)
+end subroutine override_naca_t_max
+subroutine     override_naca_t_te(n, a)
+  real*8 a(*)
+end subroutine override_naca_t_te
 #endif
 !****************************************************************************************
 

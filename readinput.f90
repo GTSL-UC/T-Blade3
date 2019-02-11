@@ -1544,7 +1544,7 @@ enddo
  endif
 
 !deallocate(temp)
-endif
+endif   ! control_inp_flag
 if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4) then
     !--------------------------------------------------------------------------
     !Reading thickness control points
@@ -1988,8 +1988,9 @@ subroutine read_spanwise_NACA_input(row_type,path)
     ! Local variables
     character(:),   allocatable                     :: file_name, log_file
     character(len = 256)                            :: temps
-    integer                                         :: nopen_aux = 10, nopen, nopen1
+    integer                                         :: nopen_aux = 10, nopen, nopen1, jj, kk
     real                                            :: span_dum
+    real,           allocatable                     :: temp(:), temp_NACA(:)
     logical                                         :: file_open, file_open_1
 
 
@@ -2078,6 +2079,192 @@ subroutine read_spanwise_NACA_input(row_type,path)
 
     end do  ! ncp_span_curv
 
+    !
+    ! ESP override subroutines for curvature control
+    !
+    if (control_inp_flag .eq. 2) then
+        if (allocated(temp)) deallocate(temp)
+        allocate(temp(ncp_span_curv))
+
+        ! Override span_curv_ctrl
+        kk                          = 1
+        do ii   = 1,ncp_span_curv
+            temp(ii)                = cp_chord_curv(ii,kk)
+        end do  
+        call override_span_curv_ctrl(ncp_span_curv,temp)
+        do ii   = 1,ncp_span_curv
+            cp_chord_curv(ii,kk)    = temp(ii)
+        end do
+
+        ! Override u2
+        if (ncp_chord .ge. 1) then
+            
+            kk                      = 2
+            do ii = 1,ncp_span_curv
+                temp(ii)            = cp_chord_curv(ii,kk)
+            end do
+            call override_u2(ncp_span_curv,temp)
+            do ii = 1,ncp_span_curv
+                cp_chord_curv(ii,kk)= temp(ii)
+            end do
+
+        end if
+
+        ! Override u3
+        if (ncp_chord .ge. 2) then
+            
+            kk                      = 3
+            do ii = 1,ncp_span_curv
+                temp(ii)            = cp_chord_curv(ii,kk)
+            end do
+            call override_u3(ncp_span_curv,temp)
+            do ii = 1,ncp_span_curv
+                cp_chord_curv(ii,kk)= temp(ii)
+            end do
+
+        end if
+
+        ! Override u4
+        if (ncp_chord .ge. 3) then
+
+            kk                      = 4
+            do ii = 1,ncp_span_curv
+                temp(ii)            = cp_chord_curv(ii,kk)
+            end do
+            call override_u4(ncp_span_curv,temp)
+            do ii = 1,ncp_span_curv
+                cp_chord_curv(ii,kk)= temp(ii)
+            end do
+
+        end if
+
+        ! Override u5
+        if (ncp_chord .ge. 4) then
+
+            kk                      = 5
+            do ii = 1,ncp_span_curv
+                temp(ii)            = cp_chord_curv(ii,kk)
+            end do
+            call override_u5(ncp_span_curv,temp)
+            do ii = 1,ncp_span_curv
+                cp_chord_curv(ii,kk)= temp(ii)
+            end do
+
+        end if
+                
+        ! Override u6
+        if (ncp_chord .ge. 5) then
+
+            kk                      = 6
+            do ii = 1,ncp_span_curv
+                temp(ii)            = cp_chord_curv(ii,kk)
+            end do
+            call override_u6(ncp_span_curv,temp)
+            do ii = 1,ncp_span_curv
+                cp_chord_curv(ii,kk)= temp(ii)
+            end do
+
+        end if
+
+        ! Override cur1
+        if (ncp_curvature .ge. 1) then
+
+            kk                      = ncp_chord 
+            do ii = 1,ncp_span_curv
+                temp(ii)            = cp_chord_curv(ii,kk)
+            end do
+            call override_cur1(ncp_span_curv,temp)
+            do ii = 1,ncp_span_curv
+                cp_chord_curv(ii,kk)= temp(ii)
+            end do
+
+        end if
+
+        ! Override cur2
+        if (ncp_curvature .ge. 2) then
+
+            kk                      = ncp_chord + 1
+            do ii = 1,ncp_span_curv
+                temp(ii)            = cp_chord_curv(ii,kk)
+            end do
+            call override_cur2(ncp_span_curv,temp)
+            do ii = 1,ncp_span_curv
+                cp_chord_curv(ii,kk)= temp(ii)
+            end do
+
+        end if
+
+        ! Override cur3
+        if (ncp_curvature .ge. 3) then
+
+            kk                      = ncp_chord + 2
+            do ii = 1,ncp_span_curv
+                temp(ii)            = cp_chord_curv(ii,kk)
+            end do
+            call override_cur3(ncp_span_curv,temp)
+            do ii = 1,ncp_span_curv
+                cp_chord_curv(ii,kk)= temp(ii)
+            end do
+
+        end if
+
+        ! Override cur4
+        if (ncp_curvature .ge. 4) then
+
+            kk                      = ncp_chord + 3
+            do ii = 1,ncp_span_curv
+                temp(ii)            = cp_chord_curv(ii,kk)
+            end do
+            call override_cur4(ncp_span_curv,temp)
+            do ii = 1,ncp_span_curv
+                cp_chord_curv(ii,kk)= temp(ii)
+            end do
+
+        end if
+
+        ! Override cur5
+        if (ncp_curvature .ge. 5) then
+
+            kk                      = ncp_chord + 4
+            do ii = 1,ncp_span_curv
+                temp(ii)            = cp_chord_curv(ii,kk)
+            end do
+            call override_cur5(ncp_span_curv,temp)
+            do ii = 1,ncp_span_curv
+                cp_chord_curv(ii,kk)= temp(ii)
+            end do
+
+        end if
+
+        ! Override cur6
+        if (ncp_curvature .ge. 6) then
+
+            kk                      = ncp_chord + 5
+            do ii = 1,ncp_span_curv
+                temp(ii)            = cp_chord_curv(ii,kk)
+            end do
+            call override_cur6(ncp_span_curv,temp)
+            do ii = 1,ncp_span_curv
+                cp_chord_curv(ii,kk)= temp(ii)
+            end do
+
+        end if
+
+        ! Override cur5
+        if (ncp_curvature .ge. 7) then
+
+            kk                      = ncp_chord + 6
+            do ii = 1,ncp_span_curv
+                temp(ii)            = cp_chord_curv(ii,kk)
+            end do
+            call override_cur6(ncp_span_curv,temp)
+            do ii = 1,ncp_span_curv
+                cp_chord_curv(ii,kk)= temp(ii)
+            end do
+
+        end if
+
+    end if  ! control_inp_flag
 
     ! 
     ! Read the thickness part of the auxiliary input file
@@ -2125,6 +2312,65 @@ subroutine read_spanwise_NACA_input(row_type,path)
     ! Close auxiliary input file and auxiliary input log file
     close(nopen1)
     close(nopen_aux)
+
+    !
+    ! ESP override subroutines for thickness control
+    !
+    if (control_inp_flag .eq. 2) then
+        if (allocated(temp)) deallocate(temp)
+        allocate(temp(ncp_span_thk))
+
+        ! Override span_thk_ctrl
+        kk                      = 1
+        do ii = 1,ncp_span_thk
+            temp(ii)            = cp_chord_thk(ii,kk)
+        end do
+        call override_span_thk_ctrl(ncp_span_thk,temp)
+        do ii = 1,ncp_span_thk
+            cp_chord_thk(ii,kk) = temp(ii)
+        end do
+
+        ! Override naca_le_radius
+        kk                      = 2
+        do ii = 1,ncp_span_thk
+            temp(ii)            = cp_chord_thk(ii,kk)
+        end do
+        call override_naca_le_radius(ncp_span_thk,temp)
+        do ii = 1,ncp_span_thk
+            cp_chord_thk(ii,kk) = temp(ii)
+        end do
+
+        ! Override naca_u_max
+        kk                      = 3
+        do ii = 1,ncp_span_thk
+            temp(ii)            = cp_chord_thk(ii,kk)
+        end do
+        call override_naca_u_max(ncp_span_thk,temp)
+        do ii = 1,ncp_span_thk
+            cp_chord_thk(ii,kk) = temp(ii)
+        end do
+
+        ! Override naca_t_max
+        kk                      = 4
+        do ii = 1,ncp_span_thk
+            temp(ii)            = cp_chord_thk(ii,kk)
+        end do
+        call override_naca_t_max(ncp_span_thk,temp)
+        do ii = 1,ncp_span_thk
+            cp_chord_thk(ii,kk) = temp(ii)
+        end do
+
+        ! Override naca_t_te
+        kk                      = 5
+        do ii = 1,ncp_span_thk
+            temp(ii)            = cp_chord_thk(ii,kk)
+        end do
+        call override_naca_t_te(ncp_span_thk,temp)
+        do ii = 1,ncp_span_thk
+            cp_chord_thk(ii,kk) = temp(ii)
+        end do
+
+    end if  ! control_inp_flag
 
 
     ! Print message to screen and write to log file
