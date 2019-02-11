@@ -33,7 +33,7 @@ parameter (nspan=200,nrow=1,nx=500,nax=50,jk=12,amount_data= 15)
 integer nsp(nspan),curve,npoints,nbls,i_slope,i_slope_nonoffset_hub,ii,nspline,ncp1,k_tip, rad_in_flag(nspan), rad_out_flag(nspan)
 integer cpdeltam,cpdeltheta,cpinbeta,cpoutbeta,cpchord,cptm_c
 integer, allocatable, dimension(:) :: ncp_curv,ncp_thk,throat_index,BGgrid_all
-integer n_inter_intervals,nsp_interpolated_hub, te_flag, le_opt_flag, te_opt_flag
+integer n_inter_intervals,nsp_interpolated_hub, te_flag, le_opt_flag, te_opt_flag, spline_switch
 !
 real*8, allocatable, dimension(:,:) :: bladedata,splinedata
 real*8 sinl,sext,thkc ,chrdx,mr1,stak_u,stak_v, x1hub,x1tip,r1hub,r1tip

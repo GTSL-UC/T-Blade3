@@ -1545,14 +1545,14 @@ enddo
 
 !deallocate(temp)
 endif
-if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4 .or. thick_distr .eq. 5) then
+if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4) then
     !--------------------------------------------------------------------------
     !Reading thickness control points
     read(10,'(A)') temps
     write(nopen1,'(A)') trim(temps)
     read(10,'(A)') temps
     write(nopen1,'(A)') trim(temps)
-    if (thick_distr .eq. 4 .or. thick_distr .eq. 5) then
+    if (thick_distr .eq. 4) then
         read(10, *) ncp_span_thk, ncp_chord_thickness, te_flag, le_opt_flag, te_opt_flag
         backspace(10)
         read(10,'(A)') temps
@@ -1582,7 +1582,7 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4 
 
     ncp_chord_thk = ncp_chord_thickness-2+ncp_thickness-2+1
     if (thick_distr .eq. 3) ncp_chord_thk = ncp_chord_thickness-2+ncp_thickness+2+1
-    if (thick_distr .eq. 4 .or. thick_distr .eq. 5) &
+    if (thick_distr .eq. 4) &
                             ncp_chord_thk = ncp_chord_thickness+ncp_thickness+1
 
     !Initializing values for variables defined by Ahmed
@@ -1594,7 +1594,7 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4 
         do i = 1, nsl
             ncp_thk(i) = ncp_thickness+4
         enddo
-    elseif (thick_distr .eq. 4 .or. thick_distr .eq. 5) then
+    elseif (thick_distr .eq. 4) then
         do i = 1, nsl
             ncp_thk(i) = ncp_thickness
         enddo
@@ -1619,7 +1619,7 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4 
         if (allocated(ycp)) deallocate(ycp)
         Allocate(xcp(ncp_thk(i)))
         Allocate(ycp(ncp_thk(i)))
-        if (thick_distr .eq. 4 .or. thick_distr .eq. 5) then
+        if (thick_distr .eq. 4) then
             read(10, *) cp_chord_thk(i, 1:ncp_chord_thk), le_angle_cp(i), te_angle_cp(i)
             backspace(10)
             read(10,'(A)') temps
@@ -1664,20 +1664,12 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4 
         endif
 
         do k = 1, ncp_thk(i)
-            !if (thick_distr == 5) then
-            !    thk_cp(k, 2*i - 1) = cp_chord_thk(i, 2 + k - 1)
-            !    thk_cp(k, 2*i)     = cp_chord_thk(i, ncp_chord_thickness + 2 + k - 1)
-            !    if (i == 1) then
-            !        print *, 'From readinput - ', thk_cp(k, 2*i - 1), thk_cp(k, 2*i)
-            !    end if
-            !else
-                thk_cp(k, 2*i-1) = xcp(k)
-                thk_cp(k, 2*i) = ycp(k)
-            !end if
+            thk_cp(k, 2*i-1) = xcp(k)
+            thk_cp(k, 2*i) = ycp(k)
         enddo
     enddo
 
-    if (control_inp_flag .eq. 2 .and. isold .eqv. .false. .and. (thick_distr .eq. 4 .or. thick_distr .eq. 5)) then
+    if (control_inp_flag .eq. 2 .and. isold .eqv. .false. .and. thick_distr .eq. 4) then
 
         if (allocated(temp_exact)) deallocate(temp_exact)
         allocate(temp_exact(ncp_span_thk))
@@ -1974,3 +1966,173 @@ call close_log_file(nopen, file_open)
 !--------------------------------------------------------------------------------------------------
 
 end subroutine read_spanwise_input
+
+
+
+
+
+!
+! Read spanwise input file for NACA thickness distribution
+!
+! Mayank Sharma@UC
+! Date: 2/8/2019
+!--------------------------------------------------------------------------------------------------
+subroutine read_spanwise_NACA_input(row_type,path)
+    use globvar
+    use file_operations
+    implicit none
+
+    character(len = 256),           intent(in)      :: row_type
+    character(len = *),             intent(in)      :: path
+
+    ! Local variables
+    character(:),   allocatable                     :: file_name, log_file
+    character(len = 256)                            :: temps
+    integer                                         :: nopen_aux = 10, nopen, nopen1
+    real                                            :: span_dum
+    logical                                         :: file_open, file_open_1
+
+
+    ! Read auxiliary input file name
+    file_name       = trim(path)//'spancontrolinputs_NACA_'//trim(row_type)//'.dat'
+
+    !
+    ! Open auxiliary input file and auxiliary input log file
+    !
+    call open_auxinput_log_file(trim(adjustl(file_name)), nopen1, file_open_1)
+    open(nopen_aux, file = file_name)
+    rewind(nopen_aux)
+
+    ! Read casename and blade row number
+    do i = 1,5
+        read(nopen_aux,'(A)') temps
+        write(nopen1,'(A)') trim(temps)
+    end do
+
+    !
+    ! Read number of curvature and chord control points
+    !
+    read(nopen_aux,*) ncp_span_curv, ncp_chord
+    backspace(nopen_aux)
+    read(nopen_aux,'(A)') temps
+    write(nopen1,'(A)') trim(temps)
+
+    ! Number of chord and curvature control points will always be the same
+    ncp_curvature                   = ncp_chord
+
+    ! Allocate Ahmed arrays
+    ! TODO: Only used when control_inp_flag = 1?
+    if (allocated(ncp_curv)) deallocate(ncp_curv)
+    allocate(ncp_curv(nsl))
+    do i = 1,nsl
+        ncp_curv(i)                 = ncp_curvature + 2
+    end do
+
+    if (allocated(curv_cp)) deallocate(curv_cp)
+    if (control_inp_flag == 1) allocate(curv_cp(20, 2*nsl))
+
+    !
+    ! Compute total size of a curvature and chord control points row
+    ! No. of rows = ncp_span_curv
+    ! Allocate curvature control points array
+    !
+    ncp_chord_curv                  = ncp_chord - 2 + ncp_curvature + 1
+    if (allocated(cp_chord_curv)) deallocate(cp_chord_curv)
+    allocate(cp_chord_curv(ncp_span_curv, ncp_chord_curv))
+
+    read(nopen_aux,'(A)') temps
+    write(nopen1,'(A)') trim(temps)
+
+    !
+    ! Read curvature control points
+    !
+    do i = 1,ncp_span_curv
+        
+        read(nopen_aux,*) cp_chord_curv(i,:)
+        backspace(nopen_aux)
+        read(nopen_aux,'(A)') temps
+        write(nopen1,'(A)') temps
+
+        ! TODO: Necessary?
+        if (control_inp_flag == 1) then
+            
+            if (allocated(xcp) .and. allocated(ycp)) deallocate(xcp,ycp)
+            allocate(xcp(ncp_curv(i)), ycp(ncp_curv(i)))
+
+            span_dum                = cp_chord_curv(i,1)
+            xcp(3:ncp_curv(i) - 2)  = cp_chord_curv(i, 2:ncp_chord - 1)
+            ycp(2:ncp_curv(i) - 1)  = cp_chord_curv(i, ncp_chord:ncp_chord_curv)
+            xcp(1)                  = 2*xcp(2) - xcp(3)
+            xcp(2)                  = 0.0
+            ycp(1)                  = 2*ycp(2) - ycp(3)
+            xcp(ncp_curv(i) - 1)    = 1.0
+            xcp(ncp_curv(i))        = 2*xcp(ncp_curv(i) - 1) - xcp(ncp_curv(i) - 2)
+            ycp(ncp_curv(i))        = 2*ycp(ncp_curv(i) - 1) - ycp(ncp_curv(i) - 2)
+
+            do k = 1,ncp_curv(i)
+                curv_cp(k, 2*i - 1) = xcp(k)
+                curv_cp(k, 2*i)     = ycp(k)
+            end do ! k
+
+        end if  ! control_inp_flag
+
+    end do  ! ncp_span_curv
+
+
+    ! 
+    ! Read the thickness part of the auxiliary input file
+    ! Only applies for the modified NACA thickness distribution
+    !
+    if (thick_distr .ne. 5) then
+        print *, "FATAL ERROR: Auxiliary input file ", file_name, " can only be used with the modified NACA thickness distribution"
+        print *, "Refer to T-Blade3 documentation"
+        stop
+    else
+        do i = 1,2
+            read(nopen_aux,'(A)') temps
+            write(nopen1,'(A)') trim(temps)
+        end do
+
+        !
+        ! Read no. of thickness control points along span and spline switch 
+        !
+        read(nopen_aux,*) ncp_span_thk, spline_switch
+        backspace(nopen_aux) 
+        read(nopen_aux,'(A)') temps
+        write(nopen1,'(A)') trim(temps)
+
+        ! Allocate thickness control points array
+        if (allocated(cp_chord_thk)) deallocate(cp_chord_thk)
+        allocate(cp_chord_thk(ncp_span_thk,5))
+
+        ! Read thickness control points
+        read(nopen_aux,'(A)') temps
+        write(nopen1,'(A)') trim(temps)
+        do i = 1,ncp_span_thk
+
+            read(nopen_aux,*) cp_chord_thk(i,:)
+            do j = 4,5
+                cp_chord_thk(i,j)   = 0.5*cp_chord_thk(i,j)
+            end do
+            backspace(nopen_aux)
+            read(nopen_aux,'(A)') temps
+            write(nopen1,'(A)') trim(temps)
+
+        end do  ! ncp_span_thk
+
+    end if  ! thick_distr
+
+    ! Close auxiliary input file and auxiliary input log file
+    close(nopen1)
+    close(nopen_aux)
+
+
+    ! Print message to screen and write to log file
+    call log_file_exists(log_file, nopen, file_open)
+    print *, "NACA spanwise input file read successfully"
+    write(nopen,*) "NACA spanwise input file read successfully"
+    call close_log_file(nopen, file_open)
+
+
+end subroutine read_spanwise_NACA_input
+!--------------------------------------------------------------------------------------------------

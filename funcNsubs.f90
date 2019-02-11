@@ -917,8 +917,10 @@ subroutine bladesection(xb,yb,np,nbls,TE_del,sinls,sexts,chrdd,fext,js,pitch,mbl
 implicit none
 integer TE_del,nx,nbls,ii,i,js,np,np_side
 parameter(nx = 1000)
-character*32 fname,fext,blext(100)
-character*20 airfoil
+character(*)    :: fext
+character(*)    :: airfoil
+character*32 fname,blext(100)
+!character*20 airfoil
 real*8 sexts,sinls,chrdd,pitch,pi,x1,y1,x2,y2
 real*8, intent(inout) :: xb(nx),yb(nx)
 real*8 mble,mbte

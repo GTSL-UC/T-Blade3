@@ -279,8 +279,9 @@ character*256 :: fname, temp, tempr1, fname1, fname2, fname3, fname4, row_type, 
 character*(*) :: arg2, arg3, arg4
 character(len = :),  allocatable     :: log_file
 ! !
-logical axial_LE, radial_LE, axial_TE, radial_TE, file_open
+logical axial_LE, radial_LE, axial_TE, radial_TE, file_open, dir_exist
 integer     :: i_local, nopen
+
 axial_LE = .False.
 radial_LE = .False.
 axial_TE = .False.
@@ -295,7 +296,11 @@ dtor = pi/180.
 radius_tolerance = 1e-05
 abs_zero = 0.0000000000000000
 
-call execute_command_line('mkdir log_files')
+inquire(file = './log_files/', exist=dir_exist)
+if (.not. dir_exist) call execute_command_line('mkdir log_files')
+
+inquire(file = './thickness_files/', exist=dir_exist)
+if (.not. dir_exist) call execute_command_line('mkdir thickness_files')
 !****************************************************************************
 !Displays the welcome message and some info about the code capabilities
 call displayMessage
@@ -470,7 +475,11 @@ elseif (control_inp_flag .eq. 2) then
     write(nopen,*) 'Reading the spanwise_input file ....'
     write(nopen,*)
 	! call read_spanwise_input(aux_in)
-	call read_spanwise_input(row_type, path)
+    if (thick_distr == 5) then
+        call read_spanwise_NACA_input(row_type, path)
+	else
+        call read_spanwise_input(row_type, path)
+    end if
 endif
 call close_log_file(nopen, file_open)
 
@@ -1442,16 +1451,30 @@ do js = 1, nspn
    call close_log_file(nopen, file_open)
    
    !----------------------------------------------------------------------
-   call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js), &
-                stgr,stack,chord_switch,stak_u,stak_v,xb_stk,yb_stk,stack_switch, &
-		        clustering_switch, clustering_parameter, nsl,nbls,curv,thick,LE,np,ncp_curv,ncp_thk, &
-                curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,ee_all,thick_distr,thick_distr_3_flag, &
-                umxthk_all, C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all, &
-		        LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments, &
-		        sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
-                n_normal_distance,casename,develop,isdev,mble,mbte,mles,mtes,i_slope,jcellblade_all, &
-                etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset, te_flag, &
-				le_opt_flag, te_opt_flag, le_angle_all, te_angle_all)	
+   if (thick_distr == 5) then
+       call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js), &
+                    stgr,stack,chord_switch,stak_u,stak_v,xb_stk,yb_stk,stack_switch, &
+                    clustering_switch, clustering_parameter, nsl,nbls,curv,thick,LE,np,ncp_curv,ncp_thk, &
+                    curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,ee_all,thick_distr,thick_distr_3_flag, &
+                    umxthk_all, C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all, &
+                    LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments, &
+                    sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
+                    n_normal_distance,casename,develop,isdev,mble,mbte,mles,mtes,i_slope,jcellblade_all, &
+                    etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset, te_flag, &
+                    le_opt_flag, te_opt_flag, le_angle_all, te_angle_all,bspline_thk)
+   else
+       call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js), &
+                    stgr,stack,chord_switch,stak_u,stak_v,xb_stk,yb_stk,stack_switch, &
+                    clustering_switch, clustering_parameter, nsl,nbls,curv,thick,LE,np,ncp_curv,ncp_thk, &
+                    curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,ee_all,thick_distr,thick_distr_3_flag, &
+                    umxthk_all, C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all, &
+                    LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments, &
+                    sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
+                    n_normal_distance,casename,develop,isdev,mble,mbte,mles,mtes,i_slope,jcellblade_all, &
+                    etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset, te_flag, &
+                    le_opt_flag, te_opt_flag, le_angle_all, te_angle_all)
+    end if
+
 
    mprime_ble(js) = mble
    mprime_bte(js) = mbte

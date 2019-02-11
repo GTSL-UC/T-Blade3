@@ -118,7 +118,7 @@ elseif (thick_distr .eq. 3) then
 			k=k+1
 		end if
 	end do
-elseif(thick_distr .eq. 4 .or. thick_distr .eq. 5) then
+elseif(thick_distr .eq. 4) then
 	!writing Thickness control points
 	if (allocated(thk_cp)) deallocate(thk_cp)
 	Allocate(thk_cp(20, 2*na))

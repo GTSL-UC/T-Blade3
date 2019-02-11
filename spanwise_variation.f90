@@ -16,7 +16,7 @@ real :: intersec_u(nspan), intersec_v(nspan)
 character*20 ind
 integer ::  nopen
 character(len = :), allocatable :: log_file
-logical                         :: file_open
+logical                         :: file_open, file_exist
 
 if (allocated(bspline_chord_curv)) deallocate(bspline_chord_curv)
 if (allocated(bspline_thk       )) deallocate(bspline_thk       )
@@ -26,8 +26,10 @@ if (allocated(le_angle_all)) deallocate(le_angle_all)
 Allocate(le_angle_all(na))
 if (allocated(te_angle_all)) deallocate(te_angle_all)
 Allocate(te_angle_all(na))
-if (thick_distr .eq. 4 .or. thick_distr .eq. 5) then
+if (thick_distr .eq. 4) then
 	allocate(bspline_thk(nsl, 2*ncp_thickness+1))
+else if (thick_distr == 5) then
+    allocate(bspline_thk(nsl,5))
 else
 	allocate(bspline_thk(nsl, ncp_chord_thk))
 endif
@@ -49,8 +51,8 @@ if (thick_distr .eq. 4) then
     write(nopen,*) 'Creating spanwise thickness and TE angle distributions'
     write(nopen,*) 'Creating cubic Bspline with spancontrolinput file for spanwise curvature'
 else
-	print*, 'creating cubic bspline with spancontrolinput file'
-    write(nopen,*) 'Creating cubic bspline with spancontrolinput file'
+	print*, 'Creating cubic B-spline with spancontrolinput file'
+    write(nopen,*) 'Creating cubic B-spline with spancontrolinput file'
 endif
 call close_log_file(nopen, file_open)
 
@@ -85,7 +87,37 @@ if(thick .ne. 0 .or. thick_distr .eq. 3) then
 			bspline_thk(j,i)=intersec(j)
 		end do
 	end do
-elseif (thick_distr .eq. 4 .or. thick_distr .eq. 5) then
+else if (thick_distr == 5) then
+    bspline_thk(:,1) = span(1:nsl)
+    do i = 2,5
+        call cubicspline(cp_chord_thk(:,i),cp_chord_thk(:,1),ncp_span_thk,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
+        call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,intersec_u,na,xbs,ybs)
+        bspline_thk(:,i) = intersec_u(1:nsl)
+    end do
+
+    ! Write spline data to a file
+    if (isdev) then
+
+        print *, 'Writing spanwise thickness variation data to file'
+        call log_file_exists(log_file, nopen, file_open)
+        write(nopen,*) "Writing spanwise thickness variation data to file"
+        call close_log_file(nopen, file_open)
+
+        inquire(file = 'thickness_files/thickness_span_variation.'//trim(casename)//'.dat', exist=file_exist)
+    
+        if (file_exist) then
+            open(97, file = 'thickness_files/thickness_span_variation.'//trim(casename)//'.dat', status = 'old', action = 'write', form = 'formatted')
+        else
+            open(97, file = 'thickness_files/thickness_span_variation.'//trim(casename)//'.dat', status = 'new', action = 'write', form = 'formatted')
+        end if
+        do i = 1,nsl
+            write(97, '(5F20.16)') bspline_thk(i,:)
+        end do
+        close(97)
+
+    end if  ! isdev
+
+elseif (thick_distr .eq. 4) then
 	do j = 1,na
 		bspline_thk(j,1) = span(j)
 	enddo
@@ -96,29 +128,23 @@ elseif (thick_distr .eq. 4 .or. thick_distr .eq. 5) then
 		intersec_v(1:na) = out_coord_v(:, 2)
 		call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+1), ncp_span_thk, span, na, 1, out_coord_u)
 		intersec_u(1:na) = out_coord_u(:, 2)
-        if (thick_distr .eq. 4) then
-            open (unit = 81, file = 'thk_span_dist_v.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
-            write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
-            close (81)
-            open (unit = 81, file = 'thk_span_dist_u.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
-            write (81, '(12F30.12)') (out_coord_u(k, :), k = 1, na)
-            close (81)
-        end if
+        open (unit = 81, file = 'thickness_files/thk_span_dist_v.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
+        write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
+        close (81)
+        open (unit = 81, file = 'thickness_files/thk_span_dist_u.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
+        write (81, '(12F30.12)') (out_coord_u(k, :), k = 1, na)
+        close (81)
 		if (isdev) then
 			call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+1), ncp_span_thk, span_fine, np_fine, &
                                            1, out_coord_u_fine)
-            if (thick_distr .eq. 4) then
-                open (unit = 81, file = 'thk_span_dist_u_fine.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
-                write (81, '(12F30.12)') (out_coord_u_fine(k, :), k = 1, np_fine)
-                close (81)
-            end if
+            open (unit = 81, file = 'thickness_files/thk_span_dist_u_fine.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
+            write (81, '(12F30.12)') (out_coord_u_fine(k, :), k = 1, np_fine)
+            close (81)
 			call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+ncp_thickness+1), ncp_span_thk,       &
                                            span_fine, np_fine, 1, out_coord_v_fine)
-            if (thick_distr .eq. 4) then
-                open (unit = 81, file = 'thk_span_dist_v_fine.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
-                write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
-                close (81)
-            end if
+            open (unit = 81, file = 'thickness_files/thk_span_dist_v_fine.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
+            write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
+            close (81)
 		endif
 		! do j = 2, ncp_span_thk
 			! if (cp_chord_thk(j, i+1) /= cp_chord_thk(1, i+1)) then
@@ -133,33 +159,25 @@ elseif (thick_distr .eq. 4 .or. thick_distr .eq. 5) then
 	enddo
 	call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), te_angle_cp, ncp_span_thk, span, na, 1, out_coord_v)
 	te_angle_all(1:na) = out_coord_v(:, 2)
-    if (thick_distr .eq. 4) then
-        open (unit = 81, file = 'te_angle_span_dist.' // trim(casename) // '.dat')
-        write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
-        close (81)
-    end if
+    open (unit = 81, file = 'thickness_files/te_angle_span_dist.' // trim(casename) // '.dat')
+    write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
+    close (81)
 	if (isdev) then
 		call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), te_angle_cp, ncp_span_thk, span_fine, np_fine, 1, out_coord_v_fine)
-        if (thick_distr .eq. 4) then
-            open (unit = 81, file = 'te_angle_span_dist_fine.' // trim(casename) // '.dat')
-            write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
-            close (81)
-        end if
+        open (unit = 81, file = 'thickness_files/te_angle_span_dist_fine.' // trim(casename) // '.dat')
+        write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
+        close (81)
 	endif
 	call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), le_angle_cp, ncp_span_thk, span, na, 1, out_coord_v)	
 	le_angle_all(1:na) = out_coord_v(:, 2)
-    if (thick_distr .eq. 4) then
-        open (unit = 81, file = 'le_angle_span_dist.' // trim(casename) // '.dat')
-        write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
-        close (81)
-    end if
+    open (unit = 81, file = 'thickness_files/le_angle_span_dist.' // trim(casename) // '.dat')
+    write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
+    close (81)
 	if (isdev) then
 		call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), le_angle_cp, ncp_span_thk, span_fine, np_fine, 1, out_coord_v_fine)
-        if (thick_distr .eq. 4) then
-            open (unit = 81, file = 'le_angle_span_dist_fine.' // trim(casename) // '.dat')
-            write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
-            close (81)
-        end if
+        open (unit = 81, file = 'thickness_files/le_angle_span_dist_fine.' // trim(casename) // '.dat')
+        write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
+        close (81)
 	endif
 endif
 if(LE .ne. 0) then
@@ -187,8 +205,8 @@ if (thick_distr .eq. 4) then
     write(nopen,*) 'Spanwise thickness and TE angle distributions created successfully:'
     write(nopen,*) 'Files prefixed with thk_span_dist and te_angle_span_dist created'
 else
-	print*, 'bspline created successfully'
-    write(nopen,*) 'bspline created successfully'
+	print*, 'B-spline created successfully'
+    write(nopen,*) 'B-spline created successfully'
 endif
 call close_log_file(nopen, file_open)
 

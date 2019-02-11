@@ -8,7 +8,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, &
                     sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
                     n_normal_distance,casename,develop,isdev,mble,mbte,msle,mste,i_slope,jcellblade_all, &
                     etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset, te_flag, &
-                    le_opt_flag, te_opt_flag, le_angle_all, te_angle_all)
+                    le_opt_flag, te_opt_flag, le_angle_all, te_angle_all,bspline_thk)
 
 !-----------------------------------------
 ! Input:
@@ -122,6 +122,7 @@ real curv_cp(20, 2*nsl), thk_cp(20, 2*nsl)
 real lethk_all(nsl), tethk_all(nsl), s_all(nsl), ee_all(nsl), umxthk_all(nsl), thk_tm_c_spl(nsl)
 real C_le_x_top_all(nsl), C_le_x_bot_all(nsl), C_le_y_top_all(nsl), C_le_y_bot_all(nsl)
 real LE_vertex_ang_all(nsl), LE_vertex_dis_all(nsl), le_angle_all(nsl), te_angle_all(nsl)
+real,   optional,   intent(in)  :: bspline_thk(nsl, 5)
 real Zweifel(nsl), sting_l_all(nsl), sting_h_all(nsl, 2)
 real jcellblade_all(nspn), etawidth_all(nspn), jcellblade, etawidth
 real, allocatable, dimension(:) :: xtop_refine, ytop_refine, xbot_refine, ybot_refine
@@ -149,9 +150,11 @@ real t(nb), mprime(nb), theta(nb), dmp, stingl, ueqi, dueq
 real, allocatable, dimension(:) :: ueq, xmean, ymean
 
 character*120 line, temp
-character*32 fext, fname, fname1, fname3, fname4, blext, casename, develop
+character(*)    :: fext
+character*32 fname, fname1, fname3, fname4, blext, casename, develop
 character*80 file1, file2, file3, file4, file5, file6, file7
-character*20 airfoil, sec
+character(*)    :: airfoil
+character*20 sec
 character*16 thick_distr_3_flag
 logical error, ellip, isdev, isxygrid
 integer                             :: nopen, deg_trail, np_new
@@ -208,7 +211,7 @@ call close_log_file(nopen, file_open)
 !*******************************************************************************************
 !---- # of points
 np = 121! nodes for the grid generator100
-if (thick_distr .eq. 5) then
+if (thick_distr == 5) then
     np = 111
 end if
 np_side = np
@@ -282,8 +285,13 @@ else if (clustering_switch .eq. 2) then
 else if (clustering_switch .eq. 3) then
     call hyperbolic_tan_clustering(np,u,clustering_parameter)
 else if (clustering_switch .eq. 4) then
-    np_cluster  = int(clustering_parameter)
-    call elliptical_clustering(js,np,nsl,ncp_thk(js),thk_cp,np_cluster,u)
+    if (thick_distr == 5) then
+        print *, "ERROR: Ellipse-hyperbolic clustering not available for modified NACA thickness distribution"
+        stop
+    else
+        np_cluster  = int(clustering_parameter)
+        call elliptical_clustering(js,np,nsl,ncp_thk(js),thk_cp,np_cluster,u)
+    end if
 end if
 
 !u(1) = 0.0
@@ -637,7 +645,10 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
     ! -----------------------------------------------------------------------------
     !---- generate airfoil thickness: =============================== 
     ! -----------------------------------------------------------------------------
-    if (thick_distr .eq. 5) then
+    !
+    ! Modified four-digit NACA thickness
+    !
+    if (thick_distr == 5 .and. present(bspline_thk)) then
 
         !
         ! Allocate necessary arrays
@@ -657,25 +668,24 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         !
         ! Allocate and read thickness arrays
         !
-        ncp     = ncp_thk(js)
-        if (allocated(xcp_thk)) deallocate(xcp_thk)
-        if (allocated(ycp_thk)) deallocate(ycp_thk)
-        allocate(xcp_thk(ncp))
-        allocate(ycp_thk(ncp))
+        !ncp     = ncp_thk(js)
+        !if (allocated(xcp_thk)) deallocate(xcp_thk)
+        !if (allocated(ycp_thk)) deallocate(ycp_thk)
+        !allocate(xcp_thk(ncp))
+        !allocate(ycp_thk(ncp))
 
-        do i = 1,ncp
-            xcp_thk(i)  = thk_cp(i, 2*js-1)
-            ycp_thk(i)  = thk_cp(i, 2*js)
-        end do 
+        !do i = 1,ncp
+        !    xcp_thk(i)  = thk_cp(i, 2*js-1)
+        !    ycp_thk(i)  = thk_cp(i, 2*js)
+        !end do 
          
         ! 
         ! Compute maximum thickness and maximum thickness location
         ! TODO: Set LE radius
         !
-        t_max    = maxval(ycp_thk)
-        loc      = maxloc(ycp_thk)
-        u_max    = xcp_thk(loc(1))
-        LE_round = 5.5
+        t_max    = bspline_thk(js,4)
+        u_max    = bspline_thk(js,3)
+        LE_round = bspline_thk(js,2)
 
         ! 
         ! Print input values to screen and write to log file
@@ -684,8 +694,8 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         write(nopen,*) 'Maximum thickness for the blade section = ', t_max
         print *, 'Chordwise location for the maximum thickness = ', u_max
         write(nopen,*) 'Chordwise location for the maximum thickness = ', u_max
-        print *, 'Thickness at TE = ', ycp_thk(ncp)!0.02*t_max
-        write(nopen,*) 'Thickness at TE = ', ycp_thk(ncp)!0.02*t_max
+        print *, 'Thickness at TE = ', bspline_thk(js,5)
+        write(nopen,*) 'Thickness at TE = ', bspline_thk(js,5)
         print *, 'Leading edge radius = ', LE_round
         write(nopen,*) 'Leading edge radius = ', LE_round
 
@@ -702,10 +712,7 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         ! Find coefficients for modified NACA four digit thickness
         ! Apply modified NACA four digit thickness
         !
-        call modified_NACA_four_digit_thickness_coeffs(t_max,u_max,ycp_thk(ncp),dy_dx_TE,LE_round,a_NACA,d_NACA)
-        if (js == 1) then
-            call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,ycp_thk(ncp),0.96,dy_dx_TE,LE_round,a_temp,d_temp)
-        end if
+        call modified_NACA_four_digit_thickness_coeffs(t_max,u_max,bspline_thk(js,5),dy_dx_TE,LE_round,a_NACA,d_NACA)
         call modified_NACA_four_digit_thickness(np,u,u_max,t_max,a_NACA,d_NACA,thickness_data)
         thickness       = thickness_data(:,1)
 
@@ -734,37 +741,33 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         write(nopen,*) ''
 
         !
-        ! If command line option "dev" is selected, write thickness data to sectionwise files
+        ! Write thickness data to sectionwise files
         !
-        if (isdev) then
+        print *, 'Writing thickness data to file'
+        print *, ''
+        write(nopen,*) 'Writing thickness data to file'
+        write(nopen,*) ''
 
-            print *, 'Writing thickness data to file'
-            print *, ''
-            write(nopen,*) 'Writing thickness data to file'
-            write(nopen,*) ''
-
-            inquire(file = './thickness_files/', exist = dir_exist)
-            if (.not. dir_exist) call execute_command_line('mkdir thickness_files')
-
-            thickness_file_name = 'thickness_files/thickness_data.'//trim(adjustl(sec))//'.'//trim(casename)
-            inquire(file = thickness_file_name, exist=file_exist)
-            if (file_exist) then
-                open(11, file = thickness_file_name, status = 'old', action = 'write', form = 'formatted')
-            else
-                open(11, file = thickness_file_name, status = 'new', action = 'write', form = 'formatted')
-            end if
-            do i = 1,np
-
-                write(11,'(4F40.16)') u(i), thickness_data(i,1), thickness_data(i,2), thickness_data(i,3)
-
-            end do 
-            close(11)
-
+        ! Write sectionwise thickness data files
+        thickness_file_name = 'thickness_files/thickness_data.'//trim(adjustl(sec))//'.'//trim(casename)
+        inquire(file = thickness_file_name, exist=file_exist)
+        if (file_exist) then
+            open(11, file = thickness_file_name, status = 'old', action = 'write', form = 'formatted')
+        else
+            open(11, file = thickness_file_name, status = 'new', action = 'write', form = 'formatted')
         end if
+        do i = 1,np
+
+            write(11,'(4F40.16)') u(i), thickness_data(i,1), thickness_data(i,2), thickness_data(i,3)
+
+        end do 
+        close(11)
 
         call close_log_file(nopen, file_open)
 
-
+    !
+    ! Exact thickness distribution
+    !
     else if (thick_distr.eq.4) then
         call log_file_exists(log_file, nopen, file_open)
         ! Added by Karthik Balasubramanian
@@ -802,10 +805,10 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         thickness = thickness_data(:, 2)
         call close_log_file(nopen, file_open)
         ! if(isdev) then
-        open (unit = 81, file = 'thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
+        open (unit = 81, file = 'thickness_files/thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
         write (81, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
         close (81)
-        open (unit = 81, file = 'thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
+        open (unit = 81, file = 'thickness_files/thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
         ! write (81, '(2F20.16)') (u(i), thickness(i), i = 1, np)
         write (81, '(6F40.16)') (thickness_data(i, 1), thickness_data(i, 2), thickness_data(i, 3),     &
                                  thickness_data(i, 4), thickness_data(i, 5), thickness_data(i, 6), i = 1, np)
@@ -831,10 +834,10 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         write (nopen, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
         call splinethickcontrol(umxthk, thkc, ncp, xcp_thk, ycp_thk, np, u, thickness, thick_distr_3_flag)
         ! if(isdev) then
-            open (unit = 81, file = 'thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
+            open (unit = 81, file = 'thickness_files/thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
             write (81, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
             close (81)
-            open (unit = 81, file = 'thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
+            open (unit = 81, file = 'thickness_files/thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
             write (81, '(2F20.16)') (u(i), thickness(i), i = 1, np)
             close (81)
         ! endif
@@ -879,7 +882,7 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
     xtop = u   - thickness*sin(angle)
     ytop = camber + thickness*cos(angle)
 
-    if (thick_distr .eq. 5) then
+    if (thick_distr == 5) then
         np_circ = 21
         np_new  = np + ((np_circ - 1)/2)
 
