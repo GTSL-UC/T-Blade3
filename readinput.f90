@@ -2357,7 +2357,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
         end do
         call override_naca_t_max(ncp_span_thk,temp)
         do ii = 1,ncp_span_thk
-            cp_chord_thk(ii,kk) = temp(ii)
+            cp_chord_thk(ii,kk) = 0.5*temp(ii)
         end do
 
         ! Override naca_t_te
@@ -2367,7 +2367,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
         end do
         call override_naca_t_te(ncp_span_thk,temp)
         do ii = 1,ncp_span_thk
-            cp_chord_thk(ii,kk) = temp(ii)
+            cp_chord_thk(ii,kk) = 0.5*temp(ii)
         end do
 
     end if  ! control_inp_flag

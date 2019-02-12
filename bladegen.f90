@@ -1162,6 +1162,46 @@ if (thick_distr .ne. 5) then
     call throat_calc_pitch_line(xb, yb, np, camber, angle, sang, u, pi, pitch, intersec_coord(1:4, js), &
                                 intersec_coord(5:8, js), intersec_coord(9:12, js), min_throat_2D,       &
                                 throat_index(js), n_normal_distance, casename, js, nsl, develop, isdev)
+else
+    if (allocated(camber)) deallocate(camber)
+    allocate(camber((np + 1)/2))
+    if (allocated(slope)) deallocate(slope)
+    allocate(slope((np + 1)/2)) 
+    
+    do i = 1, (np + 1)/2
+        ui = u(i)    
+        call cambmix(ui, cam, cam_u, sinl, sext, flin, flex)
+        camber(i) = cam
+        slope(i) = cam_u
+    
+    enddo
+
+    if(trim(airfoil) == 'sect1') then
+        u_translation = u(1)
+        camber_trans = camber(1)
+
+        if(chord_switch.eq.1)then
+        scaling = chrdx
+        else
+        scaling = chrd
+        endif
+
+        do i = 1, (np+1)/2
+            call rotate2 (u_rot, camber_rot, u(i), camber(i), sang)
+            u(i) = scaled (u_rot, scaling)
+            camber(i) = scaled (camber_rot, scaling)
+            u(i) = u(i) + (xb((np+1)/2)-u_translation)
+            camber(i) = camber(i) + (yb((np+1)/2)-camber_trans)
+        enddo
+    else
+        ! averaging top and bottom curves to obtain the camber
+        call averaged_camber(xb, yb, np, u, camber, angle, sinl)
+    endif
+
+    !! note: in intersection coordinate array, the throat, mouth and exit lines are added respectively.
+    call throat_calc_pitch_line(xb, yb, np, camber, angle, sang, u, pi, pitch, intersec_coord(1:4, js), &
+                                intersec_coord(5:8, js), intersec_coord(9:12, js), min_throat_2D,       &
+                                throat_index(js), n_normal_distance, casename, js, nsl, develop, isdev)
 end if
 
 !******************************************************************************************            

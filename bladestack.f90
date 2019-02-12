@@ -432,29 +432,27 @@ enddo
 ! Calculation of the 3D Throat length:  Nemnem 9 17 2013
 !*******************************************************************************************
 call log_file_exists(log_file, nopen, file_open)
-if (thick_distr .ne. 5) then
-    do ia = 1,na
-       throat_3D(ia) = sqrt((inter_xb(1,ia)-inter_xb(2,ia))**2+&
-                    (inter_yb(1,ia)-inter_yb(2,ia))**2+ &
-            (inter_zb(1,ia)-inter_zb(2,ia))**2)! 3D throat
-       mouth_3D(ia) = sqrt((inter_xb(3,ia)-inter_xb(4,ia))**2+&
-                    (inter_yb(3,ia)-inter_yb(4,ia))**2+ &
-            (inter_zb(3,ia)-inter_zb(4,ia))**2)
-       exit_3D(ia) = sqrt((inter_xb(5,ia)-inter_xb(6,ia))**2+&
-                    (inter_yb(5,ia)-inter_yb(6,ia))**2+ &
-            (inter_zb(5,ia)-inter_zb(6,ia))**2)
-       if(throat_3D(ia).ne.0) then 
-         print*,'section(',ia,')'
-         print*,'3D throat line [',units,'] =',throat_3D(ia)*scf
-         print*,'3D mouth line [',units,'] =',mouth_3D(ia)*scf
-         print*,'3D exit line [',units,'] =',exit_3D(ia)*scf
-         write(nopen,*)'section(',ia,')'
-         write(nopen,*),'3D throat line [',units,'] =',throat_3D(ia)*scf
-         write(nopen,*),'3D mouth line [',units,'] =',mouth_3D(ia)*scf
-         write(nopen,*),'3D exit line [',units,'] =',exit_3D(ia)*scf
-       endif
-    enddo
-end if
+do ia = 1,na
+   throat_3D(ia) = sqrt((inter_xb(1,ia)-inter_xb(2,ia))**2+&
+                (inter_yb(1,ia)-inter_yb(2,ia))**2+ &
+        (inter_zb(1,ia)-inter_zb(2,ia))**2)! 3D throat
+   mouth_3D(ia) = sqrt((inter_xb(3,ia)-inter_xb(4,ia))**2+&
+                (inter_yb(3,ia)-inter_yb(4,ia))**2+ &
+        (inter_zb(3,ia)-inter_zb(4,ia))**2)
+   exit_3D(ia) = sqrt((inter_xb(5,ia)-inter_xb(6,ia))**2+&
+                (inter_yb(5,ia)-inter_yb(6,ia))**2+ &
+        (inter_zb(5,ia)-inter_zb(6,ia))**2)
+   if(throat_3D(ia).ne.0) then 
+     print*,'section(',ia,')'
+     print*,'3D throat line [',units,'] =',throat_3D(ia)*scf
+     print*,'3D mouth line [',units,'] =',mouth_3D(ia)*scf
+     print*,'3D exit line [',units,'] =',exit_3D(ia)*scf
+     write(nopen,*)'section(',ia,')'
+     write(nopen,*),'3D throat line [',units,'] =',throat_3D(ia)*scf
+     write(nopen,*),'3D mouth line [',units,'] =',mouth_3D(ia)*scf
+     write(nopen,*),'3D exit line [',units,'] =',exit_3D(ia)*scf
+   endif
+enddo
 
 !*******************************************************************************************
 ! Dimensional Chord calculation and writing dimensional coordinates into a single file 'blade3D.casename.dat'.

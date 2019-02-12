@@ -528,26 +528,24 @@ character(:),   allocatable         :: log_file
 logical                             :: file_open
 
 call log_file_exists(log_file, nopen, file_open)
-if (thick_distr .ne. 5) then
-    if(throat_index(js) == 0) then
-      throat_pos(js) = 'none'
-      print*,'WARNING: No Throat found'
-      write(nopen,*) 'WARNING: No Throat Found'
-      !exit
-    elseif(throat_index(js) < 0.25*n_normal_distance) then
-      throat_pos(js) = 'le'
-      print*,'throat_index',js,throat_index(js)
-      write(nopen,*) 'throat_index', js, throat_index(js)
-    elseif(throat_index(js) > 0.75*n_normal_distance) then
-      throat_pos(js) = 'te' 
-      print*,'throat_index',js,throat_index(js)
-      write(nopen,*) 'throat_index', js, throat_index(js)
-    else
-      throat_pos(js) = 'btween'
-      print*,'throat_index',js,throat_index(js)
-      write(nopen,*) 'throat_index', js, throat_index(js)
-    endif! end if for throat options
-end if
+if(throat_index(js) == 0) then
+  throat_pos(js) = 'none'
+  print*,'WARNING: No Throat found'
+  write(nopen,*) 'WARNING: No Throat Found'
+  !exit
+elseif(throat_index(js) < 0.25*n_normal_distance) then
+  throat_pos(js) = 'le'
+  print*,'throat_index',js,throat_index(js)
+  write(nopen,*) 'throat_index', js, throat_index(js)
+elseif(throat_index(js) > 0.75*n_normal_distance) then
+  throat_pos(js) = 'te' 
+  print*,'throat_index',js,throat_index(js)
+  write(nopen,*) 'throat_index', js, throat_index(js)
+else
+  throat_pos(js) = 'btween'
+  print*,'throat_index',js,throat_index(js)
+  write(nopen,*) 'throat_index', js, throat_index(js)
+endif! end if for throat options
 call close_log_file(nopen, file_open)
 return
 end subroutine
@@ -2932,7 +2930,7 @@ subroutine add_circular_TE(np,u,np_circ,utop,vtop,ubot,vbot,ptop,pbot,u_new)
         ptop(2,i)       = vtop(i)
         pbot(1,i)       = ubot(i)
         pbot(2,i)       = vbot(i)
-        u_new(i)        = u(i)
+        !u_new(i)        = u(i)
 
     end do
     ntemp               = (np_circ - 1)/2
@@ -2942,13 +2940,13 @@ subroutine add_circular_TE(np,u,np_circ,utop,vtop,ubot,vbot,ptop,pbot,u_new)
         ptop(2,np + i)  = vTE(1 + i)
         pbot(1,np + i)  = uTE(np_circ - i)
         pbot(2,np + i)  = vTE(np_circ - i)
-        u_new(np + i)   = 0.5*(ptop(1,np + i) + pbot(1,np + i))
+        !u_new(np + i)   = 0.5*(ptop(1,np + i) + pbot(1,np + i))
 
     end do
 
-    ptop(1,:)           = ptop(1,:)/maxval(uTE)
-    pbot(1,:)           = pbot(1,:)/maxval(uTE)
-    u_new               = u_new/u_new(np + ntemp)
+    ptop(1,:)           = ptop(1,:)/ptop(1,np + ntemp)!maxval(uTE)
+    pbot(1,:)           = pbot(1,:)/pbot(1,np + ntemp)!maxval(uTE)
+    u_new               = 0.5*(ptop(1,:) + pbot(1,:))
     
 
 end subroutine add_circular_TE
