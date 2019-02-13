@@ -8,13 +8,13 @@ sharmamm@mail.uc.edu
 
 Refer to the main documentation (T-Blade3_v1.12_ReadMe.pdf) on the T-Blade3 website (http://gtsl.ase.uc.edu/t-blade3/) to understand how to run T-Blade3 v1.12.
 
-This document details the changes made to T-Blade3 in v1.12.8. 
+This document details the changes made to T-Blade3 in v1.12.9. 
 
 --------------------------------------------------
 RUNNING T-BLADE3
 --------------------------------------------------
 
-Once T-Blade3 has been compiled, the code be run from the terminal/command line as follows:
+Once T-Blade3 has been compiled, the code can be run from the terminal/command line as follows:
 
 (LINUX)
 >> tblade3 3dbgbinput.bladerow.dat argument
@@ -30,12 +30,13 @@ The additional command line arguments are as follows:
 
 
 --------------------------------------------------
-CHANGES MADE IN T-BLADE3 v1.12.8
+CHANGES MADE IN T-BLADE3 v1.12.9
 --------------------------------------------------
 
 1) Lean and sweep switch added to the main input file, 3dbgbinput.bladerow.dat
     a) If switched to '0': tangential lean and axial sweep are used
     b) If switched to '1': true lean and true sweep are used
+
 2) Clustering control switch added to the main input file, 3dbgbinput.bladerow.dat
     a) If switched to '1': uses sine function based clustering
     b) If switched to '2': uses exponential stretching function based clustering
@@ -54,49 +55,22 @@ CHANGES MADE IN T-BLADE3 v1.12.8
               
 3) With the exact thickness distribution, the tm/c values specified in the new auxiliary input file, spancotrolinputs.bladerow.dat is treated as the full thickness
    at the specified chord location
-4) Log file is now created with every T-Blade3 run
-5) ESP override subroutines for spanwise control points specified in the control tables for sweep, lean, in_beta*, out_beta*, chord_multiplier and tm/c in the
+
+4) Log files are now created with every T-Blade3 run
+
+5) A new thickness distribution based on the modified four-digit NACA thickness has been added
+    a) The thickness distribution switch in the main input file needs to be switched to "5" to use this thickness distribution
+    b) A new auxiliary input file, "spancontrolinputs_NACA_bladerow.dat" has also been added
+    c) Needs specification of the leading edge radius, the maximum thickness (tm/c), the chordwise location of tm/c and the trailing edge thickness
+    d) A spline switch has been added to the new auxiliary input file
+        i)  If switched to '1': uses a cubic B-spline for spanwise variation
+        ii) If switched to '2': uses a cubic spline for spanwise variation
+
+6) ESP override subroutines for spanwise control points specified in the control tables for sweep, lean, in_beta*, out_beta*, chord_multiplier and tm/c in the
    main input file 3dbgbinput.bladerow.dat have been added to updTblade.c, udpHubWedge.c and udpBladeVolume.c
 
+7) ESP override subroutines for spanwise control points specified in the control tables for u, thk, letht and tetht involved in the exact thickness distribution
+   have been added to udpTblade.c, udpHubWedge.c and udpBladeVolume.c
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+8) ESP override subroutines for spanwise control tables for LE_radius, u_max, t_max and t_TE involved in the modified four-digit NACA thickness distribution have 
+   been added to udpTblade.c, udpHubWedge.c and udpBladeVolume.c
