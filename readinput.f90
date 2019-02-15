@@ -1283,12 +1283,12 @@ character*(*) path
 character*256 file_name
 character(len = :), allocatable   :: log_file
 !opening files to read inputs
-real :: span_dum
+real :: span_dum, tol = 10E-8
 real*8, allocatable, dimension(:) :: temp, temp_exact
 integer                           :: temp_thk_flag(3)
 integer jj
 integer     :: i_local, nopen, nopen1
-logical     :: file_open, file_open_1
+logical     :: file_open, file_open_1, array_difference
 
 file_name = trim(path)//'spancontrolinputs.'//trim(row_type)//'.dat'
 call open_auxinput_log_file(trim(adjustl(file_name)), nopen1, file_open_1)
@@ -1783,8 +1783,20 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
                 temp_exact(i) = cp_chord_thk(i,jj)
             end do
             call override_exact_thk1(ncp_span_thk,temp_exact)
+            
+            ! Check if thk1 values have been overridden
             do i = 1,ncp_span_thk
-                cp_chord_thk(i,jj) = temp_exact(i)
+                if (abs(temp_exact(i) - cp_chord_thk(i,jj)) .gt. tol) array_difference = .true.
+                exit
+            end do
+
+            ! If thk1 values have been overridden, assign new thickness values
+            do i = 1,ncp_span_thk
+                if (array_difference) then
+                    cp_chord_thk(i,jj) = 0.5*temp_exact(i)
+                else
+                    cp_chord_thk(i,jj) = temp_exact(i)
+                end if
             end do    
         end if
 
@@ -1795,8 +1807,20 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
                 temp_exact(i) = cp_chord_thk(i,jj)
             end do
             call override_exact_thk2(ncp_span_thk,temp_exact)
+
+            ! Check if thk2 values have been overridden
             do i = 1,ncp_span_thk
-                cp_chord_thk(i,jj) = temp_exact(i)
+                if (abs(temp_exact(i) - cp_chord_thk(i,jj)) .gt. tol) array_difference = .true.
+                exit
+            end do
+
+            ! If thk2 values have been overridden, assign new thickness values
+            do i = 1,ncp_span_thk
+                if (array_difference) then
+                    cp_chord_thk(i,jj) = 0.5*temp_exact(i)
+                else
+                    cp_chord_thk(i,jj) = temp_exact(i)
+                end if
             end do
         end if
 
@@ -1807,8 +1831,20 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
                 temp_exact(i) = cp_chord_thk(i,jj)
             end do
             call override_exact_thk3(ncp_span_thk,temp_exact)
+
+            ! Check if thk3 values have been overridden
             do i = 1,ncp_span_thk
-                cp_chord_thk(i,jj) = temp_exact(i)
+                if (abs(temp_exact(i) - cp_chord_thk(i,jj)) .gt. tol) array_difference = .true.
+                exit
+            end do
+
+            ! If thk3 values have been overridden, assign new thickness values
+            do i = 1,ncp_span_thk
+                if (array_difference) then
+                    cp_chord_thk(i,jj) = 0.5*temp_exact(i)
+                else
+                    cp_chord_thk(i,jj) = temp_exact(i)
+                end if
             end do
         end if
 
@@ -1819,8 +1855,20 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
                 temp_exact(i) = cp_chord_thk(i,jj)
             end do
             call override_exact_thk4(ncp_span_thk,temp_exact)
+
+            ! Check if thk4 values have been overridden
             do i = 1,ncp_span_thk
-                cp_chord_thk(i,jj) = temp_exact(i)
+                if (abs(temp_exact(i) - cp_chord_thk(i,jj)) .gt. tol) array_difference = .true.
+                exit
+            end do
+
+            ! If thk4 values have been overridden, assign new thickness values
+            do i = 1,ncp_span_thk
+                if (array_difference) then
+                    cp_chord_thk(i,jj) = 0.5*temp_exact(i)
+                else
+                    cp_chord_thk(i,jj) = temp_exact(i)
+                end if
             end do
         end if
    
@@ -1831,8 +1879,20 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
                 temp_exact(i) = cp_chord_thk(i,jj)
             end do
             call override_exact_thk5(ncp_span_thk,temp_exact)
+
+            ! Check if thk5 values have been overridden
             do i = 1,ncp_span_thk
-                cp_chord_thk(i,jj) = temp_exact(i)
+                if (abs(temp_exact(i) - cp_chord_thk(i,jj)) .gt. tol) array_difference = .true.
+                exit
+            end do
+
+            ! If thk5 values have been overridden, assign new thickness values
+            do i = 1,ncp_span_thk
+                if (array_difference) then
+                    cp_chord_thk(i,jj) = 0.5*temp_exact(i)
+                else
+                    cp_chord_thk(i,jj) = temp_exact(i)
+                end if
             end do
         end if
    
@@ -1843,8 +1903,20 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
                 temp_exact(i) = cp_chord_thk(i,jj)
             end do
             call override_exact_thk6(ncp_span_thk,temp_exact)
+
+            ! Check if thk6 values have been overridden
             do i = 1,ncp_span_thk
-                cp_chord_thk(i,jj) = temp_exact(i)
+                if (abs(temp_exact(i) - cp_chord_thk(i,jj)) .gt. tol) array_difference = .true.
+                exit
+            end do
+
+            ! If thk6 values have been overridden, assign new thickness values
+            do i = 1,ncp_span_thk
+                if (array_difference) then
+                    cp_chord_thk(i,jj) = 0.5*temp_exact(i)
+                else
+                    cp_chord_thk(i,jj) = temp_exact(i)
+                end if
             end do
         end if
 
@@ -1855,8 +1927,20 @@ if(thick .ne. 0 .or. LE .ne. 0 .or. thick_distr .eq. 3  .or. thick_distr .eq. 4)
                 temp_exact(i) = cp_chord_thk(i,jj)
             end do
             call override_exact_thk7(ncp_span_thk,temp_exact)
+
+            ! Check if thk7 values have been overridden
             do i = 1,ncp_span_thk
-                cp_chord_thk(i,jj) = temp_exact(i)
+                if (abs(temp_exact(i) - cp_chord_thk(i,jj)) .gt. tol) array_difference = .true.
+                exit
+            end do
+
+            ! If thk7 values have been overridden, assign new thickness values
+            do i = 1,ncp_span_thk
+                if (array_difference) then
+                    cp_chord_thk(i,jj) = 0.5*temp_exact(i)
+                else
+                    cp_chord_thk(i,jj) = temp_exact(i)
+                end if
             end do
         end if
     
