@@ -1989,9 +1989,9 @@ subroutine read_spanwise_NACA_input(row_type,path)
     character(:),   allocatable                     :: file_name, log_file
     character(len = 256)                            :: temps
     integer                                         :: nopen_aux = 10, nopen, nopen1, jj, kk
-    real                                            :: span_dum
+    real                                            :: span_dum, tol = 10E-8
     real,           allocatable                     :: temp(:), temp_NACA(:)
-    logical                                         :: file_open, file_open_1
+    logical                                         :: file_open, file_open_1, array_difference
 
 
     ! Read auxiliary input file name
@@ -2356,8 +2356,20 @@ subroutine read_spanwise_NACA_input(row_type,path)
             temp(ii)            = cp_chord_thk(ii,kk)
         end do
         call override_naca_t_max(ncp_span_thk,temp)
+        
+        ! Check if the overriding values are different than the original values
         do ii = 1,ncp_span_thk
-            cp_chord_thk(ii,kk) = 0.5*temp(ii)
+            if (abs(temp(ii) - cp_chord_thk(ii,kk)) .gt. tol) array_difference = .true.
+            exit
+        end do
+
+        ! If values in .csm file are different, assign new thickness values
+        do ii = 1,ncp_span_thk
+            if (array_difference) then
+                cp_chord_thk(ii,kk) = 0.5*temp(ii)
+            else
+                cp_chord_thk(ii,kk) = temp(ii)
+            end if
         end do
 
         ! Override naca_t_te
@@ -2366,12 +2378,22 @@ subroutine read_spanwise_NACA_input(row_type,path)
             temp(ii)            = cp_chord_thk(ii,kk)
         end do
         call override_naca_t_te(ncp_span_thk,temp)
+
+        ! Check if the overriding values are different than the original values
         do ii = 1,ncp_span_thk
-            cp_chord_thk(ii,kk) = 0.5*temp(ii)
+            if (abs(temp(ii) - cp_chord_thk(ii,kk)) .gt. tol) array_difference = .true.
+        end do
+
+        ! If values in .csm file are different, assign new thickness values
+        do ii = 1,ncp_span_thk
+            if (array_difference) then
+                cp_chord_thk(ii,kk) = 0.5*temp(ii)
+            else
+                cp_chord_thk(ii,kk) = temp(ii)
+            end if
         end do
 
     end if  ! control_inp_flag
-
 
     ! Print message to screen and write to log file
     call log_file_exists(log_file, nopen, file_open)
