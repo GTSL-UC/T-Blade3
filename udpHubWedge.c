@@ -324,6 +324,7 @@ udpExecute(ego  context,                /* (in)  EGADS context */
 
     /* try running Tblade */
     printf("filename = %s\n", FILENAME(numUdp));
+    printf("auxname  = %s\n", AUXNAME(numUdp));
     bgb3d_sub_(FILENAME(numUdp), AUXNAME(numUdp), ARG_2(numUdp), "", "",
                strlen(FILENAME(numUdp)), strlen(AUXNAME(numUdp)), (int)strlen(ARG_2(numUdp)), strlen(""), strlen(""));
     /* Read Hub File */		   

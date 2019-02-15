@@ -108,7 +108,7 @@ do i = k, len(trim(fname))
 enddo
 row_type = fname(k:j)
 !call bgb3d_sub(fname, 'controlinputs.'//trim(row_type)//'.dat', arg2, arg3)
-call bgb3d_sub(fname, 'spancontrolinputs.'//trim(row_type)//'.dat', arg2, arg3, arg4)
+call bgb3d_sub(fname, 'spancontrolinputs_NACA_'//trim(row_type)//'.dat', arg2, arg3, arg4)
 end program bgb3d
 ! Variable override subroutines for ESP intergation
 !subroutine     override_chord(n, a)
