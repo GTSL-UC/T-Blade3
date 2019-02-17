@@ -1,997 +1,1019 @@
+!
+! This subroutine reads the main input file (3dbgbinput.bladerow.dat)
+! Stores input in several global variables defined in globvar.f90
+! 
+!------------------------------------------------------------------------------------------------------------
 subroutine readinput(fname)
-! reads the 3dbgbinput file
-use globvar
-use file_operations
-implicit none
+    use globvar
+    use file_operations
+    implicit none
 
-character*256 :: fname, temp, temp1, temp2, tempr1, fname1, fname2, fname3, beta_switch_2
-character(len = :), allocatable :: log_file
-integer :: er, temp_int, stat, n_temp, n_temp1, n_temp2, nopen, nopen1
-real*8 inBetaInci, outBetaDevn
-real*8, allocatable :: temp_in(:)
-real*8              :: temp_offsets(2)
-real*8, parameter   :: tol = 1E-8
-logical             :: equal, beta_value(5), ang_spl_value(5), file_open, file_open_1
+    character(256),                 intent(in)          :: fname
+    
+    ! Local variables
+    character(256)                                      :: temp, temp1, temp2, tempr1, fname1, fname2, fname3, &
+                                                           beta_switch_2
+    character(:),   allocatable                         :: log_file
+    integer                                             :: er, temp_int, stat, n_temp, n_temp1, n_temp2, &
+                                                           nopen, nopen1
+    real                                                :: inBetaInci, outBetaDevn, temp_offets(2)
+    real,           allocatable                         :: temp_in(:)
+    real,           parameter                           :: tol = 1E-8
+    logical                                             :: equal, beta_value(5), ang_spl_value(5), file_open, &
+                                                           file_open_1
 
-if (allocated(x_le          )) deallocate(x_le          )
-if (allocated(x_te          )) deallocate(x_te          )
-if (allocated(r_le          )) deallocate(r_le          )
-if (allocated(r_te          )) deallocate(r_te          )
-if (allocated(in_beta       )) deallocate(in_beta       )
-if (allocated(out_beta      )) deallocate(out_beta      )
-if (allocated(mrel1         )) deallocate(mrel1         )
-if (allocated(chord         )) deallocate(chord         )
-if (allocated(thk_c         )) deallocate(thk_c         )
-if (allocated(inci          )) deallocate(inci          )
-if (allocated(devn          )) deallocate(devn          )
-if (allocated(sec_flow_ang  )) deallocate(sec_flow_ang  )
-if (allocated(phi_s_in      )) deallocate(phi_s_in      )
-if (allocated(phi_s_out     )) deallocate(phi_s_out     )
-if (allocated(stagger       )) deallocate(stagger       )
-if (allocated(chordm        )) deallocate(chordm        )
-if (allocated(msle          )) deallocate(msle          )
-if (allocated(s1le          )) deallocate(s1le          )
-if (allocated(s2le          )) deallocate(s2le          )
-if (allocated(s1te          )) deallocate(s1te          )
-if (allocated(s2te          )) deallocate(s2te          )
-if (allocated(sang          )) deallocate(sang          )
-if (allocated(stk_u         )) deallocate(stk_u         )
-if (allocated(stk_v         )) deallocate(stk_v         )
-if (allocated(total_camber  )) deallocate(total_camber  )
-if (allocated(mprime_ble    )) deallocate(mprime_ble    )
-if (allocated(mprime_bte    )) deallocate(mprime_bte    )
-if (allocated(BGgrid_all    )) deallocate(BGgrid_all    )
-if (allocated(jcellblade_all)) deallocate(jcellblade_all)
-if (allocated(etawidth_all  )) deallocate(etawidth_all  )
-if (allocated(axchrd        )) deallocate(axchrd        )
-allocate (x_le(nspan))
-allocate (x_te(nspan))
-allocate (r_le(nspan))
-allocate (r_te(nspan))
-allocate (in_beta(nspan))
-allocate (out_beta(nspan))
-allocate (mrel1(nspan))
-allocate (chord(nspan))
-allocate (thk_c(nspan))
-allocate (inci(nspan))
-allocate (devn(nspan))
-allocate (sec_flow_ang(nspan))
-allocate (phi_s_in(nspan))
-allocate (phi_s_out(nspan))
-allocate (stagger(nspan))
-allocate (chordm(nspan))
-allocate (msle(nspan))
-allocate (s1le(nspan))
-allocate (s2le(nspan))
-allocate (s1te(nspan))
-allocate (s2te(nspan))
-allocate (sang(nspan))
-allocate (stk_u(nspan))
-allocate (stk_v(nspan))
-allocate (total_camber(nspan))
-allocate (mprime_ble(nspan))
-allocate (mprime_bte(nspan))
-allocate (BGgrid_all(nspan))
-allocate (jcellblade_all(nspan))
-allocate (etawidth_all(nspan))
-allocate(axchrd(nspan))
 
-! constants
-abs_zero = 0.0000000000000000
+    !
+    ! Allocate variables
+    !
+    if (allocated(x_le)) deallocate(x_le)
+    allocate(x_le(nspan))
+    if (allocated(x_te)) deallocate(x_te)
+    allocate(x_te(nspan))
+    if (allocated(r_le)) deallocate(r_le)
+    allocate(r_le(nspan))
+    if (allocated(r_te)) deallocate(r_te)
+    allocate(r_te(nspan))
+    if (allocated(in_beta)) deallocate(in_beta)
+    allocate(in_beta(nspan)) 
+    if (allocated(out_beta)) deallocate(out_beta)
+    allocate(out_beta(nspan))
+    if (allocated(mrel1)) deallocate(mrel1)
+    allocate(mrel1(nspan))
+    if (allocated(chord)) deallocate(chord)
+    allocate(chord(nspan))
+    if (allocated(thk_c)) deallocate(thk_c)
+    allocate(thk_c(nspan))
+    if (allocated(inci)) deallocate(inci)
+    allocate(inci(nspan))
+    if (allocated(devn)) deallocate(devn)
+    allocate(devn(nspan))
+    if (allocated(sec_flow_ang)) deallocate(sec_flow_ang)
+    allocate(sec_flow_ang(nspan))
+    if (allocated(phi_s_in)) deallocate(phi_s_in)
+    allocate(phi_s_in(nspan))
+    if (allocated(phi_s_out)) deallocate(phi_s_out)
+    allocate(phi_s_out(nspan))
+    if (allocated(stagger)) deallocate(stagger)
+    allocate(stagger(nspan))
+    if (allocated(chordm)) deallocate(chordm)
+    allocate(chordm(nspan))
+    if (allocated(msle)) deallocate(msle)
+    allocate(msle(nspan))
+    if (allocated(s1le)) deallocate(s1le)
+    allocate(s1le(nspan))
+    if (allocated(s2le)) deallocate(s2le)
+    allocate(s2le(nspan))
+    if (allocated(s1te)) deallocate(s1te)
+    allocate(s1te(nspan))
+    if (allocated(s2te)) deallocate(s2te)
+    allocate(s2te(nspan))
+    if (allocated(sang)) deallocate(sang)
+    allocate(sang(nspan))
+    if (allocated(stk_u)) deallocate(stk_u)
+    allocate(stk_u(nspan))
+    if (allocated(stk_v)) deallocate(stk_v)
+    allocate(stk_v(nspan))
+    if (allocated(total_camber)) deallocate(total_camber)
+    allocate(total_camber(nspan))
+    if (allocated(mprime_ble)) deallocate(mprime_ble)
+    allocate(mprime_ble(nspan))
+    if (allocated(mprime_bte)) deallocate(mprime_bte)
+    allocate(mprime_bte(nspan))
+    if (allocated(BGgrid_all)) deallocate(BGgrid_all)
+    allocate(BGgrid_all(nspan))
+    if (allocated(jcellblade_all)) deallocate(jcellblade_all)
+    allocate(jcellblade_all(nspan))
+    if (allocated(etawidth_all)) deallocate(etawidth_all)
+    allocate(etawidth_all(nspan))
+    if (allocated(axchrd)) deallocate(axchrd)
+    allocate(axchrd(nspan))
 
-open(1, file = fname, status = 'unknown')
-rewind(1)
-call log_file_exists(log_file, nopen, file_open)
-print*, fname
-write(nopen,*) ''
-write(nopen,*) fname
-call close_log_file(nopen, file_open)
-call open_maininput_log_file(trim(adjustl(fname)), nopen1, file_open_1)
-!write(*, *)
-!write(*, *) 'Reading inputs from -88dbgbinput file'
-!write(*, *)
-!---reading parameters from input file----
-read(1, '(A)')temp
-write(nopen1,'(A)') trim(temp)
-!reading the casename
-read(1, *)fext
-backspace(1)
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-!write(*, *)'case:', fext
-casename = trim(fext)
-read(1, '(A)')temp
-write(nopen1,'(A)') trim(temp)
-read(1, *)ibrow
-backspace(1)
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-!write(*, *)'bladerow #:', ibrow
-write(ibrowc, '(i3)')ibrow
-!print*, ibrowc
-!write(*, *)
-read(1, '(A)')temp
-write(nopen1,'(A)') trim(temp)
-read(1, *) nbls ! number of blades in this row
-backspace(1)
-read(1,'(A)') temp
-write(nopen1, '(A)') trim(temp)
-!print*, 'Number of blades in this row:', nbls
-read(1, '(A)') temp
-write(nopen1,'(A)') trim(temp)
-units = temp(24:25)
-read(1, *)scf, temp
-write(nopen1,*) scf
-temp = adjustl(trim(temp))
-read(temp, *, iostat = er) theta_offset
-if (er .ne. 0) then
-    theta_offset = 0.
+
+    !
+    ! Open main input file and start reading
+    ! 
+    open(1, file = fname, status = 'unknown')
     rewind(1)
-    do i = 1, 8
-        read(1, *) temp
-    enddo
-endif
-!write(*, *)'bsf:', scf
-!write(*, *) 
-read(1, '(A)')temp
-read(1, *)nsl
-write(nopen1, '(A)') trim(temp)
-write(nopen1, *) nsl
-!print*, 'Number of streamlines:', nsl
-!write(*, *)
-read(1, '(A)')temp
-write(nopen1, '(A)') trim(temp)
 
-!
-! Input angle switch
-! Error trap added -11/21/18 (Mayank Sharma @UC)
-!
-!---------------------------------------------------------------------------------------------------------------------------------------------
-spanwise_angle_spline = .False.
-spanwise_inci_dev_spline = .False.
-
-!
-! Read the input file angle switch 
-! Also read secondary argument for angle spanwise splines if present 
-!
-read(1, '(A)') beta_switch_2
-write(nopen1, '(A)') trim(beta_switch_2)
-
-!
-! All possible valid inputs are stored as logical variables in an array
-!
-beta_value  = [index(beta_switch_2, '0') .ne. 0, index(beta_switch_2, '1') .ne. 0, index(beta_switch_2, '2') .ne. 0, &
-               index(beta_switch_2, '3') .ne. 0, index(beta_switch_2, '4') .ne. 0]
-
-
-!
-! Check for all possible valid inputs of the input angle switch
-!
-!
-! Case 1 - All AXIAL angles
-if (beta_value(1) .and. .not. beta_value(2) .and. .not. beta_value(3) .and. .not. beta_value(4) .and. .not. beta_value(5)) then
-    n_temp1 = index(beta_switch_2, '0')
-    read(beta_switch_2(n_temp1:n_temp1 + 1),*,iostat=stat) beta_switch
-
-! Case 2 - All RADIAL angles    
-elseif (.not. beta_value(1) .and. beta_value(2) .and. .not. beta_value(3) .and. .not. beta_value(4) .and. .not. beta_value(5)) then
-    n_temp1 = index(beta_switch_2, '1')
-    read(beta_switch_2(n_temp1:n_temp1 + 1),*,iostat=stat) beta_switch
-
-! Case 3 - AXIAL inlet angles and RADIAL outlet angles
-elseif (.not. beta_value(1) .and. .not. beta_value(2) .and. beta_value(3) .and. .not. beta_value(4) .and. .not. beta_value(5)) then
-    n_temp1 = index(beta_switch_2, '2')
-    read(beta_switch_2(n_temp1:n_temp1 + 1),*,iostat=stat) beta_switch
-
-! Case 4 - RADIAL inlet angles and AXIAL outlet angles
-elseif (.not. beta_value(1) .and. .not. beta_value(2) .and. .not. beta_value(3) .and. beta_value(4) .and. .not. beta_value(5)) then
-    n_temp1 = index(beta_switch_2, '3')
-    read(beta_switch_2(n_temp1:n_temp1 + 1),*,iostat=stat) beta_switch
-
-! Case 5 - Wing flag is turned on
-elseif (.not. beta_value(1) .and. .not. beta_value(2) .and. .not. beta_value(3) .and. .not. beta_value(4) .and. beta_value(5)) then
-    beta_switch = 0
-    wing_flag   = 1
-
-! Case 6 - Invalid input for the input angle switch
-!          Warn user and stop execution
-elseif (.not. beta_value(1) .and. .not. beta_value(2) .and. .not. beta_value(3) .and. .not. beta_value(4) .and. .not. beta_value(5)) then
-    print *, 'FATAL ERROR: Invalid argument for beta_switch'
-    print *, 'Valid arguments are 0, 1, 2, 3 and 4 (refer to T-Blade3 documentation)'
-    print *, ''
-    stop
-endif
-
-
-! 
-! Secondary input file angle switch
-! Used to determine which angles to fit spanwise splines through
-! Error trap added - 11/21/18 (Mayank Sharma @UC)
-!
-!---------------------------------------------------------------------------------------------------------------------------------------------
-
-
-!
-! All possible valid secondary inputs are stored as logical variables in an array
-!
-ang_spl_value   = [len(beta_switch_2(:n_temp1)) .eq. len(trim(beta_switch_2)), &
-                   index(beta_switch_2, 'inletspline') .ne. 0, index(beta_switch_2, 'outletspline') .ne. 0, &
-                   index(beta_switch_2, 'inoutspline') .ne. 0, index(beta_switch_2, 'inci_dev_spline') .ne. 0]
-
-
-call log_file_exists(log_file, nopen, file_open)
-
-!
-! Check for all possible valid inputs of the secondary argument
-!
-!
-! Case 1 - No splining required
-if (ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_value(3) .and. .not. ang_spl_value(4) .and.     &
-    .not. ang_spl_value(5)) then
-    read(1,'(A)') temp
-
-! Case 2 - spline inlet angles only   
-elseif (.not. ang_spl_value(1) .and. ang_spl_value(2) .and. .not. ang_spl_value(3) .and. .not. ang_spl_value(4) .and. &
-        .not. ang_spl_value(5)) then
-
-    n_temp2 = index(beta_switch_2, 'inletspline')
-    anglespline = trim(beta_switch_2(n_temp2:))
-    spanwise_angle_spline = .true.
-
-    print *, ''
-    print *, 'Angles defined spanwise as a B-spline using control points'
-    print *, ''
-    print *, trim(anglespline)
+    ! log_file_exists() in file_operation.f90
+    call log_file_exists(log_file, nopen, file_open)
+    print*, fname
     write(nopen,*) ''
-    write(nopen,*) 'Angles defined spanwise as a B-spline using control points'
-    write(nopen,*) ''
-    write(nopen,*) trim(anglespline)
-    read(1,'(A)') temp
+    write(nopen,*) fname
 
-! Case 3 -spline outlet angles only
-elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. ang_spl_value(3) .and. .not. ang_spl_value(4) .and. &
-        .not. ang_spl_value(5)) then
+    ! close_log_file() in file_operations.f90
+    call close_log_file(nopen, file_open)
 
-    n_temp2 = index(beta_switch_2, 'outletspline')
-    anglespline = trim(beta_switch_2(n_temp2:))
-    spanwise_angle_spline = .true.
-
-    print *, ''
-    print *, 'Angles defined spanwise as a B-spline using control points'
-    print *, ''
-    print *, trim(anglespline)
-    write(nopen,*) ''
-    write(nopen,*) 'Angles defined spanwise as a B-spline using control points'
-    write(nopen,*) ''
-    write(nopen,*) trim(anglespline)
-    read(1,'(A)') temp
-
-! Case 4 - spline inlet and outlet angles
-elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_value(3) .and. ang_spl_value(4) .and. &
-        .not. ang_spl_value(5)) then
-
-    n_temp2 = index(beta_switch_2, 'inoutspline')
-    anglespline = trim(beta_switch_2(n_temp2:))
-    spanwise_angle_spline = .true.
-
-    print *, ''
-    print *, 'Angles defined spanwise as a B-spline using control points'
-    print *, ''
-    print *, trim(anglespline)
-    write(nopen,*) ''
-    write(nopen,*) 'Angles defined spanwise as a B-spline using control points'
-    write(nopen,*) ''
-    write(nopen,*) trim(anglespline)
-    read(1,'(A)') temp
-
-! Case 5 - spline incidence and deviation
-elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_value(3) .and. .not. ang_spl_value(4) &
-        .and. ang_spl_value(5)) then
-
-    n_temp2 = index(beta_switch_2, 'inci_dev_spline')
-    anglespline = trim(beta_switch_2(n_temp2:))
-    spanwise_inci_dev_spline = .true.
-
-    print *, ''
-    print *, 'Incidence and Deviation defined spanwise as a B-spline using control points'
-    print *, ''
-    print *, trim(anglespline)
-    write(nopen,*) ''
-    write(nopen,*) 'Incidence and Deviation defined spanwise as a B-spline using control points'
-    write(nopen,*) ''
-    write(nopen,*) trim(anglespline)
-    read(1,'(A)') temp
-
-! Case 6 - invalid input
-!          warn user and stop execution
-elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_value(3) .and. .not. ang_spl_value(4) &
-        .and. .not. ang_spl_value(5)) then
-    print *, ''
-    print *, 'FATAL ERROR: Invalid argument for anglespline'
-    print *, 'anglespline can be left blank (refer to T-Blade3 documentation)'
-    print *, 'Valid arguments are "inletspline", "outletspline", "inoutspline" or "inci_dev_spline"'
-    print *, ''
-    stop
-end if
-
-call close_log_file(nopen, file_open)
-write(nopen1, '(A)') trim(temp)
-
-! 
-! Curvature control switch
-! Error trap added - 11/21/18 (Mayank Sharma @UC)
-!
-!---------------------------------------------------------------------------------------------------------------------------------------------
-read(1,*)curv, spanwise_spline  
-if (trim(spanwise_spline) .eq. 'spanwise_spline') then
-    backspace(1)
-    read(1,'(A)') temp
-    write(nopen1, '(A)') trim(temp)
-else
-    backspace(1)
-    backspace(1)
-    read(1,'(A)') temp
-    write(nopen1, '(A)') trim(temp)
-    read(1,'(A)') temp
-    write(nopen1, '(A)') trim(temp)
-end if
-
-! Invalid input for the camber definition switch
-! Warn user and stop execution 
-if (curv .ne. 0 .and. curv .ne. 1) then
-
-    print *, ''
-    print *, 'FATAL ERROR: Invalid argument for camber definition switch'
-    print *, 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
-    print *, ''
-    stop
-
-end if
-
-
-! Invalid input for curvature control switch
-! Warn user and stop execution
-if (trim(spanwise_spline) .ne. 'spanwise_spline' .and. trim(spanwise_spline) .ne. 'Airfoil') then
-
-    print *, ''
-    print *, 'FATAL ERROR: Invalid argument for camber definition switch'
-    print *, 'Valid argument for using spancontrolinputs is "spanwise_spline" (refer to T-Blade3 documentation)'
-    print *, ''
-    stop
-
-end if 
-
-! Read next line in the input file if spanwise_spline has been specified
-if (trim(spanwise_spline).eq.'spanwise_spline')then
-    read(1,'(A)')temp
+    ! Start writing a log file based on the main input file
+    ! open_maininput_log_file() in file_operations.f90
+    call open_maininput_log_file(trim(adjustl(fname)), nopen1, file_open_1)
+    
+    ! temp used to read descriptor lines in main input file
+    read(1, '(A)')temp
     write(nopen1,'(A)') trim(temp)
-endif
+    
+    ! Read the casename
+    read(1, *)fext
+    backspace(1)
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    casename = trim(fext)
+    
+    read(1, '(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    
+    ! Read bladerow type
+    read(1, *)ibrow
+    backspace(1)
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    write(ibrowc, '(i3)')ibrow
+    
+    read(1, '(A)')temp
+    write(nopen1,'(A)') trim(temp)
+   
+    ! Read number of blades
+    read(1, *) nbls 
+    backspace(1)
+    read(1,'(A)') temp
+    write(nopen1, '(A)') trim(temp)
+    
+    ! Read units of blade scaling factor
+    read(1, '(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    units = temp(24:25)
 
-
-
-
-
-
-
-! 
-! Thickness distribution switch
-! Error trap added - 11/21/18 (Mayank Sharma @UC)
-!
-!---------------------------------------------------------------------------------------------------------------------------------------------
-read(1, *)thick_distr, temp2
-backspace(1)
-read(1,'(A)') temp
-write(nopen1, *) thick_distr
-write(nopen1,'(A)') trim(temp)
-! Invalid input for the thickness distribution switch
-! Warn user and stop execution
-if (thick_distr .ne. 0 .and. thick_distr .ne. 1 .and. thick_distr .ne. 2 .and. thick_distr .ne. 3 .and. &
-    thick_distr .ne. 4 .and. thick_distr .ne. 5) then
-
-    print *, ''
-    print *, 'FATAL ERROR: Invalid argument for thickness distribution switch'
-    print *, 'Valid arguments are 0, 1, 2, 3, 4 or 5 (refer to T-Blade3 documentation)'
-    print *, ''
-    stop
-
-end if
-
-! Read next line in the input file
-if (len(trim(adjustl(temp2))) .eq. 3) then
-    thick_distr_3_flag = trim(adjustl(temp2))
-    read(1, *)temp
-endif
-
-
-
-
-
-
-!
-! Thickness multiplier switch
-! Error trap added - 11/21/18 (Mayank Sharma @UC)
-!
-!---------------------------------------------------------------------------------------------------------------------------------------------
-read(1, *)thick       
-write(nopen1,*) thick
-! Invalid input for the thickness multiplier switch
-! Warn user and stop execution
-if (thick .ne. 0 .and. thick .ne. 1) then
-
-    print *, ''
-    print *, 'FATAL ERROR: Invalid argument for thickness multiplier switch'
-    print *, 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
-    print *, ''
-    stop
-
-end if
-
-
-
-
-
-
-!
-! LE spline control switch
-! Error trap added - 11/21/18 (Mayank Sharma @UC)
-!
-!---------------------------------------------------------------------------------------------------------------------------------------------
-! Read next line
-read(1, '(A)')temp
-read(1, *)LE         
-write(nopen1,'(A)') trim(temp)
-write(nopen1,*) LE
-! Invalid input for the LE spline control switch
-! Warn user and stop execution
-if (LE .ne. 0 .and. LE .ne. 1) then
-
-    print *, ''
-    print *, 'FATAL ERROR: Invalid argument for LE spline control switch'
-    print *, 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
-    print *, ''
-    stop
-
-end if
-
-
-
-
-
- 
-!
-! Non-dimensional actual chord control switch
-! Error trap added - 11/21/18 (Mayank Sharma @UC)
-!
-!---------------------------------------------------------------------------------------------------------------------------------------------
-! Read next line
-read(1, '(A)')temp
-read(1, *)chord_switch ! non-dimensional actual chord switch
-write(nopen1,'(A)') trim(temp)
-write(nopen1,*) chord_switch
-! Invalid input for the non-dimensional actual chord switch
-! Warn user and stop execution
-if (chord_switch .ne. 0 .and. chord_switch .ne. 1 .and. chord_switch .ne. 2) then
-
-    print *, ''
-    print *, 'FATAL ERROR: Invalid arguments for non-dimensional actual chord switch'
-    print *, 'Valid arguments are 0, 1 or 2 (refer to T-Blade3 documentation)'
-    print *, ''
-    stop
-
-end if
-
-
-
-
-
-
-!
-! True lean and sweep switch
-! Error trap added - 11/21/18 (Mayank Sharma @UC)
-!
-!---------------------------------------------------------------------------------------------------------------------------------------------
-! Read next line
-read(1, '(A)')temp
-read(1, *)leansweep_switch 
-write(nopen1,'(A)') trim(temp)
-write(nopen1,*) leansweep_switch
-! If there is an invalid input for the true lean and sweep switch
-! Warn user and stop execution
-if (leansweep_switch .eq. 0) then
-    trueleansweep = ''
-else if (leansweep_switch .eq. 1) then
-    trueleansweep = '1'
-else
-    print *, ''
-    print *, 'FATAL ERROR: Invalid argument for leansweep_switch'
-    print *, 'Valid arguments are 0 or 1 (refer to the T-Blade3 documentation)'
-    print *, ''
-    stop
-end if
-
-
-
-
-
-
-!
-! Clustering distribution switch
-! Error trap added - 11/21/18 (Mayank Sharma @UC)
-!
-!---------------------------------------------------------------------------------------------------------------------------------------------
-! Read next line
-read(1, '(A)')temp
-write(nopen1,'(A)') trim(temp)
-read(1, *)clustering_switch, clustering_parameter
-backspace(1)
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-! Invalid input for the clustering distribution switch
-! Warn user and stop execution
-if (clustering_switch .ne. 0 .and. clustering_switch .ne. 1 .and. clustering_switch .ne. 2 .and. &
-    clustering_switch .ne. 3 .and. clustering_switch .ne. 4) then
-
-    print *, ''
-    print *, 'FATAL ERROR: Invalid argument for clustering_switch'
-    print *, 'Valid arguments are 0, 1, 2 or 3 (refer to the T-Blade3 documentation)'
-    print *, ''
-    stop
-
-end if
-
-! Read next lines
-read(1, '(A)')temp
-write(nopen1, '(A)') trim(temp)
-read(1, '(A)')temp
-write(nopen1, '(A)') trim(temp)
-!
-!---- blade file names
-do i = 1, nsl
-    write(ibrowc1, '(i3)')i
-    blext(i) = trim(adjustl(ibrowc1))//'.'//trim(adjustl(ibrowc))//'.'//fext
-enddo
-nspn = nsl
-!print*, '   in_betaZ*    out_betaZ*'
-do js = 1, nspn
-    if (spanwise_angle_spline)then   ! Not reading it here since it is splined spanwise
-        read(1, *, end = 35)tempr, tempr, tempr, &
-        mrel1(js), chord(js), thk_c(js), inci(js), devn(js), sec_flow_ang(js)
-        backspace(1)
-        read(1,'(A)') temp
-        write(nopen1, '(A)') trim(temp)
-    elseif (spanwise_inci_dev_spline) then 
-        !reading inlet & outlet angles from table but not adding incidence and deviation from the table
-        read(1, *, end = 35)tempr, in_beta(js), out_beta(js), mrel1(js), chord(js), thk_c(js), inci(js), devn(js), sec_flow_ang(js)
-        backspace(1)
-        read(1,'(A)') temp
-        write(nopen1, '(A)') trim(temp)
-    else ! Reading the inlet and outlet angles from this table
-        read(1, *, end = 35)tempr, in_beta(js), out_beta(js), mrel1(js), chord(js), thk_c(js), inci(js), devn(js), sec_flow_ang(js)
-        backspace(1)
-        read(1,'(A)') temp
-        write(nopen1, '(A)') trim(temp)
-        !Adding incidence and deviation angles-------------------3/10/11
-        !print*, in_beta(js), out_beta(js)   
+    ! Read blade scaling factor
+    read(1, *)scf, temp
+    write(nopen1,*) scf
+    temp = adjustl(trim(temp))
+    read(temp, *, iostat = er) theta_offset
+    if (er .ne. 0) then
+        theta_offset = 0.
+        rewind(1)
+        do i = 1, 8
+            read(1, *) temp
+        enddo
     endif
-enddo
+    
+    ! Read number of streamlines
+    read(1, '(A)')temp
+    read(1, *)nsl
+    write(nopen1, '(A)') trim(temp)
+    write(nopen1, *) nsl
+    
+    read(1, '(A)')temp
+    write(nopen1, '(A)') trim(temp)
+
+    !
+    ! Input angle switch
+    ! Error trap added -11/21/18 (Mayank Sharma @UC)
+    !
+    !---------------------------------------------------------------------------------------------------------------------------------------------
+    spanwise_angle_spline = .False.
+    spanwise_inci_dev_spline = .False.
+
+    !
+    ! Read the input file angle switch 
+    ! Also read secondary argument for angle spanwise splines if present 
+    !
+    read(1, '(A)') beta_switch_2
+    write(nopen1, '(A)') trim(beta_switch_2)
+
+    !
+    ! All possible valid inputs are stored as logical variables in an array
+    !
+    beta_value  = [index(beta_switch_2, '0') .ne. 0, index(beta_switch_2, '1') .ne. 0, index(beta_switch_2, '2') .ne. 0, &
+                   index(beta_switch_2, '3') .ne. 0, index(beta_switch_2, '4') .ne. 0]
+
+
+    !
+    ! Check for all possible valid inputs of the input angle switch
+    !
+    !
+    ! Case 1 - All AXIAL angles
+    if (beta_value(1) .and. .not. beta_value(2) .and. .not. beta_value(3) .and. .not. beta_value(4) .and. .not. beta_value(5)) then
+        n_temp1 = index(beta_switch_2, '0')
+        read(beta_switch_2(n_temp1:n_temp1 + 1),*,iostat=stat) beta_switch
+
+    ! Case 2 - All RADIAL angles    
+    elseif (.not. beta_value(1) .and. beta_value(2) .and. .not. beta_value(3) .and. .not. beta_value(4) .and. .not. beta_value(5)) then
+        n_temp1 = index(beta_switch_2, '1')
+        read(beta_switch_2(n_temp1:n_temp1 + 1),*,iostat=stat) beta_switch
+
+    ! Case 3 - AXIAL inlet angles and RADIAL outlet angles
+    elseif (.not. beta_value(1) .and. .not. beta_value(2) .and. beta_value(3) .and. .not. beta_value(4) .and. .not. beta_value(5)) then
+        n_temp1 = index(beta_switch_2, '2')
+        read(beta_switch_2(n_temp1:n_temp1 + 1),*,iostat=stat) beta_switch
+
+    ! Case 4 - RADIAL inlet angles and AXIAL outlet angles
+    elseif (.not. beta_value(1) .and. .not. beta_value(2) .and. .not. beta_value(3) .and. beta_value(4) .and. .not. beta_value(5)) then
+        n_temp1 = index(beta_switch_2, '3')
+        read(beta_switch_2(n_temp1:n_temp1 + 1),*,iostat=stat) beta_switch
+
+    ! Case 5 - Wing flag is turned on
+    elseif (.not. beta_value(1) .and. .not. beta_value(2) .and. .not. beta_value(3) .and. .not. beta_value(4) .and. beta_value(5)) then
+        beta_switch = 0
+        wing_flag   = 1
+
+    ! Case 6 - Invalid input for the input angle switch
+    !          Warn user and stop execution
+    elseif (.not. beta_value(1) .and. .not. beta_value(2) .and. .not. beta_value(3) .and. .not. beta_value(4) .and. .not. beta_value(5)) then
+        print *, 'FATAL ERROR: Invalid argument for beta_switch'
+        print *, 'Valid arguments are 0, 1, 2, 3 and 4 (refer to T-Blade3 documentation)'
+        print *, ''
+        stop
+    endif
+
+
+    ! 
+    ! Secondary input file angle switch
+    ! Used to determine which angles to fit spanwise splines through
+    ! Error trap added - 11/21/18 (Mayank Sharma @UC)
+    !
+    !---------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    !
+    ! All possible valid secondary inputs are stored as logical variables in an array
+    !
+    ang_spl_value   = [len(beta_switch_2(:n_temp1)) .eq. len(trim(beta_switch_2)), &
+                       index(beta_switch_2, 'inletspline') .ne. 0, index(beta_switch_2, 'outletspline') .ne. 0, &
+                       index(beta_switch_2, 'inoutspline') .ne. 0, index(beta_switch_2, 'inci_dev_spline') .ne. 0]
+
+
+    call log_file_exists(log_file, nopen, file_open)
+
+    !
+    ! Check for all possible valid inputs of the secondary argument
+    !
+    !
+    ! Case 1 - No splining required
+    if (ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_value(3) .and. .not. ang_spl_value(4) .and.     &
+        .not. ang_spl_value(5)) then
+        read(1,'(A)') temp
+
+    ! Case 2 - spline inlet angles only   
+    elseif (.not. ang_spl_value(1) .and. ang_spl_value(2) .and. .not. ang_spl_value(3) .and. .not. ang_spl_value(4) .and. &
+            .not. ang_spl_value(5)) then
+
+        n_temp2 = index(beta_switch_2, 'inletspline')
+        anglespline = trim(beta_switch_2(n_temp2:))
+        spanwise_angle_spline = .true.
+
+        print *, ''
+        print *, 'Angles defined spanwise as a B-spline using control points'
+        print *, ''
+        print *, trim(anglespline)
+        write(nopen,*) ''
+        write(nopen,*) 'Angles defined spanwise as a B-spline using control points'
+        write(nopen,*) ''
+        write(nopen,*) trim(anglespline)
+        read(1,'(A)') temp
+
+    ! Case 3 -spline outlet angles only
+    elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. ang_spl_value(3) .and. .not. ang_spl_value(4) .and. &
+            .not. ang_spl_value(5)) then
+
+        n_temp2 = index(beta_switch_2, 'outletspline')
+        anglespline = trim(beta_switch_2(n_temp2:))
+        spanwise_angle_spline = .true.
+
+        print *, ''
+        print *, 'Angles defined spanwise as a B-spline using control points'
+        print *, ''
+        print *, trim(anglespline)
+        write(nopen,*) ''
+        write(nopen,*) 'Angles defined spanwise as a B-spline using control points'
+        write(nopen,*) ''
+        write(nopen,*) trim(anglespline)
+        read(1,'(A)') temp
+
+    ! Case 4 - spline inlet and outlet angles
+    elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_value(3) .and. ang_spl_value(4) .and. &
+            .not. ang_spl_value(5)) then
+
+        n_temp2 = index(beta_switch_2, 'inoutspline')
+        anglespline = trim(beta_switch_2(n_temp2:))
+        spanwise_angle_spline = .true.
+
+        print *, ''
+        print *, 'Angles defined spanwise as a B-spline using control points'
+        print *, ''
+        print *, trim(anglespline)
+        write(nopen,*) ''
+        write(nopen,*) 'Angles defined spanwise as a B-spline using control points'
+        write(nopen,*) ''
+        write(nopen,*) trim(anglespline)
+        read(1,'(A)') temp
+
+    ! Case 5 - spline incidence and deviation
+    elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_value(3) .and. .not. ang_spl_value(4) &
+            .and. ang_spl_value(5)) then
+
+        n_temp2 = index(beta_switch_2, 'inci_dev_spline')
+        anglespline = trim(beta_switch_2(n_temp2:))
+        spanwise_inci_dev_spline = .true.
+
+        print *, ''
+        print *, 'Incidence and Deviation defined spanwise as a B-spline using control points'
+        print *, ''
+        print *, trim(anglespline)
+        write(nopen,*) ''
+        write(nopen,*) 'Incidence and Deviation defined spanwise as a B-spline using control points'
+        write(nopen,*) ''
+        write(nopen,*) trim(anglespline)
+        read(1,'(A)') temp
+
+    ! Case 6 - invalid input
+    !          warn user and stop execution
+    elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_value(3) .and. .not. ang_spl_value(4) &
+            .and. .not. ang_spl_value(5)) then
+        print *, ''
+        print *, 'FATAL ERROR: Invalid argument for anglespline'
+        print *, 'anglespline can be left blank (refer to T-Blade3 documentation)'
+        print *, 'Valid arguments are "inletspline", "outletspline", "inoutspline" or "inci_dev_spline"'
+        print *, ''
+        stop
+    end if
+
+    call close_log_file(nopen, file_open)
+    write(nopen1, '(A)') trim(temp)
+
+    ! 
+    ! Curvature control switch
+    ! Error trap added - 11/21/18 (Mayank Sharma @UC)
+    !
+    !---------------------------------------------------------------------------------------------------------------------------------------------
+    read(1,*)curv, spanwise_spline  
+    if (trim(spanwise_spline) .eq. 'spanwise_spline') then
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1, '(A)') trim(temp)
+    else
+        backspace(1)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1, '(A)') trim(temp)
+        read(1,'(A)') temp
+        write(nopen1, '(A)') trim(temp)
+    end if
+
+    ! Invalid input for the camber definition switch
+    ! Warn user and stop execution 
+    if (curv .ne. 0 .and. curv .ne. 1) then
+
+        print *, ''
+        print *, 'FATAL ERROR: Invalid argument for camber definition switch'
+        print *, 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
+        print *, ''
+        stop
+
+    end if
+
+
+    ! Invalid input for curvature control switch
+    ! Warn user and stop execution
+    if (trim(spanwise_spline) .ne. 'spanwise_spline' .and. trim(spanwise_spline) .ne. 'Airfoil') then
+
+        print *, ''
+        print *, 'FATAL ERROR: Invalid argument for camber definition switch'
+        print *, 'Valid argument for using spancontrolinputs is "spanwise_spline" (refer to T-Blade3 documentation)'
+        print *, ''
+        stop
+
+    end if 
+
+    ! Read next line in the input file if spanwise_spline has been specified
+    if (trim(spanwise_spline).eq.'spanwise_spline')then
+        read(1,'(A)')temp
+        write(nopen1,'(A)') trim(temp)
+    endif
 
 
 
-if (.not.spanwise_angle_spline .and. .not.spanwise_inci_dev_spline) then
-   do js = 1, nspn
-      in_beta( js) =  inBetaInci(in_beta(js),               inci(js))
-      out_beta(js) = outBetaDevn(in_beta(js), out_beta(js), devn(js))
-   enddo
-endif
 
-!write(*, *)
-! Reading the LE/TE curve definition---------
-read(1, '(A)')temp
-write(nopen1,'(A)') trim(temp)
-read(1, '(A)')temp
-write(nopen1,'(A)') trim(temp) 
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-read(1, *)npoints
-write(nopen1,*) npoints
-read(1, '(A)')temp
-write(nopen1,'(A)') trim(temp)
-! write(*, *)'LE/TE defined by a curve with no. of points as:', npoints
-! write(*, *)'xLE    rLE     xTE     rTE'
-do i = 1, npoints
-    read(1, *)xle(i), rle(i), xte(i), rte(i)
+
+
+
+    ! 
+    ! Thickness distribution switch
+    ! Error trap added - 11/21/18 (Mayank Sharma @UC)
+    !
+    !---------------------------------------------------------------------------------------------------------------------------------------------
+    read(1, *)thick_distr, temp2
+    backspace(1)
+    read(1,'(A)') temp
+    write(nopen1, *) thick_distr
+    write(nopen1,'(A)') trim(temp)
+    ! Invalid input for the thickness distribution switch
+    ! Warn user and stop execution
+    if (thick_distr .ne. 0 .and. thick_distr .ne. 1 .and. thick_distr .ne. 2 .and. thick_distr .ne. 3 .and. &
+        thick_distr .ne. 4 .and. thick_distr .ne. 5) then
+
+        print *, ''
+        print *, 'FATAL ERROR: Invalid argument for thickness distribution switch'
+        print *, 'Valid arguments are 0, 1, 2, 3, 4 or 5 (refer to T-Blade3 documentation)'
+        print *, ''
+        stop
+
+    end if
+
+    ! Read next line in the input file
+    if (len(trim(adjustl(temp2))) .eq. 3) then
+        thick_distr_3_flag = trim(adjustl(temp2))
+        read(1, *)temp
+    endif
+
+
+
+
+
+
+    !
+    ! Thickness multiplier switch
+    ! Error trap added - 11/21/18 (Mayank Sharma @UC)
+    !
+    !---------------------------------------------------------------------------------------------------------------------------------------------
+    read(1, *)thick       
+    write(nopen1,*) thick
+    ! Invalid input for the thickness multiplier switch
+    ! Warn user and stop execution
+    if (thick .ne. 0 .and. thick .ne. 1) then
+
+        print *, ''
+        print *, 'FATAL ERROR: Invalid argument for thickness multiplier switch'
+        print *, 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
+        print *, ''
+        stop
+
+    end if
+
+
+
+
+
+
+    !
+    ! LE spline control switch
+    ! Error trap added - 11/21/18 (Mayank Sharma @UC)
+    !
+    !---------------------------------------------------------------------------------------------------------------------------------------------
+    ! Read next line
+    read(1, '(A)')temp
+    read(1, *)LE         
+    write(nopen1,'(A)') trim(temp)
+    write(nopen1,*) LE
+    ! Invalid input for the LE spline control switch
+    ! Warn user and stop execution
+    if (LE .ne. 0 .and. LE .ne. 1) then
+
+        print *, ''
+        print *, 'FATAL ERROR: Invalid argument for LE spline control switch'
+        print *, 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
+        print *, ''
+        stop
+
+    end if
+
+
+
+
+
+     
+    !
+    ! Non-dimensional actual chord control switch
+    ! Error trap added - 11/21/18 (Mayank Sharma @UC)
+    !
+    !---------------------------------------------------------------------------------------------------------------------------------------------
+    ! Read next line
+    read(1, '(A)')temp
+    read(1, *)chord_switch ! non-dimensional actual chord switch
+    write(nopen1,'(A)') trim(temp)
+    write(nopen1,*) chord_switch
+    ! Invalid input for the non-dimensional actual chord switch
+    ! Warn user and stop execution
+    if (chord_switch .ne. 0 .and. chord_switch .ne. 1 .and. chord_switch .ne. 2) then
+
+        print *, ''
+        print *, 'FATAL ERROR: Invalid arguments for non-dimensional actual chord switch'
+        print *, 'Valid arguments are 0, 1 or 2 (refer to T-Blade3 documentation)'
+        print *, ''
+        stop
+
+    end if
+
+
+
+
+
+
+    !
+    ! True lean and sweep switch
+    ! Error trap added - 11/21/18 (Mayank Sharma @UC)
+    !
+    !---------------------------------------------------------------------------------------------------------------------------------------------
+    ! Read next line
+    read(1, '(A)')temp
+    read(1, *)leansweep_switch 
+    write(nopen1,'(A)') trim(temp)
+    write(nopen1,*) leansweep_switch
+    ! If there is an invalid input for the true lean and sweep switch
+    ! Warn user and stop execution
+    if (leansweep_switch .eq. 0) then
+        trueleansweep = ''
+    else if (leansweep_switch .eq. 1) then
+        trueleansweep = '1'
+    else
+        print *, ''
+        print *, 'FATAL ERROR: Invalid argument for leansweep_switch'
+        print *, 'Valid arguments are 0 or 1 (refer to the T-Blade3 documentation)'
+        print *, ''
+        stop
+    end if
+
+
+
+
+
+
+    !
+    ! Clustering distribution switch
+    ! Error trap added - 11/21/18 (Mayank Sharma @UC)
+    !
+    !---------------------------------------------------------------------------------------------------------------------------------------------
+    ! Read next line
+    read(1, '(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    read(1, *)clustering_switch, clustering_parameter
     backspace(1)
     read(1,'(A)') temp
     write(nopen1,'(A)') trim(temp)
-enddo
-read(1,'(A)')temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)')temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)')temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)')temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)')temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)')temp
-write(nopen1,'(A)') trim(temp)
-read(1,*)stack_switch
-write(nopen1,*) stack_switch
-read(1,'(A)')temp
-write(nopen1,'(A)') trim(temp)
-if (allocated(umxthk_all)) deallocate(umxthk_all)
-Allocate(umxthk_all(nsl))
-if (LE.ne.0) then
+    ! Invalid input for the clustering distribution switch
+    ! Warn user and stop execution
+    if (clustering_switch .ne. 0 .and. clustering_switch .ne. 1 .and. clustering_switch .ne. 2 .and. &
+        clustering_switch .ne. 3 .and. clustering_switch .ne. 4) then
+
+        print *, ''
+        print *, 'FATAL ERROR: Invalid argument for clustering_switch'
+        print *, 'Valid arguments are 0, 1, 2 or 3 (refer to the T-Blade3 documentation)'
+        print *, ''
+        stop
+
+    end if
+
+    ! Read next lines
+    read(1, '(A)')temp
+    write(nopen1, '(A)') trim(temp)
+    read(1, '(A)')temp
+    write(nopen1, '(A)') trim(temp)
+    !
+    !---- blade file names
+    do i = 1, nsl
+        write(ibrowc1, '(i3)')i
+        blext(i) = trim(adjustl(ibrowc1))//'.'//trim(adjustl(ibrowc))//'.'//fext
+    enddo
+    nspn = nsl
+    !print*, '   in_betaZ*    out_betaZ*'
     do js = 1, nspn
-        read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), tempr, tempr,  &
-                  jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
-        backspace(1)
-        read(1,'(A)') temp
-        write(nopen1,'(A)') trim(temp)
-        !print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
-    enddo
-elseif (LE == 0) then
-        if (allocated(lethk_all)) deallocate(lethk_all)
-        if (allocated(tethk_all)) deallocate(tethk_all)
-    Allocate(lethk_all(nsl))
-    Allocate(tethk_all(nsl))
-    do js = 1, nspn
-        read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), &
-                  tethk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
-        backspace(1)
-        read(1,'(A)') temp
-        write(nopen1,'(A)') trim(temp)
-        ! print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), tethk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
-    enddo
-endif
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)')temp
-write(nopen1,'(A)') trim(temp)
-read(1, *)cpbsv, bsv1, bsv2
-backspace(1)
-read(1,'(A)') temp
-write(nopen1,*) trim(temp)
-read(1,'(A)')temp
-write(nopen1,'(A)') trim(temp)
-do i = 1, cpbsv
-    read(1, *)spanbsv(i), bf1(i), bf2(i)
-    backspace(1)
-    read(1,'(A)') temp
-    write(nopen1,'(A)') trim(temp)
-enddo
-
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-read(1, *)stack! Reading the stacking value
-write(nopen1,*) stack
-
-
-
-!
-! Read sweep spline control points and call ESP override subroutine 
-!
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)')temp 
-write(nopen1,'(A)') trim(temp)
-read(temp(12:12), *)cpdeltam
-if(trim(trueleansweep).ne.'')then
-    chrdsweep = 1
-    read(1,'(A)')temp
-    write(nopen1,'(A)') trim(temp)
-    do i = 1, cpdeltam
-        read(1, *)spanmp(i), xcpdelm(i)
-        backspace(1)
-        read(1,'(A)') temp
-        write(nopen1,'(A)') trim(temp)
-    enddo
-else
-    read(1,'(A)')temp
-    write(nopen1,'(A)') trim(temp)
-    do i = 1, cpdeltam
-        read(1, *)spanmp(i), xcpdelm(i)
-        backspace(1)
-        read(1,'(A)') temp
-        write(nopen1,'(A)') trim(temp)
-    enddo
-endif
-
-if (allocated(temp_in)) deallocate(temp_in)
-allocate(temp_in(cpdeltam))
-temp_in = spanmp(1:cpdeltam)
-call override_span_del_m_ctrl(cpdeltam, temp_in)
-spanmp(1:cpdeltam) = temp_in
-
-if (allocated(temp_in)) deallocate(temp_in)
-allocate(temp_in(cpdeltam))
-temp_in = xcpdelm(1:cpdeltam)
-call override_span_del_m(cpdeltam, temp_in)
-xcpdelm(1:cpdeltam) = temp_in
-
-
-
-!
-! Read lean spline control points and call ESP override subroutine
-!
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)')temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)')temp 
-write(nopen1,'(A)') trim(temp)
-read(temp(12:12), *)cpdeltheta
-if(trim(trueleansweep).ne.'')then
-    chrdlean = 1
-    read(1,'(A)')temp
-    write(nopen1,'(A)') trim(temp)
-    do i = 1, cpdeltheta
-        read(1, *)spantheta(i), xcpdeltheta(i)
-        backspace(1)
-        read(1,'(A)') temp
-        write(nopen1,'(A)') trim(temp)
-    enddo
-else
-    read(1,'(A)')temp
-    write(nopen1,'(A)') trim(temp)
-    do i = 1, cpdeltheta
-        read(1, *)spantheta(i), xcpdeltheta(i)
-        backspace(1)
-        read(1,'(A)') temp
-        write(nopen1,'(A)') trim(temp)
-    enddo
-endif
-
-if (allocated(temp_in)) deallocate(temp_in)
-allocate(temp_in(cpdeltheta))
-temp_in = spantheta(1:cpdeltheta)
-call override_span_del_theta_ctrl(cpdeltheta, temp_in)
-spantheta(1:cpdeltheta) = temp_in
- 
-if (allocated(temp_in)) deallocate(temp_in)
-allocate(temp_in(cpdeltheta))
-temp_in = xcpdeltheta(1:cpdeltheta) 
-call override_span_del_theta(cpdeltheta, temp_in)
-xcpdeltheta(1:cpdeltheta) = temp_in
-
-
-
-!
-! Read inBeta* spline control points and call ESP override subroutine
-! inBeta* can be used to spline either inlet flow angle or incidence
-!
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)')temp
-write(nopen1,'(A)') trim(temp)
-read(1, *)cpinbeta 
-write(nopen1,*) cpinbeta
-read(1,'(A)')temp
-write(nopen1,'(A)') trim(temp)
-do i = 1, cpinbeta
-    read(1, *)spaninbeta(i), xcpinbeta(i)
-    backspace(1)
-    read(1,'(A)') temp
-    write(nopen1,'(A)') trim(temp)
-enddo
-
-if (allocated(temp_in)) deallocate(temp_in)
-allocate(temp_in(cpinbeta))
-temp_in = spaninbeta(1:cpinbeta)
-call override_span_in_beta_ctrl(cpinbeta, temp_in)
-spaninbeta(1:cpinbeta) = temp_in
-
-if (allocated(temp_in)) deallocate(temp_in)
-allocate(temp_in(cpinbeta))
-temp_in = xcpinbeta(1:cpinbeta)
-call override_span_in_beta(cpinbeta, temp_in)
-xcpinbeta(1:cpinbeta) = temp_in
-
-
-
-!
-! Read outBeta* spline control points and call ESP override subroutine
-! outBeta* can be used to spline either exit flow angle or deviation
-!
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-read(1, *)cpoutbeta
-write(nopen1,*) cpoutbeta
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-do i = 1, cpoutbeta
-    read(1, *)spanoutbeta(i), xcpoutbeta(i)
-    backspace(1)
-    read(1,'(A)') temp
-    write(nopen1,'(A)') trim(temp)
-enddo
-
-if (allocated(temp_in)) deallocate(temp_in)
-allocate(temp_in(cpoutbeta))
-temp_in = spanoutbeta(1:cpoutbeta)
-call override_span_out_beta_ctrl(cpoutbeta, temp_in)
-spanoutbeta(1:cpoutbeta) = temp_in
-
-if (allocated(temp_in)) deallocate(temp_in)
-allocate(temp_in(cpoutbeta))
-temp_in = xcpoutbeta(1:cpoutbeta)
-call override_span_out_beta(cpoutbeta, temp_in)
-xcpoutbeta(1:cpoutbeta) = temp_in
-
-
-
-!
-! Read chord multiplier spline control points and call ESP override subroutine
-! TODO: chord_multiplier > 1?
-!
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-read(1, *)cpchord
-write(nopen1,*) cpchord
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-do i = 1, cpchord
-    read(1, *)spanchord(i), xcpchord(i)
-    backspace(1)
-    read(1,'(A)') temp
-    write(nopen1,'(A)') trim(temp)
-    xcpchord(i) = xcpchord(i) + 1.0
-enddo
-
-if (allocated(temp_in)) deallocate(temp_in)
-allocate(temp_in(cpchord))
-temp_in = spanchord(1:cpchord)
-call override_span_chord_ctrl(cpchord, temp_in)
-spanchord(1:cpchord) = temp_in
-
-if (allocated(temp_in)) deallocate(temp_in)
-allocate(temp_in(cpchord))
-temp_in = xcpchord(1:cpchord)
-call override_span_chord(cpchord, temp_in)
-do i = 1,cpchord
-    equal = (abs(xcpchord(i) - temp_in(i)) .le. tol)
-    if (.not. equal) exit
-end do
-if (.not. equal) then
-    xcpchord(1:cpchord) = temp_in + 1
-else
-    xcpchord(1:cpchord) = temp_in
-end if
-
-
-
-! 
-! Read tm/c spline control points and call ESP override subroutine
-! TODO: tm/c > 1?
-!
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)')temp
-write(nopen1,'(A)') trim(temp)
-read(1, *)cptm_c ! control points for tm/c
-write(nopen1,*) cptm_c
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-
-!next line to always use the thickness tm/c as it is a multiplier (default = 1):
-if ((thick_distr .ne. 0) .and. .not. is2d) then
-    tm_c_spline = .True.
-else
-    tm_c_spline = .False.
-endif    
-
-do i = 1, cptm_c
-    read(1, *)spantm_c(i), xcptm_c(i)
-    backspace(1)
-    read(1,'(A)') temp
-    write(nopen1,'(A)') trim(temp)
-    xcptm_c(i) = xcptm_c(i) + 1.0
-enddo
-
-if (allocated(temp_in)) deallocate(temp_in)
-allocate(temp_in(cptm_c))
-temp_in = spantm_c(1:cptm_c)
-call override_span_thk_c_ctrl(cptm_c, temp_in)
-spantm_c(1:cptm_c) = temp_in
-
-if(allocated(temp_in)) deallocate(temp_in)
-allocate(temp_in(cptm_c))
-temp_in = xcptm_c(1:cptm_c)
-call override_span_thk_c(cptm_c, temp_in)
-do i = 1,cptm_c
-    equal = (abs(xcptm_c(i) - temp_in(i)) .le. tol)
-    if (.not. equal) exit
-end do
-if (.not. equal) then
-    xcptm_c(1:cptm_c) = temp_in + 1
-else
-    xcptm_c(1:cptm_c) = temp_in
-end if
-
-
-
-! 
-! Read hub and tip offsets and call ESP override subroutine
-! TODO: Negative hub offset?
-!
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)') temp 
-write(nopen1,'(A)') trim(temp)
-read(1, *)hub
-write(nopen1,*) hub
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-read(1, *)tip
-write(nopen1,*) tip
-
-temp_offsets(1) = hub
-temp_offsets(2) = tip
-call override_offsets(temp_offsets)
-hub = temp_offsets(1)
-tip = temp_offsets(2)
-
-
-
-!
-! Read streamline data from input file
-!
-read(1,'(A)') temp
-write(nopen1,'(A)') trim(temp)
-read(1,'(A)')temp
-write(nopen1,'(A)') trim(temp)
-do while(temp.ne.'x_s')
-    read(1, *)temp
-    backspace(1)
-    read(1,'(A)') temp1
-    write(nopen1,'(A)') trim(temp1)
-enddo
-
-!
-! Calculating m prime coordinates
-! Using x, r coordinates as the input for streamlines
-!
-do ia = 1, nsl
-    nsp(ia) = 0
-    do while(.true.)
-        read(1, *)trarray(1), trarray(2)
-        backspace(1)
-        read(1,'(A)') temp
-        write(nopen1,'(A)') trim(temp)
-        !print*, trarray(1), trarray(2)
-        if(trarray(2).ne.0)then
-            nsp(ia) = nsp(ia) + 1
-            xm(nsp(ia), ia) = trarray(1)
-            rm(nsp(ia), ia) = trarray(2)
-            !print*, ia, nsl
-            ! print*, xm(nsp(ia), ia), rm(nsp(ia), ia)
-            else
-            exit
+        if (spanwise_angle_spline)then   ! Not reading it here since it is splined spanwise
+            read(1, *, end = 35)tempr, tempr, tempr, &
+            mrel1(js), chord(js), thk_c(js), inci(js), devn(js), sec_flow_ang(js)
+            backspace(1)
+            read(1,'(A)') temp
+            write(nopen1, '(A)') trim(temp)
+        elseif (spanwise_inci_dev_spline) then 
+            !reading inlet & outlet angles from table but not adding incidence and deviation from the table
+            read(1, *, end = 35)tempr, in_beta(js), out_beta(js), mrel1(js), chord(js), thk_c(js), inci(js), devn(js), sec_flow_ang(js)
+            backspace(1)
+            read(1,'(A)') temp
+            write(nopen1, '(A)') trim(temp)
+        else ! Reading the inlet and outlet angles from this table
+            read(1, *, end = 35)tempr, in_beta(js), out_beta(js), mrel1(js), chord(js), thk_c(js), inci(js), devn(js), sec_flow_ang(js)
+            backspace(1)
+            read(1,'(A)') temp
+            write(nopen1, '(A)') trim(temp)
+            !Adding incidence and deviation angles-------------------3/10/11
+            !print*, in_beta(js), out_beta(js)   
         endif
     enddo
-enddo
 
 
 
-! Close input file
-35 close(1)
-call close_maininput_log_file(nopen1, file_open_1)
-return
+    if (.not.spanwise_angle_spline .and. .not.spanwise_inci_dev_spline) then
+       do js = 1, nspn
+          in_beta( js) =  inBetaInci(in_beta(js),               inci(js))
+          out_beta(js) = outBetaDevn(in_beta(js), out_beta(js), devn(js))
+       enddo
+    endif
+
+    !write(*, *)
+    ! Reading the LE/TE curve definition---------
+    read(1, '(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    read(1, '(A)')temp
+    write(nopen1,'(A)') trim(temp) 
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read(1, *)npoints
+    write(nopen1,*) npoints
+    read(1, '(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    ! write(*, *)'LE/TE defined by a curve with no. of points as:', npoints
+    ! write(*, *)'xLE    rLE     xTE     rTE'
+    do i = 1, npoints
+        read(1, *)xle(i), rle(i), xte(i), rte(i)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
+    enddo
+    read(1,'(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,*)stack_switch
+    write(nopen1,*) stack_switch
+    read(1,'(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    if (allocated(umxthk_all)) deallocate(umxthk_all)
+    Allocate(umxthk_all(nsl))
+    if (LE.ne.0) then
+        do js = 1, nspn
+            read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), tempr, tempr,  &
+                      jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+            backspace(1)
+            read(1,'(A)') temp
+            write(nopen1,'(A)') trim(temp)
+            !print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+        enddo
+    elseif (LE == 0) then
+            if (allocated(lethk_all)) deallocate(lethk_all)
+            if (allocated(tethk_all)) deallocate(tethk_all)
+        Allocate(lethk_all(nsl))
+        Allocate(tethk_all(nsl))
+        do js = 1, nspn
+            read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), &
+                      tethk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+            backspace(1)
+            read(1,'(A)') temp
+            write(nopen1,'(A)') trim(temp)
+            ! print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), tethk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+        enddo
+    endif
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    read(1, *)cpbsv, bsv1, bsv2
+    backspace(1)
+    read(1,'(A)') temp
+    write(nopen1,*) trim(temp)
+    read(1,'(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    do i = 1, cpbsv
+        read(1, *)spanbsv(i), bf1(i), bf2(i)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
+    enddo
+
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read(1, *)stack! Reading the stacking value
+    write(nopen1,*) stack
+
+
+
+    !
+    ! Read sweep spline control points and call ESP override subroutine 
+    !
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)')temp 
+    write(nopen1,'(A)') trim(temp)
+    read(temp(12:12), *)cpdeltam
+    if(trim(trueleansweep).ne.'')then
+        chrdsweep = 1
+        read(1,'(A)')temp
+        write(nopen1,'(A)') trim(temp)
+        do i = 1, cpdeltam
+            read(1, *)spanmp(i), xcpdelm(i)
+            backspace(1)
+            read(1,'(A)') temp
+            write(nopen1,'(A)') trim(temp)
+        enddo
+    else
+        read(1,'(A)')temp
+        write(nopen1,'(A)') trim(temp)
+        do i = 1, cpdeltam
+            read(1, *)spanmp(i), xcpdelm(i)
+            backspace(1)
+            read(1,'(A)') temp
+            write(nopen1,'(A)') trim(temp)
+        enddo
+    endif
+
+    if (allocated(temp_in)) deallocate(temp_in)
+    allocate(temp_in(cpdeltam))
+    temp_in = spanmp(1:cpdeltam)
+    call override_span_del_m_ctrl(cpdeltam, temp_in)
+    spanmp(1:cpdeltam) = temp_in
+
+    if (allocated(temp_in)) deallocate(temp_in)
+    allocate(temp_in(cpdeltam))
+    temp_in = xcpdelm(1:cpdeltam)
+    call override_span_del_m(cpdeltam, temp_in)
+    xcpdelm(1:cpdeltam) = temp_in
+
+
+
+    !
+    ! Read lean spline control points and call ESP override subroutine
+    !
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)')temp 
+    write(nopen1,'(A)') trim(temp)
+    read(temp(12:12), *)cpdeltheta
+    if(trim(trueleansweep).ne.'')then
+        chrdlean = 1
+        read(1,'(A)')temp
+        write(nopen1,'(A)') trim(temp)
+        do i = 1, cpdeltheta
+            read(1, *)spantheta(i), xcpdeltheta(i)
+            backspace(1)
+            read(1,'(A)') temp
+            write(nopen1,'(A)') trim(temp)
+        enddo
+    else
+        read(1,'(A)')temp
+        write(nopen1,'(A)') trim(temp)
+        do i = 1, cpdeltheta
+            read(1, *)spantheta(i), xcpdeltheta(i)
+            backspace(1)
+            read(1,'(A)') temp
+            write(nopen1,'(A)') trim(temp)
+        enddo
+    endif
+
+    if (allocated(temp_in)) deallocate(temp_in)
+    allocate(temp_in(cpdeltheta))
+    temp_in = spantheta(1:cpdeltheta)
+    call override_span_del_theta_ctrl(cpdeltheta, temp_in)
+    spantheta(1:cpdeltheta) = temp_in
+     
+    if (allocated(temp_in)) deallocate(temp_in)
+    allocate(temp_in(cpdeltheta))
+    temp_in = xcpdeltheta(1:cpdeltheta) 
+    call override_span_del_theta(cpdeltheta, temp_in)
+    xcpdeltheta(1:cpdeltheta) = temp_in
+
+
+
+    !
+    ! Read inBeta* spline control points and call ESP override subroutine
+    ! inBeta* can be used to spline either inlet flow angle or incidence
+    !
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    read(1, *)cpinbeta 
+    write(nopen1,*) cpinbeta
+    read(1,'(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    do i = 1, cpinbeta
+        read(1, *)spaninbeta(i), xcpinbeta(i)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
+    enddo
+
+    if (allocated(temp_in)) deallocate(temp_in)
+    allocate(temp_in(cpinbeta))
+    temp_in = spaninbeta(1:cpinbeta)
+    call override_span_in_beta_ctrl(cpinbeta, temp_in)
+    spaninbeta(1:cpinbeta) = temp_in
+
+    if (allocated(temp_in)) deallocate(temp_in)
+    allocate(temp_in(cpinbeta))
+    temp_in = xcpinbeta(1:cpinbeta)
+    call override_span_in_beta(cpinbeta, temp_in)
+    xcpinbeta(1:cpinbeta) = temp_in
+
+
+
+    !
+    ! Read outBeta* spline control points and call ESP override subroutine
+    ! outBeta* can be used to spline either exit flow angle or deviation
+    !
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read(1, *)cpoutbeta
+    write(nopen1,*) cpoutbeta
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    do i = 1, cpoutbeta
+        read(1, *)spanoutbeta(i), xcpoutbeta(i)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
+    enddo
+
+    if (allocated(temp_in)) deallocate(temp_in)
+    allocate(temp_in(cpoutbeta))
+    temp_in = spanoutbeta(1:cpoutbeta)
+    call override_span_out_beta_ctrl(cpoutbeta, temp_in)
+    spanoutbeta(1:cpoutbeta) = temp_in
+
+    if (allocated(temp_in)) deallocate(temp_in)
+    allocate(temp_in(cpoutbeta))
+    temp_in = xcpoutbeta(1:cpoutbeta)
+    call override_span_out_beta(cpoutbeta, temp_in)
+    xcpoutbeta(1:cpoutbeta) = temp_in
+
+
+
+    !
+    ! Read chord multiplier spline control points and call ESP override subroutine
+    ! TODO: chord_multiplier > 1?
+    !
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read(1, *)cpchord
+    write(nopen1,*) cpchord
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    do i = 1, cpchord
+        read(1, *)spanchord(i), xcpchord(i)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
+        xcpchord(i) = xcpchord(i) + 1.0
+    enddo
+
+    if (allocated(temp_in)) deallocate(temp_in)
+    allocate(temp_in(cpchord))
+    temp_in = spanchord(1:cpchord)
+    call override_span_chord_ctrl(cpchord, temp_in)
+    spanchord(1:cpchord) = temp_in
+
+    if (allocated(temp_in)) deallocate(temp_in)
+    allocate(temp_in(cpchord))
+    temp_in = xcpchord(1:cpchord)
+    call override_span_chord(cpchord, temp_in)
+    do i = 1,cpchord
+        equal = (abs(xcpchord(i) - temp_in(i)) .le. tol)
+        if (.not. equal) exit
+    end do
+    if (.not. equal) then
+        xcpchord(1:cpchord) = temp_in + 1
+    else
+        xcpchord(1:cpchord) = temp_in
+    end if
+
+
+
+    ! 
+    ! Read tm/c spline control points and call ESP override subroutine
+    ! TODO: tm/c > 1?
+    !
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    read(1, *)cptm_c ! control points for tm/c
+    write(nopen1,*) cptm_c
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+
+    !next line to always use the thickness tm/c as it is a multiplier (default = 1):
+    if ((thick_distr .ne. 0) .and. .not. is2d) then
+        tm_c_spline = .True.
+    else
+        tm_c_spline = .False.
+    endif    
+
+    do i = 1, cptm_c
+        read(1, *)spantm_c(i), xcptm_c(i)
+        backspace(1)
+        read(1,'(A)') temp
+        write(nopen1,'(A)') trim(temp)
+        xcptm_c(i) = xcptm_c(i) + 1.0
+    enddo
+
+    if (allocated(temp_in)) deallocate(temp_in)
+    allocate(temp_in(cptm_c))
+    temp_in = spantm_c(1:cptm_c)
+    call override_span_thk_c_ctrl(cptm_c, temp_in)
+    spantm_c(1:cptm_c) = temp_in
+
+    if(allocated(temp_in)) deallocate(temp_in)
+    allocate(temp_in(cptm_c))
+    temp_in = xcptm_c(1:cptm_c)
+    call override_span_thk_c(cptm_c, temp_in)
+    do i = 1,cptm_c
+        equal = (abs(xcptm_c(i) - temp_in(i)) .le. tol)
+        if (.not. equal) exit
+    end do
+    if (.not. equal) then
+        xcptm_c(1:cptm_c) = temp_in + 1
+    else
+        xcptm_c(1:cptm_c) = temp_in
+    end if
+
+
+
+    ! 
+    ! Read hub and tip offsets and call ESP override subroutine
+    ! TODO: Negative hub offset?
+    !
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)') temp 
+    write(nopen1,'(A)') trim(temp)
+    read(1, *)hub
+    write(nopen1,*) hub
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read(1, *)tip
+    write(nopen1,*) tip
+
+    temp_offsets(1) = hub
+    temp_offsets(2) = tip
+    call override_offsets(temp_offsets)
+    hub = temp_offsets(1)
+    tip = temp_offsets(2)
+
+
+
+    !
+    ! Read streamline data from input file
+    !
+    read(1,'(A)') temp
+    write(nopen1,'(A)') trim(temp)
+    read(1,'(A)')temp
+    write(nopen1,'(A)') trim(temp)
+    do while(temp.ne.'x_s')
+        read(1, *)temp
+        backspace(1)
+        read(1,'(A)') temp1
+        write(nopen1,'(A)') trim(temp1)
+    enddo
+
+    !
+    ! Calculating m prime coordinates
+    ! Using x, r coordinates as the input for streamlines
+    !
+    do ia = 1, nsl
+        nsp(ia) = 0
+        do while(.true.)
+            read(1, *)trarray(1), trarray(2)
+            backspace(1)
+            read(1,'(A)') temp
+            write(nopen1,'(A)') trim(temp)
+            !print*, trarray(1), trarray(2)
+            if(trarray(2).ne.0)then
+                nsp(ia) = nsp(ia) + 1
+                xm(nsp(ia), ia) = trarray(1)
+                rm(nsp(ia), ia) = trarray(2)
+                !print*, ia, nsl
+                ! print*, xm(nsp(ia), ia), rm(nsp(ia), ia)
+                else
+                exit
+            endif
+        enddo
+    enddo
+
+
+
+    ! Close input file
+    35 close(1)
+    call close_maininput_log_file(nopen1, file_open_1)
+    return
 
 
 end subroutine readinput
-!**********************************************************************************
-!**********************************************************************************
-
+!------------------------------------------------------------------------------------------------------------
 
 
 !**********************************************************************************
