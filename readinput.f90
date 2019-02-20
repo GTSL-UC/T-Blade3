@@ -1179,7 +1179,7 @@ subroutine readcontrolinput(row_type, path)
     character(*),                   intent(in)      :: path
     
     ! Local variables
-    character(256)                                  :: temp, fname4, fname5, row_type
+    character(256)                                  :: temp, fname4, fname5
     character(:),   allocatable                     :: log_file
     integer                                         :: phantom_n, nopen, nopen1
     logical                                         :: file_open, file_open_1
@@ -1256,9 +1256,9 @@ subroutine readcontrolinput(row_type, path)
         ! Accommodate for fixed control points
         ncp_curv(i) = ncp_curv(i) + 2
         if (allocated(xcp)) deallocate(xcp)
-        allocate(xcp(ncp_curv(i))
+        allocate(xcp(ncp_curv(i)))
         if (allocated(ycp)) deallocate(ycp)
-        allocate(ycp(ncp_curv(i))
+        allocate(ycp(ncp_curv(i)))
 
         ! Update counter
         current = i 
@@ -2074,7 +2074,7 @@ subroutine read_spanwise_input(row_type, path)
             
             ! Allocate 1D thickness control points arrays
             if (allocated(xcp)) deallocate(xcp)
-            allocate(xcp(ncp_thk(i))
+            allocate(xcp(ncp_thk(i)))
             if (allocated(ycp)) deallocate(ycp)
             allocate(ycp(ncp_thk(i)))
             
