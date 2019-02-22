@@ -113,8 +113,7 @@ do j = 1, nspan
   if (xint.ge.xmin.and.xint.le.xmax)then
      yout(j) = xint
   elseif(xint.eq.0.)then
-     print*," Curve-Line Intersection error."
-     print*," Intersection point was not found"
+     print*," FATAL ERROR: Curve-line intersection point was not found"
      print*,"xint: ",xint
      STOP
   endif

@@ -368,12 +368,12 @@ endif
 
 
 if( ixrow .NE. xrhs-1 ) then
-	WRITE(*, *) "Programming error ixrow .NE. xrhs-1 in splinethick.f90"
+	WRITE(*, *) "FATAL ERROR: ixrow not equal to xrhs-1 in splinethick.f90"
 	STOP
 endif
 
 if( iyrow .NE. yrhs-1 ) then
-	WRITE(*, *) "Programming error iyrow .NE. yrhs-1 in splinethick.f90"
+	WRITE(*, *) "FATAL ERROR: iyrow not equal to yrhs-1 in splinethick.f90"
 	STOP
 endif
 
@@ -403,14 +403,14 @@ endif
 
 call gauss_jordan( xrhs-1, 1, Ax, info )
 if(info.ne.0)then
-	print*, 'Singular Matrix encountered in solving the thickness distribution'
+	print*, 'FATAL ERROR: singular matrix encountered in solving the thickness distribution'
 	STOP
 endif
 !print*, "x info ", info, Ax(ile_ee, xrhs), Ax(ite_ee, xrhs)
 
 call gauss_jordan( yrhs-1, 1, Ay, info )
 if(info.ne.0)then
-	print*, 'Singular Matrix encountered in solving the thickness distribution'
+	print*, 'FATAL ERROT: singular matrix encountered in solving the thickness distribution'
 	STOP
 endif
 

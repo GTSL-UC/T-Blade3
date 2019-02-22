@@ -183,7 +183,7 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
 	! Refined finite difference:----------------------------------------
 		h = (xtop(dimen) - xtop(1))/interval
 		if (abs((h)-(xtop(2)-xtop(1)))>1e-05) then
-			print*,'error calculating h in LE spline top...'
+			print*,'FATAL ERROR: h in LE spline top not calculated'
 			stop
 		endif
 		!print*,'h top',h
@@ -214,7 +214,7 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
 	! Refined finite difference:----------------------------------------
 		h = (xbot(dimen) - xbot(1))/interval
 		if (abs((h)-(xbot(2)-xbot(1)))>1e-05) then
-			print*,'error calculating h in spline LE bot ...'
+			print*,'FATAL ERROR: h in spline LE bot not calculated'
 			stop
 		endif
 		!print*,'h bot',h
@@ -278,12 +278,12 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
 	
 	! error trap for top:
 	if ((sum_alpha_top_a < sum_alpha_top_c).or.(sum_alpha_top_c > sum_alpha_top_b)) then
-		print*, 'Warning, [a,c,b] interval does not bracket a min, look in lespline subroutine'
+		print*, 'WARNING: [a,c,b] interval does not bracket a min, look in lespline subroutine'
 	endif
 	
 	! error trap for bot:
 	if ((sum_alpha_bot_a < sum_alpha_bot_c).or.(sum_alpha_bot_c > sum_alpha_bot_b)) then
-		print*, 'Warning, [a,c,b] interval does not bracket a min, look in lespline subroutine'
+		print*, 'WARNING: [a,c,b] interval does not bracket a min, look in lespline subroutine'
 	endif
 	
 	!for top
@@ -1007,7 +1007,7 @@ subroutine le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,C_le_y
 	 a(10,14:15) 	= (/ -1.,    1./) 		; a(10,19) 	=  -LE_extens*sin(LE_vertex_ang_rad/2.)
 
 	 else
-		print*,'Error in choosing the bspline degree or number of segments ...'
+		print*,'FATAL ERROR: bspline degree or number of segments not chosen'
 		stop
 	endif
 
@@ -1020,7 +1020,7 @@ subroutine le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,C_le_y
      call gauss_jordan ( 2*(degree+no_LE_segments), 1, a, info )
 	 ! print*, "info==0 == ", info
 	 if (info.ne.0) then 
-		print*,'LE spline Singular Matrix ...'
+		print*,'FATAL ERROR: LE spline Singular Matrix'
 		stop
 	 endif
 

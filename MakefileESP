@@ -27,6 +27,7 @@ endif
 VPATH = $(ODIR)
 
 OBJS  =	$(ODIR)/globvar.o \
+    $(ODIR)/file_operations.o\
 	$(ODIR)/spline.o \
 	$(ODIR)/readinput.o \
 	$(ODIR)/funcNsubs.o \
@@ -68,6 +69,8 @@ $(LDIR)/libTBlade3.a:	$(OBJS)
 
 $(ODIR)/globvar.o:	globvar.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) globvar.f90            -o $(ODIR)/globvar.o
+$(ODIR)/file_operations.o:	file_operations.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) file_operations.f90    -o $(ODIR)/file_operations.o
 $(ODIR)/spline.o:	spline.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) spline.f90             -o $(ODIR)/spline.o
 $(ODIR)/readinput.o:	readinput.f90

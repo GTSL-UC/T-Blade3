@@ -34,7 +34,7 @@ temp(4) = 1.0D0
 
 call cubic_roots(temp, root)
 do i = 1, 3
-	if (root(i) .ne. root(i)) print*, 'cubic_roots subroutine failed:', i , 'th root undefined'
+	if (root(i) .ne. root(i)) print*, 'WARNING: cubic_roots subroutine failed:', i , 'th root undefined'
 enddo
 
 if (aimag(root(2)) .eq. 0.0D0) then

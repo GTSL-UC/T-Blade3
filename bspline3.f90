@@ -354,6 +354,11 @@ integer :: i, j, seg_1, seg_end, thicksegmentprint
 
 !--------------------------------------------------------  
 ! computing the end points for each segment:
+
+print *, 'From bspline_y_of_x - ', ncp
+print *, 'From bspline_y_of_x - ', degree
+print *, 'From bspline_y_of_x - ', ncp - degree + 1
+
 t = 0
 if( degree == 3) then
     x_spl_end(1) = bspline(xcp(1:degree+1),t)
@@ -542,7 +547,7 @@ real*8 function bspline_t_newton(cp,u)
         endif
         tt_0 = bspline_t_newton
     enddo
-    print*,"FAILED to converge cubic abs(u-xs_0)", abs(u-xs_0), bspline_t_newton
+    print*,"FATAL ERROR: cubic abs(u-xs_0) not converged - ", abs(u-xs_0), bspline_t_newton
     STOP
 end function
 !********************************************************************************
@@ -660,7 +665,7 @@ real*8 function bspline4_t_newton(cp,u)
         endif
         tt_0 = bspline4_t_newton
     enddo
-    print*,"FAILED to converge Quartic abs(u-xs_0)", abs(u-xs_0), bspline4_t_newton
+    print*,"FATAL ERROR: Quartic abs(u-xs_0) not converged - ", abs(u-xs_0), bspline4_t_newton
     STOP
 end function
 
