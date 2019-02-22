@@ -305,6 +305,17 @@ end if
 !	ueq(i) = ueq(i-1) + dueq ! Kiran 12/27/13
 !enddo
 !u = u/u(np) ! Non dimensionalizing
+!u(1) = 0.0
+!ueq(1) = 0.0 ! uniform clustering
+!do i = 2, np
+!	ui = real(i-1)/real(np) ! Marshall 8/19/13
+!	du = (sin(pi*ui))**2.0
+!	u(i) = u(i-1) + du 
+!	!! uniform clustering
+!	dueq = ui 
+!	ueq(i) = ueq(i-1) + dueq ! Kiran 12/27/13
+!enddo
+!u = u/u(np) ! Non dimensionalizing
 ! do i = 2, np
 ! ui = du*(i-2)
 ! dsi = dsmn + (dsmx-dsmn)*sin(pi*ui)**2.0 
