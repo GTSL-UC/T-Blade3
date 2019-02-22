@@ -137,10 +137,10 @@ subroutine span_variation()
             intersec_u(1:na) = out_coord_u(:, 2)
             
             ! Write spline data to files
-            open (unit = 81, file = 'thickness_files/thk_span_dist_v.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
+            open (unit = 81, file = 'thk_span_dist_v.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
             write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
             close (81)
-            open (unit = 81, file = 'thickness_files/thk_span_dist_u.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
+            open (unit = 81, file = 'thk_span_dist_u.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
             write (81, '(12F30.12)') (out_coord_u(k, :), k = 1, na)
             close (81)
 
@@ -151,7 +151,7 @@ subroutine span_variation()
                                                1, out_coord_u_fine)
 
                 ! Write spline data to file
-                open (unit = 81, file = 'thickness_files/thk_span_dist_u_fine.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
+                open (unit = 81, file = 'thk_span_dist_u_fine.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
                 write (81, '(12F30.12)') (out_coord_u_fine(k, :), k = 1, np_fine)
                 close (81)
 
@@ -159,7 +159,7 @@ subroutine span_variation()
                                                span_fine, np_fine, 1, out_coord_v_fine)
 
                 ! Write spline data to file
-                open (unit = 81, file = 'thickness_files/thk_span_dist_v_fine.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
+                open (unit = 81, file = 'thk_span_dist_v_fine.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
                 write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
                 close (81)
             
@@ -180,7 +180,7 @@ subroutine span_variation()
         !
         call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), te_angle_cp, ncp_span_thk, span, na, 1, out_coord_v)
         te_angle_all(1:na) = out_coord_v(:, 2)
-        open (unit = 81, file = 'thickness_files/te_angle_span_dist.' // trim(casename) // '.dat')
+        open (unit = 81, file = 'te_angle_span_dist.' // trim(casename) // '.dat')
         write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
         close (81)
         
@@ -190,7 +190,7 @@ subroutine span_variation()
             call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), te_angle_cp, ncp_span_thk, span_fine, np_fine, 1, out_coord_v_fine)
 
             ! Write spline data to file
-            open (unit = 81, file = 'thickness_files/te_angle_span_dist_fine.' // trim(casename) // '.dat')
+            open (unit = 81, file = 'te_angle_span_dist_fine.' // trim(casename) // '.dat')
             write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
             close (81)
 
@@ -203,7 +203,7 @@ subroutine span_variation()
         !
         call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), le_angle_cp, ncp_span_thk, span, na, 1, out_coord_v)
         le_angle_all(1:na) = out_coord_v(:, 2)
-        open (unit = 81, file = 'thickness_files/le_angle_span_dist.' // trim(casename) // '.dat')
+        open (unit = 81, file = 'le_angle_span_dist.' // trim(casename) // '.dat')
         write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
         close (81)
 
@@ -213,7 +213,7 @@ subroutine span_variation()
             call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), le_angle_cp, ncp_span_thk, span_fine, np_fine, 1, out_coord_v_fine)
 
             ! Write spline data to file
-            open (unit = 81, file = 'thickness_files/le_angle_span_dist_fine.' // trim(casename) // '.dat')
+            open (unit = 81, file = 'le_angle_span_dist_fine.' // trim(casename) // '.dat')
             write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
             close (81)
 
@@ -242,7 +242,7 @@ subroutine span_variation()
             write(nopen,*) "Writing spanwise thickness variation data to file"
             call close_log_file(nopen, file_open)
 
-            thickness_file_name = 'thickness_files/thickness_span_variation.'//trim(casename)//'.dat'
+            thickness_file_name = 'thickness_span_variation.'//trim(casename)//'.dat'
             inquire(file = thickness_file_name, exist=file_exist)
         
             if (file_exist) then

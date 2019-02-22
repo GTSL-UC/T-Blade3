@@ -329,7 +329,7 @@ if (te_flag .eq. 1 .and. te_opt_flag .eq. 0) then
                           ddD1_te, u_spl_te, np_te, iknt_te, niknt_te, 0, 0, 1, 1, 2, 0, 0, F, G, out_coord_te, coeff_te,          &
                           fail_flag, dev_flag)
 	out_coord(i_te : np, :) = out_coord_te
-	open (unit = 81, file = 'thickness_files/thk_dist_te.' // trim(adjustl(sec)) // '.' // trim(cname) // '.dat')
+	open (unit = 81, file = 'thk_dist_te.' // trim(adjustl(sec)) // '.' // trim(cname) // '.dat')
 	write (81, '(12F40.12)') (out_coord_te(i, :), i = 1, np_te)			
 	close (81)	
     !call log_file_exists(log_file, nopen, file_open)
@@ -351,7 +351,7 @@ if (te_flag .eq. 1 .and. te_opt_flag .eq. 0) then
 		call thk_ctrl_gen_spl(uthk_te, thk_te, n_te, nknt_te, d_0, d_1, dAdE_te, dBdE_te, dCdE_te, &
 		dDdE_te, dEdE_te, ddB1_te, ddC1_te, ddD1_te, u_spl_fine, np_fine, iknt_te, niknt_te, 0, 0, 1, &
 		1, 2, 0, 0, F, G, out_coord_fine, coeff_te, fail_flag, dev_flag)
-		open (unit = 81, file = 'thickness_files/thk_dist_fine_te.' // trim(adjustl(sec)) // '.' // trim(cname) // '.dat')
+		open (unit = 81, file = 'thk_dist_fine_te.' // trim(adjustl(sec)) // '.' // trim(cname) // '.dat')
 		write (81, '(12F40.12)') (out_coord_fine(i, :), i = 1, np_fine)			
 		close (81)
 	endif
@@ -1055,7 +1055,7 @@ if (out_flag .eq. 1 .and. dev_flag .eq. 1) then
 	call thk_ctrl_gen_spl(uthk, thk, n, nknt, d_0, d_1, dAdE, dBdE, dCdE, &
 		dDdE, dEdE, ddB1, ddC1, ddD1, u_spl_fine, np_fine, iknt, niknt, 1, 0, 0, &
 		out_flag, 0, 1, d1_flag, F_spl, G_spl, out_coord_fine, coeff_bl, fail_flag, dev_flag)
-	open (unit = 81, file = 'thickness_files/thk_dist_fine_spl.' // trim(adjustl(sec)) // '.' // trim(cname) // '.dat')!, Access = 'append',Status='old')
+	open (unit = 81, file = 'thk_dist_fine_spl.' // trim(adjustl(sec)) // '.' // trim(cname) // '.dat')!, Access = 'append',Status='old')
 	write (81, '(12F40.12)') (out_coord_fine(i, :), i = 1, np_fine)
 	close (81)
 endif
@@ -1121,7 +1121,7 @@ if (out_flag .eq. 1 .and. dev_flag .eq. 1) then
 	call thk_ctrl_gen_spl(uthk_le, thk_le, n_le, nknt_le, d_0_rot_0, d_0_rot_1, dAdE_le, dBdE_le, dCdE_le, &
 		dDdE_le, dEdE_le, ddB1_le, ddC1_le, ddD1_le, u_spl_fine, np_fine, iknt_le, niknt_le, d3v_ang_flag_le, 1, 0, &
 		out_flag, 1, 1, d1_flag, F_le, G_le_temp, out_coord_fine, coeff_le, fail_flag, dev_flag)
-	open (unit = 81, file = 'thickness_files/thk_dist_fine_le.'  // trim(adjustl(sec)) //  '.' // trim(cname) // '.dat')!, Access = 'append',Status='old')
+	open (unit = 81, file = 'thk_dist_fine_le.'  // trim(adjustl(sec)) //  '.' // trim(cname) // '.dat')!, Access = 'append',Status='old')
 	write (81, '(12F40.12)') (out_coord_fine(i, :), i = 1, np_fine)
 	close (81)		
 endif		
@@ -1179,7 +1179,7 @@ if (te_opt_flag .eq. 1 .and. te_flag .eq. 1) then
 		call thk_ctrl_gen_spl(uthk_te, thk_te, n_te, nknt_te, d_1_rot_0, d_1_rot_1, dAdE_te, dBdE_te, dCdE_te, &
 			dDdE_te, dEdE_te, ddB1_te, ddC1_te, ddD1_te, u_spl_fine, np_fine, iknt_te, niknt_te, 0, 0, 1, &
 			out_flag, 2, 0, d1_flag, F_te, G_te_temp, out_coord_fine, coeff_te, fail_flag, dev_flag)
-		open (unit = 81, file = 'thickness_files/thk_dist_fine_te.'  // trim(adjustl(sec)) //  '.' // trim(cname) // '.dat')!, Access = 'append',Status='old')
+		open (unit = 81, file = 'thk_dist_fine_te.'  // trim(adjustl(sec)) //  '.' // trim(cname) // '.dat')!, Access = 'append',Status='old')
 		write (81, '(12F40.12)') (out_coord_fine(i, :), i = 1, np_fine)
 		close (81)		
 	endif
@@ -1220,7 +1220,7 @@ elseif (te_opt_flag .eq. 2 .and. te_flag .eq. 1) then
 		call thk_ctrl_gen_spl(uthk_te, thk_te, n_te, nknt_te, d_1_rot_0, d_1_rot_1, dAdE_te, dBdE_te, dCdE_te, &
 			dDdE_te, dEdE_te, ddB1_te, ddC1_te, ddD1_te, u_spl_fine, np_fine, iknt_te, niknt_te, 0, 0, 1, &
 			out_flag, 2, 0, d1_flag, F_te, G_te_temp, out_coord_fine, coeff_te, fail_flag, dev_flag)
-		open (unit = 81, file = 'thickness_files/thk_dist_fine_te.'  // trim(adjustl(sec)) //  '.' // trim(cname) // '.dat')!, Access = 'append',Status='old')
+		open (unit = 81, file = 'thk_dist_fine_te.'  // trim(adjustl(sec)) //  '.' // trim(cname) // '.dat')!, Access = 'append',Status='old')
 		write (81, '(12F40.12)') (out_coord_fine(i, :), i = 1, np_fine)
 		close (81)		
 	endif	

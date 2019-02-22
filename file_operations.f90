@@ -27,7 +27,7 @@ module file_operations
         integer             :: ierr
 
 
-        log_file    = 'log_files/T-Blade3_run.log'
+        log_file    = 'T-Blade3_run.log'
         nopen       = 101
 
         inquire(file = log_file, exist=exist)
@@ -96,7 +96,7 @@ module file_operations
 
         nopen               = 102
         index1              = index(input_file, 'dat')
-        maininput_log_file  = 'log_files/'//input_file(:index1 - 1)//'log'
+        maininput_log_file  = input_file(:index1 - 1)//'log'
 
         inquire(file = trim(maininput_log_file), exist=exist)
         if (exist) then
@@ -159,7 +159,7 @@ module file_operations
         
         nopen               = 102
         index1              = index(input_file, 'dat')
-        auxinput_log_file   = 'log_files/'//input_file(:index1 - 1)//'log'
+        auxinput_log_file   = input_file(:index1 - 1)//'log'
         
         inquire(file = trim(auxinput_log_file), exist=exist)
         if (exist) then

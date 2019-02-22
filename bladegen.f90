@@ -664,20 +664,6 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         print *, 'Using modified NACA four digit thickness distribution'
         write(nopen,*) ''
         write(nopen,*) 'Using modified NACA four digit thickness distribution'
-        
-        !
-        ! Allocate and read thickness arrays
-        !
-        !ncp     = ncp_thk(js)
-        !if (allocated(xcp_thk)) deallocate(xcp_thk)
-        !if (allocated(ycp_thk)) deallocate(ycp_thk)
-        !allocate(xcp_thk(ncp))
-        !allocate(ycp_thk(ncp))
-
-        !do i = 1,ncp
-        !    xcp_thk(i)  = thk_cp(i, 2*js-1)
-        !    ycp_thk(i)  = thk_cp(i, 2*js)
-        !end do 
          
         ! 
         ! Compute maximum thickness and maximum thickness location
@@ -749,7 +735,7 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         write(nopen,*) ''
 
         ! Write sectionwise thickness data files
-        thickness_file_name = 'thickness_files/thickness_data.'//trim(adjustl(sec))//'.'//trim(casename)
+        thickness_file_name = 'thickness_data.'//trim(adjustl(sec))//'.'//trim(casename)
         inquire(file = thickness_file_name, exist=file_exist)
         if (file_exist) then
             open(11, file = thickness_file_name, status = 'old', action = 'write', form = 'formatted')
@@ -805,10 +791,10 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         thickness = thickness_data(:, 2)
         call close_log_file(nopen, file_open)
         ! if(isdev) then
-        open (unit = 81, file = 'thickness_files/thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
+        open (unit = 81, file = 'thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
         write (81, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
         close (81)
-        open (unit = 81, file = 'thickness_files/thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
+        open (unit = 81, file = 'thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
         ! write (81, '(2F20.16)') (u(i), thickness(i), i = 1, np)
         write (81, '(6F40.16)') (thickness_data(i, 1), thickness_data(i, 2), thickness_data(i, 3),     &
                                  thickness_data(i, 4), thickness_data(i, 5), thickness_data(i, 6), i = 1, np)
@@ -834,10 +820,10 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         write (nopen, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
         call splinethickcontrol(umxthk, thkc, ncp, xcp_thk, ycp_thk, np, u, thickness, thick_distr_3_flag)
         ! if(isdev) then
-            open (unit = 81, file = 'thickness_files/thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
+            open (unit = 81, file = 'thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
             write (81, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
             close (81)
-            open (unit = 81, file = 'thickness_files/thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
+            open (unit = 81, file = 'thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
             write (81, '(2F20.16)') (u(i), thickness(i), i = 1, np)
             close (81)
         ! endif

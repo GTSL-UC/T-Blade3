@@ -331,18 +331,6 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     radius_tolerance  = 1e-05
     abs_zero          = 0.0000000000000000
 
-
-
-    !
-    ! Create separate directories for storing log files and thickness data files
-    ! if they don't exist
-    !
-    inquire(file = './log_files/', exist=dir_exist)
-    if (.not. dir_exist) call execute_command_line('mkdir log_files')
-
-    inquire(file = './thickness_files/', exist=dir_exist)
-    if (.not. dir_exist) call execute_command_line('mkdir thickness_files')
-
     
    
     ! 
