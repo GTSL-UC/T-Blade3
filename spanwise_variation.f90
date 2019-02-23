@@ -11,20 +11,28 @@ subroutine span_variation()
     use globvar
     implicit none
 
+    ! Local variables
     integer                         :: np_fine, i_local, nopen
     real,           allocatable     :: span_fine(:), out_coord_u_fine(:,:), out_coord_v_fine(:,:)
     real                            :: out_coord_u(na, 12), out_coord_v(na, 12), intersec_u(nspan), &
                                        intersec_v(nspan)
     character(20)                   :: ind
-    character(:),   allocatable     :: log_file, thickness_file_name
+    character(:),   allocatable     :: log_file, thickness_file_name, curvature_file_name, LE_file_name
     logical                         :: file_open, file_exist
 
 
+
+    !
     ! Allocate spanwise curvature arrays
+    !
     if (allocated(bspline_chord_curv)) deallocate(bspline_chord_curv)
     allocate(bspline_chord_curv(nsl,ncp_chord_curv))
+   
     
+
+    !
     ! Allocate spanwise thickness arrays
+    !
     if (allocated(bspline_thk)) deallocate(bspline_thk)
     if (thick_distr == 4) then
         allocate(bspline_thk(nsl, 2*ncp_thickness + 1))
@@ -34,17 +42,29 @@ subroutine span_variation()
         allocate(bspline_thk(nsl, ncp_chord_thk))
     end if
 
+
+
+    !
     ! Allocate spanwise LE spline arrays
+    !
     if (allocated(bspline_LE)) deallocate(bspline_LE)
     allocate(bspline_LE(nsl, ncp_LE + 1))
 
+
+    
+    !
     ! Allocate exact thickness spanwise LE_angle and TE_angle arrays
+    !
     if (allocated(le_angle_all)) deallocate(le_angle_all)
     allocate(le_angle_all(na))
     if (allocated(te_angle_all)) deallocate(te_angle_all)
     allocate(te_angle_all(na))
-    
+   
+   
+   
+    ! 
     ! Allocate exact thickness arrays
+    !
     np_fine = 1000
     if (allocated(span_fine)) deallocate(span_fine)
     allocate(span_fine(np_fine))
@@ -54,7 +74,10 @@ subroutine span_variation()
     allocate(out_coord_v_fine(np_fine, 12))
 
 
+
+    !
     ! Print message to screen and write to log file
+    !
     call log_file_exists(log_file, nopen, file_open)
     if (thick_distr == 4) then
         print*, 'Creating spanwise thickness and TE angle distributions'
@@ -68,10 +91,14 @@ subroutine span_variation()
     call close_log_file(nopen, file_open)
 
 
+
+    !
     ! Generate span_fine array
+    !
     do i = 1, np_fine
         span_fine(i) = (i-1.)/(np_fine-1)*(span(na) - span(1)) + span(1)
     enddo
+
 
 
     !
@@ -94,12 +121,39 @@ subroutine span_variation()
 
     end do  ! i = 2,ncp_chord_curv
 
+    ! Write curvature spanwise spline data to a file, if command line option "dev" is used
+    if (isdev) then
+
+        print *, 'Writing spanwise curvature variation data to file'
+        call log_file_exists(log_file, nopen, file_open)
+        write(nopen,*) 'Writing spanwise curvature variation data to file'
+        call close_log_file(nopen, file_open)
+
+        curvature_file_name = 'curvature_span_variation.'//trim(casename)//'.dat'
+        inquire(file = curvature_file_name, exist=file_exist)
+
+        if (file_exist) then
+            open(97, file = curvature_file_name, status = 'old', action = 'write', form = 'formatted')
+        else
+            open(97, file = curvature_file_name, status = 'new', action = 'write', form = 'formatted')
+        end if
+
+        do i = 1,nsl
+
+            write(97, '(20F20.16)') bspline_chord_curv(i,:)
+
+        end do
+        close(97)
+
+    end if  ! isdev
+
+
 
     !
     ! Create spanwise cubic spline for thickness
     ! Generate cubic splines for quartic spline thickness distribution or direct thickness distribution
     !
-    if(thick /= 0 .or. thick_distr == 3) then
+    if (thick /= 0 .or. thick_distr == 3) then
         
         ! Spanwise distribution of "Span" control points
         do j = 1,na
@@ -117,8 +171,10 @@ subroutine span_variation()
             end do
 
         end do  ! i = 2,ncp_chord_thk
-
+        
+    !
     ! Generate cubic splines for exact thickness distribution
+    !
     else if (thick_distr == 4) then
         
         ! Spanwise distribution of "Span" control points
@@ -136,33 +192,15 @@ subroutine span_variation()
             call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+1), ncp_span_thk, span, na, 1, out_coord_u)
             intersec_u(1:na) = out_coord_u(:, 2)
             
-            ! Write spline data to files
-            open (unit = 81, file = 'thk_span_dist_v.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
-            write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
-            close (81)
-            open (unit = 81, file = 'thk_span_dist_u.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
-            write (81, '(12F30.12)') (out_coord_u(k, :), k = 1, na)
-            close (81)
-
             ! Compute with span_fine if command line option "dev" is passed to T-Blade3
             if (isdev) then
 
                 call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+1), ncp_span_thk, span_fine, np_fine, &
                                                1, out_coord_u_fine)
 
-                ! Write spline data to file
-                open (unit = 81, file = 'thk_span_dist_u_fine.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
-                write (81, '(12F30.12)') (out_coord_u_fine(k, :), k = 1, np_fine)
-                close (81)
-
                 call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+ncp_thickness+1), ncp_span_thk,       &
                                                span_fine, np_fine, 1, out_coord_v_fine)
 
-                ! Write spline data to file
-                open (unit = 81, file = 'thk_span_dist_v_fine.' // trim(adjustl(ind)) // '.' // trim(casename) // '.dat')
-                write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
-                close (81)
-            
             endif   ! isdev
            
             ! Store "u" and "thk" spanwise distribution in the spanwise thickness array 
@@ -219,7 +257,9 @@ subroutine span_variation()
 
         endif   ! isdev
 
+    !
     ! Generate cubic splines for modified NACA four-digit thickness distribution
+    !
     else if (thick_distr == 5) then
 
         ! Spanwise distribution of "Span" control points
@@ -234,35 +274,43 @@ subroutine span_variation()
 
         end do  ! i = 2,5
 
-        ! Write spline data to a file
-        if (isdev) then
-
-            print *, 'Writing spanwise thickness variation data to file'
-            call log_file_exists(log_file, nopen, file_open)
-            write(nopen,*) "Writing spanwise thickness variation data to file"
-            call close_log_file(nopen, file_open)
-
-            thickness_file_name = 'thickness_span_variation.'//trim(casename)//'.dat'
-            inquire(file = thickness_file_name, exist=file_exist)
-        
-            if (file_exist) then
-                open(97, file = thickness_file_name, status = 'old', action = 'write', form = 'formatted')
-            else
-                open(97, file = thickness_file_name, status = 'new', action = 'write', form = 'formatted')
-            end if
-            do i = 1,nsl
-
-                write(97, '(5F20.16)') bspline_thk(i,:)
-            
-            end do
-            close(97)
-
-        end if  ! isdev
-
     end if  ! thick_distr
 
 
+
+    !
+    ! Write thickness spanwise spline data to a file, if command line option "dev" is used
+    !
+    if (isdev) then
+        
+        print *, 'Writing spanwise thickness variation data to file'
+        call log_file_exists(log_file, nopen, file_open)
+        write(nopen,*) 'Writing spanwise thickness variation data to file'
+        call close_log_file(nopen, file_open)
+
+        thickness_file_name = 'thickness_span_variation.'//trim(casename)//'.dat'
+        inquire(file = thickness_file_name, exist=file_exist)
+
+        if (file_exist) then
+            open(97, file = thickness_file_name, status = 'old', action = 'write', form = 'formatted')
+        else
+            open(97, file = thickness_file_name, status = 'new', action = 'write', form = 'formatted')
+        end if
+
+        do i = 1,nsl
+
+            write(97, '(20F20.16)') bspline_thk(i,:)
+
+        end do
+        close(97)
+
+    end if  ! isdev
+
+
+
+    !
     ! Create spanwise cubic splines for LE 
+    !
     if(LE .ne. 0) then
 
         ! Spanwise distribution of "Span"
@@ -286,10 +334,39 @@ subroutine span_variation()
 
         end do  ! i = 2,ncp_LE
 
+        ! Write LE spanwise spline data to a file, if command line option "dev" is used
+        if (isdev) then
+
+            print *, 'Writing spanwise LE variation data to file'
+            call log_file_exists(log_file, nopen, file_open)
+            write(nopen,*) 'Writing spanwise LE variation data to file'
+            call close_log_file(nopen, file_open)
+
+            LE_file_name = 'LE_span_variation.'//trim(casename)//'.dat'
+            inquire(file = LE_file_name, exist=file_exist)
+
+            if (file_exist) then
+                open(97, file = LE_file_name, status = 'old', action = 'write', form = 'formatted')
+            else
+                open(97, file = LE_file_name, status = 'new', action = 'write', form = 'formatted')
+            end if
+
+            do i = 1,nsl
+
+                write(97, '(20F20.16)') bspline_LE(i,:)
+
+            end do
+            close(97)
+
+        end if  ! isdev
+
     endif   ! LE
 
 
+
+    !
     ! Print message to screen and write to log file
+    !
     call log_file_exists(log_file, nopen, file_open)
     if (thick_distr == 4) then
         print*, 'Spanwise curvature Bspline created successfully'
@@ -305,7 +382,10 @@ subroutine span_variation()
     call close_log_file(nopen, file_open)
 
 
+    
+    !
     ! Call spanwise output subroutine for creating curv_cp, thk_cp and LE arrays
+    !
     call span_output()
 
 
