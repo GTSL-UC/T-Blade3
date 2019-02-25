@@ -128,8 +128,8 @@ real jcellblade_all(nspn), etawidth_all(nspn), jcellblade, etawidth
 real, allocatable, dimension(:) :: xtop_refine, ytop_refine, xbot_refine, ybot_refine
 real, allocatable, dimension(:) :: init_angles, init_cambers, x_spl_end_curv, cam_refine, u_refine
 real ucp_top(11), vcp_top(11), ucp_bot(11), vcp_bot(11)
-real a_NACA(4), d_NACA(4), t_max, u_max, dy_dx_TE, loc(1), LE_round, a_temp(4), d_temp(4)
-real,   allocatable             :: ptop(:,:), pbot(:,:), u_circ_TE(:)
+real a_NACA(4), d_NACA(4), t_max, u_max, t_TE, u_TE, dy_dx_TE, loc(1), LE_round, a_temp(4), d_temp(4)
+real,   allocatable             :: ptop(:,:), pbot(:,:), u_circ_TE(:), thick_temp(:,:), xbt(:), ybt(:), xtt(:), ytt(:)
 real le_throat, te_throat, intersec_coord(12, nsl), min_throat_2D, attach_angle
 real u_translation, camber_trans
 ! variables for s809 profile
@@ -683,6 +683,7 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         t_max    = bspline_thk(js,4)
         u_max    = bspline_thk(js,3)
         LE_round = bspline_thk(js,2)
+        t_TE     = bspline_thk(js,5)
 
         ! 
         ! Print input values to screen and write to log file
@@ -691,8 +692,8 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         write(nopen,*) 'Maximum thickness for the blade section = ', t_max
         print *, 'Chordwise location for the maximum thickness = ', u_max
         write(nopen,*) 'Chordwise location for the maximum thickness = ', u_max
-        print *, 'Thickness at TE = ', bspline_thk(js,5)
-        write(nopen,*) 'Thickness at TE = ', bspline_thk(js,5)
+        print *, 'Thickness at TE = ', t_TE
+        write(nopen,*) 'Thickness at TE = ', t_TE
         print *, 'Leading edge radius = ', LE_round
         write(nopen,*) 'Leading edge radius = ', LE_round
 
@@ -709,9 +710,18 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         ! Find coefficients for modified NACA four digit thickness
         ! Apply modified NACA four digit thickness
         !
-        call modified_NACA_four_digit_thickness_coeffs(t_max,u_max,bspline_thk(js,5),dy_dx_TE,LE_round,a_NACA,d_NACA)
+        call modified_NACA_four_digit_thickness_coeffs(t_max,u_max,t_TE,dy_dx_TE,LE_round,a_NACA,d_NACA)
         call modified_NACA_four_digit_thickness(np,u,u_max,t_max,a_NACA,d_NACA,thickness_data)
         thickness       = thickness_data(:,1)
+        
+        
+        u_TE        = 1.0 - t_TE
+        call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,u_TE,dy_dx_TE,LE_round,a_temp,d_temp)
+        if (allocated(thick_temp)) deallocate(thick_temp)
+        allocate(thick_temp(np,3))
+        call modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,a_temp,d_temp,thick_temp)
+
+
 
         !
         ! Check for monotonicity
@@ -878,6 +888,21 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
     ybot = camber - thickness*cos(angle)
     xtop = u   - thickness*sin(angle)
     ytop = camber + thickness*cos(angle)
+
+    if (allocated(xbt) .and. allocated(ybt) .and. allocated(xtt) .and. allocated(ybt)) &
+        deallocate(xbt,ybt,xtt,ytt)
+    allocate(xbt(np), ybt(np), xtt(np), ytt(np))
+    xbt = u + (thick_temp(:,1)*sin(angle))
+    ybt = camber - (thick_temp(:,1)*cos(angle))
+    xtt = u - (thick_temp(:,1)*sin(angle))
+    ytt = camber + (thick_temp(:,1)*cos(angle))
+    open(830, file = 'temp_NACA.'//trim(adjustl(sec))//'.dat')
+    do i = 1,np
+        write(830,*) u(i), thick_temp(i,1), thick_temp(i,2), thick_temp(i,3), xbt(i), ybt(i), xtt(i), ytt(i)
+    end do
+    close(830)
+
+
 
     if (thick_distr == 5) then
         np_circ = 21

@@ -2718,17 +2718,18 @@ subroutine modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,u_TE,dy_
     !
     ! Gauss Jordan method used to solve the resulting linear system
     !
+    d(1)            = sqrt(2.0*t_TE)
+
     if (allocated(aug_matrix)) deallocate(aug_matrix)
-    allocate(aug_matrix(4,5))
+    allocate(aug_matrix(3,4))
+    
+    aug_matrix(1,:) = [1.0 - u_max, (1.0 - u_max)**2 , (1.0 - u_max)**3       , t_max - (d(1)*sqrt(1.0 - u_max))]
+    aug_matrix(2,:) = [1.0 - u_TE , (1.0 - u_TE)**2  , (1.0 - u_TE)**3        , t_TE - (d(1)*sqrt(1.0 - u_TE))]
+    aug_matrix(2,:) = [-1.0       , 2.0*(u_max - 1.0), -3.0*((1.0 - u_max)**2), (0.5*d(1)/sqrt(1.0 - u_max))]
+    !aug_matrix(3,:) = [-1.0       , 2.0*(u_TE - 1.0) , -3.0*((1.0 - u_TE)**2) , (-2.0*dy_dx_TE*t_max) + (0.5*d(1)/sqrt(1.0 - u_TE))]
 
-    aug_matrix(1,:) = [1.0, 1.0 - u_TE , (1.0 - u_TE)**2  , (1.0 - u_TE)**3        , t_TE    ]
-    aug_matrix(2,:) = [1.0, 1.0 - u_max, (1.0 - u_max)**2 , (1.0 - u_max)**3       , t_max   ]
-    aug_matrix(3,:) = [0.0, -1.0       , 2.0*(u_TE - 1.0) , -3.0*((1.0 - u_TE)**2) , dy_dx_TE]
-    aug_matrix(4,:) = [0.0, -1.0       , 2.0*(u_max - 1.0), -3.0*((1.0 - u_max)**2), 0.0     ]
-
-    call gauss_jordan(4,1,aug_matrix,fail_flag)
-
-    d               = aug_matrix(:,5)
+    call gauss_jordan(3,1,aug_matrix,fail_flag)
+    d(2:)           = aug_matrix(:,4)
 
 
     ! Compute a_0
@@ -2745,7 +2746,8 @@ subroutine modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,u_TE,dy_
     if (allocated(aug_matrix)) deallocate(aug_matrix)
     allocate(aug_matrix(3,4)) 
     
-    temp            = (2.0*d(3)) + (6.0*(1.0 - u_max)*d(4)) + (0.25*a(1)/(u_max*sqrt(u_max)))
+    temp            = (-0.25*d(1)/((sqrt(1.0 - u_max))**3)) + (2.0*d(3)) + (6.0*(1.0 - u_max)*d(4)) + &
+                      (0.25*a(1)/(u_max*sqrt(u_max)))
 
     aug_matrix(1,:) = [u_max, u_max**2 , u_max**3      , t_max - (a(1)*sqrt(u_max))]
     aug_matrix(2,:) = [1.0  , 2.0*u_max, 3.0*(u_max**2), (-0.5*a(1)/sqrt(u_max))   ]
@@ -2825,6 +2827,76 @@ subroutine modified_NACA_four_digit_thickness(np,u,u_max,t_max,a,d,thk_data)
 
 
 end subroutine modified_NACA_four_digit_thickness
+!*******************************************************************************************
+
+
+
+!
+! Obtain thickness distribution with the computed coefficients a_i and d_i
+!
+! Input parameters: np    = number of points along the blade section meanline
+!                   u     = points along chord
+!                   u_max = chordwise location of max. thickness for the blade section
+!                   t_max = half max. thickness for the blade section in fraction chord
+!                   a     = thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
+!                   d     = thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
+!           
+!*******************************************************************************************
+subroutine modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,a,d,thk_data)
+    use file_operations
+    implicit none
+
+    integer,                intent(in)      :: np
+    real,                   intent(in)      :: u(np)
+    real,                   intent(in)      :: u_max
+    real,                   intent(in)      :: t_max
+    real,                   intent(in)      :: a(4)
+    real,                   intent(in)      :: d(4)
+    real,                   intent(inout)   :: thk_data(np,3)
+
+    ! Local variables
+    integer                                 :: i, j, k
+    real                                    :: tol = 10E-8
+
+
+    ! Compute thickness distribution
+    do i = 1,np
+
+        if (abs(u(i) - u_max) .le. tol) then
+            thk_data(i,1)   = t_max
+        else if (u(i) .lt. u_max) then
+            thk_data(i,1)   = (a(1)*sqrt(u(i))) + (a(2)*u(i)) + (a(3)*(u(i)**2)) + (a(4)*(u(i)**3))
+        else if (u(i) .gt. u_max) then
+            thk_data(i,1)   = (d(1)*sqrt(1.0 - u(i))) + (d(2)*(1.0 - u(i))) + (d(3)*((1.0 - u(i))**2)) + (d(4)*((1.0 - u(i))**3))
+        end if
+
+    end do
+
+    
+    ! Compute first derivative of thickness distribution
+    do i = 1,np
+
+        if (abs(u(i) - u_max) < tol) then
+            thk_data(i,2)   = 0.0
+            thk_data(i,3)   = (-0.25*d(1)/(sqrt(1.0 - u_max))**3) + (2.0*d(3)) + (6.0*d(4)*(1.0 - u_max)) 
+        else if (abs(u(i)) < tol) then
+            thk_data(i,2)   = (0.5*a(1)/sqrt(tol)) + a(2) + (2.0*a(3)*tol) + (3.0*a(4)*(tol**2))
+            thk_data(i,3)   = (-0.25*a(1)/((sqrt(tol))**3)) + (2.0*a(3)) + (6.0*a(4)*tol)
+        else if (abs(1.0 - u(i)) < tol) then
+            thk_data(i,2)   = (-0.5*d(1)/sqrt(tol)) - d(2) - (2.0*d(3)*tol) - (3.0*d(4)*(tol**2))
+            thk_data(i,3)   = (-0.25*d(1)/((sqrt(tol))**3)) + (2.0*d(3)) + (6.0*d(4)*tol)
+        else if (u(i) < u_max) then
+            thk_data(i,2)   = (0.5*a(1)/sqrt(u(i))) + a(2) + (2.0*a(3)*u(i)) + (3.0*a(4)*(u(i)**2))
+            thk_data(i,3)   = (-0.25*a(1)/((sqrt(u(i)))**3)) + (2.0*a(3)) + (6.0*a(4)*u(i))
+        else if (u(i) > u_max) then
+            thk_data(i,2)   = (-0.5*d(1)/sqrt(1.0 - u(i))) - d(2) + (2.0*d(3)*(u(i) - 1.0)) - (3.0*d(4)*((1.0 - u(i))**2)) 
+            thk_data(i,3)   = (-0.25*d(1)/((sqrt(1.0 - u(i)))**3)) + (2.0*d(3)) + (6.0*d(4)*(1.0 - u(i)))
+        end if
+
+    end do
+
+
+end subroutine modified_NACA_four_digit_thickness_2
 !*******************************************************************************************
 
 
