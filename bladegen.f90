@@ -721,7 +721,13 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         allocate(thick_temp(np,3))
         call modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,a_temp,d_temp,thick_temp)
 
-
+        if (js == 1) then
+            open(830, file = 'coeffs_temp.dat')
+            do i = 1,4
+                write(830,*) a_temp(i), d_temp(i)
+            end do
+            close(830)
+        end if
 
         !
         ! Check for monotonicity

@@ -2724,9 +2724,10 @@ subroutine modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,u_TE,dy_
     allocate(aug_matrix(3,4))
     
     aug_matrix(1,:) = [1.0 - u_max, (1.0 - u_max)**2 , (1.0 - u_max)**3       , t_max - (d(1)*sqrt(1.0 - u_max))]
-    aug_matrix(2,:) = [1.0 - u_TE , (1.0 - u_TE)**2  , (1.0 - u_TE)**3        , t_TE - (d(1)*sqrt(1.0 - u_TE))]
-    aug_matrix(2,:) = [-1.0       , 2.0*(u_max - 1.0), -3.0*((1.0 - u_max)**2), (0.5*d(1)/sqrt(1.0 - u_max))]
+    !aug_matrix(2,:) = [1.0 - u_TE , (1.0 - u_TE)**2  , (1.0 - u_TE)**3        , t_TE - (d(1)*sqrt(1.0 - u_TE))]
+    aug_matrix(2,:) = [-1.0       , 2.0*(u_max - 1.0), -3.0*((1.0 - u_max)**2), (0.5*d(1)/sqrt(1.0 - u_max))    ]
     !aug_matrix(3,:) = [-1.0       , 2.0*(u_TE - 1.0) , -3.0*((1.0 - u_TE)**2) , (-2.0*dy_dx_TE*t_max) + (0.5*d(1)/sqrt(1.0 - u_TE))]
+    aug_matrix(3,:) = [0.0        , 0.0              , 0.0                    , 0.0                             ]
 
     call gauss_jordan(3,1,aug_matrix,fail_flag)
     d(2:)           = aug_matrix(:,4)
