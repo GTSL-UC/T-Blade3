@@ -304,8 +304,9 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     integer                     :: i_local, nopen
     real                        :: spl_eval, dspl_eval, xdiff, rdiff, inBetaInci, outBetaDevn
     character(256)              :: fname, temp, tempr1, fname1, fname2, fname3, fname4, row_type, path
-    character(:),  allocatable  :: log_file
-    logical                     :: axial_LE, radial_LE, axial_TE, radial_TE, file_open, dir_exist
+    character(:),  allocatable  :: log_file, auxinput_filename
+    logical                     :: axial_LE, radial_LE, axial_TE, radial_TE, file_open, dir_exist, &
+                                   file_exist
 
 
 
@@ -511,8 +512,16 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen,*) 'Reading the controlinput file ....'
         write(nopen,*) ''
 
+        ! If auxiliary input file doesn't exist, warn and quit
         ! readcontrolinputs() in readinput.f90
-        call readcontrolinput(row_type, path)
+        auxinput_filename = trim(path)//'controlinputs.'//trim(row_type)//'.dat'
+        inquire(file = auxinput_filename, exist=file_exist)
+        if (file_exist) then
+            call readcontrolinput(row_type, path)
+        else
+            print *, 'FATAL ERROR: Auxiliary input file '//auxinput_filename//' does not exist'
+            stop
+        end if
 
     ! Read old spancontrolinputs file (added by Syed)
     elseif (control_inp_flag .eq. 1 .and. .not. isold) then
@@ -523,8 +532,16 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen,*) 'Reading the spanwise_input file ....'
         write(nopen,*) ''
 
+        ! If auxiliary input file doesn't exist, warn and quit
         ! read_spanwise_input() in readinput.f90
-        call read_spanwise_input(row_type, path)
+        auxinput_filename = trim(path)//'spancontrolinputs.'//trim(row_type)//'.dat'
+        inquire(file = auxinput_filename, exist=file_exist)
+        if (file_exist) then
+            call read_spanwise_input(row_type, path)
+        else
+            print *, 'FATAL ERROR: Auxiliary input file '//auxinput_filename//' does not exist'
+            stop
+        end if
 
     ! Read new spancontrolinputs file (added by Karthik) or
     ! Read NACA spancontrolinputs file (added by Mayank)
@@ -535,13 +552,30 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen,*) ''
         write(nopen,*) 'Reading the spanwise_input file ....'
         write(nopen,*)
-       
+      
+        ! If auxiliary input file doesn't exist, warn and quit 
         ! read_spanwise_NACA_input() in readinput.f90 
         if (thick_distr == 5) then
-            call read_spanwise_NACA_input(row_type, path)
+            auxinput_filename = trim(path)//'spancontrolinputs_NACA_'//trim(row_type)//'.dat'
+            inquire(file = auxinput_filename, exist=file_exist)
+            if (file_exist) then
+                call read_spanwise_NACA_input(row_type, path)
+            else
+                print *, 'FATAL ERROR: Auxiliary input file '//auxinput_filename//' does not exist'
+                stop
+            end if
+
         else
-            call read_spanwise_input(row_type, path)
-        end if
+            auxinput_filename = trim(path)//'spancontrolinputs.'//trim(row_type)//'.dat'
+            inquire(file = auxinput_filename, exist=file_exist)
+            if (file_exist) then
+                call read_spanwise_input(row_type, path)
+            else
+                print *, 'FATAL ERROR: Auxiliary input file '//auxinput_filename//' does not exist'
+                stop
+            end if
+
+        end if ! thick_distr
 
     endif   ! control_inp_flag
 
