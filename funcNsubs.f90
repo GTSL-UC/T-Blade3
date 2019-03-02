@@ -2687,79 +2687,79 @@ end subroutine modified_NACA_four_digit_thickness_coeffs
 !            Sections, Dover Publications, New York, 1999, pp. 116-118
 !
 !*******************************************************************************************
-subroutine modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,u_TE,dy_dx_TE, &
-                                                       LE_radius, a, d)
-    use file_operations
-    implicit none
-
-    real,                   intent(in)      :: t_max
-    real,                   intent(in)      :: u_max
-    real,                   intent(in)      :: t_TE
-    real,                   intent(in)      :: u_TE
-    real,                   intent(in)      :: dy_dx_TE
-    real,                   intent(in)      :: LE_radius
-    real,                   intent(inout)   :: a(4)
-    real,                   intent(inout)   :: d(4)
-
-    ! Local variables
-    integer                                 :: i, j, k, nopen, fail_flag
-    real                                    :: temp
-    real,           allocatable             :: aug_matrix(:,:)
-    character(:),   allocatable             :: log_file
-    logical                                 :: file_open
-
-
-    !
-    ! Compute d_0, d_1, d_2 and d_3
-    ! Enforce the following conditions: yd_t(u_max)     = t_max
-    !                                   yd_t(u_TE)      = t_TE
-    !                                   yd'_t(u_max)    = 0.0
-    !                                   yd'_t(u_TE)     = dy_dx_TE
-    !
-    ! Gauss Jordan method used to solve the resulting linear system
-    !
-    d(1)            = sqrt(2.0*t_TE)
-
-    if (allocated(aug_matrix)) deallocate(aug_matrix)
-    allocate(aug_matrix(3,4))
-    
-    aug_matrix(1,:) = [1.0 - u_max, (1.0 - u_max)**2 , (1.0 - u_max)**3       , t_max - (d(1)*sqrt(1.0 - u_max))]
-    !aug_matrix(2,:) = [1.0 - u_TE , (1.0 - u_TE)**2  , (1.0 - u_TE)**3        , t_TE - (d(1)*sqrt(1.0 - u_TE))]
-    aug_matrix(2,:) = [-1.0       , 2.0*(u_max - 1.0), -3.0*((1.0 - u_max)**2), (0.5*d(1)/sqrt(1.0 - u_max))    ]
-    !aug_matrix(3,:) = [-1.0       , 2.0*(u_TE - 1.0) , -3.0*((1.0 - u_TE)**2) , (-2.0*dy_dx_TE*t_max) + (0.5*d(1)/sqrt(1.0 - u_TE))]
-    aug_matrix(3,:) = [0.0        , 0.0              , 0.0                    , 0.0                             ]
-
-    call gauss_jordan(3,1,aug_matrix,fail_flag)
-    d(2:)           = aug_matrix(:,4)
-
-
-    ! Compute a_0
-    a(1)            = sqrt(2.2038)*(2.0*t_max*LE_radius/6.0)
-
-    !
-    ! Compute a_1, a_2 and a_3
-    ! Enforce the following conditions: ya_t(u_max)     = t_max
-    !                                   ya'_t(u_max)    = 0.0
-    !                                   ya''_t(u_max)   = yd''_t(u_max)
-    !
-    ! Gauss Jordan method used to solve the resulting linear system
-    !
-    if (allocated(aug_matrix)) deallocate(aug_matrix)
-    allocate(aug_matrix(3,4)) 
-    
-    temp            = (-0.25*d(1)/((sqrt(1.0 - u_max))**3)) + (2.0*d(3)) + (6.0*(1.0 - u_max)*d(4)) + &
-                      (0.25*a(1)/(u_max*sqrt(u_max)))
-
-    aug_matrix(1,:) = [u_max, u_max**2 , u_max**3      , t_max - (a(1)*sqrt(u_max))]
-    aug_matrix(2,:) = [1.0  , 2.0*u_max, 3.0*(u_max**2), (-0.5*a(1)/sqrt(u_max))   ]
-    aug_matrix(3,:) = [0.0  , 2.0      , 6.0*u_max     , temp                      ]
-
-    call gauss_jordan(3,1,aug_matrix,fail_flag)
-
-    a(2:)           = aug_matrix(:,4)
-    
-     
-end subroutine modified_NACA_four_digit_thickness_coeffs_2
+!subroutine modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,u_TE,dy_dx_TE, &
+!                                                       LE_radius, a, d)
+!    use file_operations
+!    implicit none
+!
+!    real,                   intent(in)      :: t_max
+!    real,                   intent(in)      :: u_max
+!    real,                   intent(in)      :: t_TE
+!    real,                   intent(in)      :: u_TE
+!    real,                   intent(in)      :: dy_dx_TE
+!    real,                   intent(in)      :: LE_radius
+!    real,                   intent(inout)   :: a(4)
+!    real,                   intent(inout)   :: d(4)
+!
+!    ! Local variables
+!    integer                                 :: i, j, k, nopen, fail_flag
+!    real                                    :: temp
+!    real,           allocatable             :: aug_matrix(:,:)
+!    character(:),   allocatable             :: log_file
+!    logical                                 :: file_open
+!
+!
+!    !
+!    ! Compute d_0, d_1, d_2 and d_3
+!    ! Enforce the following conditions: yd_t(u_max)     = t_max
+!    !                                   yd_t(u_TE)      = t_TE
+!    !                                   yd'_t(u_max)    = 0.0
+!    !                                   yd'_t(u_TE)     = dy_dx_TE
+!    !
+!    ! Gauss Jordan method used to solve the resulting linear system
+!    !
+!    d(1)            = sqrt(2.0*t_TE)
+!
+!    if (allocated(aug_matrix)) deallocate(aug_matrix)
+!    allocate(aug_matrix(3,4))
+!    
+!    aug_matrix(1,:) = [1.0 - u_max, (1.0 - u_max)**2 , (1.0 - u_max)**3       , t_max - (d(1)*sqrt(1.0 - u_max))]
+!    !aug_matrix(2,:) = [1.0 - u_TE , (1.0 - u_TE)**2  , (1.0 - u_TE)**3        , t_TE - (d(1)*sqrt(1.0 - u_TE))]
+!    aug_matrix(2,:) = [-1.0       , 2.0*(u_max - 1.0), -3.0*((1.0 - u_max)**2), (0.5*d(1)/sqrt(1.0 - u_max))    ]
+!    !aug_matrix(3,:) = [-1.0       , 2.0*(u_TE - 1.0) , -3.0*((1.0 - u_TE)**2) , (-2.0*dy_dx_TE*t_max) + (0.5*d(1)/sqrt(1.0 - u_TE))]
+!    aug_matrix(3,:) = [0.0        , 0.0              , 0.0                    , 0.0                             ]
+!
+!    call gauss_jordan(3,1,aug_matrix,fail_flag)
+!    d(2:)           = aug_matrix(:,4)
+!
+!
+!    ! Compute a_0
+!    a(1)            = sqrt(2.2038)*(2.0*t_max*LE_radius/6.0)
+!
+!    !
+!    ! Compute a_1, a_2 and a_3
+!    ! Enforce the following conditions: ya_t(u_max)     = t_max
+!    !                                   ya'_t(u_max)    = 0.0
+!    !                                   ya''_t(u_max)   = yd''_t(u_max)
+!    !
+!    ! Gauss Jordan method used to solve the resulting linear system
+!    !
+!    if (allocated(aug_matrix)) deallocate(aug_matrix)
+!    allocate(aug_matrix(3,4)) 
+!    
+!    temp            = (-0.25*d(1)/((sqrt(1.0 - u_max))**3)) + (2.0*d(3)) + (6.0*(1.0 - u_max)*d(4)) + &
+!                      (0.25*a(1)/(u_max*sqrt(u_max)))
+!
+!    aug_matrix(1,:) = [u_max, u_max**2 , u_max**3      , t_max - (a(1)*sqrt(u_max))]
+!    aug_matrix(2,:) = [1.0  , 2.0*u_max, 3.0*(u_max**2), (-0.5*a(1)/sqrt(u_max))   ]
+!    aug_matrix(3,:) = [0.0  , 2.0      , 6.0*u_max     , temp                      ]
+!
+!    call gauss_jordan(3,1,aug_matrix,fail_flag)
+!
+!    a(2:)           = aug_matrix(:,4)
+!    
+!     
+!end subroutine modified_NACA_four_digit_thickness_coeffs_2
 !*******************************************************************************************
 
 
@@ -2843,61 +2843,61 @@ end subroutine modified_NACA_four_digit_thickness
 !                   d     = thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
 !           
 !*******************************************************************************************
-subroutine modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,a,d,thk_data)
-    use file_operations
-    implicit none
-
-    integer,                intent(in)      :: np
-    real,                   intent(in)      :: u(np)
-    real,                   intent(in)      :: u_max
-    real,                   intent(in)      :: t_max
-    real,                   intent(in)      :: a(4)
-    real,                   intent(in)      :: d(4)
-    real,                   intent(inout)   :: thk_data(np,3)
-
-    ! Local variables
-    integer                                 :: i, j, k
-    real                                    :: tol = 10E-8
-
-
-    ! Compute thickness distribution
-    do i = 1,np
-
-        if (abs(u(i) - u_max) .le. tol) then
-            thk_data(i,1)   = t_max
-        else if (u(i) .lt. u_max) then
-            thk_data(i,1)   = (a(1)*sqrt(u(i))) + (a(2)*u(i)) + (a(3)*(u(i)**2)) + (a(4)*(u(i)**3))
-        else if (u(i) .gt. u_max) then
-            thk_data(i,1)   = (d(1)*sqrt(1.0 - u(i))) + (d(2)*(1.0 - u(i))) + (d(3)*((1.0 - u(i))**2)) + (d(4)*((1.0 - u(i))**3))
-        end if
-
-    end do
-
-    
-    ! Compute first derivative of thickness distribution
-    do i = 1,np
-
-        if (abs(u(i) - u_max) < tol) then
-            thk_data(i,2)   = 0.0
-            thk_data(i,3)   = (-0.25*d(1)/(sqrt(1.0 - u_max))**3) + (2.0*d(3)) + (6.0*d(4)*(1.0 - u_max)) 
-        else if (abs(u(i)) < tol) then
-            thk_data(i,2)   = (0.5*a(1)/sqrt(tol)) + a(2) + (2.0*a(3)*tol) + (3.0*a(4)*(tol**2))
-            thk_data(i,3)   = (-0.25*a(1)/((sqrt(tol))**3)) + (2.0*a(3)) + (6.0*a(4)*tol)
-        else if (abs(1.0 - u(i)) < tol) then
-            thk_data(i,2)   = (-0.5*d(1)/sqrt(tol)) - d(2) - (2.0*d(3)*tol) - (3.0*d(4)*(tol**2))
-            thk_data(i,3)   = (-0.25*d(1)/((sqrt(tol))**3)) + (2.0*d(3)) + (6.0*d(4)*tol)
-        else if (u(i) < u_max) then
-            thk_data(i,2)   = (0.5*a(1)/sqrt(u(i))) + a(2) + (2.0*a(3)*u(i)) + (3.0*a(4)*(u(i)**2))
-            thk_data(i,3)   = (-0.25*a(1)/((sqrt(u(i)))**3)) + (2.0*a(3)) + (6.0*a(4)*u(i))
-        else if (u(i) > u_max) then
-            thk_data(i,2)   = (-0.5*d(1)/sqrt(1.0 - u(i))) - d(2) + (2.0*d(3)*(u(i) - 1.0)) - (3.0*d(4)*((1.0 - u(i))**2)) 
-            thk_data(i,3)   = (-0.25*d(1)/((sqrt(1.0 - u(i)))**3)) + (2.0*d(3)) + (6.0*d(4)*(1.0 - u(i)))
-        end if
-
-    end do
-
-
-end subroutine modified_NACA_four_digit_thickness_2
+!subroutine modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,a,d,thk_data)
+!    use file_operations
+!    implicit none
+!
+!    integer,                intent(in)      :: np
+!    real,                   intent(in)      :: u(np)
+!    real,                   intent(in)      :: u_max
+!    real,                   intent(in)      :: t_max
+!    real,                   intent(in)      :: a(4)
+!    real,                   intent(in)      :: d(4)
+!    real,                   intent(inout)   :: thk_data(np,3)
+!
+!    ! Local variables
+!    integer                                 :: i, j, k
+!    real                                    :: tol = 10E-8
+!
+!
+!    ! Compute thickness distribution
+!    do i = 1,np
+!
+!        if (abs(u(i) - u_max) .le. tol) then
+!            thk_data(i,1)   = t_max
+!        else if (u(i) .lt. u_max) then
+!            thk_data(i,1)   = (a(1)*sqrt(u(i))) + (a(2)*u(i)) + (a(3)*(u(i)**2)) + (a(4)*(u(i)**3))
+!        else if (u(i) .gt. u_max) then
+!            thk_data(i,1)   = (d(1)*sqrt(1.0 - u(i))) + (d(2)*(1.0 - u(i))) + (d(3)*((1.0 - u(i))**2)) + (d(4)*((1.0 - u(i))**3))
+!        end if
+!
+!    end do
+!
+!    
+!    ! Compute first derivative of thickness distribution
+!    do i = 1,np
+!
+!        if (abs(u(i) - u_max) < tol) then
+!            thk_data(i,2)   = 0.0
+!            thk_data(i,3)   = (-0.25*d(1)/(sqrt(1.0 - u_max))**3) + (2.0*d(3)) + (6.0*d(4)*(1.0 - u_max)) 
+!        else if (abs(u(i)) < tol) then
+!            thk_data(i,2)   = (0.5*a(1)/sqrt(tol)) + a(2) + (2.0*a(3)*tol) + (3.0*a(4)*(tol**2))
+!            thk_data(i,3)   = (-0.25*a(1)/((sqrt(tol))**3)) + (2.0*a(3)) + (6.0*a(4)*tol)
+!        else if (abs(1.0 - u(i)) < tol) then
+!            thk_data(i,2)   = (-0.5*d(1)/sqrt(tol)) - d(2) - (2.0*d(3)*tol) - (3.0*d(4)*(tol**2))
+!            thk_data(i,3)   = (-0.25*d(1)/((sqrt(tol))**3)) + (2.0*d(3)) + (6.0*d(4)*tol)
+!        else if (u(i) < u_max) then
+!            thk_data(i,2)   = (0.5*a(1)/sqrt(u(i))) + a(2) + (2.0*a(3)*u(i)) + (3.0*a(4)*(u(i)**2))
+!            thk_data(i,3)   = (-0.25*a(1)/((sqrt(u(i)))**3)) + (2.0*a(3)) + (6.0*a(4)*u(i))
+!        else if (u(i) > u_max) then
+!            thk_data(i,2)   = (-0.5*d(1)/sqrt(1.0 - u(i))) - d(2) + (2.0*d(3)*(u(i) - 1.0)) - (3.0*d(4)*((1.0 - u(i))**2)) 
+!            thk_data(i,3)   = (-0.25*d(1)/((sqrt(1.0 - u(i)))**3)) + (2.0*d(3)) + (6.0*d(4)*(1.0 - u(i)))
+!        end if
+!
+!    end do
+!
+!
+!end subroutine modified_NACA_four_digit_thickness_2
 !*******************************************************************************************
 
 

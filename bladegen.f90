@@ -715,19 +715,19 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         thickness       = thickness_data(:,1)
         
         
-        u_TE        = 1.0 - t_TE
-        call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,u_TE,dy_dx_TE,LE_round,a_temp,d_temp)
-        if (allocated(thick_temp)) deallocate(thick_temp)
-        allocate(thick_temp(np,3))
-        call modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,a_temp,d_temp,thick_temp)
+        !u_TE        = 1.0 - t_TE
+        !call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,u_TE,dy_dx_TE,LE_round,a_temp,d_temp)
+        !if (allocated(thick_temp)) deallocate(thick_temp)
+        !allocate(thick_temp(np,3))
+        !call modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,a_temp,d_temp,thick_temp)
 
-        if (js == 1) then
-            open(830, file = 'coeffs_temp.dat')
-            do i = 1,4
-                write(830,*) a_temp(i), d_temp(i)
-            end do
-            close(830)
-        end if
+        !if (js == 1) then
+        !    open(830, file = 'coeffs_temp.dat')
+        !    do i = 1,4
+        !        write(830,*) a_temp(i), d_temp(i)
+        !    end do
+        !    close(830)
+        !end if
 
         !
         ! Check for monotonicity
@@ -895,18 +895,18 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
     xtop = u   - thickness*sin(angle)
     ytop = camber + thickness*cos(angle)
 
-    if (allocated(xbt) .and. allocated(ybt) .and. allocated(xtt) .and. allocated(ybt)) &
-        deallocate(xbt,ybt,xtt,ytt)
-    allocate(xbt(np), ybt(np), xtt(np), ytt(np))
-    xbt = u + (thick_temp(:,1)*sin(angle))
-    ybt = camber - (thick_temp(:,1)*cos(angle))
-    xtt = u - (thick_temp(:,1)*sin(angle))
-    ytt = camber + (thick_temp(:,1)*cos(angle))
-    open(830, file = 'temp_NACA.'//trim(adjustl(sec))//'.dat')
-    do i = 1,np
-        write(830,*) u(i), thick_temp(i,1), thick_temp(i,2), thick_temp(i,3), xbt(i), ybt(i), xtt(i), ytt(i)
-    end do
-    close(830)
+    !if (allocated(xbt) .and. allocated(ybt) .and. allocated(xtt) .and. allocated(ybt)) &
+    !    deallocate(xbt,ybt,xtt,ytt)
+    !allocate(xbt(np), ybt(np), xtt(np), ytt(np))
+    !xbt = u + (thick_temp(:,1)*sin(angle))
+    !ybt = camber - (thick_temp(:,1)*cos(angle))
+    !xtt = u - (thick_temp(:,1)*sin(angle))
+    !ytt = camber + (thick_temp(:,1)*cos(angle))
+    !open(830, file = 'temp_NACA.'//trim(adjustl(sec))//'.dat')
+    !do i = 1,np
+    !    write(830,*) u(i), thick_temp(i,1), thick_temp(i,2), thick_temp(i,3), xbt(i), ybt(i), xtt(i), ytt(i)
+    !end do
+    !close(830)
 
 
 
