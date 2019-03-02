@@ -2086,11 +2086,6 @@ subroutine read_spanwise_input(row_type, path)
                 read(10,'(A)') temps
                 write(nopen1,'(A)') temps
 
-                ! Read as half thickness at the given chordwise location
-                do j = 2 + ncp_chord_thickness,ncp_chord_thk
-                    cp_chord_thk(i,j) = 0.5*cp_chord_thk(i,j)
-                end do
-
                 ! If spanwise splining is not required, store in 1D arrays
                 if(control_inp_flag .eq. 1) then
                     xcp = cp_chord_thk(i, 2:ncp_chord_thickness+1)
@@ -2328,20 +2323,8 @@ subroutine read_spanwise_input(row_type, path)
                     temp_exact(i) = cp_chord_thk(i,jj)
                 end do
                 call override_exact_thk1(ncp_span_thk,temp_exact)
-                
-                ! Check if thk1 values have been overridden
                 do i = 1,ncp_span_thk
-                    if (abs(temp_exact(i) - cp_chord_thk(i,jj)) .gt. tol) array_difference = .true.
-                    exit
-                end do
-
-                ! If thk1 values have been overridden, assign new thickness values
-                do i = 1,ncp_span_thk
-                    if (array_difference) then
-                        cp_chord_thk(i,jj) = 0.5*temp_exact(i)
-                    else
-                        cp_chord_thk(i,jj) = temp_exact(i)
-                    end if
+                    cp_chord_thk(i,jj) = temp_exact(i)
                 end do 
                    
             end if
@@ -2358,20 +2341,8 @@ subroutine read_spanwise_input(row_type, path)
                     temp_exact(i) = cp_chord_thk(i,jj)
                 end do
                 call override_exact_thk2(ncp_span_thk,temp_exact)
-
-                ! Check if thk2 values have been overridden
                 do i = 1,ncp_span_thk
-                    if (abs(temp_exact(i) - cp_chord_thk(i,jj)) .gt. tol) array_difference = .true.
-                    exit
-                end do
-
-                ! If thk2 values have been overridden, assign new thickness values
-                do i = 1,ncp_span_thk
-                    if (array_difference) then
-                        cp_chord_thk(i,jj) = 0.5*temp_exact(i)
-                    else
-                        cp_chord_thk(i,jj) = temp_exact(i)
-                    end if
+                    cp_chord_thk(i,jj) = temp_exact(i)
                 end do
 
             end if
@@ -2388,20 +2359,8 @@ subroutine read_spanwise_input(row_type, path)
                     temp_exact(i) = cp_chord_thk(i,jj)
                 end do
                 call override_exact_thk3(ncp_span_thk,temp_exact)
-
-                ! Check if thk3 values have been overridden
                 do i = 1,ncp_span_thk
-                    if (abs(temp_exact(i) - cp_chord_thk(i,jj)) .gt. tol) array_difference = .true.
-                    exit
-                end do
-
-                ! If thk3 values have been overridden, assign new thickness values
-                do i = 1,ncp_span_thk
-                    if (array_difference) then
-                        cp_chord_thk(i,jj) = 0.5*temp_exact(i)
-                    else
-                        cp_chord_thk(i,jj) = temp_exact(i)
-                    end if
+                    cp_chord_thk(i,jj) = temp_exact(i)
                 end do
 
             end if
@@ -2418,20 +2377,8 @@ subroutine read_spanwise_input(row_type, path)
                     temp_exact(i) = cp_chord_thk(i,jj)
                 end do
                 call override_exact_thk4(ncp_span_thk,temp_exact)
-
-                ! Check if thk4 values have been overridden
                 do i = 1,ncp_span_thk
-                    if (abs(temp_exact(i) - cp_chord_thk(i,jj)) .gt. tol) array_difference = .true.
-                    exit
-                end do
-
-                ! If thk4 values have been overridden, assign new thickness values
-                do i = 1,ncp_span_thk
-                    if (array_difference) then
-                        cp_chord_thk(i,jj) = 0.5*temp_exact(i)
-                    else
-                        cp_chord_thk(i,jj) = temp_exact(i)
-                    end if
+                    cp_chord_thk(i,jj) = temp_exact(i)
                 end do
             
             end if
@@ -2448,20 +2395,8 @@ subroutine read_spanwise_input(row_type, path)
                     temp_exact(i) = cp_chord_thk(i,jj)
                 end do
                 call override_exact_thk5(ncp_span_thk,temp_exact)
-
-                ! Check if thk5 values have been overridden
                 do i = 1,ncp_span_thk
-                    if (abs(temp_exact(i) - cp_chord_thk(i,jj)) .gt. tol) array_difference = .true.
-                    exit
-                end do
-
-                ! If thk5 values have been overridden, assign new thickness values
-                do i = 1,ncp_span_thk
-                    if (array_difference) then
-                        cp_chord_thk(i,jj) = 0.5*temp_exact(i)
-                    else
-                        cp_chord_thk(i,jj) = temp_exact(i)
-                    end if
+                    cp_chord_thk(i,jj) = temp_exact(i)
                 end do
             
             end if
@@ -2478,20 +2413,8 @@ subroutine read_spanwise_input(row_type, path)
                     temp_exact(i) = cp_chord_thk(i,jj)
                 end do
                 call override_exact_thk6(ncp_span_thk,temp_exact)
-
-                ! Check if thk6 values have been overridden
                 do i = 1,ncp_span_thk
-                    if (abs(temp_exact(i) - cp_chord_thk(i,jj)) .gt. tol) array_difference = .true.
-                    exit
-                end do
-
-                ! If thk6 values have been overridden, assign new thickness values
-                do i = 1,ncp_span_thk
-                    if (array_difference) then
-                        cp_chord_thk(i,jj) = 0.5*temp_exact(i)
-                    else
-                        cp_chord_thk(i,jj) = temp_exact(i)
-                    end if
+                    cp_chord_thk(i,jj) = temp_exact(i)
                 end do
             
             end if
@@ -2508,20 +2431,8 @@ subroutine read_spanwise_input(row_type, path)
                     temp_exact(i) = cp_chord_thk(i,jj)
                 end do
                 call override_exact_thk7(ncp_span_thk,temp_exact)
-
-                ! Check if thk7 values have been overridden
                 do i = 1,ncp_span_thk
-                    if (abs(temp_exact(i) - cp_chord_thk(i,jj)) .gt. tol) array_difference = .true.
-                    exit
-                end do
-
-                ! If thk7 values have been overridden, assign new thickness values
-                do i = 1,ncp_span_thk
-                    if (array_difference) then
-                        cp_chord_thk(i,jj) = 0.5*temp_exact(i)
-                    else
-                        cp_chord_thk(i,jj) = temp_exact(i)
-                    end if
+                    cp_chord_thk(i,jj) = temp_exact(i)
                 end do
             
             end if
@@ -3046,9 +2957,9 @@ subroutine read_spanwise_NACA_input(row_type,path)
         do i = 1,ncp_span_thk
 
             read(nopen_aux,*) cp_chord_thk(i,:)
-            do j = 4,5
-                cp_chord_thk(i,j)   = 0.5*cp_chord_thk(i,j)
-            end do
+            !do j = 4,5
+            !    cp_chord_thk(i,j)   = 0.5*cp_chord_thk(i,j)
+            !end do
             backspace(nopen_aux)
             read(nopen_aux,'(A)') temps
             write(nopen1,'(A)') trim(temps)
@@ -3070,104 +2981,81 @@ subroutine read_spanwise_NACA_input(row_type,path)
     !
     ! ESP override subroutines for thickness control
     !
-    !if (control_inp_flag == 2) then
-    !    if (allocated(temp)) deallocate(temp)
-    !    allocate(temp(ncp_span_thk))
+    if (control_inp_flag == 2) then
+        if (allocated(temp)) deallocate(temp)
+        allocate(temp(ncp_span_thk))
 
-    !    !
-    !    ! Override span_thk_ctrl
-    !    ! override_span_thk_ctrl() in 3dbgb.f90
-    !    ! Callback to override_span_thk_ctrl_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-    !    !
-    !    kk                      = 1
-    !    do ii = 1,ncp_span_thk
-    !        temp(ii)            = cp_chord_thk(ii,kk)
-    !    end do
-    !    call override_span_thk_ctrl(ncp_span_thk,temp)
-    !    do ii = 1,ncp_span_thk
-    !        cp_chord_thk(ii,kk) = temp(ii)
-    !    end do
+        !
+        ! Override span_thk_ctrl
+        ! override_span_thk_ctrl() in 3dbgb.f90
+        ! Callback to override_span_thk_ctrl_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !
+        kk                      = 1
+        do ii = 1,ncp_span_thk
+            temp(ii)            = cp_chord_thk(ii,kk)
+        end do
+        call override_span_thk_ctrl(ncp_span_thk,temp)
+        do ii = 1,ncp_span_thk
+            cp_chord_thk(ii,kk) = temp(ii)
+        end do
 
-    !    !
-    !    ! Override naca_le_radius
-    !    ! override_naca_le_radius() in 3dbgb.f90
-    !    ! Callback to override_naca_le_radius_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-    !    !
-    !    kk                      = 2
-    !    do ii = 1,ncp_span_thk
-    !        temp(ii)            = cp_chord_thk(ii,kk)
-    !    end do
-    !    call override_naca_le_radius(ncp_span_thk,temp)
-    !    do ii = 1,ncp_span_thk
-    !        cp_chord_thk(ii,kk) = temp(ii)
-    !    end do
+        !
+        ! Override naca_le_radius
+        ! override_naca_le_radius() in 3dbgb.f90
+        ! Callback to override_naca_le_radius_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !
+        kk                      = 2
+        do ii = 1,ncp_span_thk
+            temp(ii)            = cp_chord_thk(ii,kk)
+        end do
+        call override_naca_le_radius(ncp_span_thk,temp)
+        do ii = 1,ncp_span_thk
+            cp_chord_thk(ii,kk) = temp(ii)
+        end do
 
-    !    !
-    !    ! Override naca_u_max
-    !    ! override_naca_u_max() in 3dbgb.f90
-    !    ! Callback to override_naca_u_max_() in udpTblade.c, udpHubWedge.c and  udpBladeVolume.c
-    !    !
-    !    kk                      = 3
-    !    do ii = 1,ncp_span_thk
-    !        temp(ii)            = cp_chord_thk(ii,kk)
-    !    end do
-    !    call override_naca_u_max(ncp_span_thk,temp)
-    !    do ii = 1,ncp_span_thk
-    !        cp_chord_thk(ii,kk) = temp(ii)
-    !    end do
+        !
+        ! Override naca_u_max
+        ! override_naca_u_max() in 3dbgb.f90
+        ! Callback to override_naca_u_max_() in udpTblade.c, udpHubWedge.c and  udpBladeVolume.c
+        !
+        kk                      = 3
+        do ii = 1,ncp_span_thk
+            temp(ii)            = cp_chord_thk(ii,kk)
+        end do
+        call override_naca_u_max(ncp_span_thk,temp)
+        do ii = 1,ncp_span_thk
+            cp_chord_thk(ii,kk) = temp(ii)
+        end do
 
-    !    !
-    !    ! Override naca_t_max
-    !    ! override_naca_t_max() in 3dbgb.f90
-    !    ! Callback to override_naca_t_max_() in 3dbgb.f90
-    !    !
-    !    kk                      = 4
-    !    do ii = 1,ncp_span_thk
-    !        temp(ii)            = cp_chord_thk(ii,kk)
-    !    end do
-    !    call override_naca_t_max(ncp_span_thk,temp)
-    !    
-    !    ! Check if the overriding values are different than the original values
-    !    do ii = 1,ncp_span_thk
-    !        if (abs(temp(ii) - cp_chord_thk(ii,kk)) .gt. tol) array_difference = .true.
-    !        exit
-    !    end do
+        !
+        ! Override naca_t_max
+        ! override_naca_t_max() in 3dbgb.f90
+        ! Callback to override_naca_t_max_() in 3dbgb.f90
+        !
+        kk                      = 4
+        do ii = 1,ncp_span_thk
+            temp(ii)            = cp_chord_thk(ii,kk)
+        end do
+        call override_naca_t_max(ncp_span_thk,temp)
+        do ii = 1,ncp_span_thk
+            cp_chord_thk(ii,kk) = temp(ii)
+        end do
 
-    !    ! If values in .csm file are different, assign new thickness values
-    !    do ii = 1,ncp_span_thk
-    !        if (array_difference) then
-    !            cp_chord_thk(ii,kk) = 0.5*temp(ii)
-    !        else
-    !            cp_chord_thk(ii,kk) = temp(ii)
-    !        end if
-    !    end do
+        !
+        ! Override naca_t_te
+        ! override_naca_t_te() in 3dbgb.f90
+        ! Callback to override_naca_t_te_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !
+        kk                      = 5
+        do ii = 1,ncp_span_thk
+            temp(ii)            = cp_chord_thk(ii,kk)
+        end do
+        call override_naca_t_te(ncp_span_thk,temp)
+        do ii = 1,ncp_span_thk
+            cp_chord_thk(ii,kk) = temp(ii)
+        end do
 
-    !    !
-    !    ! Override naca_t_te
-    !    ! override_naca_t_te() in 3dbgb.f90
-    !    ! Callback to override_naca_t_te_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-    !    !
-    !    kk                      = 5
-    !    do ii = 1,ncp_span_thk
-    !        temp(ii)            = cp_chord_thk(ii,kk)
-    !    end do
-    !    call override_naca_t_te(ncp_span_thk,temp)
-
-    !    ! Check if the overriding values are different than the original values
-    !    do ii = 1,ncp_span_thk
-    !        if (abs(temp(ii) - cp_chord_thk(ii,kk)) .gt. tol) array_difference = .true.
-    !    end do
-
-    !    ! If values in .csm file are different, assign new thickness values
-    !    do ii = 1,ncp_span_thk
-    !        if (array_difference) then
-    !            cp_chord_thk(ii,kk) = 0.5*temp(ii)
-    !        else
-    !            cp_chord_thk(ii,kk) = temp(ii)
-    !        end if
-    !    end do
-
-    !end if  ! control_inp_flag
+    end if  ! control_inp_flag
 
 
 

@@ -151,9 +151,9 @@ real, allocatable, dimension(:) :: ueq, xmean, ymean
 
 character*120 line, temp
 character(*)    :: fext
-character*32 fname, fname1, fname3, fname4, blext, casename, develop
+character*32 fname, fname1, fname3, fname4, blext
 character*80 file1, file2, file3, file4, file5, file6, file7
-character(*)    :: airfoil
+character(*)    :: casename, develop, airfoil
 character*20 sec
 character*16 thick_distr_3_flag
 logical error, ellip, isdev, isxygrid

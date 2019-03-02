@@ -40,7 +40,7 @@ real*8 :: t, uin_le, te_angle, te_thk_x, pi, dtor
 real*8  uin_te
 real*8, dimension(6, np_side):: splinedata
 
-character*32 casename, develop
+character(*) :: casename, develop
 character*80 file1, file2, file3, file4, file5, sec
 
 logical isdev

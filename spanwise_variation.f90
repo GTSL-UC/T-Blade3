@@ -206,7 +206,7 @@ subroutine span_variation()
             ! Store "u" and "thk" spanwise distribution in the spanwise thickness array 
             do j = 1, na
                 bspline_thk(j, 2*i) = intersec_u(j)
-                bspline_thk(j, 2*i+1) = intersec_v(j)
+                bspline_thk(j, 2*i+1) = 0.5*intersec_v(j)
             enddo
 
         enddo   ! i = 1,ncp_thickness
@@ -265,12 +265,18 @@ subroutine span_variation()
         ! Spanwise distribution of "Span" control points
         bspline_thk(:,1) = span(1:nsl)
 
-        ! Spanwise distribution of "u" and "thk" control points
+        ! Spanwise distribution of "LE_radius", "u_max", "t_max" and "t_TE"
         do i = 2,5
 
             call cubicspline(cp_chord_thk(:,i),cp_chord_thk(:,1),ncp_span_thk,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
             call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,intersec_u,na,xbs,ybs)
-            bspline_thk(:,i) = intersec_u(1:nsl)
+
+            ! For "t_max" and "t_TE", store as half thickness
+            if (i == 4 .or. i == 5) then
+                bspline_thk(:,i) = 0.5*intersec_u(1:nsl)
+            else
+                bspline_thk(:,i) = intersec_u(1:nsl)
+            end if
 
         end do  ! i = 2,5
 

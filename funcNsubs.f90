@@ -1029,7 +1029,7 @@ real min_throat_2D,pi,sang,angle_up
 real x_interup,y_interup,x_interdwn,y_interdwn
 real, allocatable, dimension(:) :: throat
 character*80 file4
-character*32 casename,develop
+character(*) :: casename,develop
 
 logical isdev
 
