@@ -201,6 +201,48 @@ module file_operations
 
 
 
+    !
+    ! Write meanline u,v data to a file
+    !
+    !---------------------------------------------------------------------------
+    subroutine meanline_u_v_file(np,sec,u,camber,slope)
+
+        integer,                intent(in)              :: np
+        character(*),           intent(in)              :: sec
+        real,                   intent(in)              :: u(np)
+        real,                   intent(in)              :: camber(np)
+        real,                   intent(in)              :: slope(np)
+
+        ! Logical
+        character(:),   allocatable                     :: meanline_file
+        integer                                         :: nopen = 831, i
+        logical                                         :: exist
+
+
+        ! 
+        ! Inquire if the meanline (u,v) file exists
+        ! If it exists, overwrite 
+        !
+        meanline_file   = 'meanline_uv.'//trim(adjustl(sec))//'.dat'
+        inquire(file = meanline_file, exist=exist)
+        if (exist) then
+            open(nopen, file = trim(meanline_file), status = 'old', action = 'write', form = 'formatted')
+        else
+            open(nopen, file = trim(meanline_file), status = 'new', action = 'write', form = 'formatted')
+        end if
+        
+        do i = 1,np
+            write(nopen,'(3F30.16)') u(i), camber(i), slope(i)
+        end do
+        
+        close(nopen)
+
+
+    end subroutine meanline_u_v_file
+    !---------------------------------------------------------------------------
+
+
+
 
 
 

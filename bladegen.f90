@@ -596,6 +596,7 @@ elseif (curv_camber.eq.1) then ! using curvature control for camber instead of m
         sang, chrd, init_angles, init_cambers, x_spl_end_curv, splinedata)
         camber = splinedata(2, :)
         slope = splinedata(3, :)
+
 endif ! end of camber curvature switch   
 ! -----------------------------------------------------------------------------
 
@@ -875,6 +876,9 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
     ybot = camber - thickness*cos(angle)
     xtop = u   - thickness*sin(angle)
     ytop = camber + thickness*cos(angle)
+
+    ! Write meanline (u,v) data file
+    call meanline_u_v_file(np,sec,u,camber,slope)
 
     !if (thick_distr == 5) then
     !    np_circ = 21
