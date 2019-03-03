@@ -129,7 +129,8 @@ real, allocatable, dimension(:) :: xtop_refine, ytop_refine, xbot_refine, ybot_r
 real, allocatable, dimension(:) :: init_angles, init_cambers, x_spl_end_curv, cam_refine, u_refine
 real ucp_top(11), vcp_top(11), ucp_bot(11), vcp_bot(11)
 real a_NACA(4), d_NACA(4), t_max, u_max, t_TE, u_TE, dy_dx_TE, loc(1), LE_round, a_temp(4), d_temp(4)
-real,   allocatable             :: ptop(:,:), pbot(:,:), u_circ_TE(:), thick_temp(:,:), xbt(:), ybt(:), xtt(:), ytt(:)
+real,   allocatable             :: ptop(:,:), pbot(:,:), u_circ_TE(:), thk_temp(:), thkd_temp(:,:), &
+                                   xbt(:), ybt(:), xtt(:), ytt(:)
 real le_throat, te_throat, intersec_coord(12, nsl), min_throat_2D, attach_angle
 real u_translation, camber_trans
 ! variables for s809 profile
@@ -212,7 +213,7 @@ call close_log_file(nopen, file_open)
 !---- # of points
 np = 121! nodes for the grid generator100
 if (thick_distr == 5) then
-    np = 111
+    np = 121
 end if
 np_side = np
 
@@ -668,7 +669,7 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         allocate(thickness_data(np,3))
 
         if (allocated(thk_der)) deallocate(thk_der)
-        allocate(thk_der(np - 1))
+        allocate(thk_der(np))
 
         call log_file_exists(log_file, nopen, file_open)
         print *, ''
@@ -710,32 +711,17 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         ! Find coefficients for modified NACA four digit thickness
         ! Apply modified NACA four digit thickness
         !
-        call modified_NACA_four_digit_thickness_coeffs(t_max,u_max,t_TE,dy_dx_TE,LE_round,a_NACA,d_NACA)
-        call modified_NACA_four_digit_thickness(np,u,u_max,t_max,a_NACA,d_NACA,thickness_data)
+        call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,dy_dx_TE,LE_round,a_NACA,d_NACA)
+        call modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a_NACA,d_NACA,thickness_data)
         thickness       = thickness_data(:,1)
-        
-        
-        !u_TE        = 1.0 - t_TE
-        !call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,u_TE,dy_dx_TE,LE_round,a_temp,d_temp)
-        !if (allocated(thick_temp)) deallocate(thick_temp)
-        !allocate(thick_temp(np,3))
-        !call modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,a_temp,d_temp,thick_temp)
-
-        !if (js == 1) then
-        !    open(830, file = 'coeffs_temp.dat')
-        !    do i = 1,4
-        !        write(830,*) a_temp(i), d_temp(i)
-        !    end do
-        !    close(830)
-        !end if
-
+       
         !
         ! Check for monotonicity
         !
-        do i = 1,np - 1
+        do i = 1,np
 
-            thk_der(i)  = (thickness_data(i + 1,3) .lt. 0.0)
-            if (thk_der(i) .eqv. .false.) then
+            thk_der(i)  = (thickness_data(i,3) .gt. 0.0)
+            if (thk_der(i)) then
                 print *, "WARNING: Thickness distribution for blade section = ", js, " isn't monotonic"
                 write(nopen,*) "WARNING: Thickness distribution for blade section = ", js, " isn't monotonic"
                 exit
@@ -888,58 +874,41 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
     ! Creating the top and bottom curve coordinates. ---------
     ! -----------------------------------------------------------------------------
     angle = atan(slope)
-    !print*, "camber", camber
-    ! generating the blade on vector bases:
     xbot = u   + thickness*sin(angle)
     ybot = camber - thickness*cos(angle)
     xtop = u   - thickness*sin(angle)
     ytop = camber + thickness*cos(angle)
 
-    !if (allocated(xbt) .and. allocated(ybt) .and. allocated(xtt) .and. allocated(ybt)) &
-    !    deallocate(xbt,ybt,xtt,ytt)
-    !allocate(xbt(np), ybt(np), xtt(np), ytt(np))
-    !xbt = u + (thick_temp(:,1)*sin(angle))
-    !ybt = camber - (thick_temp(:,1)*cos(angle))
-    !xtt = u - (thick_temp(:,1)*sin(angle))
-    !ytt = camber + (thick_temp(:,1)*cos(angle))
-    !open(830, file = 'temp_NACA.'//trim(adjustl(sec))//'.dat')
-    !do i = 1,np
-    !    write(830,*) u(i), thick_temp(i,1), thick_temp(i,2), thick_temp(i,3), xbt(i), ybt(i), xtt(i), ytt(i)
-    !end do
-    !close(830)
+    !if (thick_distr == 5) then
+    !    np_circ = 21
+    !    np_new  = np + ((np_circ - 1)/2)
 
+    !    if (allocated(ptop) .and. allocated(pbot)) deallocate(ptop,pbot)
+    !    allocate(ptop(2,np_new),pbot(2,np_new))
 
+    !    if (allocated(u_circ_TE)) deallocate(u_circ_TE)
+    !    allocate(u_circ_TE(np_new)) 
 
-    if (thick_distr == 5) then
-        np_circ = 21
-        np_new  = np + ((np_circ - 1)/2)
+    !    call add_circular_TE(np,u,np_circ,xtop,ytop,xbot,ybot,ptop,pbot,u_circ_TE)
 
-        if (allocated(ptop) .and. allocated(pbot)) deallocate(ptop,pbot)
-        allocate(ptop(2,np_new),pbot(2,np_new))
+    !    np      = np_new
+    !    if (allocated(xtop) .and. allocated(ytop) .and. allocated(xbot) .and. allocated(ybot)) &
+    !        deallocate(xtop,ytop,xbot,ybot)
+    !    allocate(xtop(np), ytop(np), xbot(np), ybot(np))
+    !    xtop    = ptop(1,:)
+    !    ytop    = ptop(2,:)
+    !    xbot    = pbot(1,:)
+    !    ybot    = pbot(2,:)
 
-        if (allocated(u_circ_TE)) deallocate(u_circ_TE)
-        allocate(u_circ_TE(np_new)) 
+    !    if (allocated(u)) deallocate(u)
+    !    allocate(u(np))
 
-        call add_circular_TE(np,u,np_circ,xtop,ytop,xbot,ybot,ptop,pbot,u_circ_TE)
+    !    u       = u_circ_TE
 
-        np      = np_new
-        if (allocated(xtop) .and. allocated(ytop) .and. allocated(xbot) .and. allocated(ybot)) &
-            deallocate(xtop,ytop,xbot,ybot)
-        allocate(xtop(np), ytop(np), xbot(np), ybot(np))
-        xtop    = ptop(1,:)
-        ytop    = ptop(2,:)
-        xbot    = pbot(1,:)
-        ybot    = pbot(2,:)
+    !    if (allocated(xb) .and. allocated(yb)) deallocate(xb,yb)
+    !    allocate(xb((2*np) - 1), yb((2*np) - 1))
 
-        if (allocated(u)) deallocate(u)
-        allocate(u(np))
-
-        u       = u_circ_TE
-
-        if (allocated(xb) .and. allocated(yb)) deallocate(xb,yb)
-        allocate(xb((2*np) - 1), yb((2*np) - 1))
-
-    end if
+    !end if
 
 
     !

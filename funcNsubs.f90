@@ -2674,7 +2674,7 @@ end subroutine modified_NACA_four_digit_thickness_coeffs
 ! This subroutine solves for the coefficients with an elliptical TE
 !
 ! For u < u_max: y_t = a_0*sqrt(u) + a_1*u + a_2*(u**2) + a_3*(u**3)
-! For u > u_max: y_t = d_0 + d_1*(1 - u) + d_2*((1 - u)**2) + d_3*((1 - u)**3)
+! For u > u_max: y_t = d_0*sqrt*(1 - u) + d_1*(1 - u) + d_2*((1 - u)**2) + d_3*((1 - u)**3)
 !
 ! Input parameters: t_max     = half max. thickness for the blade section 
 !                   u_max     = chordwise location of max. thickness for the blade section
@@ -2765,6 +2765,99 @@ end subroutine modified_NACA_four_digit_thickness_coeffs
 
 
 !
+! Compute coefficients of modified NACA four-digit thickness
+!
+! For u < u_max: y_t = a_0*sqrt(u) + a_1*u + a_2*(u**2) + a_3*(u**3)
+! For u > u_max: y_t = d_0 + d_1*(1 - u) + d_2*((1 - u)**2) + d_3*((1 - u)**3)
+!
+! Input parameters: t_max    = half max. thickness for the blade section in fraction chord
+!                   u_max    = chordwise location of max. thickness for the blade section
+!                   t_TE     = half thickness for the blade section at the trailing edge
+!                   dy_dx_TE = trailing edige angle
+!                   I        = integer parameter governing roundedness of the leading edge
+!                              (default = 6, sharp LE = 0)
+!
+! Reference: Abbott, I.H, von Doenhoff, A.E., "Families of Wing Sections", Theory of Wing
+!            Sections, Dover Publications, New York, 1999, pp. 116-118
+!
+!*******************************************************************************************
+subroutine modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,dy_dx_TE,I,a,d)
+    implicit none
+
+    real,                       intent(in)      :: t_max
+    real,                       intent(in)      :: u_max
+    real,                       intent(in)      :: t_TE
+    real,                       intent(in)      :: dy_dx_TE
+    real,                       intent(in)      :: I
+    real,                       intent(inout)   :: a(4)
+    real,                       intent(inout)   :: d(4)
+
+    ! Local variables
+    integer                                     :: j, k, fail_flag, nopen
+    real                                        :: u_TE, temp
+    real,           allocatable                 :: aug_matrix(:,:)
+    character(:),   allocatable                 :: log_file
+    logical                                     :: file_open
+
+
+
+    ! Define near trailing edge chordwise location
+    u_TE            = 1.0 - (t_TE)
+
+
+    !
+    ! Compute d_0, d_1, d_2 and d_3
+    ! Enforce the following conditions: yd_t(u_max)     = t_max
+    !                                   yd_t(u_TE)      = t_TE
+    !                                   yd'_t(u_max)    = 0.0
+    !                                   yd'_t(u_TE)     = -2.0*dy_dx_TE*t_max
+    !
+    if (allocated(aug_matrix)) deallocate(aug_matrix)
+    allocate(aug_matrix(4,5))
+
+    aug_matrix(1,:) = [1.0, 1.0 - u_max, (1.0 - u_max)**2  , (1.0 - u_max)**3       , t_max              ]
+    aug_matrix(2,:) = [1.0, 1.0 - u_TE , (1.0 - u_TE)**2   , (1.0 - u_TE)**3        , t_TE               ]
+    aug_matrix(3,:) = [0.0, -1.0       , -2.0*(1.0 - u_max), -3.0*((1.0 - u_max)**2), 0.0                ]
+    aug_matrix(4,:) = [0.0, -1.0       , -2.0*(1.0 - u_TE) , -3.0*((1.0 - u_TE)**2) , -2.0*dy_dx_TE*t_max]
+
+    call gauss_jordan(4,1,aug_matrix,fail_flag)
+
+    ! Store d_0, d_1, d_2 and d_3
+    d               = aug_matrix(:,5)
+
+
+    !
+    ! Compute a_0
+    !
+    a(1)            = sqrt(2.2038)*(2.0*t_max*(I/6.0))
+
+    !
+    ! Compute a_1, a_2 and a_3
+    ! Enforce the following conditions: ya_t(u_max)     = yd_t(u_max)
+    !                                   ya'_t(u_max)    = yd'_t(u_max)
+    !                                   ya''_t(u_max)   = yd''_t(u_max)
+    !
+    if (allocated(aug_matrix)) deallocate(aug_matrix)
+    allocate(aug_matrix(3,4))
+
+    temp            = (2.0*d(3)) + (6.0*d(4)*(1.0 - u_max)) + (0.25*a(1)/((sqrt(u_max))**3))
+
+    aug_matrix(1,:) = [u_max, u_max**2 , u_max**3      , t_max - (a(1)*sqrt(u_max))]
+    aug_matrix(2,:) = [1.0  , 2.0*u_max, 3.0*(u_max**2), (-0.5*a(1)/sqrt(u_max))   ]
+    aug_matrix(3,:) = [0.0  , 2.0      , 6.0*u_max     , temp                      ]
+
+    call gauss_jordan(3,1,aug_matrix,fail_flag)
+
+    ! Compute a_1, a_2 and a_3
+    a(2:)           = aug_matrix(:,4)
+
+
+end subroutine modified_NACA_four_digit_thickness_coeffs_2
+!*******************************************************************************************
+
+
+
+!
 ! Obtain thickness distribution with the computed coefficients a_i and d_i
 !
 ! Input parameters: np    = number of points along the blade section meanline
@@ -2843,61 +2936,82 @@ end subroutine modified_NACA_four_digit_thickness
 !                   d     = thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
 !           
 !*******************************************************************************************
-!subroutine modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,a,d,thk_data)
-!    use file_operations
-!    implicit none
-!
-!    integer,                intent(in)      :: np
-!    real,                   intent(in)      :: u(np)
-!    real,                   intent(in)      :: u_max
-!    real,                   intent(in)      :: t_max
-!    real,                   intent(in)      :: a(4)
-!    real,                   intent(in)      :: d(4)
-!    real,                   intent(inout)   :: thk_data(np,3)
-!
-!    ! Local variables
-!    integer                                 :: i, j, k
-!    real                                    :: tol = 10E-8
-!
-!
-!    ! Compute thickness distribution
-!    do i = 1,np
-!
-!        if (abs(u(i) - u_max) .le. tol) then
-!            thk_data(i,1)   = t_max
-!        else if (u(i) .lt. u_max) then
-!            thk_data(i,1)   = (a(1)*sqrt(u(i))) + (a(2)*u(i)) + (a(3)*(u(i)**2)) + (a(4)*(u(i)**3))
-!        else if (u(i) .gt. u_max) then
-!            thk_data(i,1)   = (d(1)*sqrt(1.0 - u(i))) + (d(2)*(1.0 - u(i))) + (d(3)*((1.0 - u(i))**2)) + (d(4)*((1.0 - u(i))**3))
-!        end if
-!
-!    end do
-!
-!    
-!    ! Compute first derivative of thickness distribution
-!    do i = 1,np
-!
-!        if (abs(u(i) - u_max) < tol) then
-!            thk_data(i,2)   = 0.0
-!            thk_data(i,3)   = (-0.25*d(1)/(sqrt(1.0 - u_max))**3) + (2.0*d(3)) + (6.0*d(4)*(1.0 - u_max)) 
-!        else if (abs(u(i)) < tol) then
-!            thk_data(i,2)   = (0.5*a(1)/sqrt(tol)) + a(2) + (2.0*a(3)*tol) + (3.0*a(4)*(tol**2))
-!            thk_data(i,3)   = (-0.25*a(1)/((sqrt(tol))**3)) + (2.0*a(3)) + (6.0*a(4)*tol)
-!        else if (abs(1.0 - u(i)) < tol) then
-!            thk_data(i,2)   = (-0.5*d(1)/sqrt(tol)) - d(2) - (2.0*d(3)*tol) - (3.0*d(4)*(tol**2))
-!            thk_data(i,3)   = (-0.25*d(1)/((sqrt(tol))**3)) + (2.0*d(3)) + (6.0*d(4)*tol)
-!        else if (u(i) < u_max) then
-!            thk_data(i,2)   = (0.5*a(1)/sqrt(u(i))) + a(2) + (2.0*a(3)*u(i)) + (3.0*a(4)*(u(i)**2))
-!            thk_data(i,3)   = (-0.25*a(1)/((sqrt(u(i)))**3)) + (2.0*a(3)) + (6.0*a(4)*u(i))
-!        else if (u(i) > u_max) then
-!            thk_data(i,2)   = (-0.5*d(1)/sqrt(1.0 - u(i))) - d(2) + (2.0*d(3)*(u(i) - 1.0)) - (3.0*d(4)*((1.0 - u(i))**2)) 
-!            thk_data(i,3)   = (-0.25*d(1)/((sqrt(1.0 - u(i)))**3)) + (2.0*d(3)) + (6.0*d(4)*(1.0 - u(i)))
-!        end if
-!
-!    end do
-!
-!
-!end subroutine modified_NACA_four_digit_thickness_2
+subroutine modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a,d,thk_data)
+    use file_operations
+    implicit none
+
+    integer,                intent(in)      :: np
+    real,                   intent(in)      :: u(np)
+    real,                   intent(in)      :: u_max
+    real,                   intent(in)      :: t_max
+    real,                   intent(in)      :: t_TE
+    real,                   intent(in)      :: a(4)
+    real,                   intent(in)      :: d(4)
+    real,                   intent(inout)   :: thk_data(np,3)
+
+    ! Local variables
+    integer                                 :: i, j, k, counter
+    real                                    :: u_TE, tol = 10E-8
+
+
+
+    !
+    ! Find point closest to u_TE
+    !
+    u_TE                = 1.0 - t_TE
+    counter             = 0
+    do i = 1,np
+        
+        if (u(i) < u_TE) then
+            counter     = counter + 1
+        else
+            exit
+        end if
+
+    end do
+
+    ! Initialize thickness array as zero-valued
+    thk_data            = 0.0
+
+
+    ! 
+    ! Compute NACA thickness distribution
+    ! Also compute first and second derivative
+    !
+    do i = 1,counter
+
+        if (abs(u(i) - u_max) .le. tol) then
+            thk_data(i,1)   = t_max
+            thk_data(i,2)   = 0.0  
+            thk_data(i,3)   = (2.0*d(3)) + (6.0*d(4)*(1.0 - u_max))
+        else if (abs(u(i)) .le. tol) then
+            thk_data(i,1)   = 0.0
+            thk_data(i,2)   = (0.5*a(1)/sqrt(tol)) + a(2) + (2.0*a(3)*tol) + (3.0*a(4)*(tol**2))    
+            thk_data(i,3)   = (-0.25*a(1)/((sqrt(tol))**3)) + (2.0*a(3)) + (6.0*a(4)*tol)
+        else if (u(i) < u_max) then
+            thk_data(i,1)   = (a(1)*sqrt(u(i))) + (a(2)*u(i)) + (a(3)*(u(i)**2)) + (a(4)*(u(i)**3)) 
+            thk_data(i,2)   = (0.5*a(1)/sqrt(u(i))) + a(2) + (2.0*a(3)*sqrt(u(i))) + (3.0*a(4)*(u(i)**2))
+            thk_data(i,3)   = (-0.25*a(1)/((sqrt(u(i)))**3)) + (2.0*a(3)) + (6.0*a(4)*u(i))
+        else if (u(i) > u_max) then
+            thk_data(i,1)   = d(1) + (d(2)*(1.0 - u(i))) + (d(3)*((1.0 - u(i))**2)) + (d(4)*((1.0 - u(i))**3))
+            thk_data(i,2)   = -d(2)  - (2.0*d(3)*(1.0 - u(i))) - (3.0*d(4)*((1.0 - u(i))**2))
+            thk_data(i,3)   = (2.0*d(3)) + (6.0*d(4)*(1.0 - u(i)))
+        end if
+
+    end do
+
+
+    !
+    ! Add circular TE thickness
+    !
+    do i = counter + 1,np - 1
+        thk_data(i,1)       = sqrt(t_TE**2 - ((u(i) - u_TE)**2)) 
+    end do
+    thk_data(np,1)          = 0.0
+
+
+
+end subroutine modified_NACA_four_digit_thickness_2
 !*******************************************************************************************
 
 
