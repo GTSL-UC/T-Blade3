@@ -878,7 +878,7 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
     ytop = camber + thickness*cos(angle)
 
     ! Write meanline (u,v) data file
-    call meanline_u_v_file(np,sec,u,camber,slope)
+    if (isdev) call meanline_u_v_file(np,sec,u,camber,slope)
 
     !if (thick_distr == 5) then
     !    np_circ = 21
