@@ -160,7 +160,21 @@ subroutine span_output ()
             end if  ! if (k <= na)
         end do  ! i = 1,na
 
+    ! Modified NACA thickness distribution
+    else if (thick_distr == 5) then
+
+        ! Allocate thickness control points array
+        if (allocated(thk_cp)) deallocate(thk_cp)
+        allocate(thk_cp(20,2*na))
+
+        ! Populate thickness control points array
+        thk_cp(1,1:na)      = bspline_thk(:,2)
+        thk_cp(2,1:na)      = bspline_thk(:,3)
+        thk_cp(3,1:na)      = bspline_thk(:,4)
+        thk_cp(4,1:na)      = bspline_thk(:,5)
+
     end if  ! thick_distr
+
 
 
     ! Populate spline LE control points array

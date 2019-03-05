@@ -1571,30 +1571,16 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
        call close_log_file(nopen, file_open)
        
        !----------------------------------------------------------------------
-       if (thick_distr == 5) then
-           call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js), &
-                        stgr,stack,chord_switch,stak_u,stak_v,xb_stk,yb_stk,stack_switch, &
-                        clustering_switch, clustering_parameter, nsl,nbls,curv,thick,LE,np,ncp_curv,ncp_thk, &
-                        curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,ee_all,thick_distr,thick_distr_3_flag, &
-                        umxthk_all, C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all, &
-                        LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments, &
-                        sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
-                        n_normal_distance,casename,develop,isdev,mble,mbte,mles,mtes,i_slope,jcellblade_all, &
-                        etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset, te_flag, &
-                        le_opt_flag, te_opt_flag, le_angle_all, te_angle_all,bspline_thk)
-       else
-           call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js), &
-                        stgr,stack,chord_switch,stak_u,stak_v,xb_stk,yb_stk,stack_switch, &
-                        clustering_switch, clustering_parameter, nsl,nbls,curv,thick,LE,np,ncp_curv,ncp_thk, &
-                        curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,ee_all,thick_distr,thick_distr_3_flag, &
-                        umxthk_all, C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all, &
-                        LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments, &
-                        sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
-                        n_normal_distance,casename,develop,isdev,mble,mbte,mles,mtes,i_slope,jcellblade_all, &
-                        etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset, te_flag, &
-                        le_opt_flag, te_opt_flag, le_angle_all, te_angle_all)
-        end if
-
+       call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js), &
+                    stgr,stack,chord_switch,stak_u,stak_v,xb_stk,yb_stk,stack_switch, &
+                    clustering_switch, clustering_parameter, nsl,nbls,curv,thick,LE,np,ncp_curv,ncp_thk, &
+                    curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,ee_all,thick_distr,thick_distr_3_flag, &
+                    umxthk_all, C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all, &
+                    LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments, &
+                    sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
+                    n_normal_distance,casename,develop,isdev,mble,mbte,mles,mtes,i_slope,jcellblade_all, &
+                    etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset, te_flag, &
+                    le_opt_flag, te_opt_flag, le_angle_all, te_angle_all)
 
        mprime_ble(js) = mble
        mprime_bte(js) = mbte

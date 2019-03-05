@@ -8,7 +8,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, &
                     sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
                     n_normal_distance,casename,develop,isdev,mble,mbte,msle,mste,i_slope,jcellblade_all, &
                     etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset, te_flag, &
-                    le_opt_flag, te_opt_flag, le_angle_all, te_angle_all,bspline_thk)
+                    le_opt_flag, te_opt_flag, le_angle_all, te_angle_all)
 
 !-----------------------------------------
 ! Input:
@@ -122,7 +122,6 @@ real curv_cp(20, 2*nsl), thk_cp(20, 2*nsl)
 real lethk_all(nsl), tethk_all(nsl), s_all(nsl), ee_all(nsl), umxthk_all(nsl), thk_tm_c_spl(nsl)
 real C_le_x_top_all(nsl), C_le_x_bot_all(nsl), C_le_y_top_all(nsl), C_le_y_bot_all(nsl)
 real LE_vertex_ang_all(nsl), LE_vertex_dis_all(nsl), le_angle_all(nsl), te_angle_all(nsl)
-real,   optional,   intent(in)  :: bspline_thk(nsl, 5)
 real Zweifel(nsl), sting_l_all(nsl), sting_h_all(nsl, 2)
 real jcellblade_all(nspn), etawidth_all(nspn), jcellblade, etawidth
 real, allocatable, dimension(:) :: xtop_refine, ytop_refine, xbot_refine, ybot_refine
@@ -658,7 +657,7 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
     !
     ! Modified four-digit NACA thickness
     !
-    if (thick_distr == 5 .and. present(bspline_thk)) then
+    if (thick_distr == 5) then
 
         !
         ! Allocate necessary arrays
@@ -679,10 +678,10 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         ! Compute maximum thickness and maximum thickness location
         ! TODO: Set LE radius
         !
-        t_max    = bspline_thk(js,4)
-        u_max    = bspline_thk(js,3)
-        LE_round = bspline_thk(js,2)
-        t_TE     = bspline_thk(js,5)
+        t_max    = thk_cp(3,js)
+        u_max    = thk_cp(2,js)
+        LE_round = thk_cp(1,js)
+        t_TE     = thk_cp(4,js)
 
         ! 
         ! Print input values to screen and write to log file
@@ -712,7 +711,19 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,dy_dx_TE,LE_round,a_NACA,d_NACA)
         call modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a_NACA,d_NACA,thickness_data)
         thickness       = thickness_data(:,1)
-       
+
+        !
+        ! Check for negative thickness
+        !
+        do i = 1,np
+            
+            if (thickness(i) < 0) then
+                print *, 'FATAL ERROR: Negative thickness encountered for blade section ', js
+                stop
+            end if
+
+        end do    
+               
         !
         ! Check for monotonicity
         !
