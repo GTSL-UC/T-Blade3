@@ -6,9 +6,9 @@ sharmamm@mail.uc.edu
 
 
 
-Refer to the main documentation (T-Blade3_v1.12_ReadMe.pdf) on the T-Blade3 website (http://gtsl.ase.uc.edu/t-blade3/) to understand how to run T-Blade3 v1.12.
+Refer to the main documentation (T-Blade3_v1.13.1_ReadMe.pdf) on the T-Blade3 website (http://gtsl.ase.uc.edu/t-blade3/) to understand how to run T-Blade3 v1.13.1.
 
-This document details the changes made to T-Blade3 in v1.12.9. 
+This document details the changes made to T-Blade3 in v1.13.1. 
 
 --------------------------------------------------
 RUNNING T-BLADE3
@@ -30,7 +30,7 @@ The additional command line arguments are as follows:
 
 
 --------------------------------------------------
-CHANGES MADE IN T-BLADE3 v1.12.9
+CHANGES MADE IN T-BLADE3 v1.13.1
 --------------------------------------------------
 
 1) Lean and sweep switch added to the main input file, 3dbgbinput.bladerow.dat

@@ -20,7 +20,7 @@
 \begin{document}
 
 \begin{center}
-\textbf{\large T-Blade3 v1.12 ReadMe}\\
+\textbf{\large T-Blade3 v1.13 ReadMe}\\
 by\\
 Mayank Sharma\\
 Department of Aerospace Engineering\\
@@ -34,7 +34,7 @@ University of Cincinnati\\
 T-Blade3 is a general parametric 3D blade geometry builder\cite{KiranPaper}. The tool can create a variety of 3D blade geometries based on a few basic parameters. The geometric and aerodynamic parameters are used to create 2D airfoils which are then stacked on the desired stacking axis\cite{KiranThesis}. The geometry modeler can also be  used for generating 3D blades with special features like bent tip or a split tip\cite{AbhayThesis} which can be explored with minimum changes to the blade geometry. The use of control points for the definition of spanwise splines makes it easy to modify the blade shapes quickly and smoothly to obtain the desired blade model\cite{SyedPaper}. The second derivative of the mean-line (related to the curvature) is controlled using B-splines to create the airfoils. This is then analytically integrated twice to obtain the mean-line\cite{AhmedPaper}. A smooth thickness distribution is then added to the airfoil. This can either be a Wennerstrom thickness distribution\cite{WennerstromBook}, a smooth quartic thickness distribution or a new exact thickness distribution\cite{KarthikThesis}. B-splines have also been implemented to achieve customized airfoil leading and trailing edges.\\
 
 \noindent
-New in version 1.12:
+New in version 1.13:
 
 \begin{enumerate}[leftmargin=*]
     \item Removal of static builds for Linux and macOS
@@ -49,7 +49,7 @@ This document contains instructions on how to install T-Blade3, run the code and
 
 \section{Obtaining T-Blade3}
 \noindent 
-There are two ways of obtaining T-Blade3 version 1.12:
+There are two ways of obtaining T-Blade3 version 1.13:
  
 \begin{enumerate}[leftmargin=*]
     \item Linux and Windows 64-bit executables can be found on \url{http://gtsl.ase.uc.edu/t-blade3}
@@ -61,7 +61,7 @@ The latter is recommended. There are two branches in use currently: {\fontfamily
 
 \section{Compiling T-Blade3}\label{compilesec}
 \noindent
-With T-Blade3 version 1.12, static builds for Linux, Unix and MacOS are no longer supported. The recommended method is to clone or download the T-Blade3 source code and compile it locally. Below are instructions to compile the code. Here, \$TBLADEROOT refers to the T-Blade3 source code directory. 
+With T-Blade3 version 1.13, static builds for Linux, Unix and MacOS are no longer supported. The recommended method is to clone or download the T-Blade3 source code and compile it locally. Below are instructions to compile the code. Here, \$TBLADEROOT refers to the T-Blade3 source code directory. 
 
 \begin{enumerate}[leftmargin=*]
     \item \textit{Prerequisites}: Make and gfortran (gfortran-6 and above recommended)
@@ -129,21 +129,21 @@ The auxiliary input file \textit{\textcolor{blue}{spancontrolinputs\_NACA\_blade
 \end{itemize}
 
 \noindent
-The auxiliary input file \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} is used to enforce the exact thickness distribution which is new to version 1.12. Also see \textbf{\ref{auxinput}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
+The auxiliary input file \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} is used to enforce the exact thickness distribution which is new to version 1.13. Also see \textbf{\ref{auxinput}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
 \begin{itemize}
     \item Airfoil defined by curvature control (set to "\textbf{spanwise\_spline}")
     \item Airfoil thickness distribution (set to "$\mathbf{3}$" or "$\mathbf{4}$")
 \end{itemize}
 
 \noindent
-The auxiliary input file \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} (old format) is an older file which is still supported in version 1.12. Also see \textbf{\ref{cmdargs}} and \textbf{\ref{auxinput1}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
+The auxiliary input file \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} (old format) is an older file which is still supported in version 1.13. Also see \textbf{\ref{cmdargs}} and \textbf{\ref{auxinput1}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
 \begin{itemize}
     \item Airfoil defined by curvature control (set to "\textbf{spanwise\_spline}")
     \item Airfoil thickness distribution (set to "$\mathbf{1}$" or "$\mathbf{2}$")
 \end{itemize}
 
 \noindent 
-The auxiliary input file \textit{\textcolor{blue}{controlinputs.bladerow.dat}} is an older file which is still supported in version 1.12. Also see \textbf{\ref{cmdargs}} and \textbf{\ref{auxinput2}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
+The auxiliary input file \textit{\textcolor{blue}{controlinputs.bladerow.dat}} is an older file which is still supported in version 1.13. Also see \textbf{\ref{cmdargs}} and \textbf{\ref{auxinput2}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
 \begin{itemize}
     \item Airfoil defined by curvature control 
     \item Airfoil thickness distribution (set to "$\mathbf{1}$" or "$\mathbf{2}$")
@@ -154,10 +154,18 @@ The auxiliary input file \textit{\textcolor{blue}{controlinputs.bladerow.dat}} i
 \textit{\textcolor{blue}{T-Blade3\_run.log}} - log file generated with each T-Blade3 run\\
 \textit{\textcolor{blue}{3dbgbinput.bladerow.log}} - log file for debugging in case of main input file read failure\\
 \textit{\textcolor{blue}{spancontrolinputs.bladerow.log}} - log file for debugging in case of auxiliary input file read failure\\
+\textit{\textcolor{blue}{botcurve.radialsection.bladerow.casename}} - created when command line argument {\fontfamily{lmr}\selectfont dev} is used, contains $(u,v)$ coordinates for bottom curve of blade section\\
+\textit{\textcolor{blue}{topcurve.radialsection.bladerow.casename}} - created when command line argument {\fontfamily{lmr}\selectfont dev} is used, contains $(u,v)$ coordinates for top curve of blade section\\
+\textit{\textcolor{blue}{uvblade.radialsection.bladerow.casename}} - created when command line argument {\fontfamily{lmr}\selectfont dev} is used, contains $(u,v)$ coordinates of blade section\\
 \textit{\textcolor{blue}{blade.radialsection.bladerow.casename}} - contains 2D blade section coordinates $(m',\theta)$\\
 \textit{\textcolor{blue}{sec\_radialsection.casename.dat}} - contains dimensionalized 3D blade section coordinates $(x,y,z)$\\
+\textit{\textcolor{blue}{blade3d.casename.dat}} - contains dimensionalized 3D blade section coordinates $(x,y,z)$ for all sections\\
+\textit{\textcolor{blue}{meanline\_uv.radialsection.dat}} - created when command line argument {\fontfamily{lmr}\selectfont dev} is used, contains $(u,v)$ meanline information for blade section\\
 \textit{\textcolor{blue}{meanline.sec\_radialsection.casename.dat}} - contains dimensionalized 3D meanline coordinates $(x,y,z)$\\
-\textit{\textcolor{blue}{splinedata\_section.radialsection.casename.dat}} - contains data about various section splines\\
+%\textit{\textcolor{blue}{splinedata\_section.radialsection.casename.dat}} - contains data about various section splines\\
+\textit{\textcolor{blue}{LE\_TE\_interesection.casename.dat}} - contains LE and TE intersection points for all sections\\
+\textit{\textcolor{blue}{curvature\_span\_variation.casename.dat}} - created when command line argument {\fontfamily{lmr}\selectfont dev} is used, contains information about spanwise splines of curvature control points\\
+\textit{\textcolor{blue}{thickness\_span\_variation.casename.dat}} - created when command line argument {\fontfamily{lmr}\selectfont dev} is used, contains information about spanwise splines of thickness control points\\
 \textit{\textcolor{blue}{hub.casename.sldcrv}} - SOLIDWORKS file for the blade hub\\
 \textit{\textcolor{blue}{casing.casename.sldcrv}} - SOLIDWORKS file for the blade casing\\
 
@@ -173,7 +181,10 @@ Additional output files are created when using the exact thickness distribution.
 \textit{\textcolor{blue}{thk\_span\_dist\_v.radialsection.casename.dat}} - contains span vs. thickness value for each specified chord-wise thickness point\\
 \textit{\textcolor{blue}{thk\_span\_dist\_u\_fine.radialsection.casename.dat}} - created when command line argument {\fontfamily{lmr}\selectfont dev} is used, contains span vs. thickness location for each specified chord-wise thickness point with finer resolution\\
 \textit{\textcolor{blue}{thk\_span\_dist\_v\_fine.radialsection.casename.dat}} - created when command line argument {\fontfamily{lmr}\selectfont dev} is used, contains span vs. thickness value for each specified chord-wise thickness point with finer resolution\\
+\textit{\textcolor{blue}{le\_angle\_span\_dist.radialsection.casename.dat}} - contains information about the spanwise spline of the leading edge angle\\
+\textit{\textcolor{blue}{le\_angle\_span\_fine\_dist.radialsection.casename.dat}} - created when command line argument {\fontfamily{lmr}\selectfont dev} is used, contains information about the spanwise spline of the leading edge angle with finer resolution\\
 \textit{\textcolor{blue}{te\_angle\_span\_dist.radialsection.casename.dat}} - contains information about the spanwise spline of the trailing edge angle\\
+\textit{\textcolor{blue}{te\_angle\_span\_fine\_dist.radialsection.casename.dat}} - created when command line argument {\fontfamily{lmr}\selectfont dev} is used, contains information about the spanwise spline of the trailing edge angle with finer resolution\\
 
 \noindent
 Additional output files are created when using the modified NACA thickness distribution.\\
@@ -214,7 +225,7 @@ This is the main input file for T-Blade3. It contains all the geometric and aero
         \item "$\mathbf{2}$": a smooth quartic thickness distribution is used along with a sharp trailing edge
         \item "$\mathbf{3}$": direct thickness distribution is used 
         \item "$\mathbf{4}$": exact thickness distribution is used. Refer to the example case \textit{exact\_thickness} on \url{http://gtsl.ase.uc.edu/t-blade3}
-        \item "$\mathbf{5}$": modified NACA four-digit thickness distribution is used
+        \item "$\mathbf{5}$": modified NACA four-digit thickness distribution is used. Refer to the example case \textit{modified\_NACA\_thickness} on \url{http://gtsl.ase.uc.edu/t-blade3}
     \end{enumerate}
     \item Thickness multiplier switch (line 18)
     \item Leading edge definition switch (line 20)
@@ -230,19 +241,19 @@ This is the main input file for T-Blade3. It contains all the geometric and aero
     \end{enumerate}
     \item Clustering control switch (line 26): If this switch is set to:
     \begin{enumerate}[label=\alph*]
-        \item "$\mathbf{1}$": sine function based clustering distribution is used
+        \item "$\mathbf{1}$": sine function based clustering distribution is used. Refer to the example case \textit{sine\_clustering} on \url{http://gtsl.ase.uc.edu/t-blade3}
         \begin{itemize}[label=\FilledSmallSquare]
             \item Clustering parameter is an exponent, higher value specifies more clustering
         \end{itemize}
-        \item "$\mathbf{2}$": exponential stretching function based clustering distribution is used
+        \item "$\mathbf{2}$": exponential stretching function based clustering distribution is used. Refer to the example case \textit{exponential\_clustering} on \url{http://gtsl.ase.uc.edu/t-blade3}
         \begin{itemize}[label=\FilledSmallSquare]
             \item Clustering parameter denotes the strength of the stretching, higher value specifies more clustering
         \end{itemize}
-        \item "$\mathbf{3}$": hyperbolic stretching function based clustering distribution is used
+        \item "$\mathbf{3}$": hyperbolic stretching function based clustering distribution is used. Refer to the example case \textit{hyperbolic\_clustering} on \url{http://gtsl.ase.uc.edu/t-blade3}
         \begin{itemize}[label=\FilledSmallSquare]
             \item Clustering parameter denotes the strength of the stretching, higher values specifies more clustering
         \end{itemize}
-        \item "$\mathbf{4}$": ellipse based clustering distribution at the LE and TE with hyperbolic midchord clustering is used
+        \item "$\mathbf{4}$": ellipse based clustering distribution at the LE and TE with hyperbolic midchord clustering is used. This option is only available when the thickness distribution switch (line 16) is set to $"\mathbf{4}"$. Refer to the example case \textit{ellipse\_based\_clustering} on \url{http://gtsl.ase.uc.edu/t-blade3}
         \begin{itemize}[label=\FilledSmallSquare]
             \item Clustering parameter denotes the number of points placed near the LE and TE, higher value specifies more clustering
         \end{itemize}
@@ -328,7 +339,7 @@ This is the main input file for T-Blade3. It contains all the geometric and aero
 
 \subsection{spancontrolinputs\_NACA\_bladerow.dat}\label{auxinput_NACA}
 \noindent
-This is an auxiliary input file for T-Blade3. This file is used when the camber definition switch (line 14) is set to "\textbf{spanwise\_spline}" and the thickness distribution switch (line 16) is set to "$\mathbf{5}$". It is used to create blade geometries by varying the curvature of the camber line and the thickness distribution through chord-wise control points at various span locations which are used to geenrate cubic splines for these parameters. See \textbf{\ref{inputs}} and \textbf{\ref{maininput}} for information on how to use this file when running T-Blade3. Following are the details of the file:
+This is an auxiliary input file for T-Blade3. This file is used when the camber definition switch (line 14) is set to "\textbf{spanwise\_spline}" and the thickness distribution switch (line 16) is set to "$\mathbf{5}$". It is used to create blade geometries by varying the curvature of the camber line and the thickness distribution through chord-wise control points at various span locations which are used to geenrate cubic splines for these parameters. See \textbf{\ref{inputs}} and \textbf{\ref{maininput}} and refer to example case \textit{modified\_NACA\_thickness} and the document \textit{Modified NACA Thickness Control Manual} on \url{http://gtsl.ase.uc.edu/t-blade3} for information on how to use this file when running T-Blade3. Following are the details of the file:
 
 \noindent
 \begin{itemize}[leftmargin=*]
@@ -404,7 +415,7 @@ This is an auxiliary input file for T-Blade3. This section describes the current
 
 \subsection{spancontrolinputs.bladerow.dat (old format)}\label{auxinput1}
 \noindent
-This is an auxiliary input file for T-Blade3. This section describes the old format of the \textit{\textcolor{blue}spancontrolinputs.bladerow.dat} file. While this file is still supported in T-Blade3 version 1.12 (refer \textbf{\ref{cmdargs}} for information on how to run T-Blade3 with this file), it is recommended that the exact thickness distribution is used with the current format of \textit{\textcolor{blue}spancontrolinputs.bladerow.dat} file (refer to \textbf{\ref{auxinput}}). The file in this format is used when the camber definition switch (line 14) is set to "\textbf{spanwise\_spline}" and the thickness distribution switch (line 16) is set to "$\mathbf{1}$" and "$\mathbf{2}$". Following are the details of the file:
+This is an auxiliary input file for T-Blade3. This section describes the old format of the \textit{\textcolor{blue}spancontrolinputs.bladerow.dat} file. While this file is still supported in T-Blade3 version 1.13 (refer \textbf{\ref{cmdargs}} for information on how to run T-Blade3 with this file), it is recommended that the exact thickness distribution is used with the current format of \textit{\textcolor{blue}spancontrolinputs.bladerow.dat} file (refer to \textbf{\ref{auxinput}}). The file in this format is used when the camber definition switch (line 14) is set to "\textbf{spanwise\_spline}" and the thickness distribution switch (line 16) is set to "$\mathbf{1}$" and "$\mathbf{2}$". Following are the details of the file:
 
 \noindent
 \begin{itemize}[leftmargin=*]
@@ -440,7 +451,7 @@ This is an auxiliary input file for T-Blade3. This section describes the old for
 
 \subsection{controlinputs.bladerow.dat}\label{auxinput2}
 \noindent
-This is an auxiliary input file for T-Blade3. This is an older file, which is still supported in T-Blade3 version 1.12 (refer \textbf{\ref{cmdargs}} for information on how to run T-Blade3 with this file) but it is recommended that the exact thickness distribution is used with the current format of \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}}. This file is used when the thickness distribution switch (line 16) is set to "$\mathbf{1}$" and "$\mathbf{2}$". Following are the details of the file:
+This is an auxiliary input file for T-Blade3. This is an older file, which is still supported in T-Blade3 version 1.13 (refer \textbf{\ref{cmdargs}} for information on how to run T-Blade3 with this file) but it is recommended that the exact thickness distribution is used with the current format of \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}}. This file is used when the thickness distribution switch (line 16) is set to "$\mathbf{1}$" and "$\mathbf{2}$". Following are the details of the file:
 
 \noindent
 \begin{itemize}[leftmargin=*]

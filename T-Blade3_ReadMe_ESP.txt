@@ -1,6 +1,6 @@
 -----------------------------------------------
 T-Blade3: Turbomachinery 3D Blade Generator 
-Version 1.02 - 9 October 2018
+Version 1.13.1 - 4 March 2019
 -----------------------------------------------
 by Mayank Sharma
 Dept. of Aerospace Engineering
@@ -10,7 +10,7 @@ sharmamm@mail.uc.edu
 
 1.  Introduction
 
-    T-Blade3 version 1.02 has been integrated with Engineering Sketch Pad (ESP) which is a 
+    T-Blade3 version 1.13.1 has been integrated with Engineering Sketch Pad (ESP) which is a 
     geometry creation and manipulation system targeted at aerospace design and analysis. ESP
     is used to drive T-Blade3 via user defined primitives (UDPs) which generate a single
     solid. Various spanwise parameters provided by T-Blade3 can be further manipulated using
@@ -23,7 +23,7 @@ sharmamm@mail.uc.edu
 
     The latest ESP source code can be obtained here: https://acdl.mit.edu/ESP/ 
     
-    This document explains how to compile ESP 1.13 using T-Blade3 version 1.02 so that exact 
+    This document explains how to compile ESP 1.13 using T-Blade3 version 1.13.1 so that exact 
     thickness controls can be used.
     
 2.1 T-Blade3 Source Distribution Layout
@@ -35,7 +35,7 @@ sharmamm@mail.uc.edu
     github.address          -   file containing T-Blade3 GitHub repository URL
     Makefile                -   makefile for compiling T-Blade3
     MakefileESP             -   makefile to be used when compiling ESP to run T-Blade version
-                                1.02
+                                1.13.1
     README.md               -   readme file
     license.txt             -   T-Blade3 license information
     inputs                  -   directory containing various example input files 
