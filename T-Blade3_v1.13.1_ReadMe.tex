@@ -339,7 +339,7 @@ This is the main input file for T-Blade3. It contains all the geometric and aero
 
 \subsection{spancontrolinputs\_NACA\_bladerow.dat}\label{auxinput_NACA}
 \noindent
-This is an auxiliary input file for T-Blade3. This file is used when the camber definition switch (line 14) is set to "\textbf{spanwise\_spline}" and the thickness distribution switch (line 16) is set to "$\mathbf{5}$". It is used to create blade geometries by varying the curvature of the camber line and the thickness distribution through chord-wise control points at various span locations which are used to geenrate cubic splines for these parameters. See \textbf{\ref{inputs}} and \textbf{\ref{maininput}} and refer to example case \textit{modified\_NACA\_thickness} and the document \textit{Modified NACA Thickness Control Manual} on \url{http://gtsl.ase.uc.edu/t-blade3} for information on how to use this file when running T-Blade3. Following are the details of the file:
+This is an auxiliary input file for T-Blade3. This file is used when the camber definition switch (line 14) is set to "\textbf{spanwise\_spline}" and the thickness distribution switch (line 16) is set to "$\mathbf{5}$". It is used to create blade geometries by varying the curvature of the camber line and the thickness distribution through chord-wise control points at various span locations which are used to generate cubic splines for these parameters. See \textbf{\ref{inputs}} and \textbf{\ref{maininput}} and refer to example case \textit{modified\_NACA\_thickness} and the document \textit{Modified NACA Thickness Control Manual} on \url{http://gtsl.ase.uc.edu/t-blade3} for information on how to use this file when running T-Blade3. Following are the details of the file:
 
 \noindent
 \begin{itemize}[leftmargin=*]
@@ -365,6 +365,7 @@ This is an auxiliary input file for T-Blade3. This file is used when the camber 
         \item The third column specifies the chord-wise location of the maximum thickness for a section
         \item The fourth column specifies the maximum thickness for a section
         \item The fifth column specifies the thickness at the TE for a section
+        \item An optional sixth column can be added, specifying the first derivative of the thickness at the TE for a section. This should \textbf{always} be the sixth column and should be specified with a header "$dy\_dx\_TE$". If the derivatives are not specified by the user, they are computed based on the chord-wise location of the maximum thickness
     \end{enumerate}
 \end{itemize}
 
@@ -420,7 +421,7 @@ This is an auxiliary input file for T-Blade3. This section describes the old for
 \noindent
 \begin{itemize}[leftmargin=*]
     \item Casename: Should match the casename specified in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}
-    \item Bladerow number: Should match the bladerow number specified ian the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}
+    \item Bladerow number: Should match the bladerow number specified in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}
     \item Control table specifying control points for chord wise location and curvature of camber line
     \begin{enumerate}[label=\alph*]
         \item Above the table are the number of spanwise control points ($nspan$) and number of control points for chord and curvature ($ncp$)
