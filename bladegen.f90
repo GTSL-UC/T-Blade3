@@ -77,11 +77,11 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, &
 use file_operations
 implicit none
 
-integer np, np_side, i, j, l, k, js, naca, chord_switch, istack, thick_distr, nxx, np_cluster, np_circ
-integer nx, nax, nrow, nspn, nspan, npoints, nsl, nbls, ncp, le_pos, wing_flag
-integer const_stk_u, const_stk_v, stack, stack_switch, clustering_switch, te_flag, le_opt_flag, te_opt_flag
+integer np, np_side, i, k, js, naca, chord_switch, thick_distr, nxx, np_cluster
+integer nx, nax, nrow, nspn, nspan, nsl, nbls, ncp, le_pos, wing_flag
+integer stack, stack_switch, clustering_switch, te_flag, le_opt_flag, te_opt_flag
 integer curv_camber, thick, LE, LEdegree, n_normal_distance
-integer TE_del, ii, ngrid, amount_data
+integer TE_del, amount_data
 integer ncp_curv(nsl), ncp_thk(nsl), i_le, i_te, oo, nb, no_LE_segments
 integer interval, pt2, throat_index(nspn), spline_data, i_slope, BGgrid_all(nspn), BGgrid
 
@@ -91,33 +91,25 @@ parameter(interval = 6, pt2 = 1, TE_del = 0)    ! parameter to choose the positi
 real*8 bladedata(amount_data, nsl)
 real sec_radius(nsl, 2)
 real*8 :: clustering_parameter
-real :: sinl, sext, tempr, chrdx, chrd, stagger, pitch, radius_pitch
+real :: sinl, sext, chrdx, chrd, stagger, pitch, radius_pitch
 !real xtop(nb), ytop(nb), xbot(nb), ybot(nb), u(nb)
 !real, intent(out) :: xb(nx), yb(nx)
 !real splthick(nb), thickness(nb), angle(nb), camber(nb), slope(nb)
 real, allocatable, dimension(:) :: xtop, ytop, xbot, ybot, u, xb, yb, u_new !- 11/20/18
 real, allocatable, dimension(:) :: splthick, thickness, angle, camber, slope
-real umin, umax, scaling, deltau, theta_offset
-real vtop_stack, vbot_stack, xb_stk, yb_stk
-real, allocatable, dimension(:, :) :: in_beta, out_beta, thickness_data
+real scaling, theta_offset
+real xb_stk, yb_stk
+real, allocatable, dimension(:, :) :: thickness_data
 real*8, allocatable, dimension(:, :) :: splinedata
-real, allocatable, dimension(:, :) :: chord, mrel1
-real, allocatable, dimension(:) :: xcp, ycp
-real X(nx, nx, 5), Y(nx, nx, 5)
-real sb(nx), xbs, ybs, min_x, max_x
-real lethk, mxthk, mr1, thkc, thkmultip
-real aext, ainl, ang, apx1, apx2, area 
-real cam, cam_u, dsi, dsmx, dsmn, dtor, pi, du, curv
-real ei11, ei22, flex, flin, fmxthk, frat, frm, frmx
-real rr1, rr2, sang, sexts, sinls, tethk, thk, ui, umx, umxthk
-real xcen, ycen, xi, yi, xxa, yya, ucen, vcen
-real xcg(nspan), ycg(nspan)
-real u_stack, v_stack, v_zero_stack
-real u_le, thk_le, slope_le, curv_le, uin_le
-real u_lespline(20), thk_lespline(20), uin_lespline(20)
-real slope_le_bot1, slope_le_top1, slope_le_bot2, slope_le_top2
-real theta_bot1, theta_bot2, theta_top1, theta_top2, camber_le(interval+1)
-real arc_bot, arc_top, curv_le_bot, curv_le_top, camber_ang(interval+1)
+real lethk, mr1, thkc, thkmultip
+real aext, ainl, area 
+real cam, cam_u, dtor, pi
+real flex, flin, fmxthk
+real rr1, rr2, sang, sexts, sinls, tethk, thk, ui, umxthk
+real xcen, ycen, xi, yi, xxa, yya
+real u_le, uin_le
+real camber_le(interval+1)
+real camber_ang(interval+1)
 real curv_cp(20, 2*nsl), thk_cp(20, 2*nsl)
 real lethk_all(nsl), tethk_all(nsl), s_all(nsl), ee_all(nsl), umxthk_all(nsl), thk_tm_c_spl(nsl)
 real C_le_x_top_all(nsl), C_le_x_bot_all(nsl), C_le_y_top_all(nsl), C_le_y_bot_all(nsl)
@@ -127,39 +119,29 @@ real jcellblade_all(nspn), etawidth_all(nspn), jcellblade, etawidth
 real, allocatable, dimension(:) :: xtop_refine, ytop_refine, xbot_refine, ybot_refine
 real, allocatable, dimension(:) :: init_angles, init_cambers, x_spl_end_curv, cam_refine, u_refine
 real ucp_top(11), vcp_top(11), ucp_bot(11), vcp_bot(11)
-real a_NACA(4), d_NACA(4), t_max, u_max, t_TE, u_TE, dy_dx_TE, yxTE, loc(1), LE_round, a_temp(4), d_temp(4)
-real,   allocatable             :: ptop(:,:), pbot(:,:), u_circ_TE(:), thk_temp(:), thkd_temp(:,:), &
-                                   xbt(:), ybt(:), xtt(:), ytt(:)
-real le_throat, te_throat, intersec_coord(12, nsl), min_throat_2D, attach_angle
+real a_NACA(4), d_NACA(4), t_max, u_max, t_TE, dy_dx_TE, LE_round
+real intersec_coord(12, nsl), min_throat_2D
 real u_translation, camber_trans
 ! variables for s809 profile
-real x_s809ss(nx), y_s809ss(nx), x_s809ps(nx), y_s809ps(nx)
-real x_ss(nx), y_ss(nx), x_ps(nx), y_ps(nx)
-real xs809(nx), ys809(nx), x_s809(nx), y_s809(nx)
-real x_clarky(nx), y_clarky(nx), x_file1(nx), y_file1(nx)
-real xn(nx), yn(nx), b(nx), alpha(nx), xi1, yi1
 real, allocatable, dimension(:) :: xcp_curv, ycp_curv, x_le_spl, y_le_spl
-real, allocatable, dimension(:) :: xcp_thk, ycp_thk, curvature
+real, allocatable, dimension(:) :: xcp_thk, ycp_thk
 !  real, allocatable, dimension(:) :: xi, yi
-real le_ee, le_s, te_ee, te_s
 real stk_u(1), stk_v(1)
-real scaled, XINT, YINT, scf        ! scf main scale factor
+real scaled, scf        ! scf main scale factor
 real u_rot, camber_rot, mble, mbte, msle, mste
 ! meanline variables
-real t(nb), mprime(nb), theta(nb), dmp, stingl, ueqi, dueq
+real stingl
 real, allocatable, dimension(:) :: ueq, xmean, ymean
 
-character*120 line, temp
 character(*)    :: fext
-character*32 fname, fname1, fname3, fname4, blext
-character*80 file1, file2, file3, file4, file5, file6, file7
+character*80 file1, file2, file3, file7
 character(*)    :: casename, develop, airfoil
 character*20 sec
 character*16 thick_distr_3_flag
-logical error, ellip, isdev, isxygrid
-integer                             :: nopen, deg_trail, np_new
+logical ellip, isdev, isxygrid
+integer                             :: nopen
 character(len = :), allocatable     :: log_file, thickness_file_name
-logical                             :: file_open, write_to_file, dir_exist, file_exist
+logical                             :: file_open, write_to_file, file_exist
 logical,    allocatable             :: thk_der(:)
 
 common / BladeSectionPoints /xxa(nxx, nax), yya(nxx, nax) 
@@ -1291,7 +1273,7 @@ endif
 !******************************************************************************************
 ! Format Statements
 !******************************************************************************************
-301 format(i3, 2x, 6(f19.16, 2x))
+!301 format(i3, 2x, 6(f19.16, 2x))
 call log_file_exists(log_file, nopen, file_open)
 print*, '******************************************'
 write(nopen,*) '******************************************'

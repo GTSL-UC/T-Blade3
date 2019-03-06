@@ -13,10 +13,9 @@ subroutine readinput(fname)
     character(256),                 intent(in)          :: fname
     
     ! Local variables
-    character(256)                                      :: temp, temp1, temp2, tempr1, fname1, fname2, fname3, &
-                                                           beta_switch_2
+    character(256)                                      :: temp, temp1, temp2, beta_switch_2
     character(:),   allocatable                         :: log_file
-    integer                                             :: er, temp_int, stat, n_temp, n_temp1, n_temp2, &
+    integer                                             :: er, stat, n_temp1, n_temp2, &
                                                            nopen, nopen1
     real                                                :: inBetaInci, outBetaDevn, temp_offsets(2)
     real,           allocatable                         :: temp_in(:)
@@ -228,6 +227,7 @@ subroutine readinput(fname)
     ! Check for all possible valid inputs of the input angle switch
     !
     ! Case 1 - All AXIAL angles
+    n_temp1     = 0
     if (beta_value(1) .and. .not. beta_value(2) .and. .not. beta_value(3) .and. .not. beta_value(4) .and. .not. beta_value(5)) then
         n_temp1 = index(beta_switch_2, '0')
         read(beta_switch_2(n_temp1:n_temp1 + 1),*,iostat=stat) beta_switch
@@ -1003,6 +1003,7 @@ subroutine readinput(fname)
     call override_span_chord(cpchord, temp_in)
     
     ! If xcpchord values have been overridden, add 1
+    equal   = .true.
     do i = 1,cpchord
         equal = (abs(xcpchord(i) - temp_in(i)) .le. tol)
         if (.not. equal) exit
@@ -1528,9 +1529,9 @@ subroutine read_spanwise_input(row_type, path)
     character(256)                                  :: temps, file_name
     character(:),   allocatable                     :: log_file
     real,           allocatable                     :: temp(:), temp_exact(:)
-    real                                            :: span_dum, tol = 10E-8
-    integer                                         :: temp_thk_flag(3), jj, i_local, nopen, nopen1
-    logical     :: file_open, file_open_1, array_difference
+    real                                            :: span_dum
+    integer                                         :: temp_thk_flag(3), jj, nopen, nopen1
+    logical                                         :: file_open, file_open_1
 
 
 
@@ -1580,8 +1581,8 @@ subroutine read_spanwise_input(row_type, path)
     read(10,'(A)') temps
     write(nopen1,'(A)') trim(temps)
     if(control_inp_flag .eq. 1 .and. ncp_span_curv .ne. nsl) then
-        print*, 'ERROR: In auxiliary file inputs, number of spanwise curvature specifications &
-                 must equal number of streamlines if spanwise spline is not used.'
+        print*, 'ERROR: In auxiliary file inputs, number of spanwise curvature specifications'//&
+                 ' must equal number of streamlines if spanwise spline is not used.'
         stop
     endif
     
@@ -1995,8 +1996,8 @@ subroutine read_spanwise_input(row_type, path)
         end if
         
         if(control_inp_flag .eq. 1 .and. ncp_span_thk .ne. nsl) then
-            print*, 'FATAL ERROR: In auxiliary file inputs, number of spanwise thickness specifications &
-                     must equal number of streamlines if spanwise spline is not used.'
+            print*, 'FATAL ERROR: In auxiliary file inputs, number of spanwise thickness specifications'//&
+                     ' must equal number of streamlines if spanwise spline is not used.'
             stop
         end if
        
@@ -2571,10 +2572,10 @@ subroutine read_spanwise_NACA_input(row_type,path)
     ! Local variables
     character(:),   allocatable                     :: file_name, log_file
     character(256)                                  :: temps
-    integer                                         :: nopen_aux = 10, nopen, nopen1, jj, kk, n_temp
-    real                                            :: span_dum, tol = 10E-8
-    real,           allocatable                     :: temp(:), temp_NACA(:)
-    logical                                         :: file_open, file_open_1, array_difference
+    integer                                         :: nopen_aux = 10, nopen, nopen1, kk, n_temp
+    real                                            :: span_dum
+    real,           allocatable                     :: temp(:)
+    logical                                         :: file_open, file_open_1
 
 
 

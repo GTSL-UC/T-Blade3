@@ -231,9 +231,9 @@ write(nopen,*) 'Writing dimensional streamline'//trim(adjustl(temp))//'...'
 call close_log_file(nopen, file_open)
 fname = 'streamlines'//trim(adjustl(temp))//'.'//trim(casename)//'.sldcrv'
 open(1,file = fname,status ='unknown')
-	do i = 1,np
-	   write(1,*)scf*xml(i),0.0,scf*rml(i)
-	enddo
+    do i = 1,np
+       write(1,*)scf*xml(i),0.0,scf*rml(i)
+    enddo
 close(1)
 
 return 
@@ -254,7 +254,7 @@ real*8 xhub(nphub,1),rhub(nphub,1),xms_hub(nphub,1),rms_hub(nphub,1)
 real*8 x(nphub,1),r(nphub,1),dxds(nphub,1),drds(nphub,1),hub,scf,deltan
 real*8 b,xnorm(nphub,1),rnorm(nphub,1),dxn(nphub,1),drn(nphub,1)
 
-character*80 fname1, fname2
+character*80 fname1
 character*32 casename
 
 character(len = :), allocatable :: log_file
@@ -298,16 +298,16 @@ mphub(1,1)= 0.
 write(2,*)xhub(1,1),rhub(1,1)
 !mp(1,1) = mphub(1,1) ! replacing the old streamline m' to the offset ones
 do i = 2, nphub
-	!print*,'abs(rhub(i,1)+rhub(i-1,1))',abs(rhub(i,1)+rhub(i-1,1))
-	! bug: when radius of streamline is ~= 0 ... Nemnem 6/3/2014
-   ! if(rhub(i,1) < radius_tolerance.and.(xhub(i,1)-xhub(i-1,1)) /= 0.0) then
-	  ! print*,'Small streamline radius exception used ... (huboffset subroutine)'
-      ! mphub(i,1) = mphub(i-1,1) + 2.*(xhub(i,1) - xhub(i-1,1))/(rhub(i,1)+rhub(i-1,1))
-   ! else if ((xhub(i,1)-xhub(i-1,1)) == 0.0) then
-	  ! mphub(i,1) = mphub(i-1,1)
-   ! else
-      ! mphub(i,1) = mphub(i-1,1) + 2.*sqrt((rhub(i,1)-rhub(i-1,1))**2+(xhub(i,1)-xhub(i-1,1))**2)/(rhub(i,1)+rhub(i-1,1)) 
-   ! endif
+    !print*,'abs(rhub(i,1)+rhub(i-1,1))',abs(rhub(i,1)+rhub(i-1,1))
+    ! bug: when radius of streamline is ~= 0 ... Nemnem 6/3/2014
+    ! if(rhub(i,1) < radius_tolerance.and.(xhub(i,1)-xhub(i-1,1)) /= 0.0) then
+        ! print*,'Small streamline radius exception used ... (huboffset subroutine)'
+        ! mphub(i,1) = mphub(i-1,1) + 2.*(xhub(i,1) - xhub(i-1,1))/(rhub(i,1)+rhub(i-1,1))
+    ! else if ((xhub(i,1)-xhub(i-1,1)) == 0.0) then
+        ! mphub(i,1) = mphub(i-1,1)
+    ! else
+        ! mphub(i,1) = mphub(i-1,1) + 2.*sqrt((rhub(i,1)-rhub(i-1,1))**2+(xhub(i,1)-xhub(i-1,1))**2)/(rhub(i,1)+rhub(i-1,1)) 
+    ! endif
    mphub(i,1) = mphub(i-1,1) + 2.*sqrt((rhub(i,1)-rhub(i-1,1))**2+(xhub(i,1)-xhub(i-1,1))**2)/(rhub(i,1)+rhub(i-1,1)) 
    write(1,*)scf*xhub(i,1),0.0,scf*rhub(i,1)
    write(2,*)xhub(i,1),rhub(i,1)
@@ -346,7 +346,7 @@ real*8 xtip(nptip,1),rtip(nptip,1),xms_tip(nptip,1),rms_tip(nptip,1)
 real*8 x(nptip,1),r(nptip,1),dxds(nptip,1),drds(nptip,1),tip,scf
 real*8 b,xnorm(nptip,1),rnorm(nptip,1),dxn(nptip,1),drn(nptip,1),deltan
 
-character*80 fname1, fname2
+character*80 fname1
 character*32 casename
 character(len = :), allocatable :: log_file
 logical                         :: file_open
@@ -391,7 +391,7 @@ do i = 2, nptip
    ! if(rtip(i,1) < radius_tolerance.and.((xtip(i,1)-xtip(i-1,1)) /= 0)) then
       ! mptip(i,1) = mptip(i-1,1) + 2.*(xtip(i,1) - xtip(i-1,1))/(rtip(i,1)+rtip(i-1,1))
    ! else if ((xtip(i,1)-xtip(i-1,1)) == 0.0) then
-	  ! mptip(i,1) = mptip(i-1,1)
+      ! mptip(i,1) = mptip(i-1,1)
    ! else
       ! mptip(i,1) = mptip(i-1,1) + 2.*sqrt((rtip(i,1)-rtip(i-1,1))**2+(xtip(i,1)-xtip(i-1,1))**2)/(rtip(i,1)+rtip(i-1,1)) 
    ! endif
@@ -424,12 +424,12 @@ end subroutine
 !-----INTERSECTION_POINTS--------------------------------------
 !--------------------------------------------------------------
 SUBROUTINE INTERP(XA,YA,XB,YB,XC,YC,XD,YD,XINT,YINT)
-	  
+  
 real*8 XA,YA,XB,YB,XC,YC,XD,YD,XINT,YINT
-	  
+ 
 XINT=(XA*(YB-YA)+YC*(XB-XA)-((YD-YC)/(XD-XC))*XC*(XB-XA)-YA*(XB-XA))/((YB-YA)-(((YD-YC)*(XB-XA))/(XD-XC)))
 YINT = YC+((XINT-XC)/(XD-XC))*(YD-YC)
-	  
+ 
 RETURN
 END subroutine
 
@@ -440,7 +440,6 @@ END subroutine
 subroutine outputfiledata(bladedata,nsl,amount_data,throat_pos,casename,units)
 integer nsl,amount_data,js
 real*8 bladedata(amount_data,nsl)
-real*8 in_beta(nsl),out_beta(nsl)
 character*20 throat_pos(nsl)
 character*32 casename
 character*80 file1
@@ -453,56 +452,56 @@ write(100,*)'Blade sections Data:'
 write(100,*)'---------------------'
 write(100,*)  
 do js = 1,nsl
-   if (js == 1) then
-	if (units == 'mm') then
-	  if (throat_pos(nsl) == 'le') then
-	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+    if (js == 1) then
+    if (units == 'mm') then
+      if (throat_pos(nsl) == 'le') then
+        write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
                       'chord [mm]','sweep','lean','area[mm^2]','lethk [mm]','tethk [mm]','throat [mm]', &
                       '(r*delta_theta)LE','Geom Zweifel','le/te/btween/none'
-	  elseif (throat_pos(nsl) == 'te') then
-	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+      elseif (throat_pos(nsl) == 'te') then
+        write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
                       'chord [mm]','sweep','lean','area[mm^2]','lethk [mm]','tethk [mm]','throat [mm]', &
                       '(r*delta_theta)TE','Geom Zweifel','le/te/btween/none'
-	  else
-	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+      else
+        write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
                       'chord [mm]','sweep','lean','area[mm^2]','lethk [mm]','tethk [mm]','throat [mm]', &
                       '(r*delta_theta)WT','Geom Zweifel','le/te/btween/none'
       endif
-	elseif (units == 'cm') then
-	  if (throat_pos(nsl) == 'le') then
-	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+    elseif (units == 'cm') then
+      if (throat_pos(nsl) == 'le') then
+        write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
                       'chord [cm]','sweep','lean','area[cm^2]','lethk [cm]','tethk [cm]','throat [cm]', &
                       '(r*delta_theta)LE','Geom Zweifel','le/te/btween/none'
-	  elseif (throat_pos(nsl) == 'te') then
-	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+      elseif (throat_pos(nsl) == 'te') then
+        write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
                       'chord [cm]','sweep','lean','area[cm^2]','lethk [cm]','tethk [cm]','throat [cm]', &
                       '(r*delta_theta)TE','Geom Zweifel','le/te/btween/none'
-	  else
-	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+      else
+        write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
                       'chord [cm]','sweep','lean','area[cm^2]','lethk [cm]','tethk [cm]','throat [cm]', &
                       '(r*delta_theta)WT','Geom Zweifel','le/te/btween/none'
       endif
     elseif ((units == 'm ').or.(units == 'm)')) then
-	  if (throat_pos(nsl) == 'le') then
-	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+      if (throat_pos(nsl) == 'le') then
+        write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
                       'chord [ m]','sweep','lean','area[ m^2]','lethk [ m]','tethk [ m]','throat [ m]', &
                       '(r*delta_theta)LE','Geom Zweifel','le/te/btween/none'
-	  elseif (throat_pos(nsl) == 'te') then
-	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+      elseif (throat_pos(nsl) == 'te') then
+        write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
                       'chord [ m]','sweep','lean','area[ m^2]','lethk [ m]','tethk [ m]','throat [ m]', &
                       '(r*delta_theta)TE','Geom Zweifel','le/te/btween/none'
-	  else
-	    write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
+      else
+        write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
                       'chord [ m]','sweep','lean','area[ m^2]','lethk [ m]','tethk [ m]','throat [ m]', &
                       '(r*delta_theta)WT','Geom Zweifel','le/te/btween/none'
       endif
-	else
-		print*,'Error in Blade scaling factor ...'
-		print*,'Check the Scaling factor in the input file ...'
-		stop
-	endif	
-   endif
-   write(100,201) js,bladedata(1:(amount_data-1),js),throat_pos(js)		
+    else
+        print*,'Error in Blade scaling factor ...'
+        print*,'Check the Scaling factor in the input file ...'
+        stop
+    endif
+    endif
+    write(100,201) js,bladedata(1:(amount_data-1),js),throat_pos(js)
 enddo
 write(100,*) 'Total Volume of the blade =',bladedata(amount_data,nsl),'[m^3]' 
 close(100)
@@ -572,7 +571,7 @@ write(13,*)trim(casename)
 write(13,*)'Blade row:',ibrow
 write(13,*)"Non-dimensional quantities:"
 write(13,*)"section    m'sLE             m'sTE              m'blade_LE          m'blade_TE&
-                       chord             pitch          "
+                       &chord             pitch          "
 
 do ia = 1, nsl
    write(13,101)ia,msle(ia),mste(ia),mprime_ble(ia),mprime_bte(ia),chordm(ia),pitch
@@ -702,7 +701,7 @@ end subroutine
        apx2 = atan2(sgn2*s2,sgn2*c2)
 !
       endif
-	  
+ 
       return
       end subroutine
 !*************************************************************
@@ -729,7 +728,7 @@ use file_operations
 !      print*,'stack:',stack
 implicit none
 
-integer i,j,k,nx,np_side,np,nphalf,ny,LE
+integer i,j,k,nx,np_side,np,ny,LE
 integer, intent(in)::js,stack,stack_switch
 parameter (nx = 1000,ny=300)
 
@@ -754,7 +753,7 @@ if(mod(np,2).eq.0)then
   np_side = np/2 ! For even no. of points LE = np/2. So, the current formula (np+1)/2 ==> np/2 with this change.
 else
   ! points on bottom and top curve
-  np_side = (np+1)*0.5
+  np_side = (np+1)/2
 endif    
 if(stack_switch.eq.0)then !constant radial stacking.
   const_stk_u = floor(abs(real(stack))/1000)
@@ -917,7 +916,7 @@ integer TE_del,nx,nbls,ii,i,js,np,np_side
 parameter(nx = 1000)
 character(*)    :: fext
 character(*)    :: airfoil
-character*32 fname,blext(100)
+character*32 fname
 !character*20 airfoil
 real*8 sexts,sinls,chrdd,pitch,pi,x1,y1,x2,y2
 real*8, intent(inout) :: xb(nx),yb(nx)
@@ -927,8 +926,11 @@ if(mod(np,2).eq.0)then
   np_side = np/2 ! For even no. of points LE = np/2. So, the current formula (np+1)/2 ==> np/2 with this change.
 else
   ! points on bottom and top curve
-  np_side = (np+1)*0.5
+  np_side = (np+1)/2
 endif
+
+! Initializing ii
+ii  = 0
 
 !If the TE points do not coincide.
 x1 = xb(1)
@@ -975,7 +977,7 @@ close(2)
  
 100  format(a)
 101  format(5(f19.16,1x))
-102  format(2(f35.16,1x))
+!102  format(2(f35.16,1x))
 ! 105  format(' Blade Area               : ',f8.5)
 !106  format(' Blade Centroid           : ',f8.5,1x,f8.5)
 
@@ -987,8 +989,7 @@ end subroutine
 !*****************************************************
 SUBROUTINE st_line_intersection(XA,YA,XB,YB,XC,YC,XD,YD,XINT,YINT)
 
-integer i,j	
-real*8 XA,YA,XB,YB,XC,YC,XD,YD,xmin,ymin,xmax,ymax
+real*8 XA,YA,XB,YB,XC,YC,XD,YD
 real*8 , intent(out):: XINT,YINT
 
 ! xmin = min(XA,XB,XC,XD)	
@@ -1024,7 +1025,7 @@ real pitch, throat_coord(4),mouth_coord(4),exit_coord(4)
 real inter_coord(4,((np+1)/2))
 real pitch_line((np+1)/2), camber((np+1)/2),angle((np+1)/2),u((np+1)/2)
 real camber_upper((np+1)/2)
-real min_throat_2D,pi,sang,angle_up
+real min_throat_2D,pi,sang
 real x_interup,y_interup,x_interdwn,y_interdwn
 real, allocatable, dimension(:) :: throat
 character*80 file4
@@ -1035,6 +1036,10 @@ logical isdev
 integer                                         :: nopen
 character(len = :), allocatable                 :: log_file
 logical                                         :: file_open
+
+! Initializing x_interup and y_interup
+x_interup   = 0.0
+y_interup   = 0.0
 
 if(mod(np,2).eq.0)then
   np_sidee = np/2 ! For even no. of points LE = np/2. So, the current formula (np+1)/2 ==> np/2 with this change.
@@ -1088,7 +1093,7 @@ do j = 1, np_sidee
        !print*,'i_interup',i_interup1,i_interup2			
      endif
   enddo       
-  do i = 1,np_sidee-1		! intersection with lower airfoil
+  do i = 1,np_sidee-1       ! intersection with lower airfoil
      call st_line_intersection(u(j),pitch_line(j),u2_bot(j),v2_bot(j),xb(i),yb(i),xb(i+1),yb(i+1),xint_dwn,yint_dwn)
      !print*,'xint_dwn,yint_dwn',xint_dwn,yint_dwn
      if((xint_dwn <= xb(i) ).and.(xint_dwn >= xb(i+1)))then
@@ -1200,10 +1205,10 @@ real u_i((np+1)/2),camber_i((np+1)/2)
 real sinl
 
 ! initializing to 0
-camber_i 	= 0
-u_i 	= 0
-camber 	= 0
-angle 	= 0
+camber_i= 0
+u_i     = 0
+camber  = 0
+angle   = 0
 print*, 'np',np
 ! calculating the average:
 do i = 1,(np+1)/2
@@ -1222,9 +1227,9 @@ enddo
      ! write(50,*) u(i),camber(i)
 ! enddo
 ! close(50)
-	
+
 ! calculate the camber line angles (slope):
-angle(1) 		= atan(sinl)
+angle(1)        = atan(sinl)
 do i = 1, ((np+1)/2)-1
    !print*,'angle(i)',angle(i)	
    angle(i+1) = atan((camber(i+1)-camber(i))/(u(i+1)-u(i)))
@@ -1274,7 +1279,7 @@ real*8 xprd_bot(nx,nax),yprd_bot(nx,nax),zprd_bot(nx,nax)
 real*8 xmeanline(nx,nax),ymeanline(nx,nax),zmeanline(nx,nax)
 
 character*32 casename,temp
-character*80 fname2,fname4,fname6,fname7
+character*80 fname2
 
 !-------------------------------------------------------------------------------
 ! Adding the upstream and downstream curves of constant theta. 6 points on both sides.
@@ -1488,7 +1493,7 @@ enddo
 write(*,*)
 
 !-------------------------------------------------------------------------------
-11 format((f20.16),A,(f20.16),A,(f20.16))
+!11 format((f20.16),A,(f20.16),A,(f20.16))
 !-------------------------------------------------------------------------------
 
 return
@@ -1516,7 +1521,7 @@ subroutine constantslopemeanline3D(xb,yb,zb,xposlean,yposlean,zposlean, &
 
 implicit none
 
-integer i,ia,j, nx, nax, npts, npts_slope, npts_axial
+integer i,ia,j, nx, nax, npts
 integer, intent(in):: iap,nsec,uplmt
 
 parameter (nx = 1000, nax = 1000)
@@ -1530,16 +1535,16 @@ real*8 xmeanline(nx,nax),ymeanline(nx,nax),zmeanline(nx,nax)
 real*8 phi_xz_up,phi_xz_dwn,phi_xy_up,phi_xy_dwn,coefficient(6),mag_coff
 
 character*32 casename,temp
-character*80 fname2,fname4,fname6,fname7
+character*80 fname2,fname4
 
 !-------------------------------------------------------------------------------
 ! Adding the upstream and downstream curves of constant theta. 6 points on both sides.
 
 !-------------------------------------------------------------------------------
-	npts = 4  ! number of points added
-	! npts_slope = 4 ! Number of points maintaing the meanline slope
-	! npts_axial = npts - npts_slope ! Number of points in horizontal x dir.
-	mag_coff = 1 ! magnification factor for the peiodic boundaries (1 for no magnification)
+    npts = 4  ! number of points added
+    ! npts_slope = 4 ! Number of points maintaing the meanline slope
+    ! npts_axial = npts - npts_slope ! Number of points in horizontal x dir.
+    mag_coff = 1 ! magnification factor for the peiodic boundaries (1 for no magnification)
 do ia = 1, nsec
    !------------------------------------------------------------------------------- 
    !!average of the top and bottom curves (meanline calculation)
@@ -1568,72 +1573,72 @@ do ia = 1, nsec
    phi_xy_dwn = atan(real(ymeanline(uplmt,ia)-ymeanline(uplmt-1,ia))/(xmeanline(uplmt,ia)-xmeanline(uplmt-1,ia)))  
   !-------------------------------------------------------------------------------
    !! upstream coordinates
-   	!coefficient = [ 0.06, 0.10, 0.12, 0.16, 0.18, 0.2 ]* mag_coff
-   	coefficient = [ 0.04, 0.05, 0.06, 0.07, 0.08, 0.1 ]* mag_coff	
-	! Constant slope:
+    !coefficient = [ 0.06, 0.10, 0.12, 0.16, 0.18, 0.2 ]* mag_coff
+    coefficient = [ 0.04, 0.05, 0.06, 0.07, 0.08, 0.1 ]* mag_coff
+    ! Constant slope:
     do j = npts, 1, -1
-	   xmeanline(j,ia) = -scf*coefficient(npts+1-j) + scf*xb(uplmt+1,ia)
-	   ymeanline(j,ia) = (xmeanline(j,ia)-xmeanline(j+1,ia))*tan(phi_xy_up)+ymeanline(j+1,ia)
-	   zmeanline(j,ia) = (xmeanline(j,ia)-xmeanline(j+1,ia))*tan(phi_xz_up)+zmeanline(j+1,ia)
-	   !top periodic wall coordinates
-	   xprd_top(j,ia) = -scf*coefficient(npts+1-j) + scf*xposlean(uplmt+1,ia)
-	   yprd_top(j,ia) = (xprd_top(j,ia)-xprd_top(j+1,ia))*tan(phi_xy_up)+scf*yprd_top(j+1,ia)
-	   zprd_top(j,ia) = (xprd_top(j,ia)-xprd_top(j+1,ia))*tan(phi_xz_up)+scf*zprd_top(j+1,ia)
-	   !bot periodic wall coordinates
-	   xprd_bot(j,ia) = -scf*coefficient(npts+1-j) + scf*xneglean(uplmt+1,ia)
-	   yprd_bot(j,ia) = (xprd_bot(j,ia)-xprd_bot(j+1,ia))*tan(phi_xy_up)+scf*yprd_bot(j+1,ia)
-	   zprd_bot(j,ia) = (xprd_bot(j,ia)-xprd_bot(j+1,ia))*tan(phi_xz_up)+scf*zprd_bot(j+1,ia)
-	   ! print*,xmeanline(j,ia),ymeanline(j,ia),zmeanline(j,ia)
-	   ! print*,xprd_top(j,ia),yprd_top(j,ia),zprd_top(j,ia)
-	   ! print*,xprd_bot(j,ia),yprd_bot(j,ia),zprd_bot(j,ia)
-	   ! stop
-	enddo
-	! Axial points:
+       xmeanline(j,ia) = -scf*coefficient(npts+1-j) + scf*xb(uplmt+1,ia)
+       ymeanline(j,ia) = (xmeanline(j,ia)-xmeanline(j+1,ia))*tan(phi_xy_up)+ymeanline(j+1,ia)
+       zmeanline(j,ia) = (xmeanline(j,ia)-xmeanline(j+1,ia))*tan(phi_xz_up)+zmeanline(j+1,ia)
+       !top periodic wall coordinates
+       xprd_top(j,ia) = -scf*coefficient(npts+1-j) + scf*xposlean(uplmt+1,ia)
+       yprd_top(j,ia) = (xprd_top(j,ia)-xprd_top(j+1,ia))*tan(phi_xy_up)+scf*yprd_top(j+1,ia)
+       zprd_top(j,ia) = (xprd_top(j,ia)-xprd_top(j+1,ia))*tan(phi_xz_up)+scf*zprd_top(j+1,ia)
+       !bot periodic wall coordinates
+       xprd_bot(j,ia) = -scf*coefficient(npts+1-j) + scf*xneglean(uplmt+1,ia)
+       yprd_bot(j,ia) = (xprd_bot(j,ia)-xprd_bot(j+1,ia))*tan(phi_xy_up)+scf*yprd_bot(j+1,ia)
+       zprd_bot(j,ia) = (xprd_bot(j,ia)-xprd_bot(j+1,ia))*tan(phi_xz_up)+scf*zprd_bot(j+1,ia)
+       ! print*,xmeanline(j,ia),ymeanline(j,ia),zmeanline(j,ia)
+       ! print*,xprd_top(j,ia),yprd_top(j,ia),zprd_top(j,ia)
+       ! print*,xprd_bot(j,ia),yprd_bot(j,ia),zprd_bot(j,ia)
+       ! stop
+    enddo
+    ! Axial points:
     ! do j = npts_slope-1, 1, -1
-	   ! xmeanline(j,ia) = -scf*coefficient(npts+1-j) + xmeanline(npts_slope,ia)
-	   ! ymeanline(j,ia) = scf*coefficient(npts_slope-1) + ymeanline(npts_slope,ia)! add factor (scf*coefficient(npts_slope-1)) to make transition smooth
-	   ! zmeanline(j,ia) = zmeanline(npts_slope,ia)
-	   !! top periodic wall coordinates
-	   ! xprd_top(j,ia) = -scf*coefficient(npts+1-j) + xprd_top(npts_slope,ia)
-	   ! yprd_top(j,ia) = yprd_top(npts_slope,ia)
-	   ! zprd_top(j,ia) = zprd_top(npts_slope,ia)
-	   !! bot periodic wall coordinates
-	   ! xprd_bot(j,ia) = -scf*coefficient(npts+1-j) + xprd_bot(npts_slope,ia)
-	   ! yprd_bot(j,ia) = yprd_bot(npts_slope,ia)
-	   ! zprd_bot(j,ia) = zprd_bot(npts_slope,ia)
-	 ! enddo
-	!!
+       ! xmeanline(j,ia) = -scf*coefficient(npts+1-j) + xmeanline(npts_slope,ia)
+       ! ymeanline(j,ia) = scf*coefficient(npts_slope-1) + ymeanline(npts_slope,ia)! add factor (scf*coefficient(npts_slope-1)) to make transition smooth
+       ! zmeanline(j,ia) = zmeanline(npts_slope,ia)
+       !! top periodic wall coordinates
+       ! xprd_top(j,ia) = -scf*coefficient(npts+1-j) + xprd_top(npts_slope,ia)
+       ! yprd_top(j,ia) = yprd_top(npts_slope,ia)
+       ! zprd_top(j,ia) = zprd_top(npts_slope,ia)
+       !! bot periodic wall coordinates
+       ! xprd_bot(j,ia) = -scf*coefficient(npts+1-j) + xprd_bot(npts_slope,ia)
+       ! yprd_bot(j,ia) = yprd_bot(npts_slope,ia)
+       ! zprd_bot(j,ia) = zprd_bot(npts_slope,ia)
+     ! enddo
+    !!
    !------------------------------------------------------------------------------- 
    !!downstream coordinates
    !-------------------------------------------------------------------------------
-	! Constant slope
+    ! Constant slope
     do j = 1 , npts
-	   xmeanline(uplmt+j,ia) = scf*coefficient(j) + scf*xb(iap,ia)
-	   ymeanline(uplmt+j,ia) = (xmeanline(uplmt+j,ia)-xmeanline(uplmt+j-1,ia))*tan(phi_xy_dwn)+ymeanline(uplmt+j-1,ia)
-	   zmeanline(uplmt+j,ia) = (xmeanline(uplmt+j,ia)-xmeanline(uplmt+j-1,ia))*tan(phi_xz_dwn)+zmeanline(uplmt+j-1,ia)
-	   !top periodic wall coordinates
-	   xprd_top(uplmt+j,ia) = scf*coefficient(j) + scf*xposlean(iap,ia)
-	   yprd_top(uplmt+j,ia) = (xprd_top(uplmt+j,ia)-xprd_top(uplmt+j-1,ia))*tan(phi_xy_dwn)+yprd_top(uplmt+j-1,ia)
-	   zprd_top(uplmt+j,ia) = (xprd_top(uplmt+j,ia)-xprd_top(uplmt+j-1,ia))*tan(phi_xz_dwn)+zprd_top(uplmt+j-1,ia)
-	   !bot periodic wall coordinates
-	   xprd_bot(uplmt+j,ia) = scf*coefficient(j) + scf*xneglean(iap,ia)
-	   yprd_bot(uplmt+j,ia) = (xprd_bot(uplmt+j,ia)-xprd_bot(uplmt+j-1,ia))*tan(phi_xy_dwn)+yprd_bot(uplmt+j-1,ia)
-	   zprd_bot(uplmt+j,ia) = (xprd_bot(uplmt+j,ia)-xprd_bot(uplmt+j-1,ia))*tan(phi_xz_dwn)+zprd_bot(uplmt+j-1,ia)
-	enddo
-	! Axial points:
+       xmeanline(uplmt+j,ia) = scf*coefficient(j) + scf*xb(iap,ia)
+       ymeanline(uplmt+j,ia) = (xmeanline(uplmt+j,ia)-xmeanline(uplmt+j-1,ia))*tan(phi_xy_dwn)+ymeanline(uplmt+j-1,ia)
+       zmeanline(uplmt+j,ia) = (xmeanline(uplmt+j,ia)-xmeanline(uplmt+j-1,ia))*tan(phi_xz_dwn)+zmeanline(uplmt+j-1,ia)
+       !top periodic wall coordinates
+       xprd_top(uplmt+j,ia) = scf*coefficient(j) + scf*xposlean(iap,ia)
+       yprd_top(uplmt+j,ia) = (xprd_top(uplmt+j,ia)-xprd_top(uplmt+j-1,ia))*tan(phi_xy_dwn)+yprd_top(uplmt+j-1,ia)
+       zprd_top(uplmt+j,ia) = (xprd_top(uplmt+j,ia)-xprd_top(uplmt+j-1,ia))*tan(phi_xz_dwn)+zprd_top(uplmt+j-1,ia)
+       !bot periodic wall coordinates
+       xprd_bot(uplmt+j,ia) = scf*coefficient(j) + scf*xneglean(iap,ia)
+       yprd_bot(uplmt+j,ia) = (xprd_bot(uplmt+j,ia)-xprd_bot(uplmt+j-1,ia))*tan(phi_xy_dwn)+yprd_bot(uplmt+j-1,ia)
+       zprd_bot(uplmt+j,ia) = (xprd_bot(uplmt+j,ia)-xprd_bot(uplmt+j-1,ia))*tan(phi_xz_dwn)+zprd_bot(uplmt+j-1,ia)
+    enddo
+    ! Axial points:
     ! do j = npts_slope+1, npts	
-	   ! xmeanline(uplmt+j,ia) = scf*coefficient(j) + xmeanline(uplmt+npts_slope,ia)
-	   ! ymeanline(uplmt+j,ia) = ymeanline(uplmt+npts_slope,ia)
-	   ! zmeanline(uplmt+j,ia) = zmeanline(uplmt+npts_slope,ia)
-	   ! !top periodic wall coordinates
-	   ! xprd_top(uplmt+j,ia) = scf*coefficient(j) + xprd_top(uplmt+npts_slope,ia)
-	   ! yprd_top(uplmt+j,ia) = yprd_top(uplmt+npts_slope,ia)
-	   ! zprd_top(uplmt+j,ia) = zprd_top(uplmt+npts_slope,ia)
-	   ! !bot periodic wall coordinates
-	   ! xprd_bot(uplmt+j,ia) = scf*coefficient(j) + xprd_bot(uplmt+npts_slope,ia)
-	   ! yprd_bot(uplmt+j,ia) = yprd_bot(uplmt+npts_slope,ia)
-	   ! zprd_bot(uplmt+j,ia) = zprd_bot(uplmt+npts_slope,ia)
-	! enddo
+       ! xmeanline(uplmt+j,ia) = scf*coefficient(j) + xmeanline(uplmt+npts_slope,ia)
+       ! ymeanline(uplmt+j,ia) = ymeanline(uplmt+npts_slope,ia)
+       ! zmeanline(uplmt+j,ia) = zmeanline(uplmt+npts_slope,ia)
+       ! !top periodic wall coordinates
+       ! xprd_top(uplmt+j,ia) = scf*coefficient(j) + xprd_top(uplmt+npts_slope,ia)
+       ! yprd_top(uplmt+j,ia) = yprd_top(uplmt+npts_slope,ia)
+       ! zprd_top(uplmt+j,ia) = zprd_top(uplmt+npts_slope,ia)
+       ! !bot periodic wall coordinates
+       ! xprd_bot(uplmt+j,ia) = scf*coefficient(j) + xprd_bot(uplmt+npts_slope,ia)
+       ! yprd_bot(uplmt+j,ia) = yprd_bot(uplmt+npts_slope,ia)
+       ! zprd_bot(uplmt+j,ia) = zprd_bot(uplmt+npts_slope,ia)
+    ! enddo
    !-------------------------------------------------------------------------------
    ! Writing to external files.
    !-------------------------------------------------------------------------------
@@ -1673,7 +1678,7 @@ write(*,*)
 
 
 !-------------------------------------------------------------------------------
-11 format((f20.16),A,(f20.16),A,(f20.16))
+!11 format((f20.16),A,(f20.16),A,(f20.16))
 !-------------------------------------------------------------------------------
 
 return
@@ -1926,17 +1931,16 @@ subroutine LE_ellipse(np,ncp,xcp_thk,ycp_thk,np_cluster,x_ellip_LE,y_ellip_LE)
 
     integer,                    intent(in)          :: np, ncp
     real,                       intent(in)          :: xcp_thk(ncp), ycp_thk(ncp)  
-    integer,                    intent(inout)       :: np_cluster
+    integer,                    intent(in)          :: np_cluster
     real,                       intent(inout)       :: x_ellip_LE(*), y_ellip_LE(*)
     
     ! Local variables
     real                                            :: x_1_LE,y_1_LE,x_2_LE,y_2_LE,x_3_LE,  &
                                                        y_3_LE,x_center_LE,y_center_LE,a_LE, &
                                                        b_LE
-    integer                                         :: np_ellip_LE
     real,       allocatable                         :: t_LE(:)
     real,       parameter                           :: pi = 4.0*atan(1.0)
-    integer                                         :: i, j, k
+    integer                                         :: i
 
 
     !
@@ -2012,10 +2016,9 @@ subroutine TE_ellipse(np,ncp,xcp_thk,ycp_thk,np_cluster,x_ellip_TE,y_ellip_TE)
     real                                            :: x_1_TE,y_1_TE,x_2_TE,y_2_TE,x_3_TE,  &
                                                        y_3_TE,x_center_TE,y_center_TE,a_TE, &
                                                        b_TE
-    integer                                         :: np_ellip_TE
     real,       allocatable                         :: t_TE(:)
     real,       parameter                           :: pi = 4.0*atan(1.0)
-    integer                                         :: i, j, k
+    integer                                         :: i
 
 
     ! 
@@ -2088,7 +2091,7 @@ subroutine cluster_mid(u_begin,u_end,np_mid,u_mid)
     real,                       intent(inout)       :: u_mid(np_mid)
 
     ! Local variables
-    integer                                         :: i,j,k
+    integer                                         :: i
     real                                            :: delta_u
 
 
@@ -2169,14 +2172,14 @@ subroutine LE_clustering_parameter_solver(xi,K,delta,solver_flag)
     ! Local variables
     real                                            :: a, b, c, f1, f2, f3, &
                                                        tol = 10E-6
-    integer                                         :: i, j, nopen, niter
+    integer                                         :: nopen, niter
     character(:),   allocatable                     :: log_file
     logical                                         :: file_open
     interface LE_clustering_parameter_func
         real function LE_clustering_parameter_func(Kf,xif,func_coordinate) 
-            real                                    :: Kf
-            real                                    :: xif
-            real                                    :: func_coordinate
+            real,               intent(in)          :: Kf
+            real,               intent(in)          :: xif
+            real,               intent(in)          :: func_coordinate
         end function LE_clustering_parameter_func
     end interface
 
@@ -2258,14 +2261,14 @@ subroutine TE_clustering_parameter_solver(xi,K,delta,solver_flag)
     ! Local variables
     real                                            :: a, b, c, f1, f2, f3, &
                                                        tol = 10E-6
-    integer                                         :: i, j, nopen, niter
+    integer                                         :: nopen, niter
     character(:),   allocatable                     :: log_file
     logical                                         :: file_open
     interface TE_clustering_parameter_func
         real function TE_clustering_parameter_func(Kf,xif,func_coordinate)
-            real                                    :: Kf
-            real                                    :: xif
-            real                                    :: func_coordinate
+            real,               intent(in)          :: Kf
+            real,               intent(in)          :: xif
+            real,               intent(in)          :: func_coordinate
         end function TE_clustering_parameter_func
     end interface
     
@@ -2345,7 +2348,7 @@ subroutine mid_hyperbolic_clustering(np_cluster,np_mid,u_LE,u_TE,u_mid)
     real,                       intent(inout)       :: u_mid(np_mid)
 
     ! Local variables
-    integer                                         :: i, j, np_mid_LE, np_mid_TE, nopen
+    integer                                         :: i, np_mid_LE, np_mid_TE, nopen
     real,   allocatable                             :: xi(:), u_mid_LE(:), u_mid_TE(:)
     real                                            :: du_LE, u_mid_pt, du_mid_LE, du_mid_TE, K_LE, delta_LE, &
                                                        du_TE, K_TE, delta_TE
@@ -2463,7 +2466,7 @@ subroutine elliptical_clustering(js,np,nsl,ncp,thk_cp,np_cluster,u_new)
     real,                       intent(inout)       :: u_new(np)
 
     ! Local variables
-    integer                                         :: i, j, k, np_mid, nopen
+    integer                                         :: i, j, np_mid, nopen
     real,           allocatable                     :: xcp_thk(:), ycp_thk(:)
     real,           allocatable                     :: x_ellip_LE(:), y_ellip_LE(:), &
                                                        x_ellip_TE(:), y_ellip_TE(:), &
@@ -2522,6 +2525,8 @@ subroutine elliptical_clustering(js,np,nsl,ncp,thk_cp,np_cluster,u_new)
     allocate(u_mid(np_mid))
     call mid_hyperbolic_clustering(np_cluster,np_mid,u_LE,u_TE,u_mid)
 
+    ! Initializing 'j'
+    j   = 0
 
     ! Generate u_new by combining u_LE, u_mid and u_TE
     do i = 1,np_cluster
@@ -2602,11 +2607,9 @@ subroutine modified_NACA_four_digit_thickness_coeffs(t_max,u_max,TE_thk,dy_dx_TE
     real,                       intent(inout)   :: d(4)
 
     ! Local variables
-    integer                                     :: j, k, fail_flag, nopen
+    integer                                     :: fail_flag
     real                                        :: temp
     real,           allocatable                 :: aug_matrix(:,:)
-    character(:),   allocatable                 :: log_file
-    logical                                     :: file_open
 
 
     !
@@ -2792,11 +2795,9 @@ subroutine modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,dy_dx_TE
     real,                       intent(inout)   :: d(4)
 
     ! Local variables
-    integer                                     :: j, k, fail_flag, nopen
+    integer                                     :: fail_flag
     real                                        :: u_TE, temp
     real,           allocatable                 :: aug_matrix(:,:)
-    character(:),   allocatable                 :: log_file
-    logical                                     :: file_open
 
 
 
@@ -2881,7 +2882,7 @@ subroutine modified_NACA_four_digit_thickness(np,u,u_max,t_max,a,d,thk_data)
     !real,                   intent(inout)   :: thk_der(np)
 
     ! Local variables
-    integer                                 :: i, j, k
+    integer                                 :: i
     real                                    :: tol = 10E-8
 
 
@@ -2949,7 +2950,7 @@ subroutine modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a,d,thk_da
     real,                   intent(inout)   :: thk_data(np,3)
 
     ! Local variables
-    integer                                 :: i, j, k, counter
+    integer                                 :: i, counter
     real                                    :: u_TE, tol = 10E-8
 
 
@@ -3019,124 +3020,122 @@ end subroutine modified_NACA_four_digit_thickness_2
 ! Add circular TE to a NACA four digit thickness airfoil and rescale 
 !
 !*******************************************************************************************
-subroutine add_circular_TE(np,u,np_circ,utop,vtop,ubot,vbot,ptop,pbot,u_new)
-    use file_operations
-    implicit none
-
-    integer,                intent(in)      :: np
-    real,                   intent(in)      :: u(np)
-    integer,                intent(in)      :: np_circ
-    real,                   intent(in)      :: utop(np)
-    real,                   intent(in)      :: vtop(np)
-    real,                   intent(in)      :: ubot(np)
-    real,                   intent(in)      :: vbot(np)
-    real,                   intent(inout)   :: ptop(2, np + ((np_circ - 1)/2))
-    real,                   intent(inout)   :: pbot(2, np + ((np_circ - 1)/2))
-    real,                   intent(inout)   :: u_new(np + ((np_circ - 1)/2))
-
-    ! Local variables
-    integer                                 :: i, j, k, nopen, ntemp
-    real                                    :: uTE(np_circ), vTE(np_circ), m_top, m_top_normal, c_top, &
-                                               m_bot, m_bot_normal, c_bot, u_center, v_center, radius, &
-                                               t_start, t_end, dt, t_TE(np_circ)
-    real,               parameter           :: pi = 4.0*atan(1.0)
-    character(len = :), allocatable         :: log_file
-    logical                                 :: file_open
-
-
-    
-    
-    !
-    ! Compute slope of normal and intercept for the top curve
-    !
-    m_top               = (vtop(np) - vtop(np - 1))/(utop(np) - utop(np - 1))
-    m_top_normal        = -1.0/m_top
-    c_top               = vtop(np) - (m_top_normal*utop(np))
-    
-    !
-    ! Compute slope of normal and intercept for the bottom curve
-    !
-    m_bot               = (vbot(np) - vbot(np - 1))/(ubot(np) - ubot(np - 1))
-    m_bot_normal        = -1.0/m_bot
-    c_bot               = vbot(np) - (m_bot_normal*ubot(np))
-
-    !
-    ! Find center and radius of TE circle (intersection of top and bottom normals)
-    !
-    u_center            = (c_top - c_bot)/(m_bot_normal - m_top_normal)
-    v_center            = (m_top_normal*u_center) + c_top
-    radius              = sqrt((u_center - utop(np))**2 + (v_center - vtop(np))**2)
-
-    !
-    ! Determine angular positions of circular TE start and end
-    if (atan(m_top_normal) .lt. 0.0) then
-        t_start         = atan(m_top_normal) + pi
-    else if (atan(m_top_normal) .gt. 0.0) then
-        t_start         = atan(m_top_normal)
-    end if 
-
-    if (atan(m_bot_normal) .lt. 0.0) then
-        t_end           = atan(m_bot_normal)
-    else if (atan(m_bot_normal) .gt. 0.0) then
-        t_end           = (-0.5*pi) - atan(m_bot_normal)
-    end if
-
-    !
-    ! Generate parameter space for the circular TE
-    ! 
-    dt                  = t_start - t_end
-    t_TE(1)             = t_start
-    do i = 2,np_circ
-
-        t_TE(i)         = t_start - (dt*(real(i - 1)/real(np_circ - 1)))
-        
-    end do 
-    t_TE(np_circ)       = t_end
-  
-    !
-    ! Compute (u,v) coordinates of circular TE 
-    ! Set endpoints of circular TE equal to endpoints of bottom and top curves
-    !
-    do i = 1,np_circ
-
-        uTE(i)          = u_center + (radius*cos(t_TE(i)))
-        vTE(i)          = v_center + (radius*sin(t_TE(i)))
-
-    end do
-    uTE(1)              = utop(np)
-    vTE(1)              = vtop(np)
-    uTE(np_circ)        = ubot(np)
-    vTE(np_circ)        = vbot(np)
-     
-    !
-    ! Combine the incoming blade section with the circular TE
-    !
-    do i = 1,np
-
-        ptop(1,i)       = utop(i)
-        ptop(2,i)       = vtop(i)
-        pbot(1,i)       = ubot(i)
-        pbot(2,i)       = vbot(i)
-        !u_new(i)        = u(i)
-
-    end do
-    ntemp               = (np_circ - 1)/2
-    do i = 1,ntemp
-
-        ptop(1,np + i)  = uTE(1 + i)
-        ptop(2,np + i)  = vTE(1 + i)
-        pbot(1,np + i)  = uTE(np_circ - i)
-        pbot(2,np + i)  = vTE(np_circ - i)
-        !u_new(np + i)   = 0.5*(ptop(1,np + i) + pbot(1,np + i))
-
-    end do
-
-    ptop(1,:)           = ptop(1,:)/ptop(1,np + ntemp)!maxval(uTE)
-    pbot(1,:)           = pbot(1,:)/pbot(1,np + ntemp)!maxval(uTE)
-    u_new               = 0.5*(ptop(1,:) + pbot(1,:))
-    
-
-end subroutine add_circular_TE
+!subroutine add_circular_TE(np,u,np_circ,utop,vtop,ubot,vbot,ptop,pbot,u_new)
+!    use file_operations
+!    implicit none
+!
+!    integer,                intent(in)      :: np
+!    real,                   intent(in)      :: u(np)
+!    integer,                intent(in)      :: np_circ
+!    real,                   intent(in)      :: utop(np)
+!    real,                   intent(in)      :: vtop(np)
+!    real,                   intent(in)      :: ubot(np)
+!    real,                   intent(in)      :: vbot(np)
+!    real,                   intent(inout)   :: ptop(2, np + ((np_circ - 1)/2))
+!    real,                   intent(inout)   :: pbot(2, np + ((np_circ - 1)/2))
+!    real,                   intent(inout)   :: u_new(np + ((np_circ - 1)/2))
+!
+!    ! Local variables
+!    integer                                 :: i, ntemp
+!    real                                    :: uTE(np_circ), vTE(np_circ), m_top, m_top_normal, c_top, &
+!                                               m_bot, m_bot_normal, c_bot, u_center, v_center, radius, &
+!                                               t_start, t_end, dt, t_TE(np_circ)
+!    real,               parameter           :: pi = 4.0*atan(1.0)
+!
+!
+!    
+!    
+!    !
+!    ! Compute slope of normal and intercept for the top curve
+!    !
+!    m_top               = (vtop(np) - vtop(np - 1))/(utop(np) - utop(np - 1))
+!    m_top_normal        = -1.0/m_top
+!    c_top               = vtop(np) - (m_top_normal*utop(np))
+!    
+!    !
+!    ! Compute slope of normal and intercept for the bottom curve
+!    !
+!    m_bot               = (vbot(np) - vbot(np - 1))/(ubot(np) - ubot(np - 1))
+!    m_bot_normal        = -1.0/m_bot
+!    c_bot               = vbot(np) - (m_bot_normal*ubot(np))
+!
+!    !
+!    ! Find center and radius of TE circle (intersection of top and bottom normals)
+!    !
+!    u_center            = (c_top - c_bot)/(m_bot_normal - m_top_normal)
+!    v_center            = (m_top_normal*u_center) + c_top
+!    radius              = sqrt((u_center - utop(np))**2 + (v_center - vtop(np))**2)
+!
+!    !
+!    ! Determine angular positions of circular TE start and end
+!    if (atan(m_top_normal) .lt. 0.0) then
+!        t_start         = atan(m_top_normal) + pi
+!    else if (atan(m_top_normal) .gt. 0.0) then
+!        t_start         = atan(m_top_normal)
+!    end if 
+!
+!    if (atan(m_bot_normal) .lt. 0.0) then
+!        t_end           = atan(m_bot_normal)
+!    else if (atan(m_bot_normal) .gt. 0.0) then
+!        t_end           = (-0.5*pi) - atan(m_bot_normal)
+!    end if
+!
+!    !
+!    ! Generate parameter space for the circular TE
+!    ! 
+!    dt                  = t_start - t_end
+!    t_TE(1)             = t_start
+!    do i = 2,np_circ
+!
+!        t_TE(i)         = t_start - (dt*(real(i - 1)/real(np_circ - 1)))
+!        
+!    end do 
+!    t_TE(np_circ)       = t_end
+!  
+!    !
+!    ! Compute (u,v) coordinates of circular TE 
+!    ! Set endpoints of circular TE equal to endpoints of bottom and top curves
+!    !
+!    do i = 1,np_circ
+!
+!        uTE(i)          = u_center + (radius*cos(t_TE(i)))
+!        vTE(i)          = v_center + (radius*sin(t_TE(i)))
+!
+!    end do
+!    uTE(1)              = utop(np)
+!    vTE(1)              = vtop(np)
+!    uTE(np_circ)        = ubot(np)
+!    vTE(np_circ)        = vbot(np)
+!     
+!    !
+!    ! Combine the incoming blade section with the circular TE
+!    !
+!    do i = 1,np
+!
+!        ptop(1,i)       = utop(i)
+!        ptop(2,i)       = vtop(i)
+!        pbot(1,i)       = ubot(i)
+!        pbot(2,i)       = vbot(i)
+!        !u_new(i)        = u(i)
+!
+!    end do
+!    ntemp               = (np_circ - 1)/2
+!    do i = 1,ntemp
+!
+!        ptop(1,np + i)  = uTE(1 + i)
+!        ptop(2,np + i)  = vTE(1 + i)
+!        pbot(1,np + i)  = uTE(np_circ - i)
+!        pbot(2,np + i)  = vTE(np_circ - i)
+!        !u_new(np + i)   = 0.5*(ptop(1,np + i) + pbot(1,np + i))
+!
+!    end do
+!
+!    ptop(1,:)           = ptop(1,:)/ptop(1,np + ntemp)!maxval(uTE)
+!    pbot(1,:)           = pbot(1,:)/pbot(1,np + ntemp)!maxval(uTE)
+!    u_new               = 0.5*(ptop(1,:) + pbot(1,:))
+!    
+!
+!end subroutine add_circular_TE
 !*******************************************************************************************
 
 

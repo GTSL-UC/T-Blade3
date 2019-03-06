@@ -301,12 +301,11 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     character(*)                :: arg4
 
     ! Local variables
-    integer                     :: i_local, nopen
-    real                        :: spl_eval, dspl_eval, xdiff, rdiff, inBetaInci, outBetaDevn
-    character(256)              :: fname, temp, tempr1, fname1, fname2, fname3, fname4, row_type, path
+    integer                     :: nopen
+    real                        :: spl_eval, dspl_eval, xdiff, inBetaInci, outBetaDevn
+    character(256)              :: fname, temp, fname1, row_type, path
     character(:),  allocatable  :: log_file, auxinput_filename
-    logical                     :: axial_LE, radial_LE, axial_TE, radial_TE, file_open, dir_exist, &
-                                   file_exist
+    logical                     :: axial_LE, radial_LE, axial_TE, radial_TE, file_open, file_exist
 
 
 
@@ -791,7 +790,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         call log_file_exists(log_file, nopen, file_open)
         do i = 2, nsp(ia)
             if (rm(i, ia)< radius_tolerance) then
-                k = k + 1	! nemnem 6 10 2014
+                k = k + 1   ! nemnem 6 10 2014
                 print*, 'Radius less than', radius_tolerance, ', excluding point number', k
                 write(nopen,*) 'Radius less than', radius_tolerance, ', excluding point number', k
                 xm(1, ia) = xm(i, ia)  ! switch to new intial value after elimination zero radius points
@@ -810,14 +809,14 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                     mp(i-k, ia) = mp(i-k-1, ia) + 2.*sqrt((rm(i, ia)-rm(i-1, ia))**2 + (xm(i, ia)-xm(i-1, ia))**2)/(rm(i, ia)+rm(i-1, ia))
                 ! endif
                 xm(i-k, ia) = xm(i, ia)   ! Reindex the mp, xm, rm for hub
-                rm(i-k, ia) = rm(i, ia)	! Reindex the mp, xm, rm for hub
+                rm(i-k, ia) = rm(i, ia)   ! Reindex the mp, xm, rm for hub
             endif
         enddo
         call close_log_file(nopen, file_open)
 
         call log_file_exists(log_file, nopen, file_open)
         if (k /= 0) then
-            nsp_hub = nsp(ia)		! nsp_hub is used for full hub streamline extraction nemnem 6 10 2014
+            nsp_hub = nsp(ia)       ! nsp_hub is used for full hub streamline extraction nemnem 6 10 2014
             nsp(ia) = i-k-1         ! Update the hub number of valid points
             print*, 'nsp for streamline', ia, 'changed from', nsp_hub, 'to', nsp(ia)
             write(nopen,*) 'nsp for streamline', ia, 'changed from', nsp_hub, 'to', nsp(ia)
@@ -1595,7 +1594,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
          Deallocate(sting_l_all)
        endif
     enddo
-    35 close (1)
+    !35 close (1)
 
     if(is2d) then
         goto 1001
@@ -1675,8 +1674,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !FORMAT statements
     !**************************************************************************************
     !101  format(I2, 2X, 6(f19.16, 1x))
-    106  format(f8.5)
-    1000 format(a)
+    !106  format(f8.5)
+    !1000 format(a)
 
     !**************************************************************************************
     ! Deallocation of variables

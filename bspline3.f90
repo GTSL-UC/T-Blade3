@@ -6,11 +6,11 @@ subroutine bspline3(xcp,ycp,ncp,x,y,nspan,ia)
 
 implicit none
 
-integer ncp,ncp1,i,j,k,np,nx,nax,nbsp,nspan,ia,ib,na
+integer ncp,ncp1,i,j,k,np,nx,nax,nbsp,nspan,ia,ib
 real*8 xcp(ncp),ycp(ncp)
 !real*8 xb3(1000),yb3(1000)
 real*8 xc(ncp+2),yc(ncp+2)
-real*8 xs(1000),ys(1000),xbs1(1000),xbs2(1000)
+real*8 xs(1000),ys(1000)
 !real*8 xmin(1000),xmax(1000)
 real*8 xmax,xmin,xint
 
@@ -18,8 +18,7 @@ real*8 t(1000), T1(1000), T2(1000), T3(1000), T4(1000)
 
 
 parameter(np=50,nx=1000,nax=100)
-real*8 xbs(nx),ybs(nx),s1(nx),xds1(nx), min,max
-real*8 xb3(nx,nax),yb3(nx,nax),arc(1000),darc(1000)
+real*8 xbs(nx),ybs(nx),min,max
 real*8 x(nspan),y(nspan)
 !print*,' Control points for bspline curve from Input are:'
 !print*,ncp
@@ -177,6 +176,11 @@ end subroutine bspline3
         real*8 ,dimension(29) :: GQx, GQw
         real*8 d_bspline4, d_bspline, dxdt, dydt, S
         integer i, j
+       
+        
+        ! Initializing dydt
+        dxdt    = 0.0
+        dydt    = 0.0
         
         GQx = (/-0.9966794422605956, -0.9825455052614139, -0.9572855957780887, -0.9211802329530591, -0.874637804920103,  & 
                 -0.8181854876152532, -0.752462851734477 , -0.6782145376026867, -0.5962817971382289, -0.5075929551242282, & 
@@ -197,13 +201,13 @@ end subroutine bspline3
         do j = 1, ncp-degree
             arclength(j+1) = arclength(j)
             do i = 1, 29
-                if (degree == 3) then			
+                if (degree == 3) then
                   dxdt = d_bspline(xcp(j:j+degree),GQx(i))
                   dydt = d_bspline(ycp(j:j+degree),GQx(i))
-		elseif (degree == 4) then
+        elseif (degree == 4) then
                   dxdt = d_bspline4(xcp(j:j+degree),GQx(i))
                   dydt = d_bspline4(ycp(j:j+degree),GQx(i))
-		endif
+        endif
                 S = sqrt(dxdt**2 + dydt**2)
                 arclength(j+1) = arclength(j+1) + GQw(i)*S
             enddo
@@ -230,7 +234,6 @@ end subroutine bspline3
         real*8 ,intent (out) :: t
         real*8 , dimension(ncp-degree+1) ,intent (in) :: arclength
         real*8 ,intent (in) :: s
-        real*8 :: bspline
         integer :: ns
         
         ns = ncp - degree !number of segmenst
@@ -257,66 +260,66 @@ end subroutine bspline3
         end subroutine    
         
 !-----------------------------------------------------------------------
-        real*8 function bspline_cp(cp,arclength,ncp,degree,s)  
-        implicit none
-        real*8, dimension(ncp),  intent (in) :: cp
-        real*8, dimension(ncp-2),intent (in) :: arclength
-        integer, intent(in) :: ncp,degree
-        real*8 ,intent (in) :: s
-        integer :: j
-        real*8 :: t, bspline, bspline4
-        
-        call bspline_jt(j,t,arclength,ncp,degree,s)  
-        if( degree == 3) bspline_cp = bspline(cp(j:j+degree),t)
-        if( degree == 4) bspline_cp = bspline4(cp(j:j+degree),t)
+        real function bspline_cp(cp,arclength,ncp,degree,s)  
+            implicit none
+            real*8, dimension(ncp),  intent (in) :: cp
+            real*8, dimension(ncp-2),intent (in) :: arclength
+            integer, intent(in) :: ncp,degree
+            real*8 ,intent (in) :: s
+            integer :: j
+            real*8 :: t, bspline, bspline4
+           
+            call bspline_jt(j,t,arclength,ncp,degree,s)  
+            if( degree == 3) bspline_cp = bspline(cp(j:j+degree),t)
+            if( degree == 4) bspline_cp = bspline4(cp(j:j+degree),t)
 
         end function    
     
 !-----------------------------------------------------------------------
-        real*8 function d_bspline_cp(cp,arclength,ncp,degree,s)  
-        implicit none
-        real*8, dimension(ncp), intent (in) :: cp
-        real*8 , dimension(ncp-2) ,intent (in) :: arclength
-        integer, intent(in) :: ncp,degree
-        real*8 ,intent (in) :: s
-        integer :: j
-        real*8 :: t, d_bspline, d_bspline4
-        
-        call bspline_jt(j,t,arclength,ncp,degree,s)  
-        if( degree == 3) d_bspline_cp = d_bspline(cp(j:j+degree),t)
-        if( degree == 4) d_bspline_cp = d_bspline4(cp(j:j+degree),t)
+        real function d_bspline_cp(cp,arclength,ncp,degree,s)  
+            implicit none
+            real*8, dimension(ncp), intent (in) :: cp
+            real*8 , dimension(ncp-2) ,intent (in) :: arclength
+            integer, intent(in) :: ncp,degree
+            real*8 ,intent (in) :: s
+            integer :: j
+            real*8 :: t, d_bspline, d_bspline4
+            
+            call bspline_jt(j,t,arclength,ncp,degree,s)  
+            if( degree == 3) d_bspline_cp = d_bspline(cp(j:j+degree),t)
+            if( degree == 4) d_bspline_cp = d_bspline4(cp(j:j+degree),t)
 
         end function   
     
 !-----------------------------------------------------------------------
-        real*8 function dd_bspline_cp(cp,arclength,ncp,degree,s)  
-        implicit none
-        real*8, dimension(ncp), intent (in) :: cp
-        real*8 , dimension(ncp-2) ,intent (in) :: arclength
-        integer, intent(in) :: ncp,degree
-        real*8 ,intent (in) :: s
-        integer :: j
-        real*8 :: t, dd_bspline, dd_bspline4
-        
-        call bspline_jt(j,t,arclength,ncp,degree,s)  
-        if( degree == 3) dd_bspline_cp = dd_bspline(cp(j:j+degree),t)
-        if( degree == 4) dd_bspline_cp = dd_bspline4(cp(j:j+degree),t)
+        real function dd_bspline_cp(cp,arclength,ncp,degree,s)  
+            implicit none
+            real*8, dimension(ncp), intent (in) :: cp
+            real*8 , dimension(ncp-2) ,intent (in) :: arclength
+            integer, intent(in) :: ncp,degree
+            real*8 ,intent (in) :: s
+            integer :: j
+            real*8 :: t, dd_bspline, dd_bspline4
+            
+            call bspline_jt(j,t,arclength,ncp,degree,s)  
+            if( degree == 3) dd_bspline_cp = dd_bspline(cp(j:j+degree),t)
+            if( degree == 4) dd_bspline_cp = dd_bspline4(cp(j:j+degree),t)
 
         end function
     
 !-----------------------------------------------------------------------
-        real*8 function d3_bspline_cp(cp,arclength,ncp,degree,s)  
-        implicit none
-        real*8, dimension(ncp), intent (in) :: cp
-        real*8 , dimension(ncp-2) ,intent (in) :: arclength
-        integer, intent(in) :: ncp,degree
-        real*8 ,intent (in) :: s
-        integer :: j
-        real*8 :: t, d3_bspline, d3_bspline4
-        
-        call bspline_jt(j,t,arclength,ncp,degree,s)  
-        if( degree == 3) d3_bspline_cp = d3_bspline(cp(j:j+degree),t)
-        if( degree == 4) d3_bspline_cp = d3_bspline4(cp(j:j+degree),t)
+        real function d3_bspline_cp(cp,arclength,ncp,degree,s)  
+            implicit none
+            real*8, dimension(ncp), intent (in) :: cp
+            real*8 , dimension(ncp-2) ,intent (in) :: arclength
+            integer, intent(in) :: ncp,degree
+            real*8 ,intent (in) :: s
+            integer :: j
+            real*8 :: t, d3_bspline, d3_bspline4
+            
+            call bspline_jt(j,t,arclength,ncp,degree,s)  
+            if( degree == 3) d3_bspline_cp = d3_bspline(cp(j:j+degree),t)
+            if( degree == 4) d3_bspline_cp = d3_bspline4(cp(j:j+degree),t)
 
         end function
         
@@ -350,7 +353,7 @@ real*8 , dimension(ncp-degree+1) :: x_spl_end,y_spl_end
 real*8 :: bspline, bspline_t_newton
 real*8 :: bspline4, bspline4_t_newton
 real*8 :: t,tolerance
-integer :: i, j, seg_1, seg_end, thicksegmentprint
+integer :: i, j, seg_1, seg_end
 
 !--------------------------------------------------------  
 ! computing the end points for each segment:
@@ -364,7 +367,7 @@ if( degree == 3) then
     x_spl_end(1) = bspline(xcp(1:degree+1),t)
 elseif (degree == 4) then
     x_spl_end(1) = bspline4(xcp(1:degree+1),t)
-	y_spl_end(1) = bspline4(ycp(1:1+degree),t)
+    y_spl_end(1) = bspline4(ycp(1:1+degree),t)
 endif
 t = 1
 do j = 1,ncp-degree
@@ -372,7 +375,7 @@ do j = 1,ncp-degree
      x_spl_end(j+1) = bspline(xcp(j:j+degree),t)
    elseif ( degree == 4) then
      x_spl_end(j+1) = bspline4(xcp(j:j+degree),t)
-	 y_spl_end(j+1) = bspline4(ycp(j:j+degree),t)
+     y_spl_end(j+1) = bspline4(ycp(j:j+degree),t)
    endif
 enddo
 
@@ -389,14 +392,14 @@ endif
 ! print*, "x_spl_end", x_spl_end
 ! to print thickness multiplier segments
   ! open(unit= 83,file="thick_Multi_segments.txt", form="formatted")
-	! write(83,*),"x_spl_end","y_spl_end"
-	! do i=1,ncp-degree+1
-		! write(83,*), x_spl_end(i),y_spl_end(i)
-	! enddo
+    ! write(83,*),"x_spl_end","y_spl_end"
+    ! do i=1,ncp-degree+1
+        ! write(83,*), x_spl_end(i),y_spl_end(i)
+    ! enddo
   ! close(83)
   ! print*, "x_spl_end", x_spl_end
   ! do i=1,ncp-degree+1
-		! print*, x_spl_end(i),y_spl_end(i)
+        ! print*, x_spl_end(i),y_spl_end(i)
   ! enddo
 
 !______________________________________________________________________
@@ -408,24 +411,24 @@ do i=1,np
              ( (x(i) <= x_spl_end(j)) .and. (x(i) >= x_spl_end(j+1)) ) .or. &
              ( (i == 1) .and. (j == seg_1 ) ).or.&   
              ( (i == np) .and. (j == seg_end ) )) then 
-			 !print*,'i=',i
+             !print*,'i=',i
             if( degree == 3 )then
-				if (((x(i)-x_spl_end(j))< tolerance).and.((x(i)-x_spl_end(j))> -tolerance)) then
-					t = 0
-				elseif (((x(i)-x_spl_end(j))> tolerance).and.((x(i)-x_spl_end(j))< -tolerance)) then
-					t = 1
-				else
-					t = bspline_t_newton(xcp(j:j+degree), x(i))
-				endif
+                if (((x(i)-x_spl_end(j))< tolerance).and.((x(i)-x_spl_end(j))> -tolerance)) then
+                    t = 0
+                elseif (((x(i)-x_spl_end(j))> tolerance).and.((x(i)-x_spl_end(j))< -tolerance)) then
+                    t = 1
+                else
+                    t = bspline_t_newton(xcp(j:j+degree), x(i))
+                endif
                 y(i)= bspline(ycp(j:j+degree), t)
             else if( degree == 4 ) then
-				if (((x(i)-x_spl_end(j))< tolerance).and.((x(i)-x_spl_end(j))> -tolerance)) then
-					t = 0
-				elseif (((x(i)-x_spl_end(j))> tolerance).and.((x(i)-x_spl_end(j))< -tolerance)) then
-					t = 1
-				else
-					t = bspline4_t_newton(xcp(j:j+degree), x(i))
-				endif
+                if (((x(i)-x_spl_end(j))< tolerance).and.((x(i)-x_spl_end(j))> -tolerance)) then
+                    t = 0
+                elseif (((x(i)-x_spl_end(j))> tolerance).and.((x(i)-x_spl_end(j))< -tolerance)) then
+                    t = 1
+                else
+                    t = bspline4_t_newton(xcp(j:j+degree), x(i))
+                endif
                 y(i)= bspline4(ycp(j:j+degree), t)
             endif
             !print*, "t, i, x, y, j", t, i, x(i), y(i), j
@@ -562,7 +565,7 @@ end function
          B1 = ((1-t)**4)/24
          B2 = ((-4*t**4) + (12*t**3) + (-6*t**2) + (-12*t) + 11)/24
          B3 = ((6*t**4) + (-12*t**3) + (-6*t**2) + (12*t) + 11)/24
-		 B4 = ((-4*t**4) + (4*t**3) + (6*t**2) + (4*t) + 1)/24
+         B4 = ((-4*t**4) + (4*t**3) + (6*t**2) + (4*t) + 1)/24
          B5 = (t**4)/24
 
          bspline4 =cp(1)*B1+cp(2)*B2+cp(3)*B3+cp(4)*B4+cp(5)*B5
@@ -579,10 +582,10 @@ end function
          B1 = t**3/6 - t**2/2 + t/2 - 1/6.
          B2 = -2*t**3/3 + 3*t**2/2 - t/2 - 1/2.
          B3 = t**3 - 3*t**2/2 - t/2 + 1/2.
-		 B4 = -2*t**3/3 + t**2/2 + t/2 + 1/6.
+         B4 = -2*t**3/3 + t**2/2 + t/2 + 1/6.
          B5 = t**3/6
-		 
-		 d_bspline4 = cp(1)*B1+cp(2)*B2+cp(3)*B3+cp(4)*B4+cp(5)*B5
+         
+         d_bspline4 = cp(1)*B1+cp(2)*B2+cp(3)*B3+cp(4)*B4+cp(5)*B5
         
         end function
 !----------------------------------------------------------------------
@@ -595,11 +598,11 @@ end function
          B1 = (12*(1-t)**2)/24
          B2 = ((-48*t**2) + (72*t) + (-12))/24
          B3 = ((72*t**2) + (-72*t) + (-12))/24
-		 B4 = ((-48*t**2) + (24*t) + (12))/24
+         B4 = ((-48*t**2) + (24*t) + (12))/24
          B5 = (12*t**2)/24
-		 
-		 dd_bspline4 = cp(1)*B1+cp(2)*B2+cp(3)*B3+cp(4)*B4+cp(5)*B5
-		 
+ 
+         dd_bspline4 = cp(1)*B1+cp(2)*B2+cp(3)*B3+cp(4)*B4+cp(5)*B5
+        
         end function    
         
 !----------------------------------------------------------------------
@@ -612,11 +615,10 @@ end function
          B1 = (-24*(1-t))/24
          B2 = ((-96*t) + (72))/24
          B3 = ((144*t) + (-72))/24
-		 B4 = ((-96*t) + (24))/24
+         B4 = ((-96*t) + (24))/24
          B5 = (24*t)/24
-		 
-		 d3_bspline4 = cp(1)*B1+cp(2)*B2+cp(3)*B3+cp(4)*B4+cp(5)*B5
-		 
+        
+         d3_bspline4 = cp(1)*B1+cp(2)*B2+cp(3)*B3+cp(4)*B4+cp(5)*B5
         end function    
 !------------------------------------------------------------
 
@@ -629,18 +631,18 @@ end function
          B1 = 1
          B2 = -4
          B3 = 6
-		 B4 = -4
+         B4 = -4
          B5 = 1
-		 
-		 d4_bspline4 = cp(1)*B1+cp(2)*B2+cp(3)*B3+cp(4)*B4+cp(5)*B5
-		 
+ 
+         d4_bspline4 = cp(1)*B1+cp(2)*B2+cp(3)*B3+cp(4)*B4+cp(5)*B5
+ 
         end function    
 !------------------------------------------------------------
 real*8 function bspline4_t_newton(cp,u)
     implicit none
     integer k
     real*8 ,dimension(5), intent (in) :: cp
-	real*8 ,intent (in) :: u
+    real*8 ,intent (in) :: u
     real*8 :: bspline4, d_bspline4
     real*8 tt_0, xs_0,d1_xs_0
     ! Newton's method       

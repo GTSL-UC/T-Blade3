@@ -43,7 +43,7 @@ integer :: i
 
 arcl(1) = 0.
 do i = 2, n
-	arcl(i) = arcl(i-1) + sqrt((t(i)-t(i-1))**2 + (y(i)-y(i-1))**2)
+    arcl(i) = arcl(i-1) + sqrt((t(i)-t(i-1))**2 + (y(i)-y(i-1))**2)
 enddo
 
 return
@@ -76,10 +76,10 @@ real,   parameter    :: tol = 10e-10
 do k = 2, n
     ! If d(k - 1) = 0
     ! Compare to a tolerance to avoid floating point errors in an equality comparison
-	if (abs(d(k-1)) .le. tol) stop 'FATAL ERROR: tridiag_solved failed - zero diagonal element'
-	m = ld(k)/d(k-1)
-	d(k) = d(k) - m*ud(k-1)
-	r(k) = r(k) - m*r(k-1)
+    if (abs(d(k-1)) .le. tol) stop 'FATAL ERROR: tridiag_solved failed - zero diagonal element'
+    m = ld(k)/d(k-1)
+    d(k) = d(k) - m*ud(k-1)
+    r(k) = r(k) - m*r(k-1)
 enddo
 
 ! If d(n) = 0 
@@ -89,7 +89,7 @@ if (abs(d(n)) .le. tol) stop 'FATAL ERROR: tridiag_solve failed - zero diagonal 
 r(n) = r(n)/d(n)
 
 do k = n-1, 1, -1
-	r(k) = (r(k) - ud(k)*r(k+1))/d(k)
+    r(k) = (r(k) - ud(k)*r(k+1))/d(k)
 enddo
 
 return
@@ -109,13 +109,13 @@ knt1 = 1
 knt2 = n
 
 do while (knt2-knt1 .gt. 1)
-	m = (knt2+knt1)/2
-	if (tt .lt. t(m)) then
-		knt2 = m
-	else
-		knt1 = m
-	endif
-	if (tt .eq. t(m)) exit
+    m = (knt2+knt1)/2
+    if (tt .lt. t(m)) then
+        knt2 = m
+    else
+        knt1 = m
+    endif
+    if (tt .eq. t(m)) exit
 enddo
 
 find_knt = knt1
@@ -158,22 +158,22 @@ integer :: i
 real :: d(n), ld(n), ud(n), dt(n-1), dy(n-1), r(n)
 
 do i = 1, n-1
-	dt(i) = t(i+1)-t(i)
-	dy(i) = y(i+1)-y(i)
+    dt(i) = t(i+1)-t(i)
+    dy(i) = y(i+1)-y(i)
 enddo
 
 if(n.eq.2) then
-	! Linear interpolation if only two points are present.
-	dydt(1) = dy(1)/dt(1)
-	dydt(2) = dydt(1)
-	return
+    ! Linear interpolation if only two points are present.
+    dydt(1) = dy(1)/dt(1)
+    dydt(2) = dydt(1)
+    return
 endif
 
 do i = 2, n-1
-	ud(i) = dt(i-1)
-	d(i) = 2.*(dt(i) + dt(i-1))
-	ld(i) = dt(i)
-	r(i) = 3.*(dy(i-1)*dt(i)/dt(i-1) + dy(i)*dt(i-1)/dt(i))
+    ud(i) = dt(i-1)
+    d(i) = 2.*(dt(i) + dt(i-1))
+    ld(i) = dt(i)
+    r(i) = 3.*(dy(i-1)*dt(i)/dt(i-1) + dy(i)*dt(i-1)/dt(i))
 enddo
 
 ! Implementing specified 1st derivative
@@ -182,18 +182,18 @@ d(n) = 1.; ld(1) = 0.; r(n) = dspecn
 
 ! Implementing zero 2nd derivative
 if (dspec1 .eq. 999.0) then 
-	d(1) = 2.; ud(1) = 1.; r(1) = 3.*dy(1)/dt(1)
+    d(1) = 2.; ud(1) = 1.; r(1) = 3.*dy(1)/dt(1)
 endif
 if (dspecn .eq. 999.0) then 
-	d(n) = 2.; ld(n) = 1.; r(n) = 3.*dy(n-1)/dt(n-1)
+    d(n) = 2.; ld(n) = 1.; r(n) = 3.*dy(n-1)/dt(n-1)
 endif
-	
+    
 ! Implementing zero 3rd derivative
 if (dspec1 .eq. -999.0) then 
-	d(1) = 1.; ud(1) = 1.; r(1) = 2.*dy(1)/dt(1)
+    d(1) = 1.; ud(1) = 1.; r(1) = 2.*dy(1)/dt(1)
 endif
 if (dspecn .eq. -999.0) then 
-	d(n) = 1.; ld(n) = 1.; r(n) = 2.*dy(n-1)/dt(n-1)
+    d(n) = 1.; ld(n) = 1.; r(n) = 2.*dy(n-1)/dt(n-1)
 endif
 
 call tridiag_solve(d,ld,ud,r,n)
@@ -244,7 +244,7 @@ if (abs(dt) .le. tol) stop 'FATAL ERROR: spl_eval failed - identical knot locati
 
 a(1) = y(knt1)
 if (tt .eq. t(knt1)) then
-	spl_eval = a(1); return
+    spl_eval = a(1); return
 endif
 a(2) = dydt(knt1)
 a(3) = (3.*dy*(frac**2))-((dydt(knt2)+(2.*dydt(knt1)))*frac*dt2)
@@ -294,7 +294,7 @@ if (abs(dt) .le. tol) stop 'FATAL ERROR: dspl_eval failed - identical knot locat
 
 a(1) = dydt(knt1)
 if (tt .eq. t(knt1)) then
-	dspl_eval = a(1); return
+    dspl_eval = a(1); return
 endif
 a(2) = 2.*frac*((3.*dy/dt)-(dydt(knt2)+(2.*dydt(knt1))))
 a(3) = 3.*(frac**2)*((-2.*dy/dt)+(dydt(knt2)+dydt(knt1)))
@@ -334,28 +334,28 @@ real :: spl_eval, dspl_eval, dt_newt, y_newt, dy_newt, tol, mint, maxt
 mint = minval(t)
 maxt = maxval(t)
 if (tt .lt. mint) then
-	!write (*, *) 'SPL_INV WARNING: Bad initial guess provided. Using minimum value.'
-	tt = mint
+    !write (*, *) 'SPL_INV WARNING: Bad initial guess provided. Using minimum value.'
+    tt = mint
 elseif (tt .gt. maxt) then
-	!write (*, *) 'SPL_INV WARNING: Bad initial guess provided. Using maximum value.'
-	tt = maxt
+    !write (*, *) 'SPL_INV WARNING: Bad initial guess provided. Using maximum value.'
+    tt = maxt
 endif
 
 tol = 1.0e-5
 maxiter = 25 ! increased from 10 for radial cases
 do iter = 1, maxiter
-	y_newt = spl_eval(tt, y, dydt, t, n) - yy
-	dy_newt = dspl_eval(tt, y, dydt, t, n)
-	dt_newt = -y_newt/dy_newt
-	tt = tt + 0.8*dt_newt
-	if (tt < mint) then
-		write(*, *) 'WARNING: spl_inv - spline parameter clipped at spline begin'
-		tt = mint
-	elseif(tt > maxt) then
-		write(*, *) 'WARNING: spl_inv- spline parameter clipped at spline end'
-		tt = maxt
-	endif
-	if(abs(dt_newt/(t(n)-t(1))) .lt. tol) return
+    y_newt = spl_eval(tt, y, dydt, t, n) - yy
+    dy_newt = dspl_eval(tt, y, dydt, t, n)
+    dt_newt = -y_newt/dy_newt
+    tt = tt + 0.8*dt_newt
+    if (tt < mint) then
+        write(*, *) 'WARNING: spl_inv - spline parameter clipped at spline begin'
+        tt = mint
+    elseif(tt > maxt) then
+        write(*, *) 'WARNING: spl_inv- spline parameter clipped at spline end'
+        tt = maxt
+    endif
+    if(abs(dt_newt/(t(n)-t(1))) .lt. tol) return
 enddo
 
 write(*,*) 'ERROR: spl_inv - spline parameter not determined. Maximum iteration reached.'
@@ -396,13 +396,13 @@ if(abs(t(n) - t(n-1)) .le. tol) stop 'FATAL ERROR: spl_discjoint - identical kno
 
 seg_start = 1
 do i = 2, n-2
-	if(abs(t(i) - t(i+1)) .le. tol) then
-		n0 = i-seg_start+1
-		seg_end = seg_start+n0-1
-		! Implementing zero second derivative segment end conditions
-		call spline(y(seg_start), dydt(seg_start), t(seg_start), n0, 999.0, 999.0)
-		seg_start = i+1
-	endif
+    if(abs(t(i) - t(i+1)) .le. tol) then
+        n0 = i-seg_start+1
+        seg_end = seg_start+n0-1
+        ! Implementing zero second derivative segment end conditions
+        call spline(y(seg_start), dydt(seg_start), t(seg_start), n0, 999.0, 999.0)
+        seg_start = i+1
+    endif
 enddo
 
 n0 = n-seg_start+1
@@ -437,7 +437,7 @@ implicit none
 !			tt2					at intersection.
 integer, intent (in) :: n1, n2
 real, intent (in) :: x1(n1), y1(n1), t1(n1), dxdt1(n1), dydt1(n1), &
-	x2(n2), y2(n2), t2(n2), dxdt2(n2), dydt2(n2)
+                     x2(n2), y2(n2), t2(n2), dxdt2(n2), dydt2(n2)
 
 !!		Outputs
 !			tt1,	Real,		spline parameters at intersection.
@@ -448,8 +448,8 @@ real, intent (inout) :: tt1, tt2
 real, parameter :: GR = 0.5*(3.-sqrt(5.)), tol = 1.0e-12
 logical :: GS_flag, trunc1knt1, trunc1kntn, trunc2knt1, trunc2kntn
 real :: dt1, dt2, r, ra, rb, rt1, rt2, F, Fa, Fb, Ft1, Ft2, &
-	F1, F2, J11, J12, J21, J22, xx1, xx2, yy1, yy2, tt1old, tt2old, &
-	mint1, mint2, maxt1, maxt2
+        F1, F2, J11, J12, J21, J22, xx1, xx2, yy1, yy2, tt1old, tt2old, &
+        mint1, mint2, maxt1, maxt2
 integer :: iter, i, l, nopen
 real :: dspl_eval
 character(len = :), allocatable :: log_file
@@ -458,18 +458,18 @@ logical                         :: file_open
 mint1 = minval(t1); maxt1 = maxval(t1)
 mint2 = minval(t2); maxt2 = maxval(t2)
 if (tt1 .lt. mint1) then
-	!write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 1. Using minimum value.'
-	tt1 = mint1
+    !write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 1. Using minimum value.'
+    tt1 = mint1
 elseif (tt1 .gt. maxt1) then
-	!write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 1. Using maximum value.'
-	tt1 = maxt1
+    !write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 1. Using maximum value.'
+    tt1 = maxt1
 endif
 if (tt2 .lt. mint2) then
-	!write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 2. Using minimum value.'
-	tt2 = mint2
+    !write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 2. Using minimum value.'
+    tt2 = mint2
 elseif (tt2 .gt. maxt2) then
-	!write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 2. Using maximum value.'
-	tt2 = maxt2
+    !write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 2. Using maximum value.'
+    tt2 = maxt2
 endif
 
 dt1 = 0.0
@@ -477,61 +477,61 @@ dt2 = 0.0
 l = 0
 
 do iter = 1, 100
-	GS_flag = .true.
-	tt1old = tt1
-	tt2old = tt2
-	ra = 0.0
-	r = ra; call feval; Fa = F
-	rb = 1.1
-	r = rb; call feval; Fb = F
-	do i = 1, 1
-		rt1 = i*1.0
-		r = rt1; call feval; Ft1 = F
-		if ((Ft1 .lt. Fa) .and. (Ft1 .lt. Fb)) exit
-	enddo
-	if ((Ft1 .ge. Fa) .or. (Ft1 .ge. Fb)) then
-		r = 1.; i = 0; GS_flag = .false.
-	endif
-	if (GS_flag) then
-	l = l+1
-		if (rt1-ra .lt. rb-rt1) then
-			rt2 = rt1+(GR*(rb-rt1))
-		else
-			rt2 = rt1; rt1 = rt1-(GR*(rt1-ra))
-		endif
-		r = rt1; call feval; Ft1 = F
-		r = rt2; call feval; Ft2 = F
-		do i = 1, 50
-			if (Ft1 .lt. Ft2) then
-				rb = rt2; rt2 = rt1
-				rt1 = rt2-(GR*(rt2-ra))
-				Ft2 = Ft1;
-				r = rt1; call feval; Ft1 = F
-			else
-				ra = rt1; rt1 = rt2
-				rt2 = rt1+(GR*(rb-rt1))
-				Ft1 = Ft2
-				r = rt2; call feval; Ft2 = F
-			endif
-			if (abs(rb-ra) .le. 1.0e-5) exit
-		enddo
-		if (Ft1 .lt. Ft2) then
-			r = rt1; F = Ft1
-		else
-			r = rt2; F = Ft2	
-		endif
-	endif
-	call feval
-	J11 = -dspl_eval(tt1, x1, dxdt1, t1, n1)
-	J12 = dspl_eval(tt2, x2, dxdt2, t2, n2)
-	J21 = -dspl_eval(tt1, y1, dydt1, t1, n1)
-	J22 = dspl_eval(tt2, y2, dydt2, t2, n2)
-	dt1 = -(F1*J22 - J12*F2)/(J11*J22 - J12*J21)
-	dt2 = -(J11*F2 - F1*J21)/(J11*J22 - J12*J21)
-	if(abs(dt1) .lt. tol*(t1(n1)-t1(1)) .and. abs(dt2) .lt. tol*(t2(n2)-t2(1))) then
-		! write (*, '(3(A, I3))'), 'Golden Search executed ', l, ' out of ', iter, ' times.'
-		return
-	endif
+    GS_flag = .true.
+    tt1old = tt1
+    tt2old = tt2
+    ra = 0.0
+    r = ra; call feval; Fa = F
+    rb = 1.1
+    r = rb; call feval; Fb = F
+    do i = 1, 1
+        rt1 = i*1.0
+        r = rt1; call feval; Ft1 = F
+        if ((Ft1 .lt. Fa) .and. (Ft1 .lt. Fb)) exit
+    enddo
+    if ((Ft1 .ge. Fa) .or. (Ft1 .ge. Fb)) then
+        r = 1.; i = 0; GS_flag = .false.
+    endif
+    if (GS_flag) then
+    l = l+1
+        if (rt1-ra .lt. rb-rt1) then
+            rt2 = rt1+(GR*(rb-rt1))
+        else
+            rt2 = rt1; rt1 = rt1-(GR*(rt1-ra))
+        endif
+        r = rt1; call feval; Ft1 = F
+        r = rt2; call feval; Ft2 = F
+        do i = 1, 50
+            if (Ft1 .lt. Ft2) then
+                rb = rt2; rt2 = rt1
+                rt1 = rt2-(GR*(rt2-ra))
+                Ft2 = Ft1;
+                r = rt1; call feval; Ft1 = F
+            else
+                ra = rt1; rt1 = rt2
+                rt2 = rt1+(GR*(rb-rt1))
+                Ft1 = Ft2
+                r = rt2; call feval; Ft2 = F
+            endif
+            if (abs(rb-ra) .le. 1.0e-5) exit
+        enddo
+        if (Ft1 .lt. Ft2) then
+            r = rt1; F = Ft1
+        else
+            r = rt2; F = Ft2
+        endif
+    endif
+    call feval
+    J11 = -dspl_eval(tt1, x1, dxdt1, t1, n1)
+    J12 = dspl_eval(tt2, x2, dxdt2, t2, n2)
+    J21 = -dspl_eval(tt1, y1, dydt1, t1, n1)
+    J22 = dspl_eval(tt2, y2, dydt2, t2, n2)
+    dt1 = -(F1*J22 - J12*F2)/(J11*J22 - J12*J21)
+    dt2 = -(J11*F2 - F1*J21)/(J11*J22 - J12*J21)
+    if(abs(dt1) .lt. tol*(t1(n1)-t1(1)) .and. abs(dt2) .lt. tol*(t2(n2)-t2(1))) then
+        ! write (*, '(3(A, I3))'), 'Golden Search executed ', l, ' out of ', iter, ' times.'
+        return
+    endif
 enddo
 
 ! TODO: No condition for failure?
@@ -565,31 +565,31 @@ call close_log_file(nopen, file_open)
 ! write(*, '(F20.16)'), t2
 
 contains
-	subroutine feval
-	real :: spl_eval
-	trunc1knt1 = .false.; trunc1kntn = .false.
-	trunc2knt1 = .false.; trunc2kntn = .false.
-	tt1 = tt1old + r*dt1
-	tt2 = tt2old + r*dt2
-	if(tt1.lt.t1(1)) then
-		tt1 = t1(1); trunc1knt1 = .true.
-	endif
-	if(tt1.gt.t1(n1)) then
-		tt1 = t1(n1); trunc1kntn = .true.
-	endif
-	if(tt2.lt.t2(1)) then
-		tt2 = t2(1); trunc2knt1 = .true.
-	endif
-	if(tt2.gt.t2(n2)) then
-		tt2 = t2(n2); trunc2kntn = .true.
-	endif
-	xx1 = spl_eval(tt1, x1, dxdt1, t1, n1)
-	xx2 = spl_eval(tt2, x2, dxdt2, t2, n2)
-	yy1 = spl_eval(tt1, y1, dydt1, t1, n1)
-	yy2 = spl_eval(tt2, y2, dydt2, t2, n2)
-	F1 = xx2 - xx1
-	F2 = yy2 - yy1
-	F = (F1**2)+(F2**2)
-	end subroutine feval
+    subroutine feval
+    real :: spl_eval
+    trunc1knt1 = .false.; trunc1kntn = .false.
+    trunc2knt1 = .false.; trunc2kntn = .false.
+    tt1 = tt1old + r*dt1
+    tt2 = tt2old + r*dt2
+    if(tt1.lt.t1(1)) then
+        tt1 = t1(1); trunc1knt1 = .true.
+    endif
+    if(tt1.gt.t1(n1)) then
+        tt1 = t1(n1); trunc1kntn = .true.
+    endif
+    if(tt2.lt.t2(1)) then
+        tt2 = t2(1); trunc2knt1 = .true.
+    endif
+    if(tt2.gt.t2(n2)) then
+        tt2 = t2(n2); trunc2kntn = .true.
+    endif
+    xx1 = spl_eval(tt1, x1, dxdt1, t1, n1)
+    xx2 = spl_eval(tt2, x2, dxdt2, t2, n2)
+    yy1 = spl_eval(tt1, y1, dydt1, t1, n1)
+    yy2 = spl_eval(tt2, y2, dydt2, t2, n2)
+    F1 = xx2 - xx1
+    F2 = yy2 - yy1
+    F = (F1**2)+(F2**2)
+    end subroutine feval
 
 end subroutine spl_intersect

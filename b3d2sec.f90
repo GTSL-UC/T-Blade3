@@ -7,7 +7,7 @@ implicit none
 
 real*8 xs,ys,zs,xsav,ysav,zsav
 real*8 scf
-character*80 fname,fname1,temp,fname2
+character*80 fname,fname1,temp
 character*10 ibrowc
 character*32 casename,fext
 integer j,i,np,ns,nbls
@@ -63,9 +63,9 @@ do j = 1,ns
         zsav=zs
       endif
       write(1,12)xs,ys,zs
-	  ! if(i.lt.np)then
-	    ! write(3,11)xs,',',ys,',',zs
-	  ! endif 
+      ! if(i.lt.np)then
+        ! write(3,11)xs,',',ys,',',zs
+      ! endif 
    enddo
    close(1)
    ! close(3)
@@ -77,7 +77,7 @@ write(nopen,*) '--- END ---'
 write(nopen,*) ''
 call close_log_file(nopen, file_open)
    
-11 format((f25.16),A,(f25.16),A,(f25.16))
+!11 format((f25.16),A,(f25.16),A,(f25.16))
 12 format((f25.16),1x,(f25.16),1x,(f25.16))
 return
 end subroutine b3d2sec
