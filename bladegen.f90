@@ -127,7 +127,7 @@ real jcellblade_all(nspn), etawidth_all(nspn), jcellblade, etawidth
 real, allocatable, dimension(:) :: xtop_refine, ytop_refine, xbot_refine, ybot_refine
 real, allocatable, dimension(:) :: init_angles, init_cambers, x_spl_end_curv, cam_refine, u_refine
 real ucp_top(11), vcp_top(11), ucp_bot(11), vcp_bot(11)
-real a_NACA(4), d_NACA(4), t_max, u_max, t_TE, u_TE, dy_dx_TE, loc(1), LE_round, a_temp(4), d_temp(4)
+real a_NACA(4), d_NACA(4), t_max, u_max, t_TE, u_TE, dy_dx_TE, yxTE, loc(1), LE_round, a_temp(4), d_temp(4)
 real,   allocatable             :: ptop(:,:), pbot(:,:), u_circ_TE(:), thk_temp(:), thkd_temp(:,:), &
                                    xbt(:), ybt(:), xtt(:), ytt(:)
 real le_throat, te_throat, intersec_coord(12, nsl), min_throat_2D, attach_angle
@@ -699,10 +699,17 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         ! Compute TE angle value for u_max
         ! Display on screen and write to log file
         !
-        call compute_TE_angle(u_max,dy_dx_TE)
+        if (abs(thk_cp(5,js)) .le. 10E-8) then
+            call compute_TE_angle(u_max,dy_dx_TE)
+            dy_dx_TE    = -2.0*t_max*dy_dx_TE
+            print *, 'TE derivative for maximum thickness chordwise location = ', dy_dx_TE
+            write(nopen,*) 'TE derivative for maximum thickness chordwise location = ', dy_dx_TE
+        else
+            dy_dx_TE    = thk_cp(5,js)
+            print *, 'Using TE derivative defined in auxiliary input file as = ', dy_dx_TE
+            write(nopen,*) 'Using TE derivative defined in auxiliary input file as = ', dy_dx_TE
+        end if
 
-        print *, 'TE angle for maximum thickness chordwise location = ', dy_dx_TE 
-        write(nopen,*) 'TE angle for maximum thickness chordwise location = ', dy_dx_TE
 
         !
         ! Find coefficients for modified NACA four digit thickness

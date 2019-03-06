@@ -36,8 +36,6 @@ subroutine span_variation()
     if (allocated(bspline_thk)) deallocate(bspline_thk)
     if (thick_distr == 4) then
         allocate(bspline_thk(nsl, 2*ncp_thickness + 1))
-    else if (thick_distr == 5) then
-        allocate(bspline_thk(nsl, 5))
     else
         allocate(bspline_thk(nsl, ncp_chord_thk))
     end if
@@ -262,11 +260,14 @@ subroutine span_variation()
     !
     else if (thick_distr == 5) then
 
+        if (allocated(bspline_thk)) deallocate(bspline_thk)
+        allocate(bspline_thk(nsl,size(cp_chord_thk,2)))
+
         ! Spanwise distribution of "Span" control points
         bspline_thk(:,1) = span(1:nsl)
 
         ! Spanwise distribution of "LE_radius", "u_max", "t_max" and "t_TE"
-        do i = 2,5
+        do i = 2,size(cp_chord_thk,2)
 
             call cubicspline(cp_chord_thk(:,i),cp_chord_thk(:,1),ncp_span_thk,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
             call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,intersec_u,na,xbs,ybs)

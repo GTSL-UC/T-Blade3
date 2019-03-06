@@ -2571,7 +2571,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
     ! Local variables
     character(:),   allocatable                     :: file_name, log_file
     character(256)                                  :: temps
-    integer                                         :: nopen_aux = 10, nopen, nopen1, jj, kk
+    integer                                         :: nopen_aux = 10, nopen, nopen1, jj, kk, n_temp
     real                                            :: span_dum, tol = 10E-8
     real,           allocatable                     :: temp(:), temp_NACA(:)
     logical                                         :: file_open, file_open_1, array_difference
@@ -2947,13 +2947,20 @@ subroutine read_spanwise_NACA_input(row_type,path)
         read(nopen_aux,'(A)') temps
         write(nopen1,'(A)') trim(temps)
 
-        ! Allocate thickness control points array
-        if (allocated(cp_chord_thk)) deallocate(cp_chord_thk)
-        allocate(cp_chord_thk(ncp_span_thk,5))
-
-        ! Read thickness control points
+        ! Read thickness control points array descriptor
         read(nopen_aux,'(A)') temps
         write(nopen1,'(A)') trim(temps)
+        
+        ! Allocate thickness control points array
+        n_temp = index(trim(temps), 't_TE')
+        if (allocated(cp_chord_thk)) deallocate(cp_chord_thk)
+        if (n_temp + 3 == len(trim(temps))) then
+            allocate(cp_chord_thk(ncp_span_thk,5))
+        else
+            allocate(cp_chord_thk(ncp_span_thk,6))
+        end if
+
+        ! Read thickness control points
         do i = 1,ncp_span_thk
 
             read(nopen_aux,*) cp_chord_thk(i,:)
