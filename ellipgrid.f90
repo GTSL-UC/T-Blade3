@@ -9,12 +9,11 @@ subroutine gauseI2D( ni, nj, x, y, err, curvemesh, ellipsmooth )
 ! Outputs: X,Y grid points which are smoothed.
 !-----------------------------------------------------
 use file_operations
-integer ni, nj, i, j, k,kmax, info, order, istart,ilast,nsmooth
+integer ni, nj, i, j, k,kmax, istart,ilast,nsmooth
 real*8, intent(inout):: x(ni,nj), y(ni,nj), err
 real*8 xtemp, ytemp, err1
 real*8 g11, g12, g22
-real*8 x1,x2,x3,x4,x5,x6,x7
-real*8 y1,y2,y3,y4,y5,y6,y7,mat(4,5),A,B,C,D
+real*8 y1,y2
 logical curvemesh,ellipsmooth
 integer                     :: nopen
 character(:),   allocatable :: log_file
@@ -317,12 +316,10 @@ use file_operations
 !         curvemesh, ellipsmooth are logical variables
 ! Outputs: X,Y grid points which are smoothed.
 !-----------------------------------------------------
-integer ni, nj, i, j, k,kmax, info, order, istart,ilast,nsmooth,LE
+integer ni, nj, i, j, k,kmax, LE
 real*8, intent(inout):: x(ni,nj), y(ni,nj), err
 real*8 xtemp, ytemp, err1
 real*8 g11, g12, g22
-real*8 x1,x2,x3,x4,x5,x6,x7
-real*8 y1,y2,y3,y4,y5,y6,y7,mat(4,5),A,B,C,D
 logical curvemesh,ellipsmooth
 integer                     :: nopen
 character(:),   allocatable :: log_file
@@ -408,15 +405,15 @@ subroutine curveBG(imax,jmax,xblade,yblade, &
 use file_operations
 use gridvar
 implicit none
-integer i,j,k,dwnstrm,j1,j2,np_side
+integer i,dwnstrm,j1,j2,np_side
 integer, intent(in) :: uplmt,np
 integer, intent(out) :: imax,jmax
 
 real*8, intent(in) :: xblade(np),yblade(np),msle,mble,chrd,pitch
 !real*8, allocatable, dimension(:), intent(inout) :: xline,yline
 real*8 cellwidth, dbmean
-character*32 fname,fname1,fname2,fname3,fname4
-character*32 fname5,fname6,fext,temp,casename,file1,develop
+character*32 fname1
+character*32 fext,casename,develop
 logical isdev
 character(:),   allocatable :: log_file
 integer                     :: nopen
@@ -429,7 +426,7 @@ np_side = uplmt
     np_side = np_side - 1 
   endif
   ! Using half the points as np_side.
-  np_side = (0.5*(np_side+1))
+  np_side = (np_side + 1)/2
   call log_file_exists(log_file, nopen, file_open)
   print*,'half np_side for curvemesh: ',np_side  
   write(nopen,*) 'half np_side for curvemesh: ', np_side
@@ -676,14 +673,13 @@ subroutine linearBG(imax,jmax,xblade,yblade, &
 !-----------------------------------------------------------------
 use gridvar
 implicit none
-integer i,j,k,dwnstrm,j1,j2,np_side
+integer i,dwnstrm,j1,j2
 integer, intent(in) :: uplmt,np
 integer, intent(out) :: imax,jmax
 
 real*8, intent(in) :: xblade(np),yblade(np),msle,mble,chrd,pitch
 real*8 cellwidth
-character*32 fname,fname1,fname2,fname3,fname4
-character*32 fname5,fname6,fext,temp,casename,file1,develop
+character*32 casename,develop
 
   imax = 51
   dwnstrm = 4
@@ -937,7 +933,7 @@ integer i,ii,j,k,np,uplmt,jmax1,le_pos
 real*8 stingl,thkc,thick_distr,pi,cellwidth,d_offset
 real*8, intent(in) :: xb(np),yb(np),msle,mble,mbte,chrd,etawidth
 real*8, allocatable, dimension(:) :: xnew,ynew,xblade,yblade
-character*32 fname5,fname6,casename,develop,fext
+character*32 fname6,casename,develop,fext
 logical isdev
 
 !Constants
@@ -1153,7 +1149,7 @@ if (allocated(Ygstingtop)) deallocate(Ygstingtop)
        Dr = ((dyds(i))**2 + (dxds(i))**2)**0.5
        xnorm(i) =  dyds(i)/Dr ! unit normal vector in x.
        ynorm(i) = -dxds(i)/Dr ! unit normal vector in y.
-       if(thick_distr == 2)then	  
+       if(thick_distr == 2)then
          xbstingtop(i) = xbstingtop(i) - offset*xnorm(i) ! hyperbolic stretching
          ybstingtop(i) = ybstingtop(i) - offset*ynorm(i) 
        else
@@ -1165,7 +1161,7 @@ if (allocated(Ygstingtop)) deallocate(Ygstingtop)
     do ii = 1, nsting1
        Xgstingtop(ii,k+1) = xbstingtop(ii)
        Ygstingtop(ii,k+1) = ybstingtop(ii)   
-    enddo	   
+    enddo 
  enddo 
  !------------------------------------------
  !Grid Refinement for STINGTOP
@@ -1254,7 +1250,7 @@ if (allocated(Ygstingbot)) deallocate(Ygstingbot)
        Dr = ((dyds(i))**2 + (dxds(i))**2)**0.5
        xnorm(i) =  dyds(i)/Dr ! unit normal vector in x.
        ynorm(i) = -dxds(i)/Dr ! unit normal vector in y.
-       if(thick_distr == 2)then	  
+       if(thick_distr == 2)then  
          xbstingbot(i) = Xgstingbot(i,1) + offset*xnorm(i) ! hyperbolic or simple stretching
          ybstingbot(i) = Ygstingbot(i,1) + offset*ynorm(i) 
        else
@@ -1325,12 +1321,10 @@ end subroutine stingLEgrid
 subroutine offset_points(xnew,ynew,x,y,dxds,dyds,offset,npoints,k,uplmt,le_pos,LE)
 implicit none
 integer, intent(in) :: k,uplmt,le_pos
-integer i,j,nx,npoints,LE,m
+integer i,nx,npoints,LE,m
 parameter(nx=500)
 real*8, dimension(npoints)::x,y,xnew,ynew,dxds,dyds,xnorm,ynorm
-real*8 xx(npoints,1),yy(npoints,1)
 real*8 Dr,offset,subdivide1D
-character*80 fname
 
 !LE spline option
 if(LE.eq.1)then
@@ -1475,7 +1469,6 @@ subroutine plot2D(fname,x,y,nx,ny)
 implicit none
 character*32, intent(in) :: fname
 integer, intent(in) :: nx,ny
-integer i,j
 real*8, dimension(nx,ny), intent(in) :: x,y
 
 open(1,file=fname,status='unknown')
@@ -1492,7 +1485,7 @@ end subroutine
 !*************************************************************************
 subroutine ellipdata(xellip,yellip,xb,yb,np,uplmt)
 implicit none
-integer i,j,k,np,uplmt
+integer i,np,uplmt
 real*8 aelp,belp,help,kelp,delta
 real*8, intent(in):: xb(np),yb(np)
 real*8, intent(out):: xellip(np),yellip(np)
@@ -1523,13 +1516,13 @@ end subroutine
 
 !*************************************************************************
 !*************************************************************************
-real*8 function ycircle(x,y,radius)
-implicit none
-real*8, intent(in)::x(1),y(1),radius
-
-!x = 
-
-end 
+!real*8 function ycircle(x,y,radius)
+!implicit none
+!real*8, intent(in)::x(1),y(1),radius
+!
+!!x = 
+!
+!end 
 
 !*************************************************************************
  ! ! do j = 2, jmax1

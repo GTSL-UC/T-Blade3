@@ -8,8 +8,8 @@ real*8, intent (in) :: t, angle0
 !integer i
 
 if ( t < 1e-16 ) then
-	angle = angle0
-	return
+    angle = angle0
+    return
 endif
 
 angle = -1*(y_cp(1)*(x_cp(1)*(t**6/72 - t**5/12 + 5*t**4/24 - 5*t**3/18 + 5*t**2/24 - t/12) + x_cp(2)*(-t**6/24 +      &
@@ -53,8 +53,8 @@ real*8, intent (in) :: t, angle0, camber0
 !integer i
 
 if ( t < 1e-16 ) then
-	camber = camber0
-	return
+    camber = camber0
+    return
 endif
 
 camber = -1*(y_cp(1)*(x_cp(1)*(x_cp(1)*(-t**9/1296 + t**8/144 - t**7/36 + 7*t**6/108 - 7*t**5/72 + 7*t**4/72 - t**3/16 +          &
@@ -128,13 +128,13 @@ end function
 
 
 subroutine camline(casename, isdev, xcp, ycp, ncp, u, np, ainl, aext, chrdx, wing_flag, &
-	sang, chrd, init_angles, init_cams, u_end, splinedata)
+    sang, chrd, init_angles, init_cams, u_end, splinedata)
     use file_operations
 
 !!		Added by Karthik Balasubramanian
 ! 			This subroutine constructs a curve (camber line) using second derivative, 
 !			angle specifications and rotates the curve by appropriate stagger/twist.
-	
+
 implicit none
 real, parameter :: dtor = 4.*atan(1.)/180.
 integer, parameter :: splinedata_col = 6
@@ -182,19 +182,19 @@ logical                             :: file_open
 !		as a subroutine outside TBlade3
 
 real, intent (out) :: chrd, sang, u_end(ncp-2), &
-	init_angles(ncp-2), init_cams(ncp-2), &
-	splinedata(splinedata_col, np)
-	
+    init_angles(ncp-2), init_cams(ncp-2), &
+    splinedata(splinedata_col, np)
+
 !!		Functions used by this subroutine
 real :: bspline_t_newton, camber, angle, bspline
 
 !!		Other local variables
 integer :: i, j
-real :: scalefactor, P, knew, knew2, det, k1, k2, &
-	curv(np), cam(np), cam_u(np), cam_u_dev(np), tot_cam, &
-	d1v_end(ncp-2), v_end(ncp-2), xcp_seg(4), ycp_seg(4), &
-	t, angle0, camber0, intg_d2v_end(ncp-2), &
-	intg_d1v_end(ncp-2), sang2, sc_factor_dev, inlet_uv_dev, &
+real :: P, knew, knew2, det, k1, k2, &
+    curv(np), cam(np), cam_u(np), cam_u_dev(np), tot_cam, &
+    d1v_end(ncp-2), v_end(ncp-2), xcp_seg(4), ycp_seg(4), &
+    t, angle0, camber0, intg_d2v_end(ncp-2), &
+    intg_d1v_end(ncp-2), sang2, sc_factor_dev, inlet_uv_dev, &
     exit_uv_dev
 call log_file_exists(log_file, nopen, file_open)
 print*, 'xcp', xcp
@@ -205,9 +205,9 @@ write(nopen,*) 'ycp', ycp
 !!
 ! write (*, '(A)'), 'Executing subroutine camline in bsplinecam.f90'
 if (wing_flag .eq. 0) then
-	tot_cam = aext-ainl
+    tot_cam = aext-ainl
 elseif (wing_flag .eq. 1) then
-	tot_cam = aext
+    tot_cam = aext
 endif
 
 intg_d2v_end = 0.
@@ -218,23 +218,23 @@ init_angles = 0.
 init_cams = 0.
 splinedata = 0.
 if (tot_cam .eq. 0.) then
-	sang = ainl
-	chrd = chrdx/abs(cos(sang))
-	return
+    sang = ainl
+    chrd = chrdx/abs(cos(sang))
+    return
 endif
 
 do j = 1, ncp-3
-	xcp_seg = xcp(j:j+3)
-	ycp_seg = ycp(j:j+3)
-	if (j .eq. ncp-3) then
-		u_end(j+1) = 1.
-	else
-		u_end(j+1) = bspline(xcp_seg, t)
-	endif
-	angle0 = intg_d2v_end(j)
-	camber0 = intg_d1v_end(j)
-	intg_d2v_end(j+1) = angle(ycp_seg, xcp_seg, angle0, t)
-	intg_d1v_end(j+1) = camber(ycp_seg, xcp_seg, angle0, camber0, t)
+    xcp_seg = xcp(j:j+3)
+    ycp_seg = ycp(j:j+3)
+    if (j .eq. ncp-3) then
+        u_end(j+1) = 1.
+    else
+        u_end(j+1) = bspline(xcp_seg, t)
+    endif
+    angle0 = intg_d2v_end(j)
+    camber0 = intg_d1v_end(j)
+    intg_d2v_end(j+1) = angle(ycp_seg, xcp_seg, angle0, t)
+    intg_d1v_end(j+1) = camber(ycp_seg, xcp_seg, angle0, camber0, t)
 enddo
 ! intg_d2v_end(ncp-2) is total integral of second derivative of v upto u = 1
 ! intg_d1v_end(ncp-2) is total integral of first derivative of v upto u = 1
@@ -354,54 +354,54 @@ init_cams = knew*(intg_d1v_end-(u_end*intg_d1v_end(ncp-2)))
 
 ! Loop to construct the splinedata 2D array
 do i = 1, np
-	do j = 1, (ncp-3)
-		if (u(i) .eq. u_end(j)) then
-			ycp_seg = ycp(j:j+3)
-			t = 0.
-			curv(i) = knew*bspline(ycp_seg, t)
-			cam_u(i) = d1v_end(j)
-			cam(i) = v_end(j)
-			exit
-		elseif (u(i) .eq. 1.) then
-			ycp_seg = ycp(ncp-3:ncp)
-			t = 1.
-			curv(i) = knew*bspline(ycp_seg, t)
-			cam_u(i) = d1v_end(ncp-2)
-			cam(i) = v_end(ncp-2)
-			exit
-		elseif ((u(i) .gt. u_end(j)) .and. (u(i) .lt. u_end(j+1))) then
-			xcp_seg = xcp(j:j+3)
-			ycp_seg = ycp(j:j+3)
-			angle0 = intg_d2v_end(j)
-			camber0 = intg_d1v_end(j)
-			t = bspline_t_newton(xcp_seg, u(i))
-			curv(i) = knew*bspline(ycp_seg, t)
-			cam_u(i) = knew*(angle(ycp_seg, xcp_seg, angle0, t)-intg_d1v_end(ncp-2))
-			cam(i) = knew*(camber(ycp_seg, xcp_seg, angle0, camber0, t)-(u(i)*intg_d1v_end(ncp-2)))
-			exit
-		end if
-	enddo
-	splinedata(1, i) = u(i)
-	splinedata(2, i) = cam(i)
-	splinedata(3, i) = cam_u(i)
-	splinedata(4, i) = curv(i) 
+    do j = 1, (ncp-3)
+        if (u(i) .eq. u_end(j)) then
+            ycp_seg = ycp(j:j+3)
+            t = 0.
+            curv(i) = knew*bspline(ycp_seg, t)
+            cam_u(i) = d1v_end(j)
+            cam(i) = v_end(j)
+            exit
+        elseif (u(i) .eq. 1.) then
+            ycp_seg = ycp(ncp-3:ncp)
+            t = 1.
+            curv(i) = knew*bspline(ycp_seg, t)
+            cam_u(i) = d1v_end(ncp-2)
+            cam(i) = v_end(ncp-2)
+            exit
+        elseif ((u(i) .gt. u_end(j)) .and. (u(i) .lt. u_end(j+1))) then
+            xcp_seg = xcp(j:j+3)
+            ycp_seg = ycp(j:j+3)
+            angle0 = intg_d2v_end(j)
+            camber0 = intg_d1v_end(j)
+            t = bspline_t_newton(xcp_seg, u(i))
+            curv(i) = knew*bspline(ycp_seg, t)
+            cam_u(i) = knew*(angle(ycp_seg, xcp_seg, angle0, t)-intg_d1v_end(ncp-2))
+            cam(i) = knew*(camber(ycp_seg, xcp_seg, angle0, camber0, t)-(u(i)*intg_d1v_end(ncp-2)))
+            exit
+        end if
+    enddo
+    splinedata(1, i) = u(i)
+    splinedata(2, i) = cam(i)
+    splinedata(3, i) = cam_u(i)
+    splinedata(4, i) = curv(i) 
 enddo
 
 ! Stagger/Twist calculation
 if (wing_flag .eq. 0) then
-	sang = (ainl-atan(cam_u(1)))
+    sang = (ainl-atan(cam_u(1)))
     if (isdev) then
         sang2 = (ainl - atan(cam_u_dev(1)))
         write(*, '(A, 2F25.15)') 'Stagger angle in deg: ', sang/dtor, sang2/dtor
         write(nopen, '(A, 2F25.15)') 'Stagger angle in deg: ', sang/dtor, sang2/dtor
     else
-	    write (*, '(A, F20.15)') 'Stagger angle in deg: ', sang/dtor
-	    write (nopen, '(A, F20.15)') 'Stagger angle in deg: ', sang/dtor
+        write (*, '(A, F20.15)') 'Stagger angle in deg: ', sang/dtor
+        write (nopen, '(A, F20.15)') 'Stagger angle in deg: ', sang/dtor
     end if
-elseif (wing_flag .eq. 1) then
-	sang = ainl
-	write (*, '(A, F20.15)') 'Twist angle in deg: ', sang/dtor
-	write (nopen, '(A, F20.15)') 'Twist angle in deg: ', sang/dtor
+    elseif (wing_flag .eq. 1) then
+    sang = ainl
+    write (*, '(A, F20.15)') 'Twist angle in deg: ', sang/dtor
+    write (nopen, '(A, F20.15)') 'Twist angle in deg: ', sang/dtor
 endif
 
 call close_log_file(nopen, file_open)

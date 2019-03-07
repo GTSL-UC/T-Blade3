@@ -7,12 +7,12 @@ program TEchop
 
 implicit none
 
-integer i,j,k,points,nx,ny,np
+integer i,points,nx,ny,np
 
 parameter (nx=500,ny=500)
 real*8 xb(nx),yb(nx),trarray(2)
 real*8 sinl,sext,chrd1,chrd2,pitch
-character*32 fname,fext,temp,npoints,fname1
+character*32 fname,fext,npoints
 
 call getarg(1,fname)
 !Error message
@@ -68,7 +68,7 @@ write(*,*) ' ---------END-----------'
 
 100  format(a)
 101  format(5(f19.16,1x))
-102  format(2(f35.16,1x))
+!102  format(2(f35.16,1x))
 
 return
 end program

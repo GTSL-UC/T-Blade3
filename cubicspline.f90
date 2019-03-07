@@ -67,12 +67,12 @@ do j=1,ncp1-3
   ybs(k) = ys(i)
 !  print*,ybs(k),xbs(k)
  enddo
- 		   !picking up the endpoints of each spline for Newton interpolation
-           if (j==1) then
-             y_spl_end(1) = ys(1)
-           endif		   
+           !picking up the endpoints of each spline for Newton interpolation
+            if (j==1) then
+                y_spl_end(1) = ys(1)
+            endif
              y_spl_end(j+1) = ys(np)
-			!00000000000000000000000000000000000000000000000000000
+            !00000000000000000000000000000000000000000000000000000
 
 enddo
 !print*,xbs(nbsp+2),ybs(nbsp+2)
@@ -96,7 +96,7 @@ subroutine curv_line_inters(xbs,ybs,nspline,xin,yout,nspan)
 
 implicit none
 
-integer ii,j,k, nspline, nx,nspan
+integer ii,j, nspline, nx,nspan
 parameter(nx=1000)
 real*8 xbs(nspline),ybs(nspline), xin(nspan), yout(nspan)
 real*8 min, max, xmax, xmin, xint
@@ -150,19 +150,24 @@ subroutine curvline_intersec(xcp,ycp,ncp,xinarray,youtarray,na,ia)
 
 implicit none
 
-integer i,j,k,ia,na,ncp,nbs,nx,ncp1
+integer i,j,ia,na,ncp,nx,ncp1
 
 parameter(nx = 500)
 
 real*8 xcp(ncp),ycp(ncp),xinarray(na),youtarray(na)
 real*8 xcp1(50),ycp1(50)
-real*8 xin,yout, xp2,yp2,xp1,yp1, xvar, var2
+real*8 xin,yout,yp2,yp1
 !real*8 xbsd(nbs),ybsd(nbs) ! displaced spline coordinates
-real*8 xc(4),yc(4),CP(4) ! 4 control points for a single spline segment
-real*8 k1,k2,k3,k4,a1,a2,a3,a4,t(nx),tfinal,t0,eps
+real*8 xc(4),yc(4) ! 4 control points for a single spline segment
+real*8 k1,k2,k3,k4,a1,a2,a3,a4,t(nx),tfinal,eps
 real*8 func(nx),dfunc(nx) ! f(t) and f'(t)
 real*8 gfunc
-real*8 c1,c2,c3,c4
+
+! Initializing xc and tfinal
+xc     = 0.0
+yc     = 0.0
+tfinal = 0.0
+
 
 xin = xinarray(ia)
 ! Making the start and end points as collocation points----
@@ -313,12 +318,12 @@ subroutine cubicbspline_intersec(y_spl_end,xcp,ycp,ncp,xin,yout,na,xbs,ybs)
 
 implicit none
 
-integer i,j,k,ia,na,ncp,nbs,nx,np
+integer i,j,k,na,ncp,nx,np
 
 parameter(np=50,nx = 500)
 
-real*8 xcp(ncp),ycp(ncp),xinarray(na),youtarray(na)
-real*8 xin(na),yout(na), xp2,yp2,xp1,yp1, xvar
+real*8 xcp(ncp),ycp(ncp)
+real*8 xin(na),yout(na)
 real*8 xbs(np*(ncp-3)),ybs(np*(ncp-3)) ! spline coordinates
 real*8 y_spl_end(ncp-2)
 real*8 d1_B11,B11,d1_B22,B22,d1_B33,B33,d1_B44,B44
@@ -328,45 +333,45 @@ real*8 ys_0,d1_ys_0,tt_0,tt
 
 ! Newton method to find yout corresponding to xin
     ! for 1st control point
-		       yout(1) = xbs(1)
-               			   
+               yout(1) = xbs(1)
+                           
     ! for last control point
-			   yout(na) = xbs(np*(ncp-3))
+               yout(na) = xbs(np*(ncp-3))
 
       do j=1,ncp-3
           do i=2,na-1
             if ((xin(i) > y_spl_end(j)).and.(xin(i) < y_spl_end(j+1)))then
-			   tt_0 = 0.3
-			   do k =1,10
-			   ! Basic functions:
-				B11 = ((-tt_0**3) + (3*tt_0**2) - (3*tt_0) + 1)/6
-				B22 = ((3*tt_0**3) - (6*tt_0**2) + 4)/6
-				B33 = ((-3*tt_0**3) + (3*tt_0**2) + (3*tt_0) + 1)/6
-				B44 = (tt_0**3)/6			   
-			   ! first derivative:
-				d1_B11 = ((-3*tt_0**2) + (6*tt_0) - (3))/6
-				d1_B22 = ((9*tt_0**2) - (12*tt_0))/6
-				d1_B33 = ((-9*tt_0**2) + (6*tt_0) + (3))/6
-				d1_B44 = (3*tt_0**2)/6
-				! xs(t_0)
-				  ys_0 = ycp(j)*B11+ycp(j+1)*B22+ycp(j+2)*B33+ycp(j+3)*B44
-				! d1_xs(t_0)
-				d1_ys_0= ycp(j)*d1_B11+ycp(j+1)*d1_B22+ycp(j+2)*d1_B33+ycp(j+3)*d1_B44
-				! Newton's interpolation:
-			     tt = tt_0 + (xin(i)-ys_0)/d1_ys_0
-	             if (abs(tt-tt_0)<1e-16) then
-				   B11 = ((-tt**3) + (3*tt**2) - (3*tt) + 1)/6
-				   B22 = ((3*tt**3) - (6*tt**2) + 4)/6
-				   B33 = ((-3*tt**3) + (3*tt**2) + (3*tt) + 1)/6
-				   B44 = (tt**3)/6			
-				    goto 20
-	             endif
-			     tt_0 = tt
+               tt_0 = 0.3
+               do k =1,10
+               ! Basic functions:
+                B11 = ((-tt_0**3) + (3*tt_0**2) - (3*tt_0) + 1)/6
+                B22 = ((3*tt_0**3) - (6*tt_0**2) + 4)/6
+                B33 = ((-3*tt_0**3) + (3*tt_0**2) + (3*tt_0) + 1)/6
+                B44 = (tt_0**3)/6 
+               ! first derivative:
+                d1_B11 = ((-3*tt_0**2) + (6*tt_0) - (3))/6
+                d1_B22 = ((9*tt_0**2) - (12*tt_0))/6
+                d1_B33 = ((-9*tt_0**2) + (6*tt_0) + (3))/6
+                d1_B44 = (3*tt_0**2)/6
+                ! xs(t_0)
+                  ys_0 = ycp(j)*B11+ycp(j+1)*B22+ycp(j+2)*B33+ycp(j+3)*B44
+                ! d1_xs(t_0)
+                d1_ys_0= ycp(j)*d1_B11+ycp(j+1)*d1_B22+ycp(j+2)*d1_B33+ycp(j+3)*d1_B44
+                ! Newton's interpolation:
+                 tt = tt_0 + (xin(i)-ys_0)/d1_ys_0
+                 if (abs(tt-tt_0)<1e-16) then
+                   B11 = ((-tt**3) + (3*tt**2) - (3*tt) + 1)/6
+                   B22 = ((3*tt**3) - (6*tt**2) + 4)/6
+                   B33 = ((-3*tt**3) + (3*tt**2) + (3*tt) + 1)/6
+                   B44 = (tt**3)/6
+                    goto 20
+                 endif
+                 tt_0 = tt
                 enddo
-20     		   yout(i)=xcp(j)*B11+xcp(j+1)*B22+xcp(j+2)*B33+xcp(j+3)*B44
-             endif			 
-!			 print*,'yout',yout(i)
-	     enddo
+    20              yout(i)=xcp(j)*B11+xcp(j+1)*B22+xcp(j+2)*B33+xcp(j+3)*B44
+             endif
+    !			 print*,'yout',yout(i)
+         enddo
       enddo
  !     do i = 1, na
 !	    print*,'xin',xin

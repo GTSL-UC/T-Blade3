@@ -31,7 +31,7 @@ np = 2*np - 1
 if(mod(np,2).eq.0)then
  np = np - 1 ! For even no. of points LE = np/2. So, the current formula (np+1)/2 ==> np/2 with this change.
 endif
-uplmt = (0.5*(np+1))
+uplmt = (np+1)/2
   !np = 199
 !--interpolating SS coordinates-----
   x_ss(1) = 1.00
@@ -1349,12 +1349,15 @@ end subroutine negclarky
       
       IMPLICIT NONE
       INTEGER, INTENT(IN) :: naca, np
-      INTEGER :: i, MeanDes
+      INTEGER :: i
       REAL, DIMENSION(np), INTENT(OUT) :: xtop, ytop, xbot, ybot
       REAL, DIMENSION(np), INTENT(IN) :: x
       REAL, DIMENSION(np) :: yc, yt
       REAL :: t, m, p, th
       LOGICAL :: NACA4
+           
+      ! Initializing t
+      t = 0.0
             
       print*,"Using NACA airfoil subroutine"
       ! Initialize variables
@@ -1419,7 +1422,7 @@ end subroutine negclarky
       
       RETURN
       END subroutine
-	  
+ 
 !******************************************************************
 !******User input airfoil definition*******************************
 !******************************************************************
@@ -1494,7 +1497,7 @@ end subroutine datafile
       subroutine thickwen(uin, thk, lethk, tethk, mxthk, umxthin,thkmultip)
 !---Thickness multiplier added by Ahmed Nemnem-----
 
-      real lethk, tethk, mxthk, umxthk, uscale, thkmultip
+      real lethk, tethk, mxthk, uscale, thkmultip
 !
       if(umxthin.lt.0.5) then
        thk1 = tethk
@@ -1551,8 +1554,8 @@ end subroutine datafile
       subroutine thickellip(i,uin,thk,lethk,tethk,mxthk,umxthin,rr1,rr2,thkmultip &
       ,u_le,uin_le,i_le,oo,i_te)
 !-------Thickness multiplier added by Ahmed Nemnem.
-      real lethk, tethk, mxthk, umxthk, uscale, thkmultip
-      real u_le,slope_le,curv_le,uin_le
+      real lethk, tethk, mxthk, uscale, thkmultip
+      real u_le,uin_le
       integer i_le,oo,i,i_te
 !
       !print*,'lethk =',lethk
@@ -1562,8 +1565,8 @@ end subroutine datafile
       !print*,'rr1 =',rr1
       !print*,'rr2 =',rr2
 
-	  i_le = 0
-	  i_te = 0
+      i_le = 0
+      i_te = 0
       if(umxthin.lt.0.5) then
        thk1 = tethk
        thk2 = lethk
@@ -1637,8 +1640,8 @@ end subroutine datafile
       else
        if(ub.lt.umxth) then
         thk = (aa*ub**3 + bb*ub**2 + cc*ub + dd)*(thkmultip + 1)
-		i_te = i
-		!print*,"i_te = ",i_te
+        i_te = i
+        !print*,"i_te = ",i_te
        else
         ub1 = ub-umxth
         thk = (ee*ub1**3 + ff*ub1**2 + gg*ub1 + hh)*(thkmultip+1) !======
@@ -1647,7 +1650,7 @@ end subroutine datafile
          !print*,'oo=',oo
          u_le = ub1
          uin_le = uin
-		 i_le = i
+         i_le = i
          !print*,'i_le sub =',i_le
          !print*,'uin_le sub=',uin_le
          oo = oo+10
@@ -1720,14 +1723,13 @@ end subroutine datafile
 subroutine circularTE(xbot,ybot,xtop,ytop,np)
 ! ! This adds a circular TE to any bladeshape.
 implicit none
-integer ncirc,np,np_side,i,j,k
+integer ncirc,np,np_side,i
 
 real*8 mtop,mbot,mtop_normal,mbot_normal,ctop,cbot,radius
 real*8 xcenter,ycenter,xmean,ymean,xTEnew,yTEnew,deltax
 real*8, allocatable, dimension(:) :: xcirc,ycirc  
 real*8, intent(inout):: xbot(np),ybot(np),xtop(np),ytop(np)    
 
-character*20 file1
 np_side = np
 
 ! file1 = 'uvnaca.dat'

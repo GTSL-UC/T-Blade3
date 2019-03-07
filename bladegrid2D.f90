@@ -62,36 +62,35 @@ subroutine bladegrid2D(xb,yb,np,nbls,chrd,thkc,fext,LE,le_pos,thick_distr, &
 use file_operations
 use gridvar
 implicit none
-integer i,j,k,t,np,nbls,uplmt,n,j1,j2,ile_ps,cgrid,cgrid_cells,js,nspn,ispline
-integer jj,kk,BGgrid,info,np_side,le_pos,ximax,m
-integer imax,jmax,ngrid,imax1,jmax1,LE,imax2,ii,imax_org,imaxnew
+integer i,j,k,t,np,nbls,uplmt,j1,j2,cgrid,js,nspn
+integer BGgrid,np_side,le_pos,ximax,m
+integer imax,jmax,ngrid,imax1,jmax1,LE,imax2,imax_org,imaxnew
 integer curv_camber
-real*8 x1,y1,x2,y2,tempr,y3,y4
+real*8 x1,y1,x2,y2,y3
 real*8, dimension(np) :: xb,yb
-real*8, allocatable, dimension(:):: xb_eta,yb_eta,xbcgrid,ybcgrid,xrot,yrot
-real*8, allocatable, dimension(:,:) :: Xg,Yg,xn,yn,Xx,Yy,Xx1,Yy1,Xxrot,Yyrot,Xbg,Ybg,Xbg2,Ybg2
-real*8, allocatable, dimension(:,:) :: Xg1,Yg1,Xgtop,Ygtop,Xgbot,Ygbot,Xg11,Yg11,x,y
-real*8, allocatable, dimension(:) :: mprime,theta,newtheta,cluster,phi
-real*8, allocatable, dimension(:) :: xblade,yblade,xbnew,ybnew,xnew,ynew,xbase,ybase
-real*8 d,xint,yint,length,deltac,distance,mcurv
-real*8 x11,y11,x21,y21,x12,y12,x22,y22,dtor,aellp,bellp,hellp,kellp
-real*8 d_offset,increment,numoffset,delta
-real*8 pitch,pi,chrdx,chrd,Dr1,Dr2,Nr,Nr1
-real*8 dxmnds(nx),dymnds(nx),smn(nx)
-real*8 theta_tot,theta_eq,angle,cellwidth,xte_norm,theta_each,theta_start
-real*8 slope1,slope2,subdivide1D,subdivide2D
-real*8 yte_norm,te_norm_mag,xtrans,ytrans,msle,mste,mble,mbte
-real seval
-real*8 jcellblade,err,C1,C2,C3,C4,mat(5,np)
-real*8 xinterp(np),yinterp(np),answer
-real*8 thkc,thick_distr,etawidth,stingl,xellip(np),yellip(np)
+real*8, allocatable, dimension(:):: xrot,yrot
+real*8, allocatable, dimension(:,:) :: Xg,Yg,Xx,Yy,Xx1,Yy1,Xbg,Ybg,Xbg2,Ybg2
+real*8, allocatable, dimension(:,:) :: Xg1,Yg1,Xg11,Yg11
+real*8, allocatable, dimension(:) :: cluster,phi
+real*8, allocatable, dimension(:) :: xblade,yblade,xbnew,ybnew,xbase,ybase
+real*8 deltac,distance
+real*8 dtor
+real*8 d_offset,increment,numoffset
+real*8 pitch,pi,chrd
+
+real*8 cellwidth,xte_norm
+real*8 subdivide2D
+real*8 yte_norm,te_norm_mag,msle,mste,mble,mbte
+real*8 jcellblade,err
+
+real*8 thkc,thick_distr,etawidth,stingl
 
 logical curvemesh, ellipsmooth, translateUp, translateDown, isdev
 integer                                     :: nopen
 character(:),   allocatable                 :: log_file
 logical                                     :: file_open
 
-character*32 fname,fname1,fname2,fname3,fname4,fname5,fname6,fext,temp,casename,file1,develop
+character*32 fname1,fname2,fext,temp,casename,develop
 
 
 !Constants
@@ -125,7 +124,7 @@ call close_log_file(nopen, file_open)
 if(mod(np,2).eq.0)then
  np = np - 1 ! For even no. of points LE = np/2. So, the current formula (np+1)/2 ==> np/2 with this change.
 endif
-uplmt = (0.5*(np+1)) !for example, uplmt is 100 for 199 as np.
+uplmt = (np+1)/2 !for example, uplmt is 100 for 199 as np.
 !print*,'mble: ',mble
 imax_org = np
 
@@ -206,11 +205,11 @@ Allocate(Xbg2(imax,jmax),Ybg2(imax,jmax))
  j2 = j1 + 1
  !
  do j = 1, j1
-	 do i = 1, imax
-	  Xbg(i,j)  = xline(i) 
-      increment = ((0.5/j1)*j)*pitch 
-	  Ybg(i,j)  = numoffset(yline(i),increment)
-	 enddo
+     do i = 1, imax
+        Xbg(i,j)  = xline(i) 
+        increment = ((0.5/j1)*j)*pitch 
+        Ybg(i,j)  = numoffset(yline(i),increment)
+     enddo
  enddo
 !-----------------------------------------------------------------
 ! Offsetting the gridline by increments BELOW it upto half pitch.
@@ -219,7 +218,7 @@ Allocate(Xbg2(imax,jmax),Ybg2(imax,jmax))
   do i = 1, imax
    Xbg2(i,j) = xline(i)
    increment = -((0.5/j1)*j)*pitch 
-   Ybg2(i,j) = numoffset(yline(i),increment)	 
+   Ybg2(i,j) = numoffset(yline(i),increment)
   enddo 
  enddo
  call log_file_exists(log_file, nopen, file_open)
@@ -235,7 +234,7 @@ ALLOCATE( Xg1(imax,jmax), Yg1(imax,jmax))
 do j = 1, j1  ! starting from the bottom offset curve, growing upwards.
   do i = 1, imax
     Xg1(i,j) = Xbg2(i,j1 + 1 - j)
-	Yg1(i,j) = Ybg2(i,j1 + 1 - j)
+    Yg1(i,j) = Ybg2(i,j1 + 1 - j)
   enddo
 enddo
 do i = 1, imax
@@ -245,7 +244,7 @@ enddo
 do j = 1, j1
   do i = 1, imax
     Xg1(i,j1+1+j) = Xbg(i,j)
-	Yg1(i,j1+1+j) = Ybg(i,j)
+    Yg1(i,j1+1+j) = Ybg(i,j)
 !    write(*,*)Xg1(i,j1+1+j),Yg1(i,j1+1+j)
   enddo 
 enddo
@@ -316,7 +315,7 @@ call log_file_exists(log_file, nopen, file_open)
 if(thick_distr == 2)then
   jcells = 10!8!33
 else
-  jcells = jcellblade!33
+  jcells = int(jcellblade)!33
   print*,'jcells: ',jcells
   write(nopen,*) 'jcells: ', jcells
 endif
@@ -355,9 +354,9 @@ if (allocated(xbase)) deallocate(xbase)
 if (allocated(ybase)) deallocate(ybase)
 allocate(xbase(imax1),ybase(imax1))
 do i = 1, imax1
- 	Xg(i,1) = xblade(imax1+1-i)
+    Xg(i,1) = xblade(imax1+1-i)
     Yg(i,1) = yblade(imax1+1-i)
-	Xx(i,1) = xblade(i)
+    Xx(i,1) = xblade(i)
     Yy(i,1) = yblade(i)
     xbase(i) = Xx(i,1)
     ybase(i) = yy(i,1)
@@ -415,10 +414,10 @@ do k = 1, jmax1-1
    ! Filling the arrays clockwise from TE to TE through LE to make the grid RIGHT HANDED.
    !------------------------------------------------------------------------------------- 
    do i = 1, imax1
-	  Xg(i,k+1) = xblade(imax1+1-i)
-	  Yg(i,k+1) = yblade(imax1+1-i)
-	  Xx(i,k+1) = xblade(i)
-	  Yy(i,k+1) = yblade(i)	   
+      Xg(i,k+1) = xblade(imax1+1-i)
+      Yg(i,k+1) = yblade(imax1+1-i)
+      Xx(i,k+1) = xblade(i)
+      Yy(i,k+1) = yblade(i) 
    enddo
 enddo
 !------------------------------------
@@ -494,9 +493,9 @@ if(thick_distr == 2)then ! sharp TE
   ALLOCATE( Xx1(imax2,jmax1), Yy1(imax2,jmax1))
   !
   do i = 1, imax2
- 	 Xg(i,1) = xbnew(imax2+1-i) ! Making it go clockwise
+     Xg(i,1) = xbnew(imax2+1-i) ! Making it go clockwise
      Yg(i,1) = ybnew(imax2+1-i)
-	 Xx1(i,1) = xbnew(i)
+     Xx1(i,1) = xbnew(i)
      Yy1(i,1) = ybnew(i)
   enddo
   !
@@ -514,45 +513,45 @@ if(thick_distr == 2)then ! sharp TE
   Allocate (phi(2),xrot(1),yrot(1))
   do k = 1, jmax1-1
      write(temp,*)k
-	 offset = 1 - tanh(pi*(1 - real(k)/(jmax1-1)))/tanh(pi) ! hyperbolic stretching
-	 offset = offset*distance*0.5
+     offset = 1 - tanh(pi*(1 - real(k)/(jmax1-1)))/tanh(pi) ! hyperbolic stretching
+     offset = offset*distance*0.5
      !	offset = k*distance*0.5/jmax1 ! uniform cellwidth
 
     ! Calculating offset coordinates
     !    call offset_points(xbnew,ybnew,Xx1(1,1),Yy1(1,1),dxds(1),dyds(1),offset,imax2)
-	    ! Calculating offset coordinates
-	!-------------------------------------------------------- 
-	! Calculating the normals and offset coordinates.
-	! Xnorm = y'(s)/ sqrt((y'(s))^2 + (x'(s))^2)
-	! Ynorm = x'(s)/ sqrt((y'(s))^2 + (x'(s))^2)
-	!-------------------------------------------------------- 
-	do i = 1, imax2
-	   Dr = ((dyds(i))**2 + (dxds(i))**2)**0.5
-	   xnorm(i) =  dyds(i)/Dr ! unit normal vector in x.
-	   ynorm(i) = -dxds(i)/Dr ! unit normal vector in y.
-	   if(i.eq.cgrid+2)then !2nd point from TE counterclockwise.
-	     xn1 = xnorm(i)
-	     yn1 = ynorm(i)
-	   elseif(i.eq.cgrid+imax1-1)then ! last but one point from TE counterclockwise.
-	     xn2 = xnorm(i)
-		 yn2 = ynorm(i)
-	   endif
-	   xbnew(i) = Xx1(i,1) + offset*xnorm(i) 
-	   ybnew(i) = Yy1(i,1) + offset*ynorm(i) 
-	enddo  
-	! Refining the TE grid.
-    ! 1st grid line with the normal of the 2nd point from TE counterclockwise. 
-	xbnew(cgrid+1) = Xx1(cgrid+1,1) + offset*xn1 
-	ybnew(cgrid+1) = Yy1(cgrid+1,1) + offset*yn1
-	!(np)th grid line with the normal of the (np-1)th point from TE counterclockwise.
-    xbnew(cgrid+imax1) = Xx1(cgrid+imax1,1) + offset*xn2 
-	ybnew(cgrid+imax1) = Yy1(cgrid+imax1,1) + offset*yn2
-	! Filling the grid coordinates
+    ! Calculating offset coordinates
+    !-------------------------------------------------------- 
+    ! Calculating the normals and offset coordinates.
+    ! Xnorm = y'(s)/ sqrt((y'(s))^2 + (x'(s))^2)
+    ! Ynorm = x'(s)/ sqrt((y'(s))^2 + (x'(s))^2)
+    !-------------------------------------------------------- 
     do i = 1, imax2
-	   Xg(i,k+1) = xbnew(imax2+1-i)
-	   Yg(i,k+1) = ybnew(imax2+1-i)
-	enddo
-  enddo	
+       Dr = ((dyds(i))**2 + (dxds(i))**2)**0.5
+       xnorm(i) =  dyds(i)/Dr ! unit normal vector in x.
+       ynorm(i) = -dxds(i)/Dr ! unit normal vector in y.
+       if(i.eq.cgrid+2)then !2nd point from TE counterclockwise.
+         xn1 = xnorm(i)
+         yn1 = ynorm(i)
+       elseif(i.eq.cgrid+imax1-1)then ! last but one point from TE counterclockwise.
+         xn2 = xnorm(i)
+         yn2 = ynorm(i)
+       endif
+       xbnew(i) = Xx1(i,1) + offset*xnorm(i) 
+       ybnew(i) = Yy1(i,1) + offset*ynorm(i) 
+    enddo  
+    ! Refining the TE grid.
+    ! 1st grid line with the normal of the 2nd point from TE counterclockwise. 
+    xbnew(cgrid+1) = Xx1(cgrid+1,1) + offset*xn1 
+    ybnew(cgrid+1) = Yy1(cgrid+1,1) + offset*yn1
+    !(np)th grid line with the normal of the (np-1)th point from TE counterclockwise.
+    xbnew(cgrid+imax1) = Xx1(cgrid+imax1,1) + offset*xn2 
+    ybnew(cgrid+imax1) = Yy1(cgrid+imax1,1) + offset*yn2
+    ! Filling the grid coordinates
+    do i = 1, imax2
+       Xg(i,k+1) = xbnew(imax2+1-i)
+       Yg(i,k+1) = ybnew(imax2+1-i)
+    enddo
+  enddo
   !---------------------------
   !C GRID MESH Refinement :
   !---------------------------
@@ -572,8 +571,8 @@ if(thick_distr == 2)then ! sharp TE
   !------------------------------------
   do t = 1, cgrid!cgrid+imax1, imax2-1
      do j = 1, jmax1
-	    Xg(cgrid+imax1+t,j) = Xg(cgrid+imax1+t-1,j) + cluster(t)*(xte_norm/te_norm_mag)
-	    Yg(cgrid+imax1+t,j) = Yg(cgrid+imax1+t-1,j) + cluster(t)*(yte_norm/te_norm_mag)
+        Xg(cgrid+imax1+t,j) = Xg(cgrid+imax1+t-1,j) + cluster(t)*(xte_norm/te_norm_mag)
+        Yg(cgrid+imax1+t,j) = Yg(cgrid+imax1+t-1,j) + cluster(t)*(yte_norm/te_norm_mag)
      enddo
   enddo  
   !------------------------------------
@@ -581,9 +580,9 @@ if(thick_distr == 2)then ! sharp TE
   !------------------------------------
   do t = cgrid, 1, -1
      do j = 1, jmax1
-	    Xg(t,j) = Xg(t+1,j) + cluster(cgrid+1-t)*(xte_norm/te_norm_mag)
-	    Yg(t,j) = Yg(t+1,j) + cluster(cgrid+1-t)*(yte_norm/te_norm_mag)
-	 enddo
+        Xg(t,j) = Xg(t+1,j) + cluster(cgrid+1-t)*(xte_norm/te_norm_mag)
+        Yg(t,j) = Yg(t+1,j) + cluster(cgrid+1-t)*(yte_norm/te_norm_mag)
+     enddo
   enddo 
   !-----------------------------------------------------------------
   !writin BG grid for debug
@@ -686,11 +685,11 @@ if((BGgrid.ne.0).and.(LE.ne.2))then
     print*,'-----------------------------------------------------------'
     write(nopen,*) ''
     write(nopen,*)'-----------------------------------------------------------'
-    write(nopen,*),'Grid Error: '
-    write(nopen,*),'-----------------------------------------------------------'
-    write(nopen,*),'Blade grid outside the bottom background grid !'
-    write(nopen,*),'Grid correction: Translating the blade grid by 3*cellwidth.'
-    write(nopen,*),'-----------------------------------------------------------'
+    write(nopen,*) 'Grid Error: '
+    write(nopen,*) '-----------------------------------------------------------'
+    write(nopen,*) 'Blade grid outside the bottom background grid !'
+    write(nopen,*) 'Grid correction: Translating the blade grid by 3*cellwidth.'
+    write(nopen,*) '-----------------------------------------------------------'
     call close_log_file(nopen, file_open)
     Yg = Yg + 3*cellwidth  
   endif

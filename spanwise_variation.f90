@@ -12,7 +12,7 @@ subroutine span_variation()
     implicit none
 
     ! Local variables
-    integer                         :: np_fine, i_local, nopen
+    integer                         :: np_fine, nopen
     real,           allocatable     :: span_fine(:), out_coord_u_fine(:,:), out_coord_v_fine(:,:)
     real                            :: out_coord_u(na, 12), out_coord_v(na, 12), intersec_u(nspan), &
                                        intersec_v(nspan)
