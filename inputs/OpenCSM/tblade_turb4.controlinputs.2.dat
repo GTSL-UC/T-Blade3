@@ -46,7 +46,6 @@ u and v coordinates:
 	0.7		,0.15
 	0.9		,0.05
 	1		,0
-
 	
 Leading Edge control Parameters: all control point ratios are (0:1)
 	LE degree(3 or 4)	no_Le_segments(4 or 5)

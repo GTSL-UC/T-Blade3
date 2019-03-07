@@ -36,7 +36,6 @@
 	   0.43307		  0.819422		0.52231			0.816798
 	   0.443569		  1				0.51706			1
 
-
  # Airfoil type and Variable Radial Stacking information.         #
  # stack_u: % chord stack (0.00 to 100.00).                       #
  # stack_v: % below or above meanline stack (-100.00 to +100.00). #
