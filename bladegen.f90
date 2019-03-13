@@ -119,7 +119,8 @@ real jcellblade_all(nspn), etawidth_all(nspn), jcellblade, etawidth
 real, allocatable, dimension(:) :: xtop_refine, ytop_refine, xbot_refine, ybot_refine
 real, allocatable, dimension(:) :: init_angles, init_cambers, x_spl_end_curv, cam_refine, u_refine
 real ucp_top(11), vcp_top(11), ucp_bot(11), vcp_bot(11)
-real a_NACA(4), d_NACA(4), t_max, u_max, t_TE, dy_dx_TE, LE_round
+real    :: xcp_LE,ycp_LE,xcp_TE,ycp_TE,cp_LE(4,2),cp_TE(4,2)
+real a_NACA(4), d_NACA(4), t_max, u_max, t_TE, dy_dx_TE, LE_round!, temp, tempt, u_temp(121)
 real intersec_coord(12, nsl), min_throat_2D
 real u_translation, camber_trans
 ! variables for s809 profile
@@ -248,12 +249,35 @@ ueq = 0; xmean = 0; ymean = 0!; u_new = 0 - Commented out until elliptical clust
 ! du = 1.0/(np-1)
 ! dsmn = du
 ! dsmx = np*dsmn! it was 100 for np = 100 8/16/13
+
+!
+! Compute NACA thickness coefficients
+! Computing here to enable ellipse based clustering
+!
+if (thick_distr == 5) then
+
+    t_max    = thk_cp(3,js)
+    u_max    = thk_cp(2,js)
+    LE_round = thk_cp(1,js)
+    t_TE     = thk_cp(4,js)
+
+    if (abs(thk_cp(5,js)) .le. 10e-8) then
+        call compute_te_angle(u_max,dy_dx_te)
+        dy_dx_te    = -2.0*t_max*dy_dx_te
+    else
+        dy_dx_te    = thk_cp(5,js)
+    end if
+    
+    call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,dy_dx_TE,LE_round,a_NACA,d_NACA)
+
+end if
+
+
 !*******************************************************************************************
 ! Generate spacing array or clustering for the airfoil coordinates ----------------
 !*******************************************************************************************
 ! This increases the points in leading and trailing edges...Clustering
 ! Subroutine definition found in funcNsubs.f90
-! Subroutine call for the elliptical clustering at LE and TE (comment - 11/20/18)
 if (clustering_switch .eq. 0) then
     call uniform_clustering(np,u)
 else if (clustering_switch .eq. 1) then
@@ -265,11 +289,41 @@ else if (clustering_switch .eq. 3) then
     call hyperbolic_tan_clustering(np,u,clustering_parameter)
 else if (clustering_switch .eq. 4) then
     if (thick_distr == 5) then
-        print *, "ERROR: Ellipse-hyperbolic clustering not available for modified NACA thickness distribution"
-        stop
-    else
         np_cluster  = int(clustering_parameter)
-        call elliptical_clustering(js,np,nsl,ncp_thk(js),thk_cp,np_cluster,u)
+
+        ! LE ellipse control points
+        xcp_LE      = 0.5*(a_NACA(1)**2)
+        ycp_LE      = (a_NACA(1)*sqrt(xcp_LE)) + (a_NACA(2)*xcp_LE) + (a_NACA(3)*(xcp_LE**2)) + (a_NACA(4)*(xcp_LE**3))
+        cp_LE(:,1)  = [xcp_LE, xcp_LE , 0.0, xcp_LE]
+        cp_LE(:,2)  = [ycp_LE, -ycp_LE, 0.0, 0.0   ]
+
+        ! TE ellipse control points
+        xcp_TE      = 1.0 - t_TE
+        ycp_TE      = d_NACA(1) + (d_NACA(2)*(1.0 -  xcp_TE)) + (d_NACA(3)*((1.0 - xcp_TE)**2)) + (d_NACA(4)*((1.0 - xcp_TE)**3))
+        cp_TE(:,1)  = [xcp_TE, xcp_TE , 1.0, xcp_TE]
+        cp_TE(:,2)  = [ycp_TE, -ycp_TE, 0.0, 0.0   ]
+
+        call elliptical_clustering(np,np_cluster,cp_LE,cp_TE,u)
+
+    else if (thick_distr == 4) then
+        np_cluster  = int(clustering_parameter)
+
+        ! LE ellipse control points
+        xcp_LE      = thk_cp(1,2*js - 1)
+        ycp_LE      = thk_cp(1,2*js)
+        cp_LE(:,1)  = [xcp_LE, xcp_LE , 0.0, xcp_LE]
+        cp_LE(:,2)  = [ycp_LE, -ycp_LE, 0.0, 0.0   ]
+
+        ! TE ellipse control points
+        xcp_TE      = thk_cp(ncp_thk(js),2*js - 1)
+        ycp_TE      = thk_cp(ncp_thk(js),2*js)
+        cp_TE(:,1)  = [xcp_TE, xcp_TE , 1.0, xcp_TE]
+        cp_TE(:,2)  = [ycp_TE, -ycp_TE, 0.0, 0.0   ]
+
+        call elliptical_clustering(np,np_cluster,cp_LE,cp_TE,u)
+    else
+        print *, 'ERROR: Ellipse-hyperbolic clustering not available for current thickness distribution'
+        stop
     end if
 end if
 
@@ -660,10 +714,10 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         ! Compute maximum thickness and maximum thickness location
         ! TODO: Set LE radius
         !
-        t_max    = thk_cp(3,js)
-        u_max    = thk_cp(2,js)
-        LE_round = thk_cp(1,js)
-        t_TE     = thk_cp(4,js)
+        !t_max    = thk_cp(3,js)
+        !u_max    = thk_cp(2,js)
+        !LE_round = thk_cp(1,js)
+        !t_TE     = thk_cp(4,js)
 
         ! 
         ! Print input values to screen and write to log file
@@ -681,15 +735,12 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         ! Compute TE angle value for u_max
         ! Display on screen and write to log file
         !
-        if (abs(thk_cp(5,js)) .le. 10E-8) then
-            call compute_TE_angle(u_max,dy_dx_TE)
-            dy_dx_TE    = -2.0*t_max*dy_dx_TE
-            print *, 'TE derivative for maximum thickness chordwise location = ', dy_dx_TE
-            write(nopen,*) 'TE derivative for maximum thickness chordwise location = ', dy_dx_TE
+        if (abs(thk_cp(5,js)) .le. 10e-8) then
+            print *, 'TE derivative for maximum thickness chordwise location = ', dy_dx_te
+            write(nopen,*) 'TE derivative for maximum thickness chordwise location = ', dy_dx_te
         else
-            dy_dx_TE    = thk_cp(5,js)
-            print *, 'Using TE derivative defined in auxiliary input file as = ', dy_dx_TE
-            write(nopen,*) 'Using TE derivative defined in auxiliary input file as = ', dy_dx_TE
+            print *, 'Using TE derivative defined in auxiliary input file as = ', dy_dx_te
+            write(nopen,*) 'Using TE derivative defined in auxiliary input file as = ', dy_dx_te
         end if
 
 
@@ -697,9 +748,26 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         ! Find coefficients for modified NACA four digit thickness
         ! Apply modified NACA four digit thickness
         !
-        call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,dy_dx_TE,LE_round,a_NACA,d_NACA)
+        !call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,dy_dx_TE,LE_round,a_NACA,d_NACA)
         call modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a_NACA,d_NACA,thickness_data)
         thickness       = thickness_data(:,1)
+
+        !if (js == 1) then
+        !    temp        = 0.5*(a_NACA(1)**2)
+        !    tempt       = (a_NACA(1)*sqrt(temp)) + (a_NACA(2)*temp) + (a_NACA(3)*(temp**2)) + (a_NACA(4)*(temp**3))
+        !    cp_LE(:,1)  = [temp, temp, 0.0, temp]
+        !    cp_LE(:,2)  = [tempt,-tempt,0.0,0.0]
+        !    temp        = 1.0 - t_TE
+        !    tempt       = d_NACA(1) + (d_NACA(2)*(1.0 - temp)) + (d_NACA(3)*((1.0 - temp)**2)) + (d_NACA(4)*((1.0 - temp)**3))
+        !    cp_TE(:,1)  = [temp,temp,1.0,temp]
+        !    cp_TE(:,2)  = [tempt,-tempt,0.0,0.0]
+        !    call elliptical_clustering(np,21,cp_LE,cp_TE,u_temp)
+        !    open(830, file = 'u_temp.dat')
+        !    do i = 1,np
+        !        write(830,'(F20.16)') u_temp(i)
+        !    end do
+        !    close(830)
+        !end if
 
         !
         ! Check for negative thickness

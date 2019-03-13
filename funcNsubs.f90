@@ -1926,11 +1926,11 @@ end subroutine hyperbolic_tan_clustering
 ! Generate LE ellipse
 !
 !*******************************************************************************************
-subroutine LE_ellipse(np,ncp,xcp_thk,ycp_thk,np_cluster,x_ellip_LE,y_ellip_LE)
+subroutine LE_ellipse(np,cp_LE_ellip,np_cluster,x_ellip_LE,y_ellip_LE)
     implicit none
 
-    integer,                    intent(in)          :: np, ncp
-    real,                       intent(in)          :: xcp_thk(ncp), ycp_thk(ncp)  
+    integer,                    intent(in)          :: np
+    real,                       intent(in)          :: cp_LE_ellip(4,2)
     integer,                    intent(in)          :: np_cluster
     real,                       intent(inout)       :: x_ellip_LE(*), y_ellip_LE(*)
     
@@ -1951,14 +1951,14 @@ subroutine LE_ellipse(np,ncp,xcp_thk,ycp_thk,np_cluster,x_ellip_LE,y_ellip_LE)
     ! 3 - left endpoint of the major axis of the LE ellipse (x = -a)
     ! center - center of the LE ellipse
     !
-    x_1_LE                      = xcp_thk(1)
-    y_1_LE                      = ycp_thk(1)
-    x_2_LE                      = xcp_thk(1)
-    y_2_LE                      = -ycp_thk(1)
-    x_3_LE                      = 0.0
-    y_3_LE                      = 0.0
-    x_center_LE                 = xcp_thk(1)
-    y_center_LE                 = 0.0
+    x_1_LE                      = cp_LE_ellip(1,1)!xcp_thk(1)
+    y_1_LE                      = cp_LE_ellip(1,2)!ycp_thk(1)
+    x_2_LE                      = cp_LE_ellip(2,1)!xcp_thk(1)
+    y_2_LE                      = cp_LE_ellip(2,2)!-ycp_thk(1)
+    x_3_LE                      = cp_LE_ellip(3,1)!0.0
+    y_3_LE                      = cp_LE_ellip(3,2)!0.0
+    x_center_LE                 = cp_LE_ellip(4,1)!xcp_thk(1)
+    y_center_LE                 = cp_LE_ellip(4,2)!0.0
 
 
     ! Define major and minor axis of the LE ellipse
@@ -2004,11 +2004,11 @@ end subroutine LE_ellipse
 ! Generate TE ellipse
 !
 !*******************************************************************************************
-subroutine TE_ellipse(np,ncp,xcp_thk,ycp_thk,np_cluster,x_ellip_TE,y_ellip_TE)
+subroutine TE_ellipse(np,cp_TE_ellip,np_cluster,x_ellip_TE,y_ellip_TE)
     implicit none
 
-    integer,                    intent(in)          :: np, ncp
-    real,                       intent(in)          :: xcp_thk(ncp), ycp_thk(ncp)
+    integer,                    intent(in)          :: np
+    real,                       intent(in)          :: cp_TE_ellip(4,2)
     integer,                    intent(in)          :: np_cluster
     real,                       intent(inout)       :: x_ellip_TE(*), y_ellip_TE(*)
 
@@ -2029,14 +2029,14 @@ subroutine TE_ellipse(np,ncp,xcp_thk,ycp_thk,np_cluster,x_ellip_TE,y_ellip_TE)
     ! 3 - rght endpoint of the major axis of the TE ellipse (x = +a)
     ! center - center of the TE ellipse
     !
-    x_1_TE                      = xcp_thk(ncp)
-    y_1_TE                      = ycp_thk(ncp)
-    x_2_TE                      = xcp_thk(ncp)
-    y_2_TE                      = -ycp_thk(ncp)
-    x_3_TE                      = 1.0
-    y_3_TE                      = 0.0
-    x_center_TE                 = xcp_thk(ncp)
-    y_center_TE                 = 0.0
+    x_1_TE                      = cp_TE_ellip(1,1)!xcp_thk(ncp)
+    y_1_TE                      = cp_TE_ellip(1,2)!ycp_thk(ncp)
+    x_2_TE                      = cp_TE_ellip(2,1)!xcp_thk(ncp)
+    y_2_TE                      = cp_TE_ellip(2,2)!-ycp_thk(ncp)
+    x_3_TE                      = cp_TE_ellip(3,1)!1.0
+    y_3_TE                      = cp_TE_ellip(3,2)!0.0
+    x_center_TE                 = cp_TE_ellip(4,1)!xcp_thk(ncp)
+    y_center_TE                 = cp_TE_ellip(4,2)!0.0
 
 
     ! Define major and minor axis of the TE ellipse
@@ -2455,19 +2455,17 @@ end subroutine mid_hyperbolic_clustering
 ! Add elliptical clustering for the LE and TE
 !
 !*******************************************************************************************
-subroutine elliptical_clustering(js,np,nsl,ncp,thk_cp,np_cluster,u_new)
+subroutine elliptical_clustering(np,np_cluster,cp_LE_ellip,cp_TE_ellip,u_new)
     use file_operations
     implicit none
 
-    integer,                    intent(in)          :: js, np, nsl
-    integer,                    intent(in)          :: ncp
-    real,                       intent(in)          :: thk_cp(20, 2*nsl)
+    integer,                    intent(in)          :: np
     integer,                    intent(in)          :: np_cluster
+    real,                       intent(in)          :: cp_LE_ellip(4,2), cp_TE_ellip(4,2)
     real,                       intent(inout)       :: u_new(np)
 
     ! Local variables
     integer                                         :: i, j, np_mid, nopen
-    real,           allocatable                     :: xcp_thk(:), ycp_thk(:)
     real,           allocatable                     :: x_ellip_LE(:), y_ellip_LE(:), &
                                                        x_ellip_TE(:), y_ellip_TE(:), &
                                                        u_LE(:), u_TE(:), u_mid(:)
@@ -2484,27 +2482,14 @@ subroutine elliptical_clustering(js,np,nsl,ncp,thk_cp,np_cluster,u_new)
     call close_log_file(nopen, file_open)
 
 
-    !
-    ! Read thickness control points for the js blade section
-    !
-    if (allocated(xcp_thk) .and. allocated(ycp_thk)) deallocate(xcp_thk,ycp_thk)
-    allocate(xcp_thk(ncp), ycp_thk(ncp))
-    do i = 1,ncp
-
-        xcp_thk(i)              = thk_cp(i,2*js - 1)
-        ycp_thk(i)              = thk_cp(i,2*js)
-
-    end do
-
-
     ! Generate LE and TE ellipses
     if (allocated(x_ellip_LE) .and. allocated(y_ellip_LE)) deallocate(x_ellip_LE,y_ellip_LE)
     allocate(x_ellip_LE(2*np_cluster - 1), y_ellip_LE(2*np_cluster - 1))
-    call LE_ellipse(np,ncp,xcp_thk,ycp_thk,np_cluster,x_ellip_LE,y_ellip_LE)
+    call LE_ellipse(np,cp_LE_ellip,np_cluster,x_ellip_LE,y_ellip_LE)
 
     if (allocated(x_ellip_TE) .and. allocated(y_ellip_TE)) deallocate(x_ellip_TE,y_ellip_TE)
     allocate(x_ellip_TE(2*np_cluster - 1), y_ellip_TE(2*np_cluster - 1))
-    call TE_ellipse(np,ncp,xcp_thk,ycp_thk,np_cluster,x_ellip_TE,y_ellip_TE)
+    call TE_ellipse(np,cp_TE_ellip,np_cluster,x_ellip_TE,y_ellip_TE)
 
 
     ! Store u values for LE and TE
@@ -2962,7 +2947,7 @@ subroutine modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a,d,thk_da
     counter             = 0
     do i = 1,np
         
-        if (u(i) < u_TE) then
+        if (u(i) .le. u_TE) then
             counter     = counter + 1
         else
             exit
