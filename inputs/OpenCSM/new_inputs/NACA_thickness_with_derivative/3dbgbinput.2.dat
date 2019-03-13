@@ -9,9 +9,9 @@
  Number of streamlines:
           21
  Angles in the input file (0=Beta_z (default),1=Beta_r):
-            0  inci_dev_spline
+           0  inci_dev_spline
  Airfoil camber defined by curvature control (0=no,1=yes ;spanwise_spline= spancontrolinputs file):
-            1  spanwise_spline
+           1  spanwise_spline
  Airfoil Thickness distribution (0=Wennerstrom,1=Spline,2=Spline + sharp TE):
            5
  Airfoil Thickness multiplier (0=no,1=yes):
@@ -23,7 +23,7 @@
  True lean and sweep (0=no,1=yes):
            0
  Clustering control (0=uniform,1=sine,2=exponential,3=hyperbolic,4=elliptical):
-	       1  3.0
+	       4  15
  Sectionwise properties:
  J        in_Beta        out_Beta          mrel_in           chord           t/c_max         Incidence       Deviation      Sec. Flow Angle
  1     -62.17615474      12.82488290       0.51695300       0.95206536       0.09610000       0.00000000       0.00000000       0.00000000
