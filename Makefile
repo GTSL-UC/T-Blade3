@@ -24,7 +24,6 @@ OBJS =  globvar.o file_operations.o spline.o readinput.o funcNsubs.o 3dbgb.o bla
         cubicspline.o lespline.o bsplinecam.o splinethick.o gauss_jordan.o airfoiltypes.o bladegrid2D.o ellipgrid.o \
 		spanwise_variation.o poly_solve_bisect.o quartic_poly_solve.o thk_ctr_gen_driver.o \
 		thk_ctrl_gen_der.o thk_ctrl_gen_spl.o \
-# spanwise_output.o
 #MYLIBS = $(HOME)/$(LIBDIR)/dtnurbsPIC_i.a
 
 XLIBS  = -L/usr/X11R6/lib64 -lX11 -lpthread
