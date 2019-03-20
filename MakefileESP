@@ -46,7 +46,6 @@ OBJS  =	$(ODIR)/globvar.o \
 	$(ODIR)/bladegrid2D.o \
 	$(ODIR)/ellipgrid.o \
 	$(ODIR)/spanwise_variation.o \
-	$(ODIR)/spanwise_output.o \
 	$(ODIR)/poly_solve_bisect.o \
 	$(ODIR)/quartic_poly_solve.o \
 	$(ODIR)/thk_ctr_gen_driver.o \
@@ -107,8 +106,6 @@ $(ODIR)/ellipgrid.o:	ellipgrid.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) ellipgrid.f90          -o $(ODIR)/ellipgrid.o
 $(ODIR)/spanwise_variation.o:	spanwise_variation.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) spanwise_variation.f90 -o $(ODIR)/spanwise_variation.o
-$(ODIR)/spanwise_output.o:	spanwise_output.f90
-	$(FCOMP) -c $(FOPTS) $(FOPTX) spanwise_output.f90    -o $(ODIR)/spanwise_output.o
 $(ODIR)/poly_solve_bisect.o:	poly_solve_bisect.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) poly_solve_bisect.f90  -o $(ODIR)/poly_solve_bisect.o
 $(ODIR)/quartic_poly_solve.o:	quartic_poly_solve.f90
