@@ -687,8 +687,8 @@ subroutine readinput(fname)
     if (LE.ne.0) then
 
         do js = 1, nspn
-            read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), tempr, tempr,  &
-                      jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+            read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), tempr, tempr
+                      !jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
             backspace(1)
             read(1,'(A)') temp
             write(nopen1,'(A)') trim(temp)
@@ -704,7 +704,7 @@ subroutine readinput(fname)
         
         do js = 1, nspn
             read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), &
-                      tethk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+                      tethk_all(js), jcellblade_all(js)!, etawidth_all(js), BGgrid_all(js)
             backspace(1)
             read(1,'(A)') temp
             write(nopen1,'(A)') trim(temp)

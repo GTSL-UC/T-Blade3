@@ -7,8 +7,22 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, &
                     LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments,&
                     sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
                     n_normal_distance,casename,develop,isdev,mble,mbte,msle,mste,i_slope,jcellblade_all, &
-                    etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset, te_flag, &
+                    etawidth_all,BGgrid_all,thk_tm_c_spl, theta_offset, te_flag, &
                     le_opt_flag, te_opt_flag, le_angle_all, te_angle_all)
+
+!
+! bladegen definition including isxygrid - will be deleted in the future
+!
+!subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, &
+!                    stagger,stack,chord_switch,stk_u,stk_v,xb_stk,yb_stk,stack_switch, &
+!                    clustering_switch, clustering_parameter,nsl,nbls,curv_camber,thick,LE,np, ncp_curv,ncp_thk, &
+!                    curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,ee_all,thick_distr,thick_distr_3_flag, &
+!                    umxthk_all,C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all,&
+!                    LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments,&
+!                    sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
+!                    n_normal_distance,casename,develop,isdev,mble,mbte,msle,mste,i_slope,jcellblade_all, &
+!                    etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset, te_flag, &
+!                    le_opt_flag, te_opt_flag, le_angle_all, te_angle_all)
 
 !-----------------------------------------
 ! Input:
@@ -139,7 +153,7 @@ character*80 file1, file2, file3, file7
 character(*)    :: casename, develop, airfoil
 character*20 sec
 character*16 thick_distr_3_flag
-logical ellip, isdev, isxygrid
+logical ellip, isdev!, isxygrid
 integer                             :: nopen
 character(len = :), allocatable     :: log_file, thickness_file_name
 logical                             :: file_open, write_to_file, file_exist
@@ -518,7 +532,7 @@ if(curv_camber.eq.0)then
         !u-v airfoil before stacking
         if(js.eq.1)then
             file1 = 'uvnaca.dat'
-            call fileWrite1D(file1, xb, yb, np)
+            call file_write_1D(file1, xb, yb, np)
         endif  
         !--------------------------------------------------------
         call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE)
@@ -580,7 +594,7 @@ if(curv_camber.eq.0)then
         call datafile(airfoil, xb, yb, np)
         if(js.eq.1)then
             file1 = 'uvairfoil.dat'
-            call fileWrite1D(file1, xb, yb, np)
+            call file_write_1D(file1, xb, yb, np)
         endif
         call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE)
         ! stagger and scale 
@@ -988,10 +1002,10 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
     ! -----------------------------------------------------------------------------
     if(isdev)then
         file7 = 'topcurve.'//trim(fext)
-        call fileWrite1D(file7, xtop, ytop, np)
+        call file_write_1D(file7, xtop, ytop, np)
         
         file7 = 'botcurve.'//trim(fext)
-        call fileWrite1D(file7, xbot, ybot, np)
+        call file_write_1D(file7, xbot, ybot, np)
 
     endif
     ! -----------------------------------------------------------------------------
@@ -1145,7 +1159,7 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
 
     if(isdev) then
         file7 = 'uvblade.'//trim(fext)
-        call fileWrite1D(file7, xb, yb, np)
+        call file_write_1D(file7, xb, yb, np)
         ! open(unit = 22, file = file7, status = 'unknown')
         ! write(22, *)'skip'
         ! write(22, *)'skip'
@@ -1306,21 +1320,24 @@ call throat_calc_pitch_line(xb, yb, np, camber, angle, sang, u, pi, pitch, inter
 !******************************************************************************************
 ! 2D blade grid generation.
 !******************************************************************************************
-if (isxygrid) then
-    call log_file_exists(log_file, nopen, file_open)
-    print*, 'i_slope in bladgen: ', i_slope
-    write(nopen,*) 'i_slope in bladegen: ', i_slope
-    call close_log_file(nopen, file_open)
-    if((nbls.ge.5).and.(i_slope.eq.0))then ! No 2D grid files for wind turbines and cases which have less than 5 blades.
-        jcellblade = jcellblade_all(js)
-        etawidth = etawidth_all(js)
-        BGgrid = BGgrid_all(js)
-
-        call bladegrid2D(xb, yb, np, nbls, chrdx, thkc, fext, LE, le_pos, thick_distr, &
-                         casename, msle, mste, mble, mbte, js, nspn, np_side,          &
-                         curv_camber, stingl, jcellblade, etawidth, BGgrid, develop, isdev)
-    endif
-endif
+!
+!  Mayank Sharma - commenting out bladegrid call for separation of O-grid generator from T-Blade3
+!
+!if (isxygrid) then
+!    call log_file_exists(log_file, nopen, file_open)
+!    print*, 'i_slope in bladgen: ', i_slope
+!    write(nopen,*) 'i_slope in bladegen: ', i_slope
+!    call close_log_file(nopen, file_open)
+!    if((nbls.ge.5).and.(i_slope.eq.0))then ! No 2D grid files for wind turbines and cases which have less than 5 blades.
+!        jcellblade = jcellblade_all(js)
+!        etawidth = etawidth_all(js)
+!        BGgrid = BGgrid_all(js)
+!
+!        call bladegrid2D(xb, yb, np, nbls, chrdx, thkc, fext, LE, le_pos, thick_distr, &
+!                         casename, msle, mste, mble, mbte, js, nspn, np_side,          &
+!                         curv_camber, stingl, jcellblade, etawidth, BGgrid, develop, isdev)
+!    endif
+!endif
 
 !******************************************************************************************
 ! Calculation of Geometric Zweifel Number:

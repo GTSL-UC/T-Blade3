@@ -240,6 +240,81 @@ module file_operations
 
     end subroutine meanline_u_v_file
     !---------------------------------------------------------------------------
+    
+    
+    
+    !
+    ! Write 2D array in matrix form to a file
+    ! Specified for (x,y) grid coordinates 
+    !
+    !---------------------------------------------------------------------------
+    subroutine file_write_matrix(fname,X,Y,nx,ny)
+    
+        character(32),          intent(in)              :: fname
+        integer,                intent(in)              :: nx
+        integer,                intent(in)              :: ny
+        real,                   intent(in)              :: X(nx,ny)
+        real,                   intent(in)              :: Y(nx,ny)
+
+        ! Local variables
+        integer                                         :: i, funit = 1
+
+
+        !
+        ! Open specified file and start writing to file
+        !
+        open(funit, file = fname, status = 'unknown')
+        
+        write(funit,*) nx, ny
+        
+        ! Write x coordinates
+        write(funit,*) 'X coordinates'
+        do i = 1,nx
+            write(funit,*) X(i,:)
+        end do
+        write(funit,*) ''
+
+        ! Write y coordinates
+        write(funit,*) 'Y coordinates'
+        do i = 1,nx
+            write(funit,*) Y(i,:)
+        end do
+        
+        close(funit)
+
+
+    end subroutine file_write_matrix
+    !---------------------------------------------------------------------------
+    
+    
+    
+    !
+    ! Write 1D arrays to a file
+    !
+    !---------------------------------------------------------------------------
+    subroutine file_write_1D(fname,X,Y,nx)
+    
+        character(32),          intent(in)              :: fname
+        integer,                intent(in)              :: nx
+        real,                   intent(in)              :: X(nx)
+        real,                   intent(in)              :: Y(nx)
+
+        ! Local variables
+        integer                                         :: i, funit = 1
+
+
+        !
+        ! Open specified file and start writing to file
+        !
+        open(funit, file = fname, status = 'unknown')
+        do i = 1,nx
+            write(funit,'(2F20.16)') X(i), Y(i)
+        end do
+        close(funit)
+
+
+    end subroutine file_write_1D
+    !---------------------------------------------------------------------------
 
 
 

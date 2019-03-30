@@ -110,8 +110,8 @@ character*15::istr1,istr2,H(13)
 !Function variables
 !real*8 inBetaInci, outBetaDevn
 
-logical isdev, tm_c_spline, isxygrid, is_xyzstreamlines, spanwise_angle_spline,spanwise_inci_dev_spline, &
-is2d, isold
+logical isdev, tm_c_spline, is_xyzstreamlines, spanwise_angle_spline,spanwise_inci_dev_spline, &
+is2d, isold!, isxygrid
 
 common / bladesectionpoints /xxa(nx,nax),yya(nx,nax)
 !
