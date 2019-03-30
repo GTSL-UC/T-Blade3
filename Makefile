@@ -55,3 +55,6 @@ endif
 clean:
 
 	-rm -f 3dbgb tblade3 techop techop.o $(OBJS) *.mod *.x *.exe
+    ifeq ($(detected_OS),Darwin)
+	    -rm -r *.dSYM
+    endif
