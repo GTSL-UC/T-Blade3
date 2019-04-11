@@ -1689,7 +1689,83 @@ end subroutine constantslopemeanline3D
 
 
 !
-! Subroutine for a uniform ckustering of u before starting blade generation
+! Subroutine for Gauss-Jordan elimination to solve a nxn linear system by converting the 
+! coefficient matrix to its reduced row echelon form
+! Row pivoting is implemented
+!
+! Input parameters: n           - size of incoming square matrix
+!                   nrhs        - no. of columns of RHS vector
+!                   a           - augmented matrix with size n x (n + nrhs)
+!                   fail_flag   - flag for determining failure of row pivoting
+!
+!*******************************************************************************************
+subroutine gauss_jordan(n, nrhs, a, fail_flag)
+    implicit none
+
+    integer,                    intent(in)          :: n
+    integer,                    intent(in)          :: nrhs
+    real,                       intent(inout)       :: a(n, n + nrhs)
+    integer,                    intent(inout)       :: fail_flag
+
+    ! Local variables
+    integer                                         :: i, j, c, ipvt
+    real                                            :: pvt, temp(n + nrhs)
+    real,   parameter                               :: eps = 10e-16
+
+
+    ! Set number of columns
+    c           = n + nrhs
+
+    ! Initialize flag
+    fail_flag   = 0
+
+    do i = 1,n
+
+        ! Determining pivot row and coefficient
+        ipvt                    = i
+        pvt                     = a(i,i)
+        
+        do j = i + 1,n
+            if (abs(pvt) < abs(a(j,i))) then
+                pvt             = a(j,i)
+                ipvt            = j
+            end if
+        end do
+
+        ! If all pivot column elements are zero, return fail
+        if (abs(pvt) < eps) then
+            write(*,*) 'FATAL ERROR: gauss_jordan - zero pivot term'
+            fail_flag           = 1
+            return
+        end if
+
+        ! Interchange current row and pivot row
+        temp                    = a(ipvt,:)
+        a(ipvt,:)               = a(i,:)
+        a(i,:)                  = temp
+
+        ! Eliminate coefficients below and above pivot
+        ! Explicit back substitution not required
+        a(i,i)                  = 1.0
+        a(i,i + 1:c)            = a(i,i + 1:c)/pvt
+        
+        do j = 1,n
+            if (j /= i) then
+                a(j,i + 1:c)    = a(j,i + 1:c) - a(j,i) * a(i,i + 1:c)
+                a(j,i)          = 0.0
+            end if
+        end do
+
+    end do  ! i = 1,n
+
+
+end subroutine gauss_jordan
+!*******************************************************************************************
+
+
+
+!
+! Subroutine for a uniform clustering of u before starting blade generation
 !
 !*******************************************************************************************
 subroutine uniform_clustering(np,u)
