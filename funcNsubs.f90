@@ -1695,8 +1695,6 @@ end subroutine constantslopemeanline3D
 !
 ! Input parameters: n           - size of incoming square matrix
 !                   nrhs        - no. of columns of RHS vector
-!                   a           - augmented matrix with size n x (n + nrhs)
-!                   fail_flag   - flag for determining failure of row pivoting
 !
 !*******************************************************************************************
 subroutine gauss_jordan(n, nrhs, a, fail_flag)
@@ -1760,6 +1758,98 @@ subroutine gauss_jordan(n, nrhs, a, fail_flag)
 
 
 end subroutine gauss_jordan
+!*******************************************************************************************
+
+
+
+!
+! Input parameters: x   - coordinate at which polynomial has to be evaluated
+!                   cf  - array of polynomial coefficients
+!                   ord - order of the polynomial to be computed
+!
+!*******************************************************************************************
+real function feval(x,cf,ord)
+    implicit none
+
+    integer,                    intent(in)          :: ord
+    real,                       intent(in)          :: x, cf(ord)
+
+    ! Local variables
+    integer                                         :: i
+
+    feval       = cf(1)
+
+    do i = 2,ord + 1
+       feval    = feval + (cf(i)*(x**(i - 1))) 
+    end do
+
+
+end function feval
+!*******************************************************************************************
+
+
+
+!
+! Input parameters: ord     - order of polynomial
+!                   cf      - array of coefficients
+!                   a_bound - lower bound of bounding interval
+!                   b_bound - upper bound of bounding interval
+!                   
+!*******************************************************************************************
+subroutine poly_solve_bisect(ord,cf,a_bound,b_bound,er,x)
+    implicit none
+
+    integer,                    intent(in)          :: ord
+    real,                       intent(in)          :: cf(ord)
+    real,                       intent(in)          :: a_bound
+    real,                       intent(in)          :: b_bound
+    integer,                    intent(inout)       :: er
+    real,                       intent(inout)       :: x(4)
+
+    ! Local variables
+    integer                                         :: i, maxiter = 200
+    real                                            :: feval, tol = 1e-6, a, b, m, ya, yb, ym, bnd
+
+
+    a       = a_bound
+    ya      = feval(a,cf,ord)
+    b       = b_bound
+    yb      = feval(b,cf,ord)
+
+    ! Error if bounding interval doesn't contain roots
+    if (ya*yb > 0) then
+        er  = 1
+        return
+    end if
+
+    ! Bisection method
+    do i = 1,maxiter
+        
+        m   = (a + b)/2.0
+        ym  = feval(m,cf,ord)
+        bnd = (b - a)/2.0
+
+        if (abs(ym) < tol) exit
+
+        if (ym*ya < 0) then
+            b   = m
+            yb  = ym
+        else
+            a   = m
+            ya  = ym
+        end if
+    
+    end do
+
+    x           = ym
+
+    ! Error if number of iterations exceeds maximum iterations
+    if (i == maxiter) then
+        er      = 2
+    end if
+
+
+end subroutine poly_solve_bisect
 !*******************************************************************************************
 
 
