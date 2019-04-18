@@ -1855,6 +1855,8 @@ end subroutine poly_solve_bisect
 
 
 !
+! Input parameters: np  - number of points along chord
+!
 ! Subroutine for a uniform clustering of u before starting blade generation
 !
 !*******************************************************************************************
@@ -1890,6 +1892,9 @@ end subroutine uniform_clustering
 !*******************************************************************************************
 
 
+
+!
+! Input parameters: np  - number of points along chord
 !
 ! Subroutine for a sine function based clustering of u before starting blade generation
 !
@@ -1937,6 +1942,8 @@ end subroutine sine_clustering
 
 
 
+!
+! Input parameters: np  - number of points along chord
 !
 ! Subroutine for exponential clustering of u before starting blade generation 
 !
@@ -2008,6 +2015,8 @@ end subroutine exponential_clustering
 
 
 
+!
+! Input parameters: np  - number of points along chord
 !
 ! Subroutine for hyperbolic tangent clustering of u before starting blade generation
 !
@@ -2091,6 +2100,10 @@ end subroutine hyperbolic_tan_clustering
 !
 ! Generate LE ellipse
 !
+! Input parameters: np          - number of points along the chord
+!                   cp_LE_ellip - control points for generating LE clustering ellipse
+!                   np_cluster  - number of points for clustering LE
+!
 !*******************************************************************************************
 subroutine LE_ellipse(np,cp_LE_ellip,np_cluster,x_ellip_LE,y_ellip_LE)
     implicit none
@@ -2168,6 +2181,10 @@ end subroutine LE_ellipse
 
 !
 ! Generate TE ellipse
+!
+! Input parameters: np          - number of points along the chord
+!                   cp_TE_ellip - control points for generating TE clustering ellipse
+!                   np_cluster  - number of points for clustering TE
 !
 !*******************************************************************************************
 subroutine TE_ellipse(np,cp_TE_ellip,np_cluster,x_ellip_TE,y_ellip_TE)
@@ -2248,6 +2265,10 @@ end subroutine TE_ellipse
 !
 ! Cluster the part of the blade between the LE and the TE
 !
+! Input parameters: u_begin - starting location of the middle part of the blade section
+!                   u_end   - ending location of the middle part of the blade section
+!                   np_mid  - number of points in the middle part of the blade section
+!
 !*******************************************************************************************
 subroutine cluster_mid(u_begin,u_end,np_mid,u_mid)
     implicit none
@@ -2283,6 +2304,10 @@ end subroutine cluster_mid
 ! This function is used in the bisection method when solving for the LE side
 ! clustering parameter
 !
+! Input parameters: K               - equation constant for the LE clustering parameter equation
+!                   xi              - reference coordinate system location
+!                   func_coordinate - bisection solver guess
+!
 !*******************************************************************************************
 real function LE_clustering_parameter_func(K,xi,func_coordinate) result(func)
     implicit none
@@ -2305,6 +2330,10 @@ end function LE_clustering_parameter_func
 ! This function is used in the bisection method when solving for the TE side
 ! clustering parameter
 !
+! Input parameters: K               - equation constant for the TE clustering parameter equation
+!                   xi              - reference coordinate system location
+!                   func_coordinate - bisection solver guess
+!
 !*******************************************************************************************
 real function TE_clustering_parameter_func(K,xi,func_coordinate) result(func)
     implicit none
@@ -2324,6 +2353,9 @@ end function TE_clustering_parameter_func
 
 !
 ! Bisection solver for the LE side clustering parameter
+!
+! Input parameters: xi  - reference coordinate system location
+!                   K   - equation constant for the LE clustering parameter equation
 !
 !*******************************************************************************************
 subroutine LE_clustering_parameter_solver(xi,K,delta,solver_flag)
@@ -2414,6 +2446,9 @@ end subroutine LE_clustering_parameter_solver
 !
 ! Bisection solver for TE side clustering parameter
 !
+! Input parameters: xi  - reference coordinate system location
+!                   K   - equation constant for the TE clustering parameter equation
+!
 !*******************************************************************************************
 subroutine TE_clustering_parameter_solver(xi,K,delta,solver_flag)
     use file_operations
@@ -2500,7 +2535,13 @@ end subroutine TE_clustering_parameter_solver
 
 
 
+!
 ! Add hyperbolic clustering for LE side middle part
+!
+! Input parameters: np_cluster  - number of clustered points along LE and TE
+!                   np_mid      - number of points in the middle part of the blade section
+!                   u_LE        - clustered points along LE
+!                   u_TE        - clustered points along TE
 !
 !*******************************************************************************************
 subroutine mid_hyperbolic_clustering(np_cluster,np_mid,u_LE,u_TE,u_mid)
@@ -2620,6 +2661,11 @@ end subroutine mid_hyperbolic_clustering
 !
 ! Add elliptical clustering for the LE and TE
 !
+! Input parameters: np          - number of points along the chord
+!                   np_cluster  - number of points along the clustered LE and TE
+!                   cp_LE_ellip - control points for the LE clustering ellipse
+!                   cp_TE_ellip - control points for the TE clustering ellipse
+!
 !*******************************************************************************************
 subroutine elliptical_clustering(np,np_cluster,cp_LE_ellip,cp_TE_ellip,u_new)
     use file_operations
@@ -2706,7 +2752,7 @@ end subroutine elliptical_clustering
 !
 ! Interpolate trailing edge angle
 !
-! Input parameters: u_max = chordwise location of max. thickness for the blade section
+! Input parameters: u_max - chordwise location of max. thickness for the blade section
 !
 ! Reference: Abbott, I.H., van Doenhoff, A.E., "Families of Wing Sections", Theory of Wing
 !            Sections, Dover Publications, New York, 1999, pp. 116-118
@@ -2735,10 +2781,11 @@ end subroutine compute_TE_angle
 ! For u < u_max: y_t = a_0*sqrt(u) + a_1*u + a_2*(u**2) + a_3*(u**3)
 ! For u > u_max: y_t = d_0 + d_1*(1 - u) + d_2*((1 - u)**2) + d_3*((1 - u)**3)
 !
-! Input parameters: t_max    = half max. thickness for the blade section in fraction chord
-!                   u_max    = chordwise location of max. thickness for the blade section
-!                   dy_dx_TE = trailing edige angle
-!                   I        = integer parameter governing roundedness of the leading edge
+! Input parameters: t_max    - half max. thickness for the blade section in fraction chord
+!                   u_max    - chordwise location of max. thickness for the blade section
+!                   TE_thk   - thickness at the TE location
+!                   dy_dx_TE - trailing edge angle
+!                   I        - integer parameter governing roundedness of the leading edge
 !                              (default = 6, sharp LE = 0)
 !
 ! Reference: Abbott, I.H, von Doenhoff, A.E., "Families of Wing Sections", Theory of Wing
@@ -2829,12 +2876,12 @@ end subroutine modified_NACA_four_digit_thickness_coeffs
 ! For u < u_max: y_t = a_0*sqrt(u) + a_1*u + a_2*(u**2) + a_3*(u**3)
 ! For u > u_max: y_t = d_0*sqrt*(1 - u) + d_1*(1 - u) + d_2*((1 - u)**2) + d_3*((1 - u)**3)
 !
-! Input parameters: t_max     = half max. thickness for the blade section 
-!                   u_max     = chordwise location of max. thickness for the blade section
-!                   TE_thk    = half thickness at the trailing edge
-!                   u_TE      = chordwise location of trailing edge
-!                   dy_dx_TE  = trailiing edge angle
-!                   LE_radius = radius of the leading edge
+! Input parameters: t_max     - half max. thickness for the blade section 
+!                   u_max     - chordwise location of max. thickness for the blade section
+!                   TE_thk    - half thickness at the trailing edge
+!                   u_TE      - chordwise location of trailing edge
+!                   dy_dx_TE  - trailiing edge angle
+!                   LE_radius - radius of the leading edge
 !
 ! Reference: Abbott, I.H., von Doenhoff, A.E., "Families of Wing Sections", Theory of Wing
 !            Sections, Dover Publications, New York, 1999, pp. 116-118
@@ -2923,11 +2970,11 @@ end subroutine modified_NACA_four_digit_thickness_coeffs
 ! For u < u_max: y_t = a_0*sqrt(u) + a_1*u + a_2*(u**2) + a_3*(u**3)
 ! For u > u_max: y_t = d_0 + d_1*(1 - u) + d_2*((1 - u)**2) + d_3*((1 - u)**3)
 !
-! Input parameters: t_max    = half max. thickness for the blade section in fraction chord
-!                   u_max    = chordwise location of max. thickness for the blade section
-!                   t_TE     = half thickness for the blade section at the trailing edge
-!                   dy_dx_TE = trailing edige angle
-!                   I        = integer parameter governing roundedness of the leading edge
+! Input parameters: t_max    - half max. thickness for the blade section in fraction chord
+!                   u_max    - chordwise location of max. thickness for the blade section
+!                   t_TE     - half thickness for the blade section at the trailing edge
+!                   dy_dx_TE - trailing edige angle
+!                   I        - integer parameter governing roundedness of the leading edge
 !                              (default = 6, sharp LE = 0)
 !
 ! Reference: Abbott, I.H, von Doenhoff, A.E., "Families of Wing Sections", Theory of Wing
@@ -3011,12 +3058,12 @@ end subroutine modified_NACA_four_digit_thickness_coeffs_2
 !
 ! Obtain thickness distribution with the computed coefficients a_i and d_i
 !
-! Input parameters: np    = number of points along the blade section meanline
-!                   u     = points along chord
-!                   u_max = chordwise location of max. thickness for the blade section
-!                   t_max = half max. thickness for the blade section in fraction chord
-!                   a     = thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
-!                   d     = thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
+! Input parameters: np    - number of points along the blade section meanline
+!                   u     - points along chord
+!                   u_max - chordwise location of max. thickness for the blade section
+!                   t_max - half max. thickness for the blade section in fraction chord
+!                   a     - thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
+!                   d     - thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
 !           
 !*******************************************************************************************
 subroutine modified_NACA_four_digit_thickness(np,u,u_max,t_max,a,d,thk_data)
@@ -3079,12 +3126,12 @@ end subroutine modified_NACA_four_digit_thickness
 !
 ! Obtain thickness distribution with the computed coefficients a_i and d_i
 !
-! Input parameters: np    = number of points along the blade section meanline
-!                   u     = points along chord
-!                   u_max = chordwise location of max. thickness for the blade section
-!                   t_max = half max. thickness for the blade section in fraction chord
-!                   a     = thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
-!                   d     = thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
+! Input parameters: np    - number of points along the blade section meanline
+!                   u     - points along chord
+!                   u_max - chordwise location of max. thickness for the blade section
+!                   t_max - half max. thickness for the blade section in fraction chord
+!                   a     - thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
+!                   d     - thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
 !           
 !*******************************************************************************************
 subroutine modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a,d,thk_data)
