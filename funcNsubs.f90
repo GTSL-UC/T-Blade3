@@ -1855,6 +1855,517 @@ end subroutine poly_solve_bisect
 
 
 !
+! Input parameters: ceff    - array of polynomial coefficients
+!
+! Solves a quadratic polynomial
+!
+!*******************************************************************************************
+subroutine quadratic_roots(ceff, root)
+    implicit none
+
+    ! Precision variables
+    integer,    parameter                           :: sp = kind(0.0), dp = kind(0.0D0)
+
+    real(kind = dp),            intent(in)          :: ceff(3) 
+    complex(kind = dp),         intent(inout)       :: root(2) 
+    
+    ! Local variables
+    real(kind = dp),parameter:: eps = epsilon(0.0D0)
+    real(dp):: d, r, w, x, y
+
+
+    ! If equation is linear
+    if(ceff(1) == 0.0) then
+        root(1)         = (0.D0,0.D0)
+        root(2)         = cmplx(-ceff(2)/ceff(3), 0.0D0,dp)
+        return
+    endif
+
+    ! Compute discriminant
+    d                   = ceff(2)*ceff(2) - 4.0D0*ceff(1)*ceff(3)             
+    if (abs(d) <= 2.0D0*eps*ceff(2)*ceff(2)) then
+        root(1)         = cmplx(-0.5D0*ceff(2)/ceff(3), 0.0D0, dp) 
+        root(2)         = root(1)
+        return
+    endif
+
+    ! Complex roots if discriminant is negative
+    r = sqrt(abs(d))
+    if (d < 0.0D0) then
+        x               = -0.5D0*ceff(2)/ceff(3)        
+        y               = abs(0.5D0*r/ceff(3))
+        root(1)         = cmplx(x, y, dp)
+        root(2)         = cmplx(x,-y, dp)   
+        return
+    endif
+
+    ! Numerical Recipes, sec. 5.5
+    if (ceff(2) /= 0.0D0) then              
+        w               = -(ceff(2) + sign(r,ceff(2)))
+        root(1)         = cmplx(2.0D0*ceff(1)/w,  0.0D0, dp)
+        root(2)         = cmplx(0.5D0*w/ceff(3), 0.0D0, dp)
+        return
+    endif
+
+    ! If equation is of the form (x^2 - 1)
+    x                   = abs(0.5D0*r/ceff(3))   
+    root(1)             = cmplx( x, 0.0D0, dp)
+    root(2)             = cmplx(-x, 0.0D0, dp)
+    return
+
+
+end subroutine quadratic_roots
+!*******************************************************************************************
+
+
+
+!
+! Input parameters: ceff    - array of polynomial coefficients
+!
+! Solves a cubic polynomial
+!
+!*******************************************************************************************
+subroutine cubic_roots(ceff, root)
+    implicit none
+
+    ! Precision variables
+    integer,    parameter                           :: sp = kind(0.0), dp = kind(1.0D0)
+
+    real(kind = dp),            intent(in)          :: ceff(4)
+    complex(kind = dp),         intent(inout)       :: root(3)
+
+    ! Local variables
+    real(kind = dp),    parameter                   :: rt3 = 1.7320508075689D0, eps = epsilon(0.0D0)
+    real(kind = dp)                                 :: aq(3), arg, c, cf, d, p, p1, q, q1, r, ra, rb,  &
+                                                       rq, rt, r1, s, sf, sq, sum1, t, tol, t1, w, w1, &
+                                                       w2, x, x1, x2, x3, y, y1, y2, y3
+
+
+    ! If equation is quadratic, call previous subroutine
+    if (ceff(1) == 0.0) then
+        root(1)                             = (0.D0,0.D0)
+        call quadratic_roots(ceff(2:4), root(2:3))
+        return
+    endif
+
+    p                                       = ceff(3)/(3.0D0*ceff(4))
+    q                                       = ceff(2)/ceff(4)
+    r                                       = ceff(1)/ceff(4)
+    tol                                     = 4.0D0*eps
+
+    c                                       = 0.0D0
+    t                                       = ceff(2) - p*ceff(3)
+    if (abs(t) > tol*abs(ceff(2))) &
+        c                                   = t/ceff(4)
+
+    t                                       = 2.0D0*p*p - q
+    if (abs(t) <= tol*abs(q)) &
+        t                                   = 0.0D0
+    d                                       = r + p*t
+
+    if (abs(d) <= tol*abs(r)) then
+        
+        root(1)                             = cmplx(-p, 0.0D0,dp)
+        w                                   = sqrt(abs(c))
+        if (c < 0.0D0) then
+            if (p /= 0.0D0) then
+                x                           = -(p + sign(w,p))
+                root(3)                     = cmplx(x, 0.0D0,dp)
+                t                           = 3.0D0*ceff(1)/(ceff(3)*x)
+                if (abs(p) > abs(t)) then
+                    root(2)                 = root(1)
+                    root(1)                 = cmplx(t, 0.0D0,dp)
+                else
+                    root(2)                 = cmplx(t, 0.0D0,dp)
+                end if
+            else
+                root(2)                     = cmplx(w, 0.0D0,dp)
+                root(3)                     = cmplx(-w, 0.0D0,dp)
+            end if
+
+        else
+            root(2)                         = cmplx(-p, w,dp)
+            root(3)                         = cmplx(-p,-w,dp)
+        end if
+        
+        return
+
+    end if
+
+    s                                       = max(abs(ceff(1)), abs(ceff(2)), &
+                                                  abs(ceff(3)))
+    p1                                      = ceff(3)/(3.0D0*s)
+    q1                                      = ceff(2)/s
+    r1                                      = ceff(1)/s
+
+    t1                                      = q - 2.25D0*p*p
+    if (abs(t1) <= tol*abs(q)) &
+        t1                                  = 0.0D0
+    w                                       = 0.25D0*r1*r1
+    w1                                      = 0.5D0*p1*r1*t
+    w2                                      = q1*q1*t1/27.0D0
+
+    if (w1 >= 0.0D0) then
+        w                                   = w + w1
+        sq                                  = w + w2
+    else if (w2 < 0.0D0) then
+        sq                                  = w + (w1 + w2)
+    else
+        w                                   = w + w2
+        sq                                  = w + w1
+    end if
+
+    if (abs(sq) <= tol*w) &
+        sq                                  = 0.0D0
+    rq                                      = abs(s/ceff(4))*sqrt(abs(sq))
+    
+    if (sq >= 0.0D0) then
+        
+        ra                                  = (-0.5D0*d - sign(rq,d))
+        if (ra > 0.0D0) then
+            ra                              = ra**(1.0D0/3.0D0)
+        else if (ra < 0.0D0) then
+            ra                              = -1.0D0*(-1.0D0*ra)**(1.0D0/3.0D0)
+        else
+            ra                              = 0.0D0
+        end if
+        
+        rb                                  = -c/(3.0D0*ra)
+        t                                   = ra + rb
+        w                                   = -p
+        x                                   = -p
+        
+        if (abs(t) > tol*abs(ra)) then
+            w                               = t - p
+            x                               = -0.5D0*t - p
+            if (abs(x) <= tol*abs(p)) &
+                x                           = 0.0D0
+        end if
+
+        t                                   = abs(ra - rb)
+        y                                   = 0.5D0*rt3*t
+        if (t <= tol*abs(ra)) then
+            
+            if (abs(x) < abs(w)) then
+                if (abs(w) < 0.1D0*abs(x)) &
+                    w                       = - (r/x)/x
+                root(1)                     = cmplx(w, 0.0D0,dp)
+                root(2)                     = cmplx(x, 0.0D0,dp)
+                root(3)                     = root(2)
+                return
+            else
+                if (abs(x) < 0.1D0*abs(w)) then
+                else
+                    root(1)                 = cmplx(x, 0.0D0,dp)
+                    root(2)                 = root(1)
+                    root(3)                 = cmplx(w, 0.0D0,dp)
+                    return
+                end if
+            end if
+
+        else
+            
+            if (abs(x) < abs(y)) then
+                s                           = abs(y)
+                t                           = x/y
+            else
+                s                           = abs(x)
+                t                           = y/x
+            end if
+            
+            if (s < 0.1D0*abs(w)) then
+            else
+                w1                          = w/s
+                sum1                        = 1.0D0 + t*t
+                if (w1*w1 < 0.01D0*sum1) &
+                    w                       = - ((r/sum1)/s)/s
+                root(1)                     = cmplx(w, 0.0D0,dp)
+                root(2)                     = cmplx(x, y,dp)
+                root(3)                     = cmplx(x,-y,dp)
+                return
+            end if
+
+        end if
+
+    else
+        
+        arg                                 = atan2(rq, -0.5D0*d)
+        cf                                  = cos(arg/3.0D0)
+        sf                                  = sin(arg/3.0D0)
+        rt                                  = sqrt(-c/3.0D0)
+        y1                                  = 2.0D0*rt*cf
+        y2                                  = -rt*(cf + rt3*sf)
+        y3                                  = -(d/y1)/y2
+        x1                                  = y1 - p
+        x2                                  = y2 - p
+        x3                                  = y3 - p
+        if (abs(x1) > abs(x2)) then
+            t                               = x1 
+            x1                              = x2 
+            x2                              = t
+        end if
+        if (abs(x2) > abs(x3)) then
+            t                               = x2
+            x2                              = x3
+            x3                              = t
+        end if
+        if (abs(x1) > abs(x2)) then
+            t                               = x1
+            x1                              = x2
+            x2                              = t
+        end if
+        w                                   = x3
+
+        if (abs(x2) < 0.1D0*abs(x3)) then
+        else if (abs(x1) < 0.1D0*abs(x2)) then
+            x1                              = - (r/x3)/x2
+            root(1)                         = cmplx(x1, 0.0D0,dp)
+            root(2)                         = cmplx(x2, 0.0D0,dp)
+            root(3)                         = cmplx(x3, 0.0D0,dp)
+            return
+        end if
+
+    end if
+
+    aq(1)                                   = ceff(1)
+    aq(2)                                   = ceff(2) + ceff(1)/w
+    aq(3)                                   = -ceff(4)*w
+    call quadratic_roots(aq, root)
+    root(3)                                 = cmplx(w, 0.0D0,dp)
+    if (aimag(root(1)) == 0.0D0) return
+    root(3)                                 = root(2)
+    root(2)                                 = root(1)
+    root(1)                                 = cmplx(w, 0.0D0,dp)
+    return
+
+
+end subroutine cubic_roots
+!*******************************************************************************************
+
+
+
+!
+! Input parameters: ceff    - array of polynomial coefficients
+!
+! Solves a quartic polynomial
+!
+!*******************************************************************************************
+subroutine quartic_roots (ceff, er, root)
+    implicit none
+
+    ! Precision variables
+    integer,    parameter                           :: sp = kind(0.0), dp = kind(0.0D0)
+
+    real(kind = dp),            intent(in)          :: ceff(5)
+    integer,                    intent(inout)       :: er
+    complex(kind = dp),         intent(inout)       :: root(4)
+    
+    ! Local variables
+    real(kind = dp)                                 :: p, q, r, t, v1, v2, x, y, u, h, v, &
+                                                       x1, x2, x3, b, c, d, e, temp(4)
+    complex(kind = dp)                              :: w
+    integer                                         :: i, j
+
+
+    ! If equation is cubic, use the previous subroutine
+    if (ceff(1) == 0.0) then
+        root(1)                             = (0.D0,0.D0)
+        call cubic_roots(ceff(2:), root(2:))
+        return
+    end if
+
+    b                                       = ceff(4)/(4.0D0*ceff(5))
+    c                                       = ceff(3)/ceff(5)
+    d                                       = ceff(2)/ceff(5)
+    e                                       = ceff(1)/ceff(5)
+
+    p                                       = 0.5D0*(c - 6.0D0*b*b)
+    q                                       = d - 2.0D0*b*(c - 4.0D0*b*b)
+    r                                       = b*b*(c - 3.0D0*b*b) - b*d + e
+    temp(1)                                 = -q*q/64.0D0
+    temp(2)                                 = 0.25D0*(p*p - r)
+    temp(3)                                 =  p
+    temp(4)                                 = 1.0D0
+
+    call cubic_roots(temp, root)
+    do i = 1, 3
+        if (root(i) /= root(i)) &
+            print*, 'WARNING: cubic_roots subroutine failed:', i , 'th root undefined'
+    end do
+
+    if (aimag(root(2)) == 0.0D0) then
+        
+        x1                                  = dble(root(1))
+        x2                                  = dble(root(2))
+        x3                                  = dble(root(3))
+        if (x1 > x2) then
+            t                               = x1 
+            x1                              = x2
+            x2                              = t
+        end if
+        if (x2 > x3) then
+            t                               = x2 
+            x2                              = x3 
+            x3                              = t
+        end if
+        if (x1 > x2) then
+            t                               = x1 
+            x1                              = x2 
+            x2                              = t
+        end if
+        u                                   = 0.0D0
+        if (x3 > 0.0D0) &
+            u                               = sqrt(x3)
+
+        if (x2 <= 0.0D0) then
+            v1                              = sqrt(abs(x1))
+            v2                              = sqrt(abs(x2))
+            if (q < 0.0D0) &
+                u                           = -u
+            x                               = -u - b
+            y                               = v1 - v2
+            root(1)                         = cmplx(x, y, dp)
+            root(2)                         = cmplx(x,-y, dp)
+            x                               =  u - b
+            y                               = v1 + v2
+            root(3)                         = cmplx(x, y, dp)
+            root(4)                         = cmplx(x,-y, dp)
+            return
+        else if (x1 >= 0.0D0) then
+            x1                              = sqrt(x1)
+            x2                              = sqrt(x2)
+            if (q > 0.0D0) &
+                x1                          = -x1
+            temp(1)                         = x1 + x2 + u - b
+            temp(2)                         = -x1 - x2 + u - b
+            temp(3)                         = x1 - x2 - u - b
+            temp(4)                         = -x1 + x2 - u - b
+            do i = 1, 3
+                do j = i, 4
+                    if (temp(j) == minval(temp(i:4))) then
+                        t                   = temp(j) 
+                        temp(j)             = temp(i)
+                        temp(i)             = t
+                        exit
+                    end if
+                end do
+            end do
+
+            if (abs(temp(1)) < 0.1D0*abs(temp(4))) then
+                t                           = temp(2)*temp(3)*temp(4)
+                if (t /= 0.0D0) &
+                    temp(1)                 = e/t
+            end if
+            
+            root(1)                         = cmplx(temp(1), 0.0D0, dp)
+            root(2)                         = cmplx(temp(2), 0.0D0, dp)
+            root(3)                         = cmplx(temp(3), 0.0D0, dp)
+            root(4)                         = cmplx(temp(4), 0.0D0, dp)
+            return
+
+        else if (abs(x1) > x2) then
+            v1                              = sqrt(abs(x1))
+            v2                              = 0.0D0
+            x                               = -u - b
+            y                               = v1 - v2
+            root(1)                         = cmplx(x, y, dp)
+            root(2)                         = cmplx(x,-y, dp)
+            x                               =  u - b
+            y                               = v1 + v2
+            root(3)                         = cmplx(x, y, dp)
+            root(4)                         = cmplx(x,-y, dp)
+            return
+        end if
+
+    else
+
+        t                                   = dble(root(1))
+        x                                   = 0.0D0
+        if (t > 0.0D0) then
+            x                               = sqrt(t)
+            if (q > 0.0D0) &
+                x                           = -x
+            w                               = sqrt(root(2))
+            u                               = 2.0D0*dble(w)
+            v                               = 2.0D0*abs(aimag(w))
+            t                               =  x - b
+            x1                              = t + u
+            x2                              = t - u
+            if (abs(x1) > abs(x2)) then
+                t                           = x1 
+                x1                          = x2 
+                x2                          = t
+            end if
+            u                               = -x - b
+            h                               = u*u + v*v
+            if (x1*x1 < 0.01D0*min(x2*x2,h)) &
+                x1                          = e/(x2*h)
+            root(1)                         = cmplx(x1, 0.0D0, dp)
+            root(2)                         = cmplx(x2, 0.0D0, dp)
+            root(3)                         = cmplx(u, v, dp)
+            root(4)                         = cmplx(u,-v, dp)
+
+        else if (t < 0.0D0) then
+            h                               = abs(dble(root(2))) + abs(aimag(root(2)))
+            if (abs(t) > h) then
+                w                           = sqrt(root(2))
+                u                           = 2.0D0*dble(w)
+                v                           = 2.0D0*abs(aimag(w))
+                t                           =  x - b
+                x1                          = t + u
+                x2                          = t - u
+                if (abs(x1) > abs(x2)) then
+                    t                       = x1 
+                    x1                      = x2 
+                    x2                      = t
+                end if
+                u                           = -x - b
+                h                           = u*u + v*v
+                if (x1*x1 < 0.01D0*min(x2*x2,h)) &
+                    x1                      = e/(x2*h)
+                root(1)                     = cmplx(x1, 0.0D0, dp)
+                root(2)                     = cmplx(x2, 0.0D0, dp)
+                root(3)                     = cmplx(u, v, dp)
+                root(4)                     = cmplx(u,-v, dp)
+            else
+                v                           = sqrt(abs(t))
+                root(1)                     = cmplx(-b, v, dp)
+                root(2)                     = cmplx(-b,-v, dp)
+                root(3)                     = root(1)
+                root(4)                     = root(2)
+            end if
+
+        else if (t == 0.0D0) then
+            w                               = sqrt(root(2))
+            u                               = 2.0D0*dble(w)
+            v                               = 2.0D0*abs(aimag(w))
+            t                               =  x - b
+            x1                              = t + u
+            x2                              = t - u
+            if (abs(x1) > abs(x2)) then
+                t                           = x1 
+                x1                          = x2 
+                x2                          = t
+            end if
+            u                               = -x - b
+            h                               = u*u + v*v
+            if (x1*x1 < 0.01D0*min(x2*x2,h)) &
+                x1                          = e/(x2*h)
+            root(1)                         = cmplx(x1, 0.0D0, dp)
+            root(2)                         = cmplx(x2, 0.0D0, dp)
+            root(3)                         = cmplx(u, v, dp)
+            root(4)                         = cmplx(u,-v, dp)
+        end if
+
+    end  if
+
+
+end subroutine quartic_roots
+!*******************************************************************************************
+
+
+
+!
 ! Input parameters: np  - number of points along chord
 !
 ! Subroutine for a uniform clustering of u before starting blade generation
