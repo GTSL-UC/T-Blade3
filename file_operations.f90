@@ -318,6 +318,104 @@ module file_operations
 
 
 
+    !
+    ! Write 3D section files (x,y,z)
+    ! Moved from b3d2sec.f90
+    !
+    !---------------------------------------------------------------------------
+    subroutine write_3D_section_files(scf,fext,ibrowc,nbls,casename)
+        implicit none
+
+        real,                   intent(in)              :: scf
+        character(32),          intent(in)              :: fext
+        character(10),          intent(in)              :: ibrowc
+        integer,                intent(in)              :: nbls
+        character(32),          intent(in)              :: casename
+
+        ! Local variables
+        real                                            :: xs,ys,zs,xsav,ysav,zsav
+        character(80)                                   :: fname,fname1,temp
+        integer                                         :: i,j,np,ns,nopen
+        character(:),   allocatable                     :: log_file
+        logical                                         :: file_open
+
+
+        call log_file_exists(log_file, nopen, file_open)
+        write(*,*)
+        print *, 'casename:',trim(fext)
+        write(nopen,*) ''
+        write(nopen,*) 'casename:', trim(fext)
+
+        ! File name for combined section data file
+        fname               = 'blade3d.'//trim(casename)//'.dat'
+
+        write(*,*)
+        print *, 'fname: ', trim(fname)
+        write(*,*)
+        write(*,*) 'Creating section data files for CAD system'
+        write(nopen,*) ''
+        write(nopen,*) 'fname: ', trim(fname)
+        write(nopen,*) ''
+        write(nopen,*) 'Creating section data files for CAD system'
+
+        ! Open  combined section data file
+        open(2, file = fname, status = 'unknown')
+        read(2,*) np,  ns
+        write(*,*) ''
+        write(*,*) 'Number of points: ', np
+        write(*,*) ''
+        write(*,*) 'Number of sections: ', ns
+        write(*,*) ''
+        write(*,*) 'bsf: ', scf
+        write(*,*) 'Number of blades in this row: ', nbls
+        write(*,*)
+        write(nopen,*) ''
+        write(nopen,*) 'Number of points: ', np
+        write(nopen,*) ''
+        write(nopen,*) 'Number of sections: ', ns
+        write(nopen,*) ''
+        write(nopen,*) 'bsf: ', scf
+        write(nopen,*) 'Number of blades in this row: ', nbls
+        write(nopen,*)
+
+        do j = 1,ns
+            
+            write(temp,*) j
+            fname1          = 'sec'//trim(adjustl(temp))//'.'//trim(casename)//'.dat'
+            open(1, file = fname1, form = 'formatted')
+            
+            ! Write section data
+            do i = 1,np
+                read(2,*) xs, ys, zs
+                if (i == 1) then
+                    xsav    = xs
+                    ysav    = ys
+                    zsav    = zs
+                end if
+                write(1,12) xs, ys, zs
+            end do  ! i = 1,np
+
+            close(1)
+
+        end do  ! j = 1,ns
+
+        ! Close combined section data file
+        close(2)
+
+        write(*,*) ''
+        write(nopen,*) ''
+        call close_log_file(nopen, file_open)
+
+        12 format((f25.16),1x,(f25.16),1x,(f25.16))
+        return
+
+
+    end subroutine write_3D_section_files
+    !---------------------------------------------------------------------------
+
+
+
+
 
 
 

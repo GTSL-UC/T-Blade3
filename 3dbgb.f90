@@ -1679,7 +1679,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !**************************************************************************************
     ! calling a routine to write dimensional 3D blade coordinates to separate files
     !**************************************************************************************
-    call b3d2sec(scf, fext, ibrowc, nbls, casename)
+    call write_3D_section_files(scf, fext, ibrowc, nbls, casename)
 
     !**************************************************************************************
     !writing pitch and chord non-dimensional values to a file
