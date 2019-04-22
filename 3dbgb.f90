@@ -292,6 +292,7 @@
 subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4) 
     use globvar
     use file_operations
+    use errors
     implicit none
     
     character(*)                :: fname_in
@@ -304,7 +305,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     integer                     :: nopen
     real                        :: spl_eval, dspl_eval, xdiff, inBetaInci, outBetaDevn
     character(256)              :: fname, temp, fname1, row_type, path
-    character(:),  allocatable  :: log_file, auxinput_filename
+    character(:),  allocatable  :: log_file, auxinput_filename, error_msg
     logical                     :: axial_LE, radial_LE, axial_TE, radial_TE, file_open, file_exist
 
 
@@ -524,8 +525,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         if (file_exist) then
             call readcontrolinput(row_type, path)
         else
-            print *, 'FATAL ERROR: Auxiliary input file '//auxinput_filename//' does not exist'
-            stop
+            error_msg   = 'Auxiliary input file '//auxinput_filename//' does not exist'
+            call fatal_error(error_msg)
         end if
 
     ! Read old spancontrolinputs file (added by Syed)
@@ -544,8 +545,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         if (file_exist) then
             call read_spanwise_input(row_type, path)
         else
-            print *, 'FATAL ERROR: Auxiliary input file '//auxinput_filename//' does not exist'
-            stop
+            error_msg   = 'Auxiliary input file '//auxinput_filename//' does not exist'
+            call fatal_error(error_msg)
         end if
 
     ! Read new spancontrolinputs file (added by Karthik) or
@@ -566,8 +567,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
             if (file_exist) then
                 call read_spanwise_NACA_input(row_type, path)
             else
-                print *, 'FATAL ERROR: Auxiliary input file '//auxinput_filename//' does not exist'
-                stop
+                error_msg   = 'Auxiliary input file '//auxinput_filename//' does not exist'
+                call fatal_error(error_msg)
             end if
 
         else
@@ -576,8 +577,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
             if (file_exist) then
                 call read_spanwise_input(row_type, path)
             else
-                print *, 'FATAL ERROR: Auxiliary input file '//auxinput_filename//' does not exist'
-                stop
+                error_msg   = 'Auxiliary input file '//auxinput_filename//' does not exist'
+                call fatal_error(error_msg)
             end if
 
         end if ! thick_distr

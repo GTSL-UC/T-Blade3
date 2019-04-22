@@ -89,6 +89,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, &
 ! Variables Declaration.
 !******************************************************************************************
 use file_operations
+use errors
 implicit none
 
 integer np, np_side, i, k, js, naca, chord_switch, thick_distr, nxx, np_cluster
@@ -155,7 +156,7 @@ character*20 sec
 character*16 thick_distr_3_flag
 logical ellip, isdev!, isxygrid
 integer                             :: nopen
-character(len = :), allocatable     :: log_file, thickness_file_name
+character(len = :), allocatable     :: log_file, thickness_file_name, error_msg
 logical                             :: file_open, write_to_file, file_exist
 logical,    allocatable             :: thk_der(:)
 
@@ -766,31 +767,14 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         call modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a_NACA,d_NACA,thickness_data)
         thickness       = thickness_data(:,1)
 
-        !if (js == 1) then
-        !    temp        = 0.5*(a_NACA(1)**2)
-        !    tempt       = (a_NACA(1)*sqrt(temp)) + (a_NACA(2)*temp) + (a_NACA(3)*(temp**2)) + (a_NACA(4)*(temp**3))
-        !    cp_LE(:,1)  = [temp, temp, 0.0, temp]
-        !    cp_LE(:,2)  = [tempt,-tempt,0.0,0.0]
-        !    temp        = 1.0 - t_TE
-        !    tempt       = d_NACA(1) + (d_NACA(2)*(1.0 - temp)) + (d_NACA(3)*((1.0 - temp)**2)) + (d_NACA(4)*((1.0 - temp)**3))
-        !    cp_TE(:,1)  = [temp,temp,1.0,temp]
-        !    cp_TE(:,2)  = [tempt,-tempt,0.0,0.0]
-        !    call elliptical_clustering(np,21,cp_LE,cp_TE,u_temp)
-        !    open(830, file = 'u_temp.dat')
-        !    do i = 1,np
-        !        write(830,'(F20.16)') u_temp(i)
-        !    end do
-        !    close(830)
-        !end if
-
         !
         ! Check for negative thickness
         !
         do i = 1,np
             
             if (thickness(i) < 0) then
-                print *, 'FATAL ERROR: Negative thickness encountered for blade section ', js
-                stop
+                error_msg   = 'Negative thickness encountered for blade section '//sec
+                call fatal_error(error_msg)
             end if
 
         end do    

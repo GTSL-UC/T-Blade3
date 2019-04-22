@@ -93,13 +93,14 @@ subroutine curv_line_inters(xbs,ybs,nspline,xin,yout,nspan)
 ! Calculates the intersection point between the line and the curve
 ! input: curve points (xbs,ybs), no. of curve points (nspline),xin from the line
 !output: yout for the line on the curve.
-
+use errors
 implicit none
 
 integer ii,j, nspline, nx,nspan
 parameter(nx=1000)
 real*8 xbs(nspline),ybs(nspline), xin(nspan), yout(nspan)
 real*8 min, max, xmax, xmin, xint
+character(:),   allocatable :: error_msg, warning_msg, warning_arg
 !print*,'xin:',xin
 do j = 1, nspan
  do ii = 1, nspline-1
@@ -113,10 +114,11 @@ do j = 1, nspan
   if (xint.ge.xmin.and.xint.le.xmax)then
      yout(j) = xint
   elseif(xint.eq.0.)then
-     print*," FATAL ERROR: Curve-line intersection point was not found"
-     print*,"xint: ",xint
-     STOP
-  endif
+     error_msg      = 'Curve-line intersection point was not found'
+     write(warning_arg, '(f20.16)') xint
+     warning_msg    = 'xint = '//warning_arg 
+     call fatal_error(error_msg, warning_msg)
+  end if
  enddo
 !write(*,*)
 ! Forcing Start and End points to be the same as control points at start and end.

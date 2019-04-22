@@ -20,7 +20,7 @@ ifdef UNDEFINED
 FOPTS += -fsanitize=undefined -fno-omit-frame-pointer
 endif
 
-OBJS =  globvar.o file_operations.o spline.o readinput.o funcNsubs.o 3dbgb.o bladegen.o bladestack.o bspline3.o lesting.o \
+OBJS =  globvar.o file_operations.o errors.o spline.o readinput.o funcNsubs.o 3dbgb.o bladegen.o bladestack.o bspline3.o lesting.o \
         cubicspline.o lespline.o bsplinecam.o splinethick.o airfoiltypes.o spanwise_variation.o thk_ctr_gen_driver.o \
 		thk_ctrl_gen_der.o thk_ctrl_gen_spl.o \
 #OBJS =  globvar.o file_operations.o spline.o readinput.o funcNsubs.o 3dbgb.o bladegen.o b3d2sec.o bladestack.o bspline3.o lesting.o \

@@ -324,7 +324,6 @@ module file_operations
     !
     !---------------------------------------------------------------------------
     subroutine write_3D_section_files(scf,fext,ibrowc,nbls,casename)
-        implicit none
 
         real,                   intent(in)              :: scf
         character(32),          intent(in)              :: fext

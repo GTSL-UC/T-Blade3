@@ -1,6 +1,6 @@
 subroutine splinethick(thickness, u, np, lethk, umxthk, mxthk, tethk, i_le, i_te, uin_le, thick_distr, ucp_top, vcp_top, ucp_bot, &
                        vcp_bot, casename, js, develop, isdev, np_side, spline_data, splinedata)
-! 
+use errors 
 implicit none
 
 real*8, dimension(np), intent(out) :: thickness
@@ -40,7 +40,7 @@ real*8, dimension(6, np_side):: splinedata
 
 character(*) :: casename, develop
 character*80 file1, sec
-
+character(:),   allocatable :: error_msg
 logical isdev
 
 Ax = 0
@@ -366,13 +366,13 @@ endif
 
 
 if( ixrow .NE. xrhs-1 ) then
-    WRITE(*, *) "FATAL ERROR: ixrow not equal to xrhs-1 in splinethick.f90"
-    STOP
+    error_msg   = 'ixrow not equal to xrhs - 1 in splinethick.f90'
+    call fatal_error(error_msg)
 endif
 
 if( iyrow .NE. yrhs-1 ) then
-    WRITE(*, *) "FATAL ERROR: iyrow not equal to yrhs-1 in splinethick.f90"
-    STOP
+    error_msg   = 'iyrow not equal to yrhs - 1 in splinethick.f90'
+    call fatal_error(error_msg)
 endif
 
 !Solve the system of equations
@@ -401,8 +401,8 @@ endif
 
 call gauss_jordan( xrhs-1, 1, Ax, info )
 if(info.ne.0)then
-    print*, 'FATAL ERROR: singular matrix encountered in solving the thickness distribution'
-    STOP
+    error_msg   = 'singular matrix encountered in solving the thickness distribution'
+    call fatal_error(error_msg)
 endif
 !print*, "x info ", info, Ax(ile_ee, xrhs), Ax(ite_ee, xrhs)
 

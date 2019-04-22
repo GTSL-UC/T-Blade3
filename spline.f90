@@ -54,7 +54,7 @@ end subroutine arclength
 subroutine tridiag_solve(d, ld, ud, r, n) ! used by spline
 
 !		This subroutine solves a tridiagonal linear system.
-
+use errors
 implicit none
 
 !!		Inputs
@@ -72,11 +72,15 @@ real, intent (inout) :: d(n), ld(n), ud(n), r(n)
 integer :: k
 real :: m
 real,   parameter    :: tol = 10e-10
+character(:),   allocatable :: error_msg
 
 do k = 2, n
     ! If d(k - 1) = 0
     ! Compare to a tolerance to avoid floating point errors in an equality comparison
-    if (abs(d(k-1)) .le. tol) stop 'FATAL ERROR: tridiag_solved failed - zero diagonal element'
+    if (abs(d(k-1)) .le. tol) then
+        error_msg   = 'tridiag_solve failed - zero diagonal element'
+        call fatal_error(error_msg)
+    end if
     m = ld(k)/d(k-1)
     d(k) = d(k) - m*ud(k-1)
     r(k) = r(k) - m*r(k-1)
@@ -84,7 +88,10 @@ enddo
 
 ! If d(n) = 0 
 ! Compare to a tolerance to avoid floating point errors in an equality comparison
-if (abs(d(n)) .le. tol) stop 'FATAL ERROR: tridiag_solve failed - zero diagonal element'
+if (abs(d(n)) .le. tol) then
+    error_msg   = 'tridiag_solve failed - zero diagonal element'
+    call fatal_error(error_msg)
+end if
 
 r(n) = r(n)/d(n)
 
@@ -212,7 +219,7 @@ function spl_eval(tt, y, dydt, t, n) ! used by(3dbgb, bladestack), used by spl_i
 !		First derivatives at spline knots can then be obtained from spline subroutine.
 !		Reference:
 !		Kreyszig, E., Advanced Engineering Mathematics, 10th Ed., John Wiley and Sons, 2011.
-
+use errors
 implicit none
 
 !!		Inputs
@@ -228,6 +235,7 @@ real, intent (in) :: y(n), dydt(n), t(n), tt
 integer :: knt1, knt2, find_knt
 real :: dt, dy, a(4), dt2, frac, spl_eval
 real,   parameter   :: tol = 10e-10
+character(:),   allocatable :: error_msg
 
 knt1 = find_knt(tt, t, n)
 knt2 = knt1+1
@@ -240,7 +248,10 @@ frac = dt2/dt
 
 ! If dt = 0
 ! Compare to a tolerance to avoid floating point errors in an equality comparison
-if (abs(dt) .le. tol) stop 'FATAL ERROR: spl_eval failed - identical knot locations'
+if (abs(dt) .le. tol) then
+    error_msg   = 'spl_eval failed - identical knot locations'
+    call fatal_error(error_msg)
+end if
 
 a(1) = y(knt1)
 if (tt .eq. t(knt1)) then
@@ -263,7 +274,7 @@ function dspl_eval(tt,y,dydt,t,n) ! used by(3dbgb), spl_inv, inters
 !		First derivatives at spline knots can then be obtained from spline subroutine.
 !		Reference:
 !		Kreyszig, E., Advanced Engineering Mathematics, 10th Ed., John Wiley and Sons, 2011.
-
+use errors
 implicit none
 
 !!		Inputs
@@ -279,6 +290,7 @@ real, intent (in) ::y(n), dydt(n), t(n), tt
 integer :: knt1, knt2, find_knt
 real :: dt, dy, a(3), dt2, frac, dspl_eval
 real,   parameter   :: tol = 10e-10
+character(:),   allocatable :: error_msg
 
 knt1 = find_knt(tt, t, n)
 knt2 = knt1+1
@@ -290,7 +302,10 @@ frac = dt2/dt
 
 ! If dt = 0
 ! Compare to a tolerance to avoid floating point errors in an equality comparison
-if (abs(dt) .le. tol) stop 'FATAL ERROR: dspl_eval failed - identical knot locations'
+if (abs(dt) .le. tol) then
+    error_msg   = 'dspl_eval failed - identical knot locations'
+    call fatal_error(error_msg)
+end if
 
 a(1) = dydt(knt1)
 if (tt .eq. t(knt1)) then
@@ -370,7 +385,7 @@ subroutine spl_discjoint(y,dydt,t,n) ! used by(3dbgb)
 !		and allows zero second derivative at segment joints.
 !		Consecutive identical y values indicate segment joints.
 !		Spline parameter t can be calculated using arclength subroutine.
-
+use errors
 implicit none
 
 !!		Inputs
@@ -387,12 +402,19 @@ real, intent (out) :: dydt(n)
 !!		Other local variables
 integer :: i, seg_start, seg_end, n0
 real,   parameter   :: tol = 10e-10
+character(:),   allocatable :: error_msg
 
 ! If t(1) = t(2)
 ! If t(n) = t(n - 1)
 ! Compare to a tolerance to avoid floating point errors in an equality comparison
-if(abs(t(1) - t(2)) .le. tol) stop 'FATAL ERROR: spl_discjoint - identical knot locations at spline begin'
-if(abs(t(n) - t(n-1)) .le. tol) stop 'FATAL ERROR: spl_discjoint - identical knot locations at spline end'
+if(abs(t(1) - t(2)) .le. tol) then
+    error_msg   = 'spl_discjoint - identical knot locations at spline begin'
+    call fatal_error(error_msg)
+end if
+if(abs(t(n) - t(n-1)) .le. tol) then
+    error_msg   = 'spl_discjoint - identical knot locations at spline end'
+    call fatal_error(error_msg)
+end if
 
 seg_start = 1
 do i = 2, n-2

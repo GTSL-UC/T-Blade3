@@ -8,13 +8,14 @@
 subroutine readinput(fname)
     use globvar
     use file_operations
+    use errors
     implicit none
 
     character(256),                 intent(in)          :: fname
     
     ! Local variables
     character(256)                                      :: temp, temp1, temp2, beta_switch_2
-    character(:),   allocatable                         :: log_file
+    character(:),   allocatable                         :: log_file, error_msg, warning_msg
     integer                                             :: er, stat, n_temp1, n_temp2, &
                                                            nopen, nopen1
     real                                                :: inBetaInci, outBetaDevn, temp_offsets(2)
@@ -255,10 +256,11 @@ subroutine readinput(fname)
     ! Case 6 - Invalid input for the input angle switch
     !          Warn user and stop execution
     elseif (.not. beta_value(1) .and. .not. beta_value(2) .and. .not. beta_value(3) .and. .not. beta_value(4) .and. .not. beta_value(5)) then
-        print *, 'FATAL ERROR: Invalid argument for beta_switch'
-        print *, 'Valid arguments are 0, 1, 2, 3 and 4 (refer to T-Blade3 documentation)'
-        print *, ''
-        stop
+
+        error_msg   = 'Invalid argument for beta_switch'
+        warning_msg = 'Valid arguments are 0, 1, 2, 3 and 4 (refer to T-Blade3 documentation)'
+        call fatal_error(error_msg, warning_msg)
+
     endif
 
     !
@@ -356,12 +358,11 @@ subroutine readinput(fname)
     !          warn user and stop execution
     elseif (.not. ang_spl_value(1) .and. .not. ang_spl_value(2) .and. .not. ang_spl_value(3) .and. .not. ang_spl_value(4) &
             .and. .not. ang_spl_value(5)) then
-        print *, ''
-        print *, 'FATAL ERROR: Invalid argument for anglespline'
-        print *, 'anglespline can be left blank (refer to T-Blade3 documentation)'
-        print *, 'Valid arguments are "inletspline", "outletspline", "inoutspline" or "inci_dev_spline"'
-        print *, ''
-        stop
+
+        error_msg   = 'Invalid argument for anglespline'
+        warning_msg = 'Valid arguments are "inletspline", "outletspline", "inoutspline" or "inci_dev_spline"'
+        call fatal_error(error_msg, warning_msg)
+
     end if
 
     call close_log_file(nopen, file_open)
@@ -390,11 +391,9 @@ subroutine readinput(fname)
     ! Warn user and stop execution 
     if (curv .ne. 0 .and. curv .ne. 1) then
 
-        print *, ''
-        print *, 'FATAL ERROR: Invalid argument for camber definition switch'
-        print *, 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
-        print *, ''
-        stop
+        error_msg   = 'Invalid argument for camber definition switch'
+        warning_msg = 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
+        call fatal_error(error_msg, warning_msg)
 
     end if
 
@@ -402,11 +401,9 @@ subroutine readinput(fname)
     ! Warn user and stop execution
     if (trim(spanwise_spline) .ne. 'spanwise_spline' .and. trim(spanwise_spline) .ne. 'Airfoil') then
 
-        print *, ''
-        print *, 'FATAL ERROR: Invalid argument for camber definition switch'
-        print *, 'Valid argument for using spancontrolinputs is "spanwise_spline" (refer to T-Blade3 documentation)'
-        print *, ''
-        stop
+        error_msg   = 'Invalid argument for curvature control switch'
+        warning_msg = 'Valid argument for using spancontrolinputs is "spanwise_spline" (refer to T-Blade3 documentation)'
+        call fatal_error(error_msg, warning_msg)
 
     end if 
 
@@ -436,11 +433,9 @@ subroutine readinput(fname)
     if (thick_distr .ne. 0 .and. thick_distr .ne. 1 .and. thick_distr .ne. 2 .and. thick_distr .ne. 3 .and. &
         thick_distr .ne. 4 .and. thick_distr .ne. 5) then
 
-        print *, ''
-        print *, 'FATAL ERROR: Invalid argument for thickness distribution switch'
-        print *, 'Valid arguments are 0, 1, 2, 3, 4 or 5 (refer to T-Blade3 documentation)'
-        print *, ''
-        stop
+        error_msg   = 'Invalid argument for thickness distribution switch'
+        warning_msg = 'Valid arguments are 0, 1, 2, 3, 4 or 5 (refer to T-Blade3 documentation)'
+        call fatal_error(error_msg, warning_msg)
 
     end if
 
@@ -462,11 +457,9 @@ subroutine readinput(fname)
     ! Warn user and stop execution
     if (thick .ne. 0 .and. thick .ne. 1) then
 
-        print *, ''
-        print *, 'FATAL ERROR: Invalid argument for thickness multiplier switch'
-        print *, 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
-        print *, ''
-        stop
+        error_msg   = 'Invalid argument for thickness multiplier switch'
+        warning_msg = 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
+        call fatal_error(error_msg, warning_msg)
 
     end if
 
@@ -484,11 +477,9 @@ subroutine readinput(fname)
     ! Warn user and stop execution
     if (LE .ne. 0 .and. LE .ne. 1) then
 
-        print *, ''
-        print *, 'FATAL ERROR: Invalid argument for LE spline control switch'
-        print *, 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
-        print *, ''
-        stop
+        error_msg   = 'Invalid argument for LE spline control switch'
+        warning_msg = 'Valaid arguments are 0 or 1 (refer to T-Blade3 documentation)'
+        call fatal_error(error_msg, warning_msg)
 
     end if
 
@@ -506,11 +497,9 @@ subroutine readinput(fname)
     ! Warn user and stop execution
     if (chord_switch .ne. 0 .and. chord_switch .ne. 1 .and. chord_switch .ne. 2) then
 
-        print *, ''
-        print *, 'FATAL ERROR: Invalid arguments for non-dimensional actual chord switch'
-        print *, 'Valid arguments are 0, 1 or 2 (refer to T-Blade3 documentation)'
-        print *, ''
-        stop
+        error_msg   = 'Invalid argument for non-dimensional actual chord switch'
+        warning_msg = 'Valid arguments are 0, 1 or 2 (refer to T-Blade3 documentation)'
+        call fatal_error(error_msg, warning_msg)
 
     end if
 
@@ -531,11 +520,9 @@ subroutine readinput(fname)
     else if (leansweep_switch .eq. 1) then
         trueleansweep = '1'
     else
-        print *, ''
-        print *, 'FATAL ERROR: Invalid argument for leansweep_switch'
-        print *, 'Valid arguments are 0 or 1 (refer to the T-Blade3 documentation)'
-        print *, ''
-        stop
+        error_msg   = 'Invalid argument for leansweep_switch'
+        warning_msg = 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
+        call fatal_error(error_msg, warning_msg)
     end if
 
 
@@ -555,11 +542,9 @@ subroutine readinput(fname)
     if (clustering_switch .ne. 0 .and. clustering_switch .ne. 1 .and. clustering_switch .ne. 2 .and. &
         clustering_switch .ne. 3 .and. clustering_switch .ne. 4) then
 
-        print *, ''
-        print *, 'FATAL ERROR: Invalid argument for clustering_switch'
-        print *, 'Valid arguments are 0, 1, 2 or 3 (refer to the T-Blade3 documentation)'
-        print *, ''
-        stop
+        error_msg   = 'Invalid argument for clustering_switch'
+        warning_msg = 'Valid arguments are 0, 1, 2 or 3 (refer to T-Blade3 documentation)'
+        call fatal_error(error_msg, warning_msg)
 
     end if
 
@@ -1520,6 +1505,7 @@ end subroutine readcontrolinput
 subroutine read_spanwise_input(row_type, path)
     use globvar
     use file_operations
+    use errors
     implicit none
     
     character(256),                 intent(in)      :: row_type
@@ -1527,7 +1513,7 @@ subroutine read_spanwise_input(row_type, path)
 
     ! Local variables
     character(256)                                  :: temps, file_name
-    character(:),   allocatable                     :: log_file
+    character(:),   allocatable                     :: log_file, error_msg
     real,           allocatable                     :: temp(:), temp_exact(:)
     real                                            :: span_dum
     integer                                         :: temp_thk_flag(3), jj, nopen, nopen1
@@ -1996,9 +1982,9 @@ subroutine read_spanwise_input(row_type, path)
         end if
         
         if(control_inp_flag .eq. 1 .and. ncp_span_thk .ne. nsl) then
-            print*, 'FATAL ERROR: In auxiliary file inputs, number of spanwise thickness specifications'//&
-                     ' must equal number of streamlines if spanwise spline is not used.'
-            stop
+            error_msg   = 'In auxiliary file inputs, number of spanwise thickness specifications'//&
+                          ' must equal number of streamlines if spanwise spline is not used.'
+            call fatal_error(error_msg)
         end if
        
        
@@ -2564,13 +2550,14 @@ end subroutine read_spanwise_input
 subroutine read_spanwise_NACA_input(row_type,path)
     use globvar
     use file_operations
+    use errors
     implicit none
 
     character(256),                 intent(in)      :: row_type
     character(*),                   intent(in)      :: path
 
     ! Local variables
-    character(:),   allocatable                     :: file_name, log_file
+    character(:),   allocatable                     :: file_name, log_file, error_msg, warning_msg
     character(256)                                  :: temps
     integer                                         :: nopen_aux = 10, nopen, nopen1, kk, n_temp
     real                                            :: span_dum
@@ -2933,9 +2920,10 @@ subroutine read_spanwise_NACA_input(row_type,path)
     ! Only applies for the modified NACA thickness distribution
     !
     if (thick_distr .ne. 5) then
-        print *, "FATAL ERROR: Auxiliary input file ", file_name, " can only be used with the modified NACA thickness distribution"
-        print *, "Refer to T-Blade3 documentation"
-        stop
+        error_msg   = "Auxiliary input file "//file_name//" can only be used with the modified &
+                      &NACA thickness distribution"
+        warning_msg = "Refer to T-Blade3 documentation"
+        call fatal_error(error_msg, warning_msg)
     else
         do i = 1,2
             read(nopen_aux,'(A)') temps

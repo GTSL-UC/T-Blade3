@@ -1732,7 +1732,7 @@ subroutine gauss_jordan(n, nrhs, a, fail_flag)
 
         ! If all pivot column elements are zero, return fail
         if (abs(pvt) < eps) then
-            write(*,*) 'FATAL ERROR: gauss_jordan - zero pivot term'
+            write(*,*) 'ERROR: gauss_jordan - zero pivot term'
             fail_flag           = 1
             return
         end if

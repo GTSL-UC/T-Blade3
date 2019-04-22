@@ -512,12 +512,14 @@ end subroutine
         
 !-----------------------------------------------------------------------
 real*8 function bspline_t_newton(cp,u)
+    use errors
     implicit none
     integer k
     real*8 ,dimension(4), intent (in) :: cp
     real*8 ,intent (in) :: u
     real*8 B1,B2,B3,B4,d1_B1,d1_B2,d1_B3,d1_B4
     real*8 tt_0, xs_0,d1_xs_0
+    character(:),   allocatable :: error_msg, error_arg_1, error_arg_2
     ! Newton's method       
 
     tt_0 = 0.5
@@ -550,8 +552,13 @@ real*8 function bspline_t_newton(cp,u)
         endif
         tt_0 = bspline_t_newton
     enddo
-    print*,"FATAL ERROR: cubic abs(u-xs_0) not converged - ", abs(u-xs_0), bspline_t_newton
-    STOP
+
+    ! Convert real numbers to strings
+    write(error_arg_1, '(f20.16)') abs(u - xs_0)
+    write(error_arg_2, '(f20.16)') bspline_t_newton
+    error_msg   = "Cubic abs(u-xs_0) not converged - "//error_arg_1//' '//error_arg_2
+    call fatal_error(error_msg)
+
 end function
 !********************************************************************************
 !*********************************************************************************
@@ -639,12 +646,14 @@ end function
         end function    
 !------------------------------------------------------------
 real*8 function bspline4_t_newton(cp,u)
+    use errors
     implicit none
     integer k
     real*8 ,dimension(5), intent (in) :: cp
     real*8 ,intent (in) :: u
     real*8 :: bspline4, d_bspline4
     real*8 tt_0, xs_0,d1_xs_0
+    character(:),   allocatable :: error_msg, error_arg_1, error_arg_2
     ! Newton's method       
     tt_0 = 0.5
 
@@ -667,8 +676,13 @@ real*8 function bspline4_t_newton(cp,u)
         endif
         tt_0 = bspline4_t_newton
     enddo
-    print*,"FATAL ERROR: Quartic abs(u-xs_0) not converged - ", abs(u-xs_0), bspline4_t_newton
-    STOP
+
+    ! Convert real numbers to strings
+    write(error_arg_1, '(f20.16)') abs(u - xs_0)
+    write(error_arg_2, '(f20.16)') bspline4_t_newton
+    error_msg   = "Quartic abs(u-xs_0) not converged - "//error_arg_1//" "//error_arg_2
+    call fatal_error(error_msg)
+
 end function
 
 subroutine bspline4_Beval(t, B)
