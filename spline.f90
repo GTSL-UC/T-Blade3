@@ -325,7 +325,7 @@ subroutine spl_inv(tt,yy,y,dydt,t,n) ! used by(3dbgb, bladestack)
 !		for tt is specified since tt(yy) may be multi-valued.
 !		Spline parameter t can be calculated using arclength subroutine.
 !		First derivatives at spline knots can then be obtained from spline subroutine.
-
+use errors
 implicit none
 
 !!		Inputs
@@ -345,6 +345,7 @@ real, intent (inout) :: tt
 !!		Other local variables
 integer :: iter, maxiter
 real :: spl_eval, dspl_eval, dt_newt, y_newt, dy_newt, tol, mint, maxt
+character(:),   allocatable :: error_msg
 
 mint = minval(t)
 maxt = maxval(t)
@@ -373,7 +374,8 @@ do iter = 1, maxiter
     if(abs(dt_newt/(t(n)-t(1))) .lt. tol) return
 enddo
 
-write(*,*) 'ERROR: spl_inv - spline parameter not determined. Maximum iteration reached.'
+error_msg   = 'spl_inv - spline parameter not determined. Maximum iteration reached.'
+call error(error_msg)
 return
 
 end subroutine spl_inv

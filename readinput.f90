@@ -1567,9 +1567,9 @@ subroutine read_spanwise_input(row_type, path)
     read(10,'(A)') temps
     write(nopen1,'(A)') trim(temps)
     if(control_inp_flag .eq. 1 .and. ncp_span_curv .ne. nsl) then
-        print*, 'ERROR: In auxiliary file inputs, number of spanwise curvature specifications'//&
-                 ' must equal number of streamlines if spanwise spline is not used.'
-        stop
+        error_msg   = ' In auxiliary file inputs, number of spanwise curvature specifications'//&
+                      ' must equal number of streamlines if spanwise spline is not used.'
+        call fatal_error(error_msg)
     endif
     
     

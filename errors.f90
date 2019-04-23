@@ -35,4 +35,42 @@ module errors
 
 
 
+    !
+    ! Error subroutine quits subroutine when error flag is used
+    !
+    ! Input paramaters: error_msg   - mandatory message showing where the error has occurred
+    !
+    !--------------------------------------------------------------------------------------------------
+    subroutine error(error_msg)
+
+        character(:),   allocatable,            intent(in)  :: error_msg
+
+
+        ! Print the error message to the screen and exit
+        print *, ''
+        print *, 'ERROR: '//error_msg
+        print *, ''
+
+
+    end subroutine error
+    !--------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 end module

@@ -337,8 +337,8 @@ else if (clustering_switch .eq. 4) then
 
         call elliptical_clustering(np,np_cluster,cp_LE,cp_TE,u)
     else
-        print *, 'ERROR: Ellipse-hyperbolic clustering not available for current thickness distribution'
-        stop
+        error_msg   = 'Ellipse-hyperbolic clustering not available for current thickness distribution'
+        call fatal_error(error_msg)
     end if
 end if
 

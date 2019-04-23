@@ -130,6 +130,7 @@ end function
 subroutine camline(casename, isdev, xcp, ycp, ncp, u, np, ainl, aext, chrdx, wing_flag, &
     sang, chrd, init_angles, init_cams, u_end, splinedata)
     use file_operations
+    use errors
 
 !!		Added by Karthik Balasubramanian
 ! 			This subroutine constructs a curve (camber line) using second derivative, 
@@ -163,7 +164,7 @@ real, intent (in) :: xcp(ncp), ycp(ncp), u(np), ainl, aext, chrdx
 character (len = 32), intent (in) :: casename
 logical, intent (in) :: isdev
 integer                             :: nopen
-character(len = :), allocatable     :: log_file
+character(len = :), allocatable     :: log_file, error_msg
 logical                             :: file_open
 
 !!		Outputs from this subroutine
@@ -247,7 +248,8 @@ det = (intg_d2v_end(ncp-2)**2)+(4*P*(tan(tot_cam)**2))
 write (*, '(A, F20.15)') 'Determinant is: ', det
 write (nopen, '(A, F20.15)') 'Determinant is: ', det
 if (det.lt.0.) then 
-    write (*, '(A)') 'ERROR: All possible scaling factors for curvature control points are complex'
+    error_msg   = 'All possible scaling factors for curvature control points are complex'
+    call error(error_msg)
     call exit
 endif
 ! Calculating both possible roots to solve for k

@@ -1698,6 +1698,7 @@ end subroutine constantslopemeanline3D
 !
 !*******************************************************************************************
 subroutine gauss_jordan(n, nrhs, a, fail_flag)
+    use errors
     implicit none
 
     integer,                    intent(in)          :: n
@@ -1709,6 +1710,7 @@ subroutine gauss_jordan(n, nrhs, a, fail_flag)
     integer                                         :: i, j, c, ipvt
     real                                            :: pvt, temp(n + nrhs)
     real,   parameter                               :: eps = 10e-16
+    character(:),   allocatable                     :: error_msg
 
 
     ! Set number of columns
@@ -1732,7 +1734,8 @@ subroutine gauss_jordan(n, nrhs, a, fail_flag)
 
         ! If all pivot column elements are zero, return fail
         if (abs(pvt) < eps) then
-            write(*,*) 'ERROR: gauss_jordan - zero pivot term'
+            error_msg   = 'gauss_jordan - zero pivot term'
+            call error(error_msg)
             fail_flag           = 1
             return
         end if
