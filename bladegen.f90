@@ -156,7 +156,8 @@ character*20 sec
 character*16 thick_distr_3_flag
 logical ellip, isdev!, isxygrid
 integer                             :: nopen
-character(len = :), allocatable     :: log_file, thickness_file_name, error_msg
+character(len = :), allocatable     :: log_file, thickness_file_name, error_msg, &
+                                       warning_msg
 logical                             :: file_open, write_to_file, file_exist
 logical,    allocatable             :: thk_der(:)
 
@@ -786,8 +787,9 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
 
             thk_der(i)  = (thickness_data(i,3) .gt. 0.0)
             if (thk_der(i)) then
-                print *, "WARNING: Thickness distribution for blade section = ", js, " isn't monotonic"
-                write(nopen,*) "WARNING: Thickness distribution for blade section = ", js, " isn't monotonic"
+                warning_msg = 'Thickness distribution for blade section = '//sec//" isn't monotonic'"
+                call warning(warning_msg)
+                !write(nopen,*) "Thickness distribution for blade section = ", js, " isn't monotonic"
                 exit
             end if
 

@@ -345,15 +345,17 @@ real, intent (inout) :: tt
 !!		Other local variables
 integer :: iter, maxiter
 real :: spl_eval, dspl_eval, dt_newt, y_newt, dy_newt, tol, mint, maxt
-character(:),   allocatable :: error_msg
+character(:),   allocatable :: error_msg, warning_msg
 
 mint = minval(t)
 maxt = maxval(t)
 if (tt .lt. mint) then
-    !write (*, *) 'SPL_INV WARNING: Bad initial guess provided. Using minimum value.'
+    warning_msg = 'Bad initial guess provided. Using minimum value.'
+    call warning(warning_msg)
     tt = mint
 elseif (tt .gt. maxt) then
-    !write (*, *) 'SPL_INV WARNING: Bad initial guess provided. Using maximum value.'
+    warning_msg = 'Bad initial guess provided. Using maximum value.'
+    call warning(warning_msg)
     tt = maxt
 endif
 
@@ -365,10 +367,12 @@ do iter = 1, maxiter
     dt_newt = -y_newt/dy_newt
     tt = tt + 0.8*dt_newt
     if (tt < mint) then
-        write(*, *) 'WARNING: spl_inv - spline parameter clipped at spline begin'
+        warning_msg = 'spl_inv - spline parameter clipped at spline begin'
+        call warning(warning_msg)
         tt = mint
     elseif(tt > maxt) then
-        write(*, *) 'WARNING: spl_inv- spline parameter clipped at spline end'
+        warning_msg = 'spl_inv- spline parameter clipped at spline end'
+        call warning(warning_msg)
         tt = maxt
     endif
     if(abs(dt_newt/(t(n)-t(1))) .lt. tol) return
@@ -440,6 +444,7 @@ end subroutine spl_discjoint
 
 
 subroutine spl_intersect(tt1, tt2, x1, dxdt1, y1, dydt1, t1, n1, x2, dxdt2, y2, dydt2, t2, n2) ! used by(3dbgb)
+    use errors  
     use file_operations
 
 !		This subroutine determines intersection of two cubic splines t1 and t2 in x-y space.
@@ -476,23 +481,27 @@ real :: dt1, dt2, r, ra, rb, rt1, rt2, F, Fa, Fb, Ft1, Ft2, &
         mint1, mint2, maxt1, maxt2
 integer :: iter, i, l, nopen
 real :: dspl_eval
-character(len = :), allocatable :: log_file
+character(len = :), allocatable :: log_file, warning_msg
 logical                         :: file_open
 
 mint1 = minval(t1); maxt1 = maxval(t1)
 mint2 = minval(t2); maxt2 = maxval(t2)
 if (tt1 .lt. mint1) then
-    !write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 1. Using minimum value.'
+    warning_msg = 'Bad initial guess provided for spline 1. Using minimum value.'
+    call warning(warning_msg)
     tt1 = mint1
 elseif (tt1 .gt. maxt1) then
-    !write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 1. Using maximum value.'
+    warning_msg = 'Bad initial guess provided for spline 1. Using maximum value.'
+    call warning(warning_msg)
     tt1 = maxt1
 endif
 if (tt2 .lt. mint2) then
-    !write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 2. Using minimum value.'
+    warning_msg = 'Bad initial guess provided for spline 2. Using minimum value.'
+    call warning(warning_msg)
     tt2 = mint2
 elseif (tt2 .gt. maxt2) then
-    !write (*, *) 'SPL_INTERSECT WARNING: Bad initial guess provided for spline 2. Using maximum value.'
+    warning_msg = 'Bad initial guess provided for spline 2. Using maximum value.'
+    call warning(warning_msg)
     tt2 = maxt2
 endif
 
@@ -563,20 +572,24 @@ enddo
 !	F1/min(t1(n1), t2(n2)), F2/min(t1(n1), t2(n2))
 call log_file_exists(log_file, nopen, file_open)
 if(trunc1knt1) then
-    write (*, *) 'WARNING: spl_intersect - splines may not intersect. Knot 1 of spline 1 is closest possible to spline 2.'
-    write(nopen,*) 'WARNING: spl_intersect - splines may not intersect. Knot 1 of spline 1 is closest possible to spline 2.'
+    warning_msg = 'spl_intersect - splines may not intersect. Knot 1 of spline 1 is closest possible to spline 2.'
+    call warning(warning_msg)
+    !write(nopen,*) 'spl_intersect - splines may not intersect. Knot 1 of spline 1 is closest possible to spline 2.'
 end if
 if(trunc1kntn) then
-    write (*, *) 'WARNING: spl_intersect - splines may not intersect. End knot of spline 1 is closest possible to spline 2.'
-    write(nopen,*) 'WARNING: spl_intersect - splines may not intersect. End knot of spline 1 is closest possible to spline 2.'
+    warning_msg = 'spl_intersect - splines may not intersect. End knot of spline 1 is closest possible to spline 2.'
+    call warning(warning_msg)
+    !write(nopen,*) 'spl_intersect - splines may not intersect. End knot of spline 1 is closest possible to spline 2.'
 end if
 if(trunc2knt1) then
-    write (*, *) 'WARNING: spl_intersect - splines may not intersect. Knot 1 of spline 2 is closest possible to spline 1.'
-    write(nopen,*) 'WARNING: spl_intersect - splines may not intersect. Knot 1 of spline 2 is closest possible to spline 1.'
+    warning_msg = 'spl_intersect - splines may not intersect. Knot 1 of spline 2 is closest possible to spline 1.'
+    call warning(warning_msg)
+    !write(nopen,*) 'spl_intersect - splines may not intersect. Knot 1 of spline 2 is closest possible to spline 1.'
 end if
 if(trunc2kntn) then
-    write (*, *) 'WARNING: spl_intersect - Splines may not intersect. End knot of spline 2 is closest possible to spline 1.'
-    write(nopen,*) 'WARNING: spl_intersect - Splines may not intersect. End knot of spline 2 is closest possible to spline 1.'
+    warning_msg = 'spl_intersect - Splines may not intersect. End knot of spline 2 is closest possible to spline 1.'
+    call warning(warning_msg)
+    !write(nopen,*) 'spl_intersect - Splines may not intersect. End knot of spline 2 is closest possible to spline 1.'
 end if
 
 call close_log_file(nopen, file_open)

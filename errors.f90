@@ -16,6 +16,7 @@ module errors
     !
     !--------------------------------------------------------------------------------------------------
     subroutine fatal_error(error_msg, warning_msg)
+        use file_operations
        
         character(:),   allocatable,                intent(in)  :: error_msg
         character(:),   allocatable,    optional,   intent(in)  :: warning_msg
@@ -42,8 +43,9 @@ module errors
     !
     !--------------------------------------------------------------------------------------------------
     subroutine error(error_msg)
+        use file_operations
 
-        character(:),   allocatable,            intent(in)  :: error_msg
+        character(:),   allocatable,                intent(in)  :: error_msg
 
 
         ! Print the error message to the screen and exit
@@ -53,6 +55,32 @@ module errors
 
 
     end subroutine error
+    !--------------------------------------------------------------------------------------------------
+    
+    
+    
+    !
+    ! Subroutine which shows a warning message when warnings are issued
+    !
+    ! Input paramaters: warning_msg - mandatory message showing where the warning has occurred
+    !
+    !--------------------------------------------------------------------------------------------------
+    subroutine warning(warning_msg,warning_msg_1)
+        use file_operations
+
+        character(:),   allocatable,                intent(in)  :: warning_msg
+        character(:),   allocatable,    optional,   intent(in)  :: warning_msg_1
+
+
+        ! Print the warning message to the screen
+        print *, ''
+        print *, 'WARNING: '// warning_msg
+        if (present(warning_msg_1)) &
+            print *, 'WARNING: '//warning_msg_1
+        print *, ''
+
+
+    end subroutine warning
     !--------------------------------------------------------------------------------------------------
 
 

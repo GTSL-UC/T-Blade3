@@ -517,20 +517,22 @@ end subroutine
 !***************************************************************
 subroutine throatindex(throat_pos,throat_index,n_normal_distance,js,nsl,thick_distr)
 use file_operations
+use errors
 implicit none
 integer, intent(inout):: js
 integer, intent(in):: nsl,throat_index(nsl),n_normal_distance
 character*20, intent(out):: throat_pos(nsl)
 integer, intent(in)     :: thick_distr
 integer                             :: nopen
-character(:),   allocatable         :: log_file
+character(:),   allocatable         :: log_file, warning_msg
 logical                             :: file_open
 
 call log_file_exists(log_file, nopen, file_open)
 if(throat_index(js) == 0) then
   throat_pos(js) = 'none'
-  print*,'WARNING: No Throat found'
-  write(nopen,*) 'WARNING: No Throat Found'
+  warning_msg   = 'No Throat found'
+  call warning(warning_msg)
+  write(nopen,*) 'No Throat Found'
   !exit
 elseif(throat_index(js) < 0.25*n_normal_distance) then
   throat_pos(js) = 'le'
@@ -1012,6 +1014,7 @@ END subroutine
 subroutine throat_calc_pitch_line(xb,yb,np,camber,angle,sang,u,pi,pitch,throat_coord, mouth_coord,exit_coord, &
                                   min_throat_2D,throat_index,n_normal_distance,casename,js,nsl,develop,isdev)
 use file_operations
+use errors
 ! np = 2*np_sidee-1
 ! All data used is nondimensional
 
@@ -1034,7 +1037,7 @@ character(*) :: casename,develop
 logical isdev
 
 integer                                         :: nopen
-character(len = :), allocatable                 :: log_file
+character(len = :), allocatable                 :: log_file, warning_msg
 logical                                         :: file_open
 
 ! Initializing x_interup and y_interup
@@ -1119,8 +1122,9 @@ enddo
 print*, 'n_normal_distance =',n_normal_distance
 write(nopen,*) 'n_normal_distance = ', n_normal_distance
 if(n_normal_distance == 0) then
-  print*, 'WARNING: No throats found because of low number of blades'
-  write(nopen,*) 'WARNING: No throats found because of low number of blades'
+  warning_msg   = 'No throats found because of low number of blades'
+  call warning(warning_msg)
+  !write(nopen,*) 'No throats found because of low number of blades'
   return
 endif
 
@@ -2154,6 +2158,7 @@ end subroutine cubic_roots
 !
 !*******************************************************************************************
 subroutine quartic_roots (ceff, er, root)
+    use errors
     implicit none
 
     ! Precision variables
@@ -2168,6 +2173,7 @@ subroutine quartic_roots (ceff, er, root)
                                                        x1, x2, x3, b, c, d, e, temp(4)
     complex(kind = dp)                              :: w
     integer                                         :: i, j
+    character(:),   allocatable                     :: counter, warning_msg
 
 
     ! If equation is cubic, use the previous subroutine
@@ -2192,8 +2198,11 @@ subroutine quartic_roots (ceff, er, root)
 
     call cubic_roots(temp, root)
     do i = 1, 3
-        if (root(i) /= root(i)) &
-            print*, 'WARNING: cubic_roots subroutine failed:', i , 'th root undefined'
+        if (root(i) /= root(i)) then
+            write(counter, '(i2)') i
+            warning_msg = 'cubic_roots subroutine failed: '//counter//'th root undefined'
+            call warning(warning_msg)
+        end if
     end do
 
     if (aimag(root(2)) == 0.0D0) then
@@ -2874,6 +2883,7 @@ end function TE_clustering_parameter_func
 !*******************************************************************************************
 subroutine LE_clustering_parameter_solver(xi,K,delta,solver_flag)
     use file_operations
+    use errors
     implicit none
 
     real,                       intent(in)          :: xi
@@ -2885,7 +2895,8 @@ subroutine LE_clustering_parameter_solver(xi,K,delta,solver_flag)
     real                                            :: a, b, c, f1, f2, f3, &
                                                        tol = 10E-6
     integer                                         :: nopen, niter
-    character(:),   allocatable                     :: log_file
+    character(:),   allocatable                     :: log_file, warning_msg, &
+                                                       warning_msg_1
     logical                                         :: file_open
     interface LE_clustering_parameter_func
         real function LE_clustering_parameter_func(Kf,xif,func_coordinate) 
@@ -2938,10 +2949,11 @@ subroutine LE_clustering_parameter_solver(xi,K,delta,solver_flag)
         end do
 
     else
-        print *, "WARNING: Could not find initial guesses for the clustering_parameter bisection solver"
-        print *, "WARNING: Returning to uniform midchord clustering"
-        write(nopen,*) 'WARNING: Could not find initial guesses for the clustering_parameter bisection solver'
-        write(nopen,*) 'WARNING: Returning to uniform midchord clustering'
+        warning_msg     = "Could not find initial guesses for the clustering_parameter bisection solver"
+        warning_msg_1   = "Returning to uniform midchord clustering"
+        call warning(warning_msg, warning_msg_1)
+        !write(nopen,*) 'Could not find initial guesses for the clustering_parameter bisection solver'
+        !write(nopen,*) 'Returning to uniform midchord clustering'
         delta       = 0.0
         solver_flag = .false.
     end if
@@ -2966,6 +2978,7 @@ end subroutine LE_clustering_parameter_solver
 !*******************************************************************************************
 subroutine TE_clustering_parameter_solver(xi,K,delta,solver_flag)
     use file_operations
+    use errors
     implicit none
 
     real,                       intent(in)          :: xi
@@ -2977,7 +2990,8 @@ subroutine TE_clustering_parameter_solver(xi,K,delta,solver_flag)
     real                                            :: a, b, c, f1, f2, f3, &
                                                        tol = 10E-6
     integer                                         :: nopen, niter
-    character(:),   allocatable                     :: log_file
+    character(:),   allocatable                     :: log_file, warning_msg, &
+                                                       warning_msg_1
     logical                                         :: file_open
     interface TE_clustering_parameter_func
         real function TE_clustering_parameter_func(Kf,xif,func_coordinate)
@@ -3030,10 +3044,11 @@ subroutine TE_clustering_parameter_solver(xi,K,delta,solver_flag)
         end do 
 
     else
-        print *, 'WARNING: Could not find initial guesses for the TE clustering_parameter bisection solver'
-        print *, 'WARNING: Returning to uniform midchord clustering'
-        write(nopen,*) 'WARNING: Could not find initial guesses for the TE clustering_parameter bisection solver'
-        write(nopen,*) 'wARNING: Returning to uniform midchord clustering'
+        warning_msg     = 'Could not find initial guesses for the TE clustering_parameter bisection solver'
+        warning_msg_1   = 'Returning to uniform midchord clustering'
+        call warning(warning_msg, warning_msg_1)
+        !write(nopen,*) 'Could not find initial guesses for the TE clustering_parameter bisection solver'
+        !write(nopen,*) 'Returning to uniform midchord clustering'
         delta       = 0.0
         solver_flag = .false.
     end if
