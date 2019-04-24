@@ -302,11 +302,12 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     character(*)                :: arg4
 
     ! Local variables
-    integer                     :: nopen
+    integer                     :: nopen, nopen_error
     real                        :: spl_eval, dspl_eval, xdiff, inBetaInci, outBetaDevn
     character(256)              :: fname, temp, fname1, row_type, path
-    character(:),  allocatable  :: log_file, auxinput_filename, error_msg
-    logical                     :: axial_LE, radial_LE, axial_TE, radial_TE, file_open, file_exist
+    character(:),  allocatable  :: log_file, error_file, auxinput_filename, error_msg
+    logical                     :: axial_LE, radial_LE, axial_TE, radial_TE, file_open, file_exist, &
+                                   initial, open_error
 
 
 
@@ -320,6 +321,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     is_xyzstreamlines = .False.
     is2d              = .False.
     isold             = .False.
+    initial           = .True.
     wing_flag         = 0
    
     
@@ -350,6 +352,9 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     ! log_file_exists() in file_operations.f90
     !
     call log_file_exists(log_file, nopen, file_open)
+
+    call error_file_exists(error_file, nopen_error, open_error, initial)
+    call close_error_file(nopen_error, open_error)
 
     ! Types of 2nd argument
     if (trim(arg2).eq.'dev') then

@@ -12,8 +12,6 @@ module file_operations
     ! If exists, open as a file to append
     ! If doesn't exists, open as a new file
     !
-    ! Mayank Sharma (@UC) - 24/11/18
-    !
     !---------------------------------------------------------------------------
     subroutine log_file_exists(log_file, nopen, file_open, initial)
         
@@ -56,7 +54,8 @@ module file_operations
     !
     ! Close log file if it is open
     !
-    ! Mayank Sharma (@UC) - 24/11/18
+    ! Input parameters: nopen       - unit number for closing file
+    !                   file_open   - close the file only if it is open
     !
     !---------------------------------------------------------------------------
     subroutine close_log_file(nopen, file_open)
@@ -78,8 +77,6 @@ module file_operations
     ! Subroutine for checking if the input log file exists or not
     ! If exists, open as a file to append
     ! If doesn't exist, open as a new file
-    !
-    ! Mayank Sharma (@UC) - 9/12/18
     !
     !---------------------------------------------------------------------------
     subroutine open_maininput_log_file(input_file, nopen, file_open)
@@ -120,7 +117,8 @@ module file_operations
     !
     ! Close input log file if open
     !
-    ! Mayank Sharma (@UC) - 10/12/18
+    ! Input parameters: nopen       - unit number for closing the file
+    !                   file_open   - only close file if it is open
     !
     !---------------------------------------------------------------------------
     subroutine close_maininput_log_file(nopen, file_open)
@@ -141,8 +139,6 @@ module file_operations
     ! Subroutine for checking if the input log file exists or not
     ! If exists, open as a file to append
     ! If doesn't exist, open as a new file
-    !
-    ! Mayank Sharma (@UC) - 9/12/18
     !
     !---------------------------------------------------------------------------
     subroutine open_auxinput_log_file(input_file, nopen, file_open)
@@ -183,7 +179,8 @@ module file_operations
     !
     ! Close input log file if open
     !
-    ! Mayank Sharma (@UC) - 10/12/18
+    ! Input parameters: nopen       - unit number for closing the file
+    !                   file_open   - only close file if it is open
     !
     !---------------------------------------------------------------------------
     subroutine close_auxinput_log_file(nopen, file_open)
@@ -198,11 +195,83 @@ module file_operations
 
     end subroutine close_auxinput_log_file
     !---------------------------------------------------------------------------
+    
+    
+    
+    !
+    ! Subroutine for checking if the error log file exists or not
+    ! If exists, open as a file to append
+    ! If doesn't exists, open as a new file
+    !
+    !---------------------------------------------------------------------------
+    subroutine error_file_exists(error_file, nopen, file_open, initial)
+        
+        character(:),   allocatable,        intent(inout)   :: error_file
+        integer,                            intent(inout)   :: nopen
+        logical,                            intent(inout)   :: file_open
+        logical,    optional,               intent(in)      :: initial
+
+        ! Local variables
+        logical                                             :: exist
+        integer                                             :: ierr
+
+
+        error_file  = 'error.log'
+        nopen       = 953
+
+        inquire(file = error_file, exist=exist)
+        if (exist) then
+            if (present(initial) .and. initial .eqv. .true.) then
+                open(nopen, file = error_file, status = 'old', action = 'write')
+            else
+                open(nopen, file = error_file, status = 'old', iostat = ierr, position = 'append', action = 'write')
+            end if
+        else
+            open(nopen, file =  error_file, status = 'new', iostat = ierr, action = 'write')
+        end if
+
+        if (ierr == 0) then
+            file_open = .true.
+        else
+            file_open = .false.
+        end if
+
+
+    end subroutine error_file_exists
+    !---------------------------------------------------------------------------
+    
+    
+    
+    !
+    ! Close error log file if it is open
+    !
+    ! Input parameters: nopen       - unit number for closing the file
+    !                   file_open   - only close the file if it is open
+    !
+    !---------------------------------------------------------------------------
+    subroutine close_error_file(nopen, file_open)
+
+        integer,        intent(in)      :: nopen
+        logical,        intent(in)      :: file_open
+
+
+        ! If the log file is open, close it
+        if (file_open) close(nopen)
+
+
+    end subroutine close_error_file
+    !---------------------------------------------------------------------------
 
 
 
     !
     ! Write meanline u,v data to a file
+    !
+    ! Input parameters: np      - number of points along the chord
+    !                   sec     - string representing the section index
+    !                   u       - aarray of points along the chord
+    !                   camber  - array of the camber for the 'sec' blade section
+    !                   slope   - array of the camber slope for the 'sec' blade section
     !
     !---------------------------------------------------------------------------
     subroutine meanline_u_v_file(np,sec,u,camber,slope)
@@ -247,6 +316,12 @@ module file_operations
     ! Write 2D array in matrix form to a file
     ! Specified for (x,y) grid coordinates 
     !
+    ! Input parameters: fname   - file name
+    !                   nx      - number of x points
+    !                   ny      - number of y points
+    !                   X       - 2D array of x-coordinates
+    !                   Y       - 2D array  of y-coordinates
+    !
     !---------------------------------------------------------------------------
     subroutine file_write_matrix(fname,X,Y,nx,ny)
     
@@ -290,6 +365,11 @@ module file_operations
     
     !
     ! Write 1D arrays to a file
+    !
+    ! Input parameters: fname   - file name
+    !                   nx      - number of x points
+    !                   X       - 1D array of x points
+    !                   Y       - 1D array of y points
     !
     !---------------------------------------------------------------------------
     subroutine file_write_1D(fname,X,Y,nx)
