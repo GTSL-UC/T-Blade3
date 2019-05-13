@@ -321,7 +321,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     is_xyzstreamlines = .False.
     is2d              = .False.
     !isold             = .False.
-    initial           = .True.
+    initial           = .true.
     wing_flag         = 0
    
     
@@ -352,6 +352,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     ! If no errors or warnings are raised, the log file will be empty
     !
     call error_file_exists(error_file, nopen_error, open_error, initial)
+    write(nopen_error,'(A)') 'T-Blade3 ERROR LOG FILE'
     call close_error_file(nopen_error, open_error)
 
 

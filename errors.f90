@@ -45,11 +45,13 @@ module errors
         ! error_file_exists and close_error_file in file_operations.f90
         !
         call error_file_exists(error_file, nopen, file_open)
+        write(nopen,*) ''
         write(nopen,*) 'FATAL ERROR: '//error_msg
         if (present(warning_msg)) &
             write(nopen,*) warning_msg
         if (isdev_local .and. present(dev_msg)) &
             write(nopen,*) 'For developers: '//dev_msg
+        write(nopen,*) ''
         call close_error_file(nopen, file_open)
 
         stop
