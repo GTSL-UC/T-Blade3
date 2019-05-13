@@ -430,8 +430,13 @@ subroutine readinput(fname)
     
     ! If there is an invalid input for the thickness distribution switch
     ! Warn user and stop execution
-    if (thick_distr .ne. 0 .and. thick_distr .ne. 1 .and. thick_distr .ne. 2 .and. thick_distr .ne. 3 .and. &
-        thick_distr .ne. 4 .and. thick_distr .ne. 5) then
+    if (thick_distr .eq. 3 .or. thick_distr .eq. 4) then
+
+        error_msg   = 'Invalid argument for thickness distribution switch'
+        warning_msg = 'Direct and Exact thickness distributions are no longer available with T-Blade3'
+        call fatal_error(error_msg, warning_msg)
+
+    else if (thick_distr .ne. 0 .and. thick_distr .ne. 1 .and. thick_distr .ne. 2 .and. thick_distr .ne. 5) then
 
         error_msg   = 'Invalid argument for thickness distribution switch'
         warning_msg = 'Valid arguments are 0, 1, 2, 3, 4 or 5 (refer to T-Blade3 documentation)'
@@ -440,10 +445,10 @@ subroutine readinput(fname)
     end if
 
     ! Read next line in the input file
-    if (len(trim(adjustl(temp2))) .eq. 3) then
-        thick_distr_3_flag = trim(adjustl(temp2))
-        read(1, *)temp
-    endif
+    !if (len(trim(adjustl(temp2))) .eq. 3) then
+    !    thick_distr_3_flag = trim(adjustl(temp2))
+    !    read(1, *)temp
+    !endif
 
 
 
@@ -1596,11 +1601,11 @@ subroutine read_spanwise_input(row_type, path)
     ncp_span_curv1 = ncp_span_curv+2
 
     ! Account for cur1 if using exact thickness distribution
-    if (isold) then
-        ncp_chord_curv = ncp_chord-2+ncp_curvature+1-1
-    else
-        ncp_chord_curv = ncp_chord-2+ncp_curvature+1
-    endif
+    !if (isold) then
+    ncp_chord_curv = ncp_chord-2+ncp_curvature+1-1
+    !else
+    !    ncp_chord_curv = ncp_chord-2+ncp_curvature+1
+    !endif
 
 
 
@@ -1690,18 +1695,18 @@ subroutine read_spanwise_input(row_type, path)
         ! override_cur1() in 3dbgb.f90
         ! Callback to override_cur1_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
         !
-        if (isold .eqv. .false.) then
-            
-            jj = 1 + ncp_chord-2 + 1
-            do i = 1,ncp_span_curv
-                temp(i) = cp_chord_curv(i,jj)
-            end do
-            call override_cur1(ncp_span_curv, temp)
-            do i = 1,ncp_span_curv
-                cp_chord_curv(i,jj) = temp(i)
-            end do
+        !if (isold .eqv. .false.) then
+        !    
+        !    jj = 1 + ncp_chord-2 + 1
+        !    do i = 1,ncp_span_curv
+        !        temp(i) = cp_chord_curv(i,jj)
+        !    end do
+        !    call override_cur1(ncp_span_curv, temp)
+        !    do i = 1,ncp_span_curv
+        !        cp_chord_curv(i,jj) = temp(i)
+        !    end do
 
-        end if
+        !end if
             
         !
         ! Override cur2 if needed
@@ -1710,11 +1715,11 @@ subroutine read_spanwise_input(row_type, path)
         ! 
         if (ncp_curvature >= 1) then
             
-            if (isold) then 
-                jj = 1 + ncp_chord-2 + 2-1
-            else
-                jj = 1 + ncp_chord-2 + 2
-            end if
+            !if (isold) then 
+            jj = 1 + ncp_chord-2 + 2-1
+            !else
+            !    jj = 1 + ncp_chord-2 + 2
+            !end if
             
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
@@ -1733,11 +1738,11 @@ subroutine read_spanwise_input(row_type, path)
         !
         if (ncp_curvature >= 2) then
             
-            if (isold) then
-                jj = 1 + ncp_chord-2 + 3-1
-            else
-                jj = 1 + ncp_chord-2 + 3
-            end if
+            !if (isold) then
+            jj = 1 + ncp_chord-2 + 3-1
+            !else
+            !    jj = 1 + ncp_chord-2 + 3
+            !end if
             
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
@@ -1756,11 +1761,11 @@ subroutine read_spanwise_input(row_type, path)
         !
         if (ncp_curvature >= 3) then
             
-            if (isold) then
-                jj = 1 + ncp_chord-2 + 4-1
-            else
-                jj = 1 + ncp_chord-2 + 4
-            end if
+            !if (isold) then
+            jj = 1 + ncp_chord-2 + 4-1
+            !else
+            !    jj = 1 + ncp_chord-2 + 4
+            !end if
 
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
@@ -1779,11 +1784,11 @@ subroutine read_spanwise_input(row_type, path)
         !
         if (ncp_curvature >= 4) then
             
-            if (isold) then
-                jj = 1 + ncp_chord-2 + 5-1
-            else
-                jj = 1 + ncp_chord-2 + 5
-            end if
+            !if (isold) then
+            jj = 1 + ncp_chord-2 + 5-1
+            !else
+            !    jj = 1 + ncp_chord-2 + 5
+            !end if
             
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
@@ -1802,11 +1807,11 @@ subroutine read_spanwise_input(row_type, path)
         !
         if (ncp_curvature >= 5) then
             
-            if (isold) then
-                jj = 1 + ncp_chord-2 + 6-1
-            else
-                jj = 1 + ncp_chord-2 + 6
-            end if
+            !if (isold) then
+            jj = 1 + ncp_chord-2 + 6-1
+            !else
+            !    jj = 1 + ncp_chord-2 + 6
+            !end if
             
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
@@ -1824,11 +1829,11 @@ subroutine read_spanwise_input(row_type, path)
         ! Callback to override_cur7_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
         !
         if (ncp_curvature >= 6) then
-            if (isold) then
-                jj = 1 + ncp_chord-2 + 7-1
-            else
-                jj = 1 + ncp_chord-2 + 7
-            end if
+            !if (isold) then
+            jj = 1 + ncp_chord-2 + 7-1
+            !else
+            !    jj = 1 + ncp_chord-2 + 7
+            !end if
 
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
@@ -1937,7 +1942,7 @@ subroutine read_spanwise_input(row_type, path)
     !
     ! Read thickness control table
     !
-    if (thick /= 0 .or. LE /= 0 .or. thick_distr == 3  .or. thick_distr == 4) then
+    if (thick /= 0 .or. LE /= 0) then !.or. thick_distr == 3  .or. thick_distr == 4) then
         
         read(10,'(A)') temps
         write(nopen1,'(A)') trim(temps)
@@ -1951,35 +1956,35 @@ subroutine read_spanwise_input(row_type, path)
         ! number of control points spanwise and chordwise
         ! and optimization flags
         !
-        if (thick_distr == 4) then
-            
-            read(10, *) ncp_span_thk, ncp_chord_thickness, te_flag, le_opt_flag, te_opt_flag
-            backspace(10)
-            read(10,'(A)') temps
-            write(nopen1,'(A)') trim(temps)
-            
-            ! Print optimization flags to screen and write to run log file
-            print*, 'TE flag:', te_flag
-            print*, 'LE optimization flag:', le_opt_flag
-            print*, 'TE optimization flag:', te_opt_flag
-            call log_file_exists(log_file, nopen,  file_open)
-            write(nopen,*) 'TE flag:', te_flag
-            write(nopen,*) 'LE optimization flag:', le_opt_flag
-            write(nopen,*) 'TE optimization flag:', te_opt_flag
-            call close_log_file(nopen, file_open)
+        !if (thick_distr == 4) then
+        !    
+        !    read(10, *) ncp_span_thk, ncp_chord_thickness, te_flag, le_opt_flag, te_opt_flag
+        !    backspace(10)
+        !    read(10,'(A)') temps
+        !    write(nopen1,'(A)') trim(temps)
+        !    
+        !    ! Print optimization flags to screen and write to run log file
+        !    print*, 'TE flag:', te_flag
+        !    print*, 'LE optimization flag:', le_opt_flag
+        !    print*, 'TE optimization flag:', te_opt_flag
+        !    call log_file_exists(log_file, nopen,  file_open)
+        !    write(nopen,*) 'TE flag:', te_flag
+        !    write(nopen,*) 'LE optimization flag:', le_opt_flag
+        !    write(nopen,*) 'TE optimization flag:', te_opt_flag
+        !    call close_log_file(nopen, file_open)
 
         !
-        ! If using direct thickness or quartic spline thickness, read
+        ! If using quartic spline thickness, read
         ! number of spanwise and chordwise control points
         !
-        else
+        !else
             
-            read(10, *)ncp_span_thk, ncp_chord_thickness
-            backspace(10)
-            read(10,'(A)') temps
-            write(nopen1,'(A)') temps
+        read(10, *)ncp_span_thk, ncp_chord_thickness
+        backspace(10)
+        read(10,'(A)') temps
+        write(nopen1,'(A)') temps
 
-        end if
+        !end if
         
         if(control_inp_flag .eq. 1 .and. ncp_span_thk .ne. nsl) then
             error_msg   = 'In auxiliary file inputs, number of spanwise thickness specifications'//&
@@ -2001,8 +2006,8 @@ subroutine read_spanwise_input(row_type, path)
         ! Determine number of control points along the chord
         !
         ncp_chord_thk = ncp_chord_thickness - 2 + ncp_thickness - 2 + 1
-        if (thick_distr == 3) ncp_chord_thk = ncp_chord_thickness - 2 + ncp_thickness + 2 + 1
-        if (thick_distr == 4) ncp_chord_thk = ncp_chord_thickness + ncp_thickness + 1
+        !if (thick_distr == 3) ncp_chord_thk = ncp_chord_thickness - 2 + ncp_thickness + 2 + 1
+        !if (thick_distr == 4) ncp_chord_thk = ncp_chord_thickness + ncp_thickness + 1
 
         
         
@@ -2015,19 +2020,19 @@ subroutine read_spanwise_input(row_type, path)
         if (allocated(thk_cp)) deallocate(thk_cp)
         allocate(thk_cp(20, 2*nsl))
         
-        if (thick_distr == 3) then
-            do i = 1, nsl
-                ncp_thk(i) = ncp_thickness + 4
-            end do
-        else if (thick_distr == 4) then
-            do i = 1, nsl
-                ncp_thk(i) = ncp_thickness
-            end do
-        else
-            do i = 1, nsl
-                ncp_thk(i) = ncp_thickness + 4
-            end do
-        end if
+        !if (thick_distr == 3) then
+        !    do i = 1, nsl
+        !        ncp_thk(i) = ncp_thickness + 4
+        !    end do
+        !else if (thick_distr == 4) then
+        !    do i = 1, nsl
+        !        ncp_thk(i) = ncp_thickness
+        !    end do
+        !else
+        do i = 1, nsl
+            ncp_thk(i) = ncp_thickness + 4
+        end do
+        !end if
 
 
 
@@ -2066,66 +2071,66 @@ subroutine read_spanwise_input(row_type, path)
             allocate(ycp(ncp_thk(i)))
             
             ! If using exact thickness distribution
-            if (thick_distr == 4) then
+            !if (thick_distr == 4) then
 
-                read(10, *) cp_chord_thk(i, 1:ncp_chord_thk), le_angle_cp(i), te_angle_cp(i)
-                backspace(10)
-                read(10,'(A)') temps
-                write(nopen1,'(A)') temps
+            !    read(10, *) cp_chord_thk(i, 1:ncp_chord_thk), le_angle_cp(i), te_angle_cp(i)
+            !    backspace(10)
+            !    read(10,'(A)') temps
+            !    write(nopen1,'(A)') temps
 
-                ! If spanwise splining is not required, store in 1D arrays
-                if(control_inp_flag .eq. 1) then
-                    xcp = cp_chord_thk(i, 2:ncp_chord_thickness+1)
-                    ycp = cp_chord_thk(i, ncp_chord_thickness+2:ncp_chord_thk)
-                end if
+            !    ! If spanwise splining is not required, store in 1D arrays
+            !    if(control_inp_flag .eq. 1) then
+            !        xcp = cp_chord_thk(i, 2:ncp_chord_thickness+1)
+            !        ycp = cp_chord_thk(i, ncp_chord_thickness+2:ncp_chord_thk)
+            !    end if
 
-            ! If using direct thickness distribution
-            elseif (thick_distr == 3) then
-                
-                read(10, *) cp_chord_thk(i, 1:ncp_chord_thk)
-                backspace(10)
-                read(10,'(A)') temps
-                write(nopen1,'(A)') temps
-                
-                ! If spanwise splining is not required, store in 1D arrays
-                if(control_inp_flag .eq. 1) then
+            !! If using direct thickness distribution
+            !elseif (thick_distr == 3) then
+            !    
+            !    read(10, *) cp_chord_thk(i, 1:ncp_chord_thk)
+            !    backspace(10)
+            !    read(10,'(A)') temps
+            !    write(nopen1,'(A)') temps
+            !    
+            !    ! If spanwise splining is not required, store in 1D arrays
+            !    if(control_inp_flag .eq. 1) then
 
-                    ! Also store phantom points
-                    xcp(1) = 0.
-                    xcp(2) = 0.
-                    xcp(3:ncp_thk(i) - 2) = cp_chord_thk(i, 2:ncp_chord_thickness-1)
-                    xcp(ncp_thk(i) - 1) = 1.
-                    xcp(ncp_thk(i)) = 0.
-                    
-                    ycp(1) = 0.
-                    ycp(2:ncp_thk(i) - 1) = cp_chord_thk(i, ncp_chord_thickness:ncp_chord_thk)
-                    ycp(ncp_thk(i)) = 0.
+            !        ! Also store phantom points
+            !        xcp(1) = 0.
+            !        xcp(2) = 0.
+            !        xcp(3:ncp_thk(i) - 2) = cp_chord_thk(i, 2:ncp_chord_thickness-1)
+            !        xcp(ncp_thk(i) - 1) = 1.
+            !        xcp(ncp_thk(i)) = 0.
+            !        
+            !        ycp(1) = 0.
+            !        ycp(2:ncp_thk(i) - 1) = cp_chord_thk(i, ncp_chord_thickness:ncp_chord_thk)
+            !        ycp(ncp_thk(i)) = 0.
 
-                end if
+            !    end if
 
             ! If using quartic spline thickness distribution
-            else
+            !else
                 
-                read(10, *) cp_chord_thk(i, 1:ncp_chord_thickness)
-                backspace(10)
-                read(10,'(A)') temps
-                write(nopen1,'(A)') temps
-                
-                ! If spanwise splining is not required, store in 1D arrays
-                if(control_inp_flag .eq. 1) then
-
-                    xcp(1) = 2*xcp(3)-xcp(5)
-                    ycp(1) = 2*ycp(3)-ycp(5)
-                    xcp(2) = 2*xcp(3)-xcp(4)
-                    ycp(2) = 2*ycp(3)-ycp(4)
-                    xcp(ncp_thk(i)) = 2*xcp(ncp_thk(i)-2)-xcp(ncp_thk(i)-4) 
-                    ycp(ncp_thk(i)) = 2*ycp(ncp_thk(i)-2)-ycp(ncp_thk(i)-4)
-                    xcp(ncp_thk(i)-1) = 2*xcp(ncp_thk(i)-2)-xcp(ncp_thk(i)-3)
-                    ycp(ncp_thk(i)-1) = 2*ycp(ncp_thk(i)-2)-ycp(ncp_thk(i)-3)
-
-                end if
+            read(10, *) cp_chord_thk(i, 1:ncp_chord_thickness)
+            backspace(10)
+            read(10,'(A)') temps
+            write(nopen1,'(A)') temps
             
-            end if  ! thick_distr
+            ! If spanwise splining is not required, store in 1D arrays
+            if(control_inp_flag .eq. 1) then
+
+                xcp(1) = 2*xcp(3)-xcp(5)
+                ycp(1) = 2*ycp(3)-ycp(5)
+                xcp(2) = 2*xcp(3)-xcp(4)
+                ycp(2) = 2*ycp(3)-ycp(4)
+                xcp(ncp_thk(i)) = 2*xcp(ncp_thk(i)-2)-xcp(ncp_thk(i)-4) 
+                ycp(ncp_thk(i)) = 2*ycp(ncp_thk(i)-2)-ycp(ncp_thk(i)-4)
+                xcp(ncp_thk(i)-1) = 2*xcp(ncp_thk(i)-2)-xcp(ncp_thk(i)-3)
+                ycp(ncp_thk(i)-1) = 2*ycp(ncp_thk(i)-2)-ycp(ncp_thk(i)-3)
+
+            end if
+            
+            !end if  ! thick_distr
 
             ! Store in global variable thk_cp
             do k = 1, ncp_thk(i)
@@ -2141,316 +2146,316 @@ subroutine read_spanwise_input(row_type, path)
         ! ESP thickness override subroutines if spanwise splining is required
         ! and exact thickness distribution is being used
         !
-        if (control_inp_flag == 2 .and. isold .eqv. .false. .and. thick_distr == 4) then
+        !if (control_inp_flag == 2 .and. isold .eqv. .false. .and. thick_distr == 4) then
 
-            if (allocated(temp_exact)) deallocate(temp_exact)
-            allocate(temp_exact(ncp_span_thk))
+        !    if (allocated(temp_exact)) deallocate(temp_exact)
+        !    allocate(temp_exact(ncp_span_thk))
 
-            !
-            ! Override exact thickness flags
-            ! override_thk_flags() in 3dbgb.f90
-            ! Callback to override_thk_flags_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            temp_thk_flag(1) = te_flag
-            temp_thk_flag(2) = le_opt_flag
-            temp_thk_flag(3) = te_opt_flag
-            call override_thk_flags(temp_thk_flag)
-            te_flag     = temp_thk_flag(1)
-            le_opt_flag = temp_thk_flag(2)
-            te_opt_flag = temp_thk_flag(3)
-         
-            ! 
-            ! Override span_thk_ctrl
-            ! override_span_thk_ctrl() in 3dbgb.f90
-            ! Callback to override_span_thk_ctrl_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            do i = 1,ncp_span_thk
-                temp_exact(i) = cp_chord_thk(i,1)
-            end do
-            call override_span_thk_ctrl(ncp_span_thk,temp_exact)
-            do i = 1,ncp_span_thk
-                cp_chord_thk(i,1) = temp_exact(i)
-            end do
-            
-            !
-            ! Override exact_u1 if needed
-            ! override_exact_u1() in 3dbgb.f90
-            ! Callback to override_exact_u1_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            if (ncp_chord_thickness >= 1) then
-                
-                jj = 1 + 1
-                do i = 1,ncp_span_thk
-                    temp_exact(i) = cp_chord_thk(i,jj)
-                end do
-                call override_exact_u1(ncp_span_thk,temp_exact)
-                do i = 1,ncp_span_thk
-                    cp_chord_thk(i,jj) = temp_exact(i)
-                end do    
+        !    !
+        !    ! Override exact thickness flags
+        !    ! override_thk_flags() in 3dbgb.f90
+        !    ! Callback to override_thk_flags_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    temp_thk_flag(1) = te_flag
+        !    temp_thk_flag(2) = le_opt_flag
+        !    temp_thk_flag(3) = te_opt_flag
+        !    call override_thk_flags(temp_thk_flag)
+        !    te_flag     = temp_thk_flag(1)
+        !    le_opt_flag = temp_thk_flag(2)
+        !    te_opt_flag = temp_thk_flag(3)
+        ! 
+        !    ! 
+        !    ! Override span_thk_ctrl
+        !    ! override_span_thk_ctrl() in 3dbgb.f90
+        !    ! Callback to override_span_thk_ctrl_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    do i = 1,ncp_span_thk
+        !        temp_exact(i) = cp_chord_thk(i,1)
+        !    end do
+        !    call override_span_thk_ctrl(ncp_span_thk,temp_exact)
+        !    do i = 1,ncp_span_thk
+        !        cp_chord_thk(i,1) = temp_exact(i)
+        !    end do
+        !    
+        !    !
+        !    ! Override exact_u1 if needed
+        !    ! override_exact_u1() in 3dbgb.f90
+        !    ! Callback to override_exact_u1_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    if (ncp_chord_thickness >= 1) then
+        !        
+        !        jj = 1 + 1
+        !        do i = 1,ncp_span_thk
+        !            temp_exact(i) = cp_chord_thk(i,jj)
+        !        end do
+        !        call override_exact_u1(ncp_span_thk,temp_exact)
+        !        do i = 1,ncp_span_thk
+        !            cp_chord_thk(i,jj) = temp_exact(i)
+        !        end do    
 
-            end if
+        !    end if
 
-            !
-            ! Override exact_u2 if needed
-            ! override_exact_u2() in 3dbgb.f90
-            ! Callback to override_exact_u2_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            if (ncp_chord_thickness >= 2) then 
-                
-                jj = 1 + 2
-                do i = 1,ncp_span_thk
-                    temp_exact(i) = cp_chord_thk(i,jj)
-                end do
-                call override_exact_u2(ncp_span_thk,temp_exact)
-                do i = 1,ncp_span_thk
-                    cp_chord_thk(i,jj) = temp_exact(i)
-                end do
+        !    !
+        !    ! Override exact_u2 if needed
+        !    ! override_exact_u2() in 3dbgb.f90
+        !    ! Callback to override_exact_u2_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    if (ncp_chord_thickness >= 2) then 
+        !        
+        !        jj = 1 + 2
+        !        do i = 1,ncp_span_thk
+        !            temp_exact(i) = cp_chord_thk(i,jj)
+        !        end do
+        !        call override_exact_u2(ncp_span_thk,temp_exact)
+        !        do i = 1,ncp_span_thk
+        !            cp_chord_thk(i,jj) = temp_exact(i)
+        !        end do
 
-            end if
+        !    end if
 
-            !
-            ! Override exact_u3 if needed
-            ! override_exact_u3() in 3dbgb.f90
-            ! Callback to override_exact_u3_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            if (ncp_chord_thickness >= 3) then
-                
-                jj = 1 + 3
-                do i = 1,ncp_span_thk
-                    temp_exact(i) = cp_chord_thk(i,jj)
-                end do
-                call override_exact_u3(ncp_span_thk,temp_exact)
-                do i = 1,ncp_span_thk
-                    cp_chord_thk(i,jj) = temp_exact(i)
-                end do
+        !    !
+        !    ! Override exact_u3 if needed
+        !    ! override_exact_u3() in 3dbgb.f90
+        !    ! Callback to override_exact_u3_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    if (ncp_chord_thickness >= 3) then
+        !        
+        !        jj = 1 + 3
+        !        do i = 1,ncp_span_thk
+        !            temp_exact(i) = cp_chord_thk(i,jj)
+        !        end do
+        !        call override_exact_u3(ncp_span_thk,temp_exact)
+        !        do i = 1,ncp_span_thk
+        !            cp_chord_thk(i,jj) = temp_exact(i)
+        !        end do
 
-            end if
+        !    end if
 
-            !
-            ! Override exact_u4 if needed
-            ! override_exact_u4() in 3dbgb.f90
-            ! Callback to override_exact_u4_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            if (ncp_chord_thickness >= 4) then
-                
-                jj = 1 + 4
-                do i = 1,ncp_span_thk
-                    temp_exact(i) = cp_chord_thk(i,jj)
-                end do
-                call override_exact_u4(ncp_span_thk,temp_exact)
-                do i = 1,ncp_span_thk
-                    cp_chord_thk(i,jj) = temp_exact(i)
-                end do
+        !    !
+        !    ! Override exact_u4 if needed
+        !    ! override_exact_u4() in 3dbgb.f90
+        !    ! Callback to override_exact_u4_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    if (ncp_chord_thickness >= 4) then
+        !        
+        !        jj = 1 + 4
+        !        do i = 1,ncp_span_thk
+        !            temp_exact(i) = cp_chord_thk(i,jj)
+        !        end do
+        !        call override_exact_u4(ncp_span_thk,temp_exact)
+        !        do i = 1,ncp_span_thk
+        !            cp_chord_thk(i,jj) = temp_exact(i)
+        !        end do
 
-            end if
+        !    end if
 
-            !
-            ! Override exact_u5 if needed
-            ! override_exact_u5() in 3dbgb.f90
-            ! Callback to override_exact_u5_() in udpTblade.c, udpHubWedge,c and udpBladeVolume.c
-            !
-            if (ncp_chord_thickness >= 5) then
-                
-                jj = 1 + 5
-                do i = 1,ncp_span_thk
-                    temp_exact(i) = cp_chord_thk(i,jj)
-                end do
-                call override_exact_u5(ncp_span_thk,temp_exact)
-                do i = 1,ncp_span_thk
-                    cp_chord_thk(i,jj) = temp_exact(i)
-                end do
+        !    !
+        !    ! Override exact_u5 if needed
+        !    ! override_exact_u5() in 3dbgb.f90
+        !    ! Callback to override_exact_u5_() in udpTblade.c, udpHubWedge,c and udpBladeVolume.c
+        !    !
+        !    if (ncp_chord_thickness >= 5) then
+        !        
+        !        jj = 1 + 5
+        !        do i = 1,ncp_span_thk
+        !            temp_exact(i) = cp_chord_thk(i,jj)
+        !        end do
+        !        call override_exact_u5(ncp_span_thk,temp_exact)
+        !        do i = 1,ncp_span_thk
+        !            cp_chord_thk(i,jj) = temp_exact(i)
+        !        end do
 
-            end if
+        !    end if
 
-            !
-            ! Override exact_u6 if needed
-            ! override_exact_u6() in 3dbgb.f90
-            ! Callback to override_exact_u6_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            if (ncp_chord_thickness >= 6) then
-                
-                jj = 1 + 6
-                do i = 1,ncp_span_thk
-                    temp_exact(i) = cp_chord_thk(i,jj)
-                end do
-                call override_exact_u6(ncp_span_thk,temp_exact)
-                do i = 1,ncp_span_thk
-                    cp_chord_thk(i,jj) = temp_exact(i)
-                end do
+        !    !
+        !    ! Override exact_u6 if needed
+        !    ! override_exact_u6() in 3dbgb.f90
+        !    ! Callback to override_exact_u6_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    if (ncp_chord_thickness >= 6) then
+        !        
+        !        jj = 1 + 6
+        !        do i = 1,ncp_span_thk
+        !            temp_exact(i) = cp_chord_thk(i,jj)
+        !        end do
+        !        call override_exact_u6(ncp_span_thk,temp_exact)
+        !        do i = 1,ncp_span_thk
+        !            cp_chord_thk(i,jj) = temp_exact(i)
+        !        end do
 
-            end if
+        !    end if
 
-            !
-            ! Override exact_u7 if needed
-            ! override_exact_u7() in 3dbgb.f90
-            ! Callback to override_exact_u7_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            if (ncp_chord_thickness == 7) then
-                
-                jj = 1 + 7
-                do i = 1,ncp_span_thk
-                    temp_exact(i) = cp_chord_thk(i,jj)
-                end do
-                call override_exact_u7(ncp_span_thk,temp_exact)
-                do i = 1,ncp_span_thk
-                    cp_chord_thk(i,jj) = temp_exact(i)
-                end do
+        !    !
+        !    ! Override exact_u7 if needed
+        !    ! override_exact_u7() in 3dbgb.f90
+        !    ! Callback to override_exact_u7_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    if (ncp_chord_thickness == 7) then
+        !        
+        !        jj = 1 + 7
+        !        do i = 1,ncp_span_thk
+        !            temp_exact(i) = cp_chord_thk(i,jj)
+        !        end do
+        !        call override_exact_u7(ncp_span_thk,temp_exact)
+        !        do i = 1,ncp_span_thk
+        !            cp_chord_thk(i,jj) = temp_exact(i)
+        !        end do
 
-            end if
+        !    end if
 
-            !
-            ! Override exact_thk1 if needed
-            ! override_exact_thk1() in 3dbgb.f90
-            ! Callback to override_exact_thk7_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            if (ncp_thickness >= 1) then
-                
-                jj = 1 + ncp_chord_thickness + 1
-                do i = 1,ncp_span_thk
-                    temp_exact(i) = cp_chord_thk(i,jj)
-                end do
-                call override_exact_thk1(ncp_span_thk,temp_exact)
-                do i = 1,ncp_span_thk
-                    cp_chord_thk(i,jj) = temp_exact(i)
-                end do 
-                   
-            end if
+        !    !
+        !    ! Override exact_thk1 if needed
+        !    ! override_exact_thk1() in 3dbgb.f90
+        !    ! Callback to override_exact_thk7_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    if (ncp_thickness >= 1) then
+        !        
+        !        jj = 1 + ncp_chord_thickness + 1
+        !        do i = 1,ncp_span_thk
+        !            temp_exact(i) = cp_chord_thk(i,jj)
+        !        end do
+        !        call override_exact_thk1(ncp_span_thk,temp_exact)
+        !        do i = 1,ncp_span_thk
+        !            cp_chord_thk(i,jj) = temp_exact(i)
+        !        end do 
+        !           
+        !    end if
 
-            !
-            ! Override exact_thk2 if needed
-            ! override_exact_thk2() in 3dbgb.f90
-            ! Callback to override_exact_thk2_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            if (ncp_thickness >= 2) then
-                
-                jj = 1 + ncp_chord_thickness + 2
-                do i = 1,ncp_span_thk
-                    temp_exact(i) = cp_chord_thk(i,jj)
-                end do
-                call override_exact_thk2(ncp_span_thk,temp_exact)
-                do i = 1,ncp_span_thk
-                    cp_chord_thk(i,jj) = temp_exact(i)
-                end do
+        !    !
+        !    ! Override exact_thk2 if needed
+        !    ! override_exact_thk2() in 3dbgb.f90
+        !    ! Callback to override_exact_thk2_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    if (ncp_thickness >= 2) then
+        !        
+        !        jj = 1 + ncp_chord_thickness + 2
+        !        do i = 1,ncp_span_thk
+        !            temp_exact(i) = cp_chord_thk(i,jj)
+        !        end do
+        !        call override_exact_thk2(ncp_span_thk,temp_exact)
+        !        do i = 1,ncp_span_thk
+        !            cp_chord_thk(i,jj) = temp_exact(i)
+        !        end do
 
-            end if
+        !    end if
 
-            !
-            ! Override exact_thk3 if needed
-            ! override_exact_thk3() in 3dbgb.f90
-            ! Callback to override_exact_thk3_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            if (ncp_thickness >= 3) then
-                
-                jj = 1 + ncp_chord_thickness + 3
-                do i = 1,ncp_span_thk
-                    temp_exact(i) = cp_chord_thk(i,jj)
-                end do
-                call override_exact_thk3(ncp_span_thk,temp_exact)
-                do i = 1,ncp_span_thk
-                    cp_chord_thk(i,jj) = temp_exact(i)
-                end do
+        !    !
+        !    ! Override exact_thk3 if needed
+        !    ! override_exact_thk3() in 3dbgb.f90
+        !    ! Callback to override_exact_thk3_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    if (ncp_thickness >= 3) then
+        !        
+        !        jj = 1 + ncp_chord_thickness + 3
+        !        do i = 1,ncp_span_thk
+        !            temp_exact(i) = cp_chord_thk(i,jj)
+        !        end do
+        !        call override_exact_thk3(ncp_span_thk,temp_exact)
+        !        do i = 1,ncp_span_thk
+        !            cp_chord_thk(i,jj) = temp_exact(i)
+        !        end do
 
-            end if
+        !    end if
 
-            !
-            ! Override exact_thk4 if needed
-            ! override_exact_thk4() in 3dbgb.f90
-            ! Callback to override_exact_thk4_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            if (ncp_thickness >= 4) then
-                
-                jj = 1 + ncp_chord_thickness + 4
-                do i = 1,ncp_span_thk
-                    temp_exact(i) = cp_chord_thk(i,jj)
-                end do
-                call override_exact_thk4(ncp_span_thk,temp_exact)
-                do i = 1,ncp_span_thk
-                    cp_chord_thk(i,jj) = temp_exact(i)
-                end do
-            
-            end if
+        !    !
+        !    ! Override exact_thk4 if needed
+        !    ! override_exact_thk4() in 3dbgb.f90
+        !    ! Callback to override_exact_thk4_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    if (ncp_thickness >= 4) then
+        !        
+        !        jj = 1 + ncp_chord_thickness + 4
+        !        do i = 1,ncp_span_thk
+        !            temp_exact(i) = cp_chord_thk(i,jj)
+        !        end do
+        !        call override_exact_thk4(ncp_span_thk,temp_exact)
+        !        do i = 1,ncp_span_thk
+        !            cp_chord_thk(i,jj) = temp_exact(i)
+        !        end do
+        !    
+        !    end if
        
-            !
-            ! Override exact_thk5 if needed
-            ! override_exact_thk5() in 3dbgb.f90
-            ! Callback to override_exact_thk5_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            if (ncp_thickness >= 5) then
-                
-                jj = 1 + ncp_chord_thickness + 5
-                do i = 1,ncp_span_thk
-                    temp_exact(i) = cp_chord_thk(i,jj)
-                end do
-                call override_exact_thk5(ncp_span_thk,temp_exact)
-                do i = 1,ncp_span_thk
-                    cp_chord_thk(i,jj) = temp_exact(i)
-                end do
-            
-            end if
+        !    !
+        !    ! Override exact_thk5 if needed
+        !    ! override_exact_thk5() in 3dbgb.f90
+        !    ! Callback to override_exact_thk5_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    if (ncp_thickness >= 5) then
+        !        
+        !        jj = 1 + ncp_chord_thickness + 5
+        !        do i = 1,ncp_span_thk
+        !            temp_exact(i) = cp_chord_thk(i,jj)
+        !        end do
+        !        call override_exact_thk5(ncp_span_thk,temp_exact)
+        !        do i = 1,ncp_span_thk
+        !            cp_chord_thk(i,jj) = temp_exact(i)
+        !        end do
+        !    
+        !    end if
        
-            ! 
-            ! Override exact_thk6 if needed
-            ! override_exact_thk6() in 3dbgb.f90
-            ! Callback to override_exact_thk6_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            if (ncp_thickness >= 6) then
-                
-                jj = 1 + ncp_chord_thickness + 6
-                do i = 1,ncp_span_thk
-                    temp_exact(i) = cp_chord_thk(i,jj)
-                end do
-                call override_exact_thk6(ncp_span_thk,temp_exact)
-                do i = 1,ncp_span_thk
-                    cp_chord_thk(i,jj) = temp_exact(i)
-                end do
-            
-            end if
+        !    ! 
+        !    ! Override exact_thk6 if needed
+        !    ! override_exact_thk6() in 3dbgb.f90
+        !    ! Callback to override_exact_thk6_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    if (ncp_thickness >= 6) then
+        !        
+        !        jj = 1 + ncp_chord_thickness + 6
+        !        do i = 1,ncp_span_thk
+        !            temp_exact(i) = cp_chord_thk(i,jj)
+        !        end do
+        !        call override_exact_thk6(ncp_span_thk,temp_exact)
+        !        do i = 1,ncp_span_thk
+        !            cp_chord_thk(i,jj) = temp_exact(i)
+        !        end do
+        !    
+        !    end if
 
-            !
-            ! Override exact_thk7 if needed
-            ! override_exact_thk7() in 3dbgb.f90
-            ! Callback to override_exact_thk7_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            if (ncp_thickness >= 7) then
-                
-                jj = 1 + ncp_chord_thickness + 7
-                do i = 1,ncp_span_thk
-                    temp_exact(i) = cp_chord_thk(i,jj)
-                end do
-                call override_exact_thk7(ncp_span_thk,temp_exact)
-                do i = 1,ncp_span_thk
-                    cp_chord_thk(i,jj) = temp_exact(i)
-                end do
-            
-            end if
-        
-            !
-            ! Override le_angle_cp
-            ! override_exact_lethk() in 3dbgb.f90
-            ! Callback to override_exact_lethk_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            do i = 1,ncp_span_thk
-                temp_exact(i) = le_angle_cp(i)
-            end do
-            call override_exact_lethk(ncp_span_thk,temp_exact)
-            do i = 1,ncp_span_thk
-                le_angle_cp(i) = temp_exact(i)
-            end do
+        !    !
+        !    ! Override exact_thk7 if needed
+        !    ! override_exact_thk7() in 3dbgb.f90
+        !    ! Callback to override_exact_thk7_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    if (ncp_thickness >= 7) then
+        !        
+        !        jj = 1 + ncp_chord_thickness + 7
+        !        do i = 1,ncp_span_thk
+        !            temp_exact(i) = cp_chord_thk(i,jj)
+        !        end do
+        !        call override_exact_thk7(ncp_span_thk,temp_exact)
+        !        do i = 1,ncp_span_thk
+        !            cp_chord_thk(i,jj) = temp_exact(i)
+        !        end do
+        !    
+        !    end if
+        !
+        !    !
+        !    ! Override le_angle_cp
+        !    ! override_exact_lethk() in 3dbgb.f90
+        !    ! Callback to override_exact_lethk_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    do i = 1,ncp_span_thk
+        !        temp_exact(i) = le_angle_cp(i)
+        !    end do
+        !    call override_exact_lethk(ncp_span_thk,temp_exact)
+        !    do i = 1,ncp_span_thk
+        !        le_angle_cp(i) = temp_exact(i)
+        !    end do
 
-            !
-            ! Override te_angle_cp
-            ! override_exact_tethk() in 3dbgb.f90
-            ! Callback to override_exact_tethk_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
-            !
-            do i = 1,ncp_span_thk
-                temp_exact(i) = te_angle_cp(i)
-            end do
-            call override_exact_tethk(ncp_span_thk,temp_exact)
-            do i = 1,ncp_span_thk
-                te_angle_cp(i) = temp_exact(i)
-            end do
+        !    !
+        !    ! Override te_angle_cp
+        !    ! override_exact_tethk() in 3dbgb.f90
+        !    ! Callback to override_exact_tethk_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        !    !
+        !    do i = 1,ncp_span_thk
+        !        temp_exact(i) = te_angle_cp(i)
+        !    end do
+        !    call override_exact_tethk(ncp_span_thk,temp_exact)
+        !    do i = 1,ncp_span_thk
+        !        te_angle_cp(i) = temp_exact(i)
+        !    end do
 
-        end if  ! if (control_inp_flag == 2 .and. isold .eqv. .false. .and. thick_distr == 4)
+        !end if  ! if (control_inp_flag == 2 .and. isold .eqv. .false. .and. thick_distr == 4)
         
         
         
@@ -2510,7 +2515,7 @@ subroutine read_spanwise_input(row_type, path)
             end do
         end if  ! if (LE /= 0)
     
-    end if  ! if (thick /= 0 .or. LE /= 0 .or. thick_distr == 3  .or. thick_distr == 4)
+    end if  ! if (thick /= 0 .or. LE /= 0)
 
 
 

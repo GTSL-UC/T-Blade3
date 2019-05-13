@@ -655,83 +655,83 @@ end subroutine splinethickmult
 
 !*******************************************************************************************
 
-subroutine splinethickcontrol(umxthk, thkc, ncp, xcp_thk, ycp_thk, np, u, thk, thick_distr_3_flag)
-
-! Added by Karthik Balasubramanian
-
-implicit none
-
-integer :: ncp, np, info, i, i_cp, dB_max_i, bisect_err
-real :: umxthk, thkc, x_spl_end, bspline4, t, dB_ycp_prod_sum
-real :: xcp_thk(ncp), ycp_thk(ncp), thk(np), u(np), dB_root(5), dB_ycp_prod(5), ddB(5), &
-    ucp_thk_mat(2, 3), ce(0:4), t_roots
-character (len = 16) :: thick_distr_3_flag
-
-write (*, '(/, A)') 'Executing subroutine splinethickcontrol in splinethick.f90'
-write (*, '(A)') 'Implementing blunt TE and LE'
-
-!! Blunt LE and TE Constraints
-ucp_thk_mat = reshape((/1., 1./3., 11., 1., -(11.*xcp_thk(3))-xcp_thk(4), xcp_thk(3)+(xcp_thk(4)/3.) /), (/2, 3/))
-call gauss_jordan(2, 1, ucp_thk_mat, info)
-xcp_thk(1:2) = ucp_thk_mat(:, 3)
-ycp_thk(1) = -(11.*ycp_thk(2))-(11.*ycp_thk(3))-ycp_thk(4)
-ucp_thk_mat = reshape((/11., 1., 1., 1./3., 24.-xcp_thk(ncp-3)-(11.*xcp_thk(ncp-2)), (xcp_thk(ncp-3)/3.) + &
-                     xcp_thk(ncp-2) /), (/2, 3/))
-call gauss_jordan(2, 1, ucp_thk_mat, info)
-xcp_thk(ncp-1:ncp) = ucp_thk_mat(:, 3)
-ycp_thk(ncp) = -ycp_thk(ncp-3)-(11.*ycp_thk(ncp-2))-(11.*ycp_thk(ncp-1))
-write (*, '(A)') 'Thickness control points including internally generated points after blunt LE and TE constraints : '
-write (*, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
-
-!! Maximum Thickness Implementation
-if (thick_distr_3_flag(:1) .eq. '1') then
-    write (*, '(A)') 'Constraining max thickness location'
-    do i = 1, ncp-4
-        x_spl_end = bspline4(xcp_thk(i:i+4), 1.)
-        if (umxthk <= x_spl_end) exit
-    end do
-    i_cp = i
-    write (*, '(A, F5.3, ":", F5.3, I2, ":", I2)') 'End points of segment containing maximum thickness : ', &
-                                                   bspline4(xcp_thk(i:i+4), 0.), x_spl_end
-    write (*, '(A, I2, ":", I2)') 'Control points containing maximum thickness : ', i, i+4
-    ! Coefficients of Quartic t equation
-    ce(0) = xcp_thk(i)+(11.*xcp_thk(i+1))+(11.*xcp_thk(i+2))+xcp_thk(i+3)-(24.*umxthk)
-    ce(1) = (-4.*xcp_thk(i))-(12.*xcp_thk(i+1))+(12.*xcp_thk(i+2))+(4.*xcp_thk(i+3))
-    ce(2) = (6.*xcp_thk(i))-(6.*xcp_thk(i+1))-(6.*xcp_thk(i+2))+(6.*xcp_thk(i+3))
-    ce(3) = (-4.*xcp_thk(i))+(12.*xcp_thk(i+1))-(12.*xcp_thk(i+2))+(4.*xcp_thk(i+3))
-    ce(4) = xcp_thk(i)-(4.*xcp_thk(i+1))+(6.*xcp_thk(i+2))-(4.*xcp_thk(i+3))+xcp_thk(i+4)
-
-    if (abs(ce(4)) > 1e-13) then
-        write(*, '(A)') 'Equation in t is : Quartic'
-        call poly_solve_bisect(4, ce, 0., 1., bisect_err, t_roots)
-    elseif (abs(ce(3)) > 1e-13) then
-        write(*, '(A)') 'Equation in t is : Cubic'
-        call poly_solve_bisect(3, ce, 0., 1., bisect_err, t_roots)
-    elseif (abs(ce(2)) > 1e-13) then
-        write(*, '(A)') 'Equation in t is : Quadratic'
-        call poly_solve_bisect(2, ce, 0., 1., bisect_err, t_roots)
-    elseif (abs(ce(1)) > 1e-13) then
-        write(*, '(A)') 'Equation in t is : Linear'
-        t_roots = -ce(0)/ce(1)
-    endif
-
-    write (*, '(A, F20.16, /, A, F20.16)') 'User-defined max thickness location is :', umxthk, &
-     'Max thickness location determined using calculated t is :', bspline4(xcp_thk(i_cp:i_cp+4), t)
-
-    call d_bspline4_Beval(t, dB_root)
-    dB_max_i = maxloc(abs(dB_root), 1)
-    write (*, '(A, I5)') 'Modified control point to implement maximum thickness : ', i_cp+dB_max_i-1
-    dB_ycp_prod = dB_root*ycp_thk(i_cp:i_cp+4)
-    dB_ycp_prod_sum = sum(dB_ycp_prod, mask = abs(dB_root).lt.maxval(abs(dB_root)))
-    ycp_thk(i_cp+dB_max_i-1) = -dB_ycp_prod_sum/dB_root(dB_max_i)
-    write (*, '(A)') 'Thickness control points including internally generated points after max thickness location implemented : '
-    write (*, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
-    call dd_Bspline4_Beval(t, ddB)
-    write (*, '(A, F20.16)') 'Second derivative of thickness at position of maximum thickness : ', sum(ddB*ycp_thk(i_cp:i_cp+4))
-endif
-
-write (*, '(//)')
-call bspline_y_of_x( thk, u, np, xcp_thk, ycp_thk, ncp, 4 )
-thk = thk*thkc/2./maxval(thk)
-
-end subroutine splinethickcontrol
+!subroutine splinethickcontrol(umxthk, thkc, ncp, xcp_thk, ycp_thk, np, u, thk, thick_distr_3_flag)
+!
+!! Added by Karthik Balasubramanian
+!
+!implicit none
+!
+!integer :: ncp, np, info, i, i_cp, dB_max_i, bisect_err
+!real :: umxthk, thkc, x_spl_end, bspline4, t, dB_ycp_prod_sum
+!real :: xcp_thk(ncp), ycp_thk(ncp), thk(np), u(np), dB_root(5), dB_ycp_prod(5), ddB(5), &
+!    ucp_thk_mat(2, 3), ce(0:4), t_roots
+!character (len = 16) :: thick_distr_3_flag
+!
+!write (*, '(/, A)') 'Executing subroutine splinethickcontrol in splinethick.f90'
+!write (*, '(A)') 'Implementing blunt TE and LE'
+!
+!!! Blunt LE and TE Constraints
+!ucp_thk_mat = reshape((/1., 1./3., 11., 1., -(11.*xcp_thk(3))-xcp_thk(4), xcp_thk(3)+(xcp_thk(4)/3.) /), (/2, 3/))
+!call gauss_jordan(2, 1, ucp_thk_mat, info)
+!xcp_thk(1:2) = ucp_thk_mat(:, 3)
+!ycp_thk(1) = -(11.*ycp_thk(2))-(11.*ycp_thk(3))-ycp_thk(4)
+!ucp_thk_mat = reshape((/11., 1., 1., 1./3., 24.-xcp_thk(ncp-3)-(11.*xcp_thk(ncp-2)), (xcp_thk(ncp-3)/3.) + &
+!                     xcp_thk(ncp-2) /), (/2, 3/))
+!call gauss_jordan(2, 1, ucp_thk_mat, info)
+!xcp_thk(ncp-1:ncp) = ucp_thk_mat(:, 3)
+!ycp_thk(ncp) = -ycp_thk(ncp-3)-(11.*ycp_thk(ncp-2))-(11.*ycp_thk(ncp-1))
+!write (*, '(A)') 'Thickness control points including internally generated points after blunt LE and TE constraints : '
+!write (*, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
+!
+!!! Maximum Thickness Implementation
+!if (thick_distr_3_flag(:1) .eq. '1') then
+!    write (*, '(A)') 'Constraining max thickness location'
+!    do i = 1, ncp-4
+!        x_spl_end = bspline4(xcp_thk(i:i+4), 1.)
+!        if (umxthk <= x_spl_end) exit
+!    end do
+!    i_cp = i
+!    write (*, '(A, F5.3, ":", F5.3, I2, ":", I2)') 'End points of segment containing maximum thickness : ', &
+!                                                   bspline4(xcp_thk(i:i+4), 0.), x_spl_end
+!    write (*, '(A, I2, ":", I2)') 'Control points containing maximum thickness : ', i, i+4
+!    ! Coefficients of Quartic t equation
+!    ce(0) = xcp_thk(i)+(11.*xcp_thk(i+1))+(11.*xcp_thk(i+2))+xcp_thk(i+3)-(24.*umxthk)
+!    ce(1) = (-4.*xcp_thk(i))-(12.*xcp_thk(i+1))+(12.*xcp_thk(i+2))+(4.*xcp_thk(i+3))
+!    ce(2) = (6.*xcp_thk(i))-(6.*xcp_thk(i+1))-(6.*xcp_thk(i+2))+(6.*xcp_thk(i+3))
+!    ce(3) = (-4.*xcp_thk(i))+(12.*xcp_thk(i+1))-(12.*xcp_thk(i+2))+(4.*xcp_thk(i+3))
+!    ce(4) = xcp_thk(i)-(4.*xcp_thk(i+1))+(6.*xcp_thk(i+2))-(4.*xcp_thk(i+3))+xcp_thk(i+4)
+!
+!    if (abs(ce(4)) > 1e-13) then
+!        write(*, '(A)') 'Equation in t is : Quartic'
+!        call poly_solve_bisect(4, ce, 0., 1., bisect_err, t_roots)
+!    elseif (abs(ce(3)) > 1e-13) then
+!        write(*, '(A)') 'Equation in t is : Cubic'
+!        call poly_solve_bisect(3, ce, 0., 1., bisect_err, t_roots)
+!    elseif (abs(ce(2)) > 1e-13) then
+!        write(*, '(A)') 'Equation in t is : Quadratic'
+!        call poly_solve_bisect(2, ce, 0., 1., bisect_err, t_roots)
+!    elseif (abs(ce(1)) > 1e-13) then
+!        write(*, '(A)') 'Equation in t is : Linear'
+!        t_roots = -ce(0)/ce(1)
+!    endif
+!
+!    write (*, '(A, F20.16, /, A, F20.16)') 'User-defined max thickness location is :', umxthk, &
+!     'Max thickness location determined using calculated t is :', bspline4(xcp_thk(i_cp:i_cp+4), t)
+!
+!    call d_bspline4_Beval(t, dB_root)
+!    dB_max_i = maxloc(abs(dB_root), 1)
+!    write (*, '(A, I5)') 'Modified control point to implement maximum thickness : ', i_cp+dB_max_i-1
+!    dB_ycp_prod = dB_root*ycp_thk(i_cp:i_cp+4)
+!    dB_ycp_prod_sum = sum(dB_ycp_prod, mask = abs(dB_root).lt.maxval(abs(dB_root)))
+!    ycp_thk(i_cp+dB_max_i-1) = -dB_ycp_prod_sum/dB_root(dB_max_i)
+!    write (*, '(A)') 'Thickness control points including internally generated points after max thickness location implemented : '
+!    write (*, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
+!    call dd_Bspline4_Beval(t, ddB)
+!    write (*, '(A, F20.16)') 'Second derivative of thickness at position of maximum thickness : ', sum(ddB*ycp_thk(i_cp:i_cp+4))
+!endif
+!
+!write (*, '(//)')
+!call bspline_y_of_x( thk, u, np, xcp_thk, ycp_thk, ncp, 4 )
+!thk = thk*thkc/2./maxval(thk)
+!
+!end subroutine splinethickcontrol

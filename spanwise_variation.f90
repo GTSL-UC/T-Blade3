@@ -8,6 +8,7 @@
 !-------------------------------------------------------------------------------------------------------------------------------
 subroutine span_output_2()
     use globvar
+    use errors
     implicit none
 
     integer                     :: cp_start
@@ -36,13 +37,17 @@ subroutine span_output_2()
         curv_cp(1, 2*k - 1)            = 2*curv_cp(2,2*k - 1) - curv_cp(3,2*k - 1)
         curv_cp(ncp_chord + 2,2*k - 1) = 2*curv_cp(ncp_chord + 1,2*k - 1) - curv_cp(ncp_chord,2*k - 1)
         
-        ! Defining fixed control points 
-        if (isold) then
-            curv_cp(2,2*k) = 0.0
-            cp_start       = 3
+        ! Defining fixed control points
+        if (thick_distr == 5) then
+            cp_start                   = 2 
         else
-            cp_start       = 2
-        endif
+            curv_cp(2,2*k)             = 0.0
+            cp_start                   = 3
+        end if
+        !if (isold) then
+        !else
+        !    cp_start       = 2
+        !endif
         
         ! Store spanwise curvature control points from spanwise_variation()
         do j = cp_start,ncp_curvature + 1
@@ -111,54 +116,54 @@ subroutine span_output_2()
         end do  ! i = 1,na
 
     ! Direct thickness distribution
-    else if (thick_distr .eq. 3) then
-        
-        ! Allocate thickness control points array
-        if (allocated(thk_cp)) deallocate(thk_cp)
-        Allocate(thk_cp(20,2*na))
+    !else if (thick_distr .eq. 3) then
+    !    
+    !     Allocate thickness control points array
+    !    if (allocated(thk_cp)) deallocate(thk_cp)
+    !    Allocate(thk_cp(20,2*na))
 
-        ! Populate thickness control points array
-        k = 1
+    !    ! Populate thickness control points array
+    !    k = 1
 
-        do i = 1,na
-            if (k <= na) then
-                
-                ! Store spanwise thickness control points from spanwise_variation()
-                do j = 1,ncp_chord_thickness - 2
-                    thk_cp(j,2*k - 1) = bspline_thk(i,j + 1)
-                end do
-                
-                do j=1,ncp_thickness - 2
-                    thk_cp(j,2*k) = bspline_thk(i,ncp_chord_thickness + j - 1)
-                end do
+    !    do i = 1,na
+    !        if (k <= na) then
+    !            
+    !            ! Store spanwise thickness control points from spanwise_variation()
+    !            do j = 1,ncp_chord_thickness - 2
+    !                thk_cp(j,2*k - 1) = bspline_thk(i,j + 1)
+    !            end do
+    !            
+    !            do j=1,ncp_thickness - 2
+    !                thk_cp(j,2*k) = bspline_thk(i,ncp_chord_thickness + j - 1)
+    !            end do
 
-                k = k + 1
+    !            k = k + 1
 
-            end if  ! if (k <= na)
-        end do  ! i = 1,na
+    !        end if  ! if (k <= na)
+    !    end do  ! i = 1,na
 
     ! Exact thickness distribution
-    else if(thick_distr .eq. 4) then
-        
-        ! Allocate thickness control points array
-        if (allocated(thk_cp)) deallocate(thk_cp)
-        Allocate(thk_cp(20, 2*na))
+    !else if(thick_distr .eq. 4) then
+    !    
+    !     Allocate thickness control points array
+    !    if (allocated(thk_cp)) deallocate(thk_cp)
+    !    Allocate(thk_cp(20, 2*na))
 
-        ! Populate thickness control points array
-        k = 1
-        do i = 1, na
-            if (k <= na)then
+    !    ! Populate thickness control points array
+    !    k = 1
+    !    do i = 1, na
+    !        if (k <= na)then
 
-                ! Store spanwise thickness control points from spanwise_variation()
-                do j = 1, ncp_thickness
-                    thk_cp(j,2*k - 1) = bspline_thk(i, 2*j)
-                    thk_cp(j,2*k)     = bspline_thk(i, 2*j + 1)
-                enddo
+    !            ! Store spanwise thickness control points from spanwise_variation()
+    !            do j = 1, ncp_thickness
+    !                thk_cp(j,2*k - 1) = bspline_thk(i, 2*j)
+    !                thk_cp(j,2*k)     = bspline_thk(i, 2*j + 1)
+    !            enddo
 
-                k = k + 1
+    !            k = k + 1
 
-            end if  ! if (k <= na)
-        end do  ! i = 1,na
+    !        end if  ! if (k <= na)
+    !    end do  ! i = 1,na
 
     ! Modified NACA thickness distribution
     else if (thick_distr == 5) then
@@ -286,11 +291,11 @@ subroutine span_variation()
     ! Allocate spanwise thickness arrays
     !
     if (allocated(bspline_thk)) deallocate(bspline_thk)
-    if (thick_distr == 4) then
-        allocate(bspline_thk(nsl, 2*ncp_thickness + 1))
-    else
-        allocate(bspline_thk(nsl, ncp_chord_thk))
-    end if
+    !if (thick_distr == 4) then
+    !    allocate(bspline_thk(nsl, 2*ncp_thickness + 1))
+    !else
+    allocate(bspline_thk(nsl, ncp_chord_thk))
+    !end if
 
 
 
@@ -329,15 +334,15 @@ subroutine span_variation()
     ! Print message to screen and write to log file
     !
     call log_file_exists(log_file, nopen, file_open)
-    if (thick_distr == 4) then
-        print*, 'Creating spanwise thickness and TE angle distributions'
-        print*, 'Creating cubic Bspline with spancontrolinput file for spanwise curvature'
-        write(nopen,*) 'Creating spanwise thickness and TE angle distributions'
-        write(nopen,*) 'Creating cubic Bspline with spancontrolinput file for spanwise curvature'
-    else
-        print*, 'Creating cubic B-spline with spancontrolinput file'
-        write(nopen,*) 'Creating cubic B-spline with spancontrolinput file'
-    endif
+    !if (thick_distr == 4) then
+    !    print*, 'Creating spanwise thickness and TE angle distributions'
+    !    print*, 'Creating cubic Bspline with spancontrolinput file for spanwise curvature'
+    !    write(nopen,*) 'Creating spanwise thickness and TE angle distributions'
+    !    write(nopen,*) 'Creating cubic Bspline with spancontrolinput file for spanwise curvature'
+    !else
+    print*, 'Creating cubic B-spline with spancontrolinput file'
+    write(nopen,*) 'Creating cubic B-spline with spancontrolinput file'
+    !endif
     call close_log_file(nopen, file_open)
 
 
@@ -403,7 +408,7 @@ subroutine span_variation()
     ! Create spanwise cubic spline for thickness
     ! Generate cubic splines for quartic spline thickness distribution or direct thickness distribution
     !
-    if (thick /= 0 .or. thick_distr == 3) then
+    if (thick /= 0) then
         
         ! Spanwise distribution of "Span" control points
         do j = 1,na
@@ -425,87 +430,87 @@ subroutine span_variation()
     !
     ! Generate cubic splines for exact thickness distribution
     !
-    else if (thick_distr == 4) then
-        
-        ! Spanwise distribution of "Span" control points
-        do j = 1,na
-            bspline_thk(j,1) = span(j)
-        enddo
+    !else if (thick_distr == 4) then
+    !    
+    !    ! Spanwise distribution of "Span" control points
+    !    do j = 1,na
+    !        bspline_thk(j,1) = span(j)
+    !    enddo
 
-        ! Spanwise distribution of "u" and "thk" control points
-        do i = 1,ncp_thickness
+    !    ! Spanwise distribution of "u" and "thk" control points
+    !    do i = 1,ncp_thickness
 
-            write(ind, '(i2)') i
-            call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+ncp_thickness+1), ncp_span_thk, span, na, &
-                                           1, out_coord_v)
-            intersec_v(1:na) = out_coord_v(:, 2)
-            call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+1), ncp_span_thk, span, na, 1, out_coord_u)
-            intersec_u(1:na) = out_coord_u(:, 2)
-            
-            ! Compute with span_fine if command line option "dev" is passed to T-Blade3
-            if (isdev) then
+    !        write(ind, '(i2)') i
+    !        call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+ncp_thickness+1), ncp_span_thk, span, na, &
+    !                                       1, out_coord_v)
+    !        intersec_v(1:na) = out_coord_v(:, 2)
+    !        call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+1), ncp_span_thk, span, na, 1, out_coord_u)
+    !        intersec_u(1:na) = out_coord_u(:, 2)
+    !        
+    !        ! Compute with span_fine if command line option "dev" is passed to T-Blade3
+    !        if (isdev) then
 
-                call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+1), ncp_span_thk, span_fine, np_fine, &
-                                               1, out_coord_u_fine)
+    !            call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+1), ncp_span_thk, span_fine, np_fine, &
+    !                                           1, out_coord_u_fine)
 
-                call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+ncp_thickness+1), ncp_span_thk,       &
-                                               span_fine, np_fine, 1, out_coord_v_fine)
+    !            call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), cp_chord_thk(:,i+ncp_thickness+1), ncp_span_thk,       &
+    !                                           span_fine, np_fine, 1, out_coord_v_fine)
 
-            endif   ! isdev
-           
-            ! Store "u" and "thk" spanwise distribution in the spanwise thickness array 
-            do j = 1, na
-                bspline_thk(j, 2*i) = intersec_u(j)
-                bspline_thk(j, 2*i+1) = 0.5*intersec_v(j)
-            enddo
+    !        endif   ! isdev
+    !       
+    !        ! Store "u" and "thk" spanwise distribution in the spanwise thickness array 
+    !        do j = 1, na
+    !            bspline_thk(j, 2*i) = intersec_u(j)
+    !            bspline_thk(j, 2*i+1) = 0.5*intersec_v(j)
+    !        enddo
 
-        enddo   ! i = 1,ncp_thickness
+    !    enddo   ! i = 1,ncp_thickness
 
-        !
-        ! Spanwise distribution of "tetht"
-        ! Store "tetht" spanwise distribution in exact thickness spanwise TE angle array
-        ! Write spline data to file
-        !
-        call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), te_angle_cp, ncp_span_thk, span, na, 1, out_coord_v)
-        te_angle_all(1:na) = out_coord_v(:, 2)
-        open (unit = 81, file = 'te_angle_span_dist.' // trim(casename) // '.dat')
-        write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
-        close (81)
-        
-        ! Compute with span_fine if command line option "dev" is passed to T-Blade3
-        if (isdev) then
+    !    !
+    !    ! Spanwise distribution of "tetht"
+    !    ! Store "tetht" spanwise distribution in exact thickness spanwise TE angle array
+    !    ! Write spline data to file
+    !    !
+    !    call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), te_angle_cp, ncp_span_thk, span, na, 1, out_coord_v)
+    !    te_angle_all(1:na) = out_coord_v(:, 2)
+    !    open (unit = 81, file = 'te_angle_span_dist.' // trim(casename) // '.dat')
+    !    write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
+    !    close (81)
+    !    
+    !    ! Compute with span_fine if command line option "dev" is passed to T-Blade3
+    !    if (isdev) then
 
-            call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), te_angle_cp, ncp_span_thk, span_fine, np_fine, 1, out_coord_v_fine)
+    !        call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), te_angle_cp, ncp_span_thk, span_fine, np_fine, 1, out_coord_v_fine)
 
-            ! Write spline data to file
-            open (unit = 81, file = 'te_angle_span_dist_fine.' // trim(casename) // '.dat')
-            write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
-            close (81)
+    !        ! Write spline data to file
+    !        open (unit = 81, file = 'te_angle_span_dist_fine.' // trim(casename) // '.dat')
+    !        write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
+    !        close (81)
 
-        endif   ! isdev
+    !    endif   ! isdev
 
-        !
-        ! Spanwise distribution of "letht"
-        ! Store "letht" spanwise distribution in exact thickness spanwise LE angle array
-        ! Write spline data to file
-        !
-        call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), le_angle_cp, ncp_span_thk, span, na, 1, out_coord_v)
-        le_angle_all(1:na) = out_coord_v(:, 2)
-        open (unit = 81, file = 'le_angle_span_dist.' // trim(casename) // '.dat')
-        write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
-        close (81)
+    !    !
+    !    ! Spanwise distribution of "letht"
+    !    ! Store "letht" spanwise distribution in exact thickness spanwise LE angle array
+    !    ! Write spline data to file
+    !    !
+    !    call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), le_angle_cp, ncp_span_thk, span, na, 1, out_coord_v)
+    !    le_angle_all(1:na) = out_coord_v(:, 2)
+    !    open (unit = 81, file = 'le_angle_span_dist.' // trim(casename) // '.dat')
+    !    write (81, '(12F30.12)') (out_coord_v(k, :), k = 1, na)
+    !    close (81)
 
-        ! Compute with span_fine if command line option "dev" is passed to T-Blade3
-        if (isdev) then
+    !    ! Compute with span_fine if command line option "dev" is passed to T-Blade3
+    !    if (isdev) then
 
-            call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), le_angle_cp, ncp_span_thk, span_fine, np_fine, 1, out_coord_v_fine)
+    !        call thk_ctrl_gen_driver_span (isdev, cp_chord_thk(:,1), le_angle_cp, ncp_span_thk, span_fine, np_fine, 1, out_coord_v_fine)
 
-            ! Write spline data to file
-            open (unit = 81, file = 'le_angle_span_dist_fine.' // trim(casename) // '.dat')
-            write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
-            close (81)
+    !        ! Write spline data to file
+    !        open (unit = 81, file = 'le_angle_span_dist_fine.' // trim(casename) // '.dat')
+    !        write (81, '(12F30.12)') (out_coord_v_fine(k, :), k = 1, np_fine)
+    !        close (81)
 
-        endif   ! isdev
+    !    endif   ! isdev
 
     !
     ! Generate cubic splines for modified NACA four-digit thickness distribution
@@ -627,17 +632,17 @@ subroutine span_variation()
     ! Print message to screen and write to log file
     !
     call log_file_exists(log_file, nopen, file_open)
-    if (thick_distr == 4) then
-        print*, 'Spanwise curvature Bspline created successfully'
-        print*, 'Spanwise thickness and TE angle distributions created successfully:'
-        print*, 'Files prefixed with thk_span_dist and te_angle_span_dist created'
-        write(nopen,*) 'Spanwise curvature Bspline created successfully'
-        write(nopen,*) 'Spanwise thickness and TE angle distributions created successfully:'
-        write(nopen,*) 'Files prefixed with thk_span_dist and te_angle_span_dist created'
-    else
-        print*, 'B-spline created successfully'
-        write(nopen,*) 'B-spline created successfully'
-    endif
+    !if (thick_distr == 4) then
+    !    print*, 'Spanwise curvature Bspline created successfully'
+    !    print*, 'Spanwise thickness and TE angle distributions created successfully:'
+    !    print*, 'Files prefixed with thk_span_dist and te_angle_span_dist created'
+    !    write(nopen,*) 'Spanwise curvature Bspline created successfully'
+    !    write(nopen,*) 'Spanwise thickness and TE angle distributions created successfully:'
+    !    write(nopen,*) 'Files prefixed with thk_span_dist and te_angle_span_dist created'
+    !else
+    print*, 'B-spline created successfully'
+    write(nopen,*) 'B-spline created successfully'
+    !endif
     call close_log_file(nopen, file_open)
 
 

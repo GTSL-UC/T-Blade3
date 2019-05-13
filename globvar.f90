@@ -4,7 +4,7 @@ implicit none
 integer ibrow,ile,ite,j,LEdegree,no_LE_segments,csng
 !
 character*256 :: fext,line2,argp1,ok
-character*16 blrow,radialsec,thick_distr_3_flag
+character*16 blrow,radialsec!,thick_distr_3_flag
 character*32 blext(100),casename,spanwise_spline
 character*256 anglespline
 character*10 ibrowc,ibrowc1
@@ -111,7 +111,7 @@ character*15::istr1,istr2,H(13)
 !real*8 inBetaInci, outBetaDevn
 
 logical isdev, tm_c_spline, is_xyzstreamlines, spanwise_angle_spline,spanwise_inci_dev_spline, &
-is2d, isold!, isxygrid
+is2d!, isold, isxygrid
 
 common / bladesectionpoints /xxa(nx,nax),yya(nx,nax)
 !

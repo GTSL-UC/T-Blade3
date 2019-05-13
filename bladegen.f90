@@ -2,7 +2,7 @@
 subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, &
                     stagger,stack,chord_switch,stk_u,stk_v,xb_stk,yb_stk,stack_switch, &
                     clustering_switch, clustering_parameter,nsl,nbls,curv_camber,thick,LE,np, ncp_curv,ncp_thk, &
-                    curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,ee_all,thick_distr,thick_distr_3_flag, &
+                    curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,ee_all,thick_distr, &
                     umxthk_all,C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all,&
                     LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments,&
                     sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
@@ -11,7 +11,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, &
                     le_opt_flag, te_opt_flag, le_angle_all, te_angle_all)
 
 !
-! bladegen definition including isxygrid - will be deleted in the future
+! bladegen definition including isxygrid and thick_distr_3_flag - will be deleted in the future
 !
 !subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, &
 !                    stagger,stack,chord_switch,stk_u,stk_v,xb_stk,yb_stk,stack_switch, &
@@ -153,7 +153,7 @@ character(*)    :: fext
 character*80 file1, file2, file3, file7
 character(*)    :: casename, develop, airfoil
 character*20 sec
-character*16 thick_distr_3_flag
+!character*16 thick_distr_3_flag
 logical ellip, isdev!, isxygrid
 integer                             :: nopen
 character(len = :), allocatable     :: log_file, thickness_file_name, error_msg, &
@@ -321,22 +321,22 @@ else if (clustering_switch .eq. 4) then
 
         call elliptical_clustering(np,np_cluster,cp_LE,cp_TE,u)
 
-    else if (thick_distr == 4) then
-        np_cluster  = int(clustering_parameter)
+    !else if (thick_distr == 4) then
+    !    np_cluster  = int(clustering_parameter)
 
-        ! LE ellipse control points
-        xcp_LE      = thk_cp(1,2*js - 1)
-        ycp_LE      = thk_cp(1,2*js)
-        cp_LE(:,1)  = [xcp_LE, xcp_LE , 0.0, xcp_LE]
-        cp_LE(:,2)  = [ycp_LE, -ycp_LE, 0.0, 0.0   ]
+    !    ! LE ellipse control points
+    !    xcp_LE      = thk_cp(1,2*js - 1)
+    !    ycp_LE      = thk_cp(1,2*js)
+    !    cp_LE(:,1)  = [xcp_LE, xcp_LE , 0.0, xcp_LE]
+    !    cp_LE(:,2)  = [ycp_LE, -ycp_LE, 0.0, 0.0   ]
 
-        ! TE ellipse control points
-        xcp_TE      = thk_cp(ncp_thk(js),2*js - 1)
-        ycp_TE      = thk_cp(ncp_thk(js),2*js)
-        cp_TE(:,1)  = [xcp_TE, xcp_TE , 1.0, xcp_TE]
-        cp_TE(:,2)  = [ycp_TE, -ycp_TE, 0.0, 0.0   ]
+    !    ! TE ellipse control points
+    !    xcp_TE      = thk_cp(ncp_thk(js),2*js - 1)
+    !    ycp_TE      = thk_cp(ncp_thk(js),2*js)
+    !    cp_TE(:,1)  = [xcp_TE, xcp_TE , 1.0, xcp_TE]
+    !    cp_TE(:,2)  = [ycp_TE, -ycp_TE, 0.0, 0.0   ]
 
-        call elliptical_clustering(np,np_cluster,cp_LE,cp_TE,u)
+    !    call elliptical_clustering(np,np_cluster,cp_LE,cp_TE,u)
     else
         error_msg   = 'Ellipse-hyperbolic clustering not available for current thickness distribution'
         call fatal_error(error_msg)
@@ -834,79 +834,83 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
     ! Exact thickness distribution
     !
     else if (thick_distr.eq.4) then
-        call log_file_exists(log_file, nopen, file_open)
-        ! Added by Karthik Balasubramanian
-        write (*, '(/, A)') 'Implementing exact thickness control'
-        write(nopen, '(/, A)') 'Implementing exact thickness control'
-        ncp = ncp_thk(js)
-        if (allocated(xcp_thk)) deallocate(xcp_thk)
-        if (allocated(ycp_thk)) deallocate(ycp_thk)
-        Allocate(xcp_thk(ncp)) 
-        Allocate(ycp_thk(ncp)) 
-        do i = 1, ncp
-            xcp_thk(i) = thk_cp(i, 2*js-1)
-            ycp_thk(i) = thk_cp(i, 2*js)
-        enddo
-        print*, 'Exact thickness points:'
-        write(nopen,*) 'Exact thickness points:'
-        write(*, '(2F10.5)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
-        write(nopen, '(2F10.5)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
-        print*, 'LE Angle', le_angle_all(js)
-        print*, 'TE Angle', te_angle_all(js)
-        write(nopen,*) 'LE Angle', le_angle_all(js)
-        write(nopen,*) 'TE Angle', te_angle_all(js)
-        ! thk_ctrl_gen_driver (uthk, thk, n, u_spl, np, te_angle_all, te_flag, out_coord)
-        print*, 'TE flag', te_flag
-        print*, 'LE optimization flag', le_opt_flag
-        print*, 'TE optimization flag', te_opt_flag
-        write(nopen,*) 'TE flag', te_flag
-        write(nopen,*) 'LE optimization flag', le_opt_flag
-        write(nopen,*) 'TE optimization flag', te_opt_flag
-        write_to_file   = .true.
-        write(nopen,*) 'te_angle_all(j) = ', te_angle_all(js)
-        call thk_ctrl_gen_driver(casename, isdev, sec, xcp_thk, ycp_thk, ncp, u, np, le_angle_all(js), &
-                                 te_angle_all(js), te_flag, le_opt_flag, te_opt_flag, thickness_data,  &
-                                 write_to_file)
-        thickness = thickness_data(:, 2)
-        call close_log_file(nopen, file_open)
-        ! if(isdev) then
-        open (unit = 81, file = 'thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
-        write (81, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
-        close (81)
-        open (unit = 81, file = 'thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
-        ! write (81, '(2F20.16)') (u(i), thickness(i), i = 1, np)
-        write (81, '(6F40.16)') (thickness_data(i, 1), thickness_data(i, 2), thickness_data(i, 3),     &
-                                 thickness_data(i, 4), thickness_data(i, 5), thickness_data(i, 6), i = 1, np)
-        close (81)
+        !call log_file_exists(log_file, nopen, file_open)
+        !! Added by Karthik Balasubramanian
+        !write (*, '(/, A)') 'Implementing exact thickness control'
+        !write(nopen, '(/, A)') 'Implementing exact thickness control'
+        !ncp = ncp_thk(js)
+        !if (allocated(xcp_thk)) deallocate(xcp_thk)
+        !if (allocated(ycp_thk)) deallocate(ycp_thk)
+        !Allocate(xcp_thk(ncp)) 
+        !Allocate(ycp_thk(ncp)) 
+        !do i = 1, ncp
+        !    xcp_thk(i) = thk_cp(i, 2*js-1)
+        !    ycp_thk(i) = thk_cp(i, 2*js)
+        !enddo
+        !print*, 'Exact thickness points:'
+        !write(nopen,*) 'Exact thickness points:'
+        !write(*, '(2F10.5)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
+        !write(nopen, '(2F10.5)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
+        !print*, 'LE Angle', le_angle_all(js)
+        !print*, 'TE Angle', te_angle_all(js)
+        !write(nopen,*) 'LE Angle', le_angle_all(js)
+        !write(nopen,*) 'TE Angle', te_angle_all(js)
+        !! thk_ctrl_gen_driver (uthk, thk, n, u_spl, np, te_angle_all, te_flag, out_coord)
+        !print*, 'TE flag', te_flag
+        !print*, 'LE optimization flag', le_opt_flag
+        !print*, 'TE optimization flag', te_opt_flag
+        !write(nopen,*) 'TE flag', te_flag
+        !write(nopen,*) 'LE optimization flag', le_opt_flag
+        !write(nopen,*) 'TE optimization flag', te_opt_flag
+        !write_to_file   = .true.
+        !write(nopen,*) 'te_angle_all(j) = ', te_angle_all(js)
+        !call thk_ctrl_gen_driver(casename, isdev, sec, xcp_thk, ycp_thk, ncp, u, np, le_angle_all(js), &
+        !                         te_angle_all(js), te_flag, le_opt_flag, te_opt_flag, thickness_data,  &
+        !                         write_to_file)
+        !thickness = thickness_data(:, 2)
+        !call close_log_file(nopen, file_open)
+        !! if(isdev) then
+        !open (unit = 81, file = 'thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
+        !write (81, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
+        !close (81)
+        !open (unit = 81, file = 'thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
+        !! write (81, '(2F20.16)') (u(i), thickness(i), i = 1, np)
+        !write (81, '(6F40.16)') (thickness_data(i, 1), thickness_data(i, 2), thickness_data(i, 3),     &
+        !                         thickness_data(i, 4), thickness_data(i, 5), thickness_data(i, 6), i = 1, np)
+        !close (81)
         ! endif
+        error_msg   = 'Exact thickness distribution is no longer available with this release of T-Blade3'
+        call fatal_error(error_msg)
     elseif (thick_distr.eq.3) then
         ! Added by Karthik Balasubramanian
-        call log_file_exists(log_file, nopen, file_open)
-        write (*, '(/, A)') 'Implementing direct thickness control'
-        write (nopen, '(/, A)') 'Implementing direct thickness control'
-        ncp = ncp_thk(js)
-                if (allocated(xcp_thk)) deallocate(xcp_thk)
-                if (allocated(ycp_thk)) deallocate(ycp_thk)
-        Allocate(xcp_thk(ncp)) 
-        Allocate(ycp_thk(ncp)) 
-        do i = 1, ncp
-            xcp_thk(i) = thk_cp(i, 2*js-1)
-            ycp_thk(i) = thk_cp(i, 2*js)
-        enddo
-        write (*, '(A)') 'User input thickness control points including internally generated dummy points : '
-        write (*, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
-        write (nopen, '(A)') 'User input thickness control points including internally generated dummy points : '
-        write (nopen, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
-        call splinethickcontrol(umxthk, thkc, ncp, xcp_thk, ycp_thk, np, u, thickness, thick_distr_3_flag)
-        ! if(isdev) then
-            open (unit = 81, file = 'thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
-            write (81, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
-            close (81)
-            open (unit = 81, file = 'thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
-            write (81, '(2F20.16)') (u(i), thickness(i), i = 1, np)
-            close (81)
-        ! endif
-        call close_log_file(nopen, file_open)
+        !call log_file_exists(log_file, nopen, file_open)
+        !write (*, '(/, A)') 'Implementing direct thickness control'
+        !write (nopen, '(/, A)') 'Implementing direct thickness control'
+        !ncp = ncp_thk(js)
+        !        if (allocated(xcp_thk)) deallocate(xcp_thk)
+        !        if (allocated(ycp_thk)) deallocate(ycp_thk)
+        !Allocate(xcp_thk(ncp)) 
+        !Allocate(ycp_thk(ncp)) 
+        !do i = 1, ncp
+        !    xcp_thk(i) = thk_cp(i, 2*js-1)
+        !    ycp_thk(i) = thk_cp(i, 2*js)
+        !enddo
+        !write (*, '(A)') 'User input thickness control points including internally generated dummy points : '
+        !write (*, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
+        !write (nopen, '(A)') 'User input thickness control points including internally generated dummy points : '
+        !write (nopen, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
+        !call splinethickcontrol(umxthk, thkc, ncp, xcp_thk, ycp_thk, np, u, thickness, thick_distr_3_flag)
+        !! if(isdev) then
+        !    open (unit = 81, file = 'thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
+        !    write (81, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
+        !    close (81)
+        !    open (unit = 81, file = 'thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
+        !    write (81, '(2F20.16)') (u(i), thickness(i), i = 1, np)
+        !    close (81)
+        !! endif
+        !call close_log_file(nopen, file_open)
+        error_msg   = 'Direct thickness distribution is no longer available with this release of T-Blade3'
+        call fatal_error(error_msg)
     elseif(thick_distr.ne.0) then
         ! -----------------------------------------------------------------------------
         !Spline thickness distr. with LE control

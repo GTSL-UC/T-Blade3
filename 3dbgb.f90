@@ -320,7 +320,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     radial_TE         = .False.
     is_xyzstreamlines = .False.
     is2d              = .False.
-    isold             = .False.
+    !isold             = .False.
     initial           = .True.
     wing_flag         = 0
    
@@ -347,14 +347,20 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
 
 
+    ! 
+    ! Create error log file for each new T-Blade3 run
+    ! If no errors or warnings are raised, the log file will be empty
+    !
+    call error_file_exists(error_file, nopen_error, open_error, initial)
+    call close_error_file(nopen_error, open_error)
+
+
+
     !
     ! Determine command line arguments
     ! log_file_exists() in file_operations.f90
     !
     call log_file_exists(log_file, nopen, file_open)
-
-    call error_file_exists(error_file, nopen_error, open_error, initial)
-    call close_error_file(nopen_error, open_error)
 
     ! Types of 2nd argument
     if (trim(arg2).eq.'dev') then
@@ -362,8 +368,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen,*) '2nd Argument:', 'develop'
         isdev = .true.
     elseif (trim(arg2).eq.'xygrid') then 
-        print *, 'Option xygrid is no longer available with T-Blade3'
-        stop
+        print *, 'Command line option "xygrid" is no longer available with T-Blade3'
+        call fatal_error(error_msg)
     !    print*, '2nd Argument:', 'xygrid'
     !    write(nopen,*) '2nd Argument:', 'xygrid'
     !    isxygrid = .true.
@@ -376,9 +382,11 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen,*) '2nd Argument:', '2D'
         is2d = .True.
     elseif ((trim(arg2).eq.'v0') .or. (trim(arg2).eq.'V0')) then
-        print*, '2nd Argument:', 'V0'
-        write(nopen,*) '2nd Argument:', 'V0'
-        isold = .True.
+        error_msg   = 'Command line option "v0" is no longer available with T-Blade3'
+        call fatal_error(error_msg)
+        !print*, '2nd Argument:', 'V0'
+        !write(nopen,*) '2nd Argument:', 'V0'
+        !isold = .True.
     endif
 
     ! Types of 3rd argument
@@ -387,8 +395,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen,*) '3rd Argument:', 'develop'
         isdev = .true.
     elseif (trim(arg3).eq.'xygrid') then 
-        print *, 'Option xygrid is no longer available with T-Blade3'
-        stop
+        error_msg   = 'Command line option "xygrid" is no longer available with T-Blade3'
+        call fatal_error(error_msg)
     !    print*, '3rd Argument:', 'xygrid'
     !    write(nopen,*) '3rd Argument:', 'xygrid'
     !    isxygrid = .true.
@@ -401,9 +409,10 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen,*) '3rd Argument:', '2D'
         is2d = .True.
     elseif ((trim(arg3).eq.'v0') .or. (trim(arg3).eq.'V0')) then
-        print*, '3rd Argument:', 'V0'
-        write(nopen,*) '3rd Argument:', 'V0'
-        isold = .True.
+        error_msg   = 'Command line option "v0" is no longer available with T-Blade3'
+        !print*, '3rd Argument:', 'V0'
+        !write(nopen,*) '3rd Argument:', 'V0'
+        !isold = .True.
     endif
 
     ! Types of 4th argument
@@ -412,8 +421,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen,*) '4th Argument:', 'develop'
         isdev = .true.
     elseif (trim(arg4).eq.'xygrid') then 
-        print *, 'Option xygrid is no longer available with T-Blade3'
-        stop
+        error_msg   =  'Command line option "xygrid" is no longer available with T-Blade3'
+        call fatal_error(error_msg)
     !    print*, '4th Argument:', 'xygrid'
     !    write(nopen,*) '4th Argument:', 'xygrid'
     !    isxygrid = .true.
@@ -426,9 +435,11 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen,*) '4th Argument:', '2D'
         is2d = .True.
     elseif ((trim(arg4).eq.'v0') .or. (trim(arg4).eq.'V0')) then
-        print*, '4th Argument:', 'V0'
-        write(nopen,*) '4th Argument:', 'V0'
-        isold = .True.
+        error_msg   = 'Command line option "v0" is no longer available with T-Blade3'
+        call fatal_error(error_msg)
+        !print*, '4th Argument:', 'V0'
+        !write(nopen,*) '4th Argument:', 'V0'
+        !isold = .True.
     endif
 
     ! close_log_file() in file_operation.f90
@@ -512,10 +523,17 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
     ! Determine which auxiliary input file should be read
     call log_file_exists(log_file, nopen, file_open)
+    
+    write(nopen,*) ''
+    write(nopen,*) 'From 3dbgb - ', trim(spanwise_spline)
+    write(nopen,*) 'From 3dbgb - ', control_inp_flag
+    write(nopen,*) ''
+
+
 
     ! Read old controlinputs file (added by Nemnem)
     ! TODO: To be removed
-    if (control_inp_flag .eq. 1 .and. isold) then
+    if (control_inp_flag .eq. 1) then! .and. isold) then
         write(*, *)
         print*, 'Reading the controlinput file ....'
         write(*, *)
@@ -535,7 +553,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         end if
 
     ! Read old spancontrolinputs file (added by Syed)
-    elseif (control_inp_flag .eq. 1 .and. .not. isold) then
+    elseif (control_inp_flag .eq. 2) then !.and. .not. isold) then
         write(*, *)
         print*, 'Reading the spanwise_input file ....'
         write(*, *)
@@ -544,38 +562,16 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen,*) ''
 
         ! If auxiliary input file doesn't exist, warn and quit
-        ! read_spanwise_input() in readinput.f90
-        auxinput_filename = trim(path)//'spancontrolinputs.'//trim(row_type)//'.dat'
-        inquire(file = auxinput_filename, exist=file_exist)
-        if (file_exist) then
-            call read_spanwise_input(row_type, path)
-        else
-            error_msg   = 'Auxiliary input file '//auxinput_filename//' does not exist'
-            call fatal_error(error_msg)
-        end if
-
-    ! Read new spancontrolinputs file (added by Karthik) or
-    ! Read NACA spancontrolinputs file (added by Mayank)
-    elseif (control_inp_flag .eq. 2) then
-        write(*, *)
-        print*, 'Reading the spanwise_input file ....'
-        write(*, *)
-        write(nopen,*) ''
-        write(nopen,*) 'Reading the spanwise_input file ....'
-        write(nopen,*)
-      
-        ! If auxiliary input file doesn't exist, warn and quit 
-        ! read_spanwise_NACA_input() in readinput.f90 
+        ! read_spanwise_NACA_input() and read_spanwise_input() in readinput.f90
         if (thick_distr == 5) then
             auxinput_filename = trim(path)//'spancontrolinputs_NACA_'//trim(row_type)//'.dat'
             inquire(file = auxinput_filename, exist=file_exist)
             if (file_exist) then
                 call read_spanwise_NACA_input(row_type, path)
             else
-                error_msg   = 'Auxiliary input file '//auxinput_filename//' does not exist'
+                error_msg = 'Auxiliary input file '//auxinput_filename//' does not exist'
                 call fatal_error(error_msg)
             end if
-
         else
             auxinput_filename = trim(path)//'spancontrolinputs.'//trim(row_type)//'.dat'
             inquire(file = auxinput_filename, exist=file_exist)
@@ -585,10 +581,46 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                 error_msg   = 'Auxiliary input file '//auxinput_filename//' does not exist'
                 call fatal_error(error_msg)
             end if
+        end if
 
-        end if ! thick_distr
+    end if  ! control_inp_flag
 
-    endif   ! control_inp_flag
+
+    ! Read new spancontrolinputs file (added by Karthik) or
+    ! Read NACA spancontrolinputs file (added by Mayank)
+    !elseif (control_inp_flag .eq. 2) then
+    !    write(*, *)
+    !    print*, 'Reading the spanwise_input file ....'
+    !    write(*, *)
+    !    write(nopen,*) ''
+    !    write(nopen,*) 'Reading the spanwise_input file ....'
+    !    write(nopen,*)
+    !  
+    !    ! If auxiliary input file doesn't exist, warn and quit 
+    !    ! read_spanwise_NACA_input() in readinput.f90 
+    !    if (thick_distr == 5) then
+    !        auxinput_filename = trim(path)//'spancontrolinputs_NACA_'//trim(row_type)//'.dat'
+    !        inquire(file = auxinput_filename, exist=file_exist)
+    !        if (file_exist) then
+    !            call read_spanwise_NACA_input(row_type, path)
+    !        else
+    !            error_msg   = 'Auxiliary input file '//auxinput_filename//' does not exist'
+    !            call fatal_error(error_msg)
+    !        end if
+
+    !    else
+    !        auxinput_filename = trim(path)//'spancontrolinputs.'//trim(row_type)//'.dat'
+    !        inquire(file = auxinput_filename, exist=file_exist)
+    !        if (file_exist) then
+    !            call read_spanwise_input(row_type, path)
+    !        else
+    !            error_msg   = 'Auxiliary input file '//auxinput_filename//' does not exist'
+    !            call fatal_error(error_msg)
+    !        end if
+
+    !    end if ! thick_distr
+
+    !endif   ! control_inp_flag
 
     call close_log_file(nopen, file_open)
 
@@ -1585,7 +1617,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
        call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js), &
                     stgr,stack,chord_switch,stak_u,stak_v,xb_stk,yb_stk,stack_switch, &
                     clustering_switch, clustering_parameter, nsl,nbls,curv,thick,LE,np,ncp_curv,ncp_thk, &
-                    curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,ee_all,thick_distr,thick_distr_3_flag, &
+                    curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,ee_all,thick_distr, &
                     umxthk_all, C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all, &
                     LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments, &
                     sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
@@ -1594,7 +1626,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                     le_opt_flag, te_opt_flag, le_angle_all, te_angle_all)
 
        !
-       ! bladegen call including isxygrid - will be deleted in the future
+       ! bladegen call including isxygrid and thick_distr_3_flag - will be deleted in the future
        !
        !call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js), &
        !             stgr,stack,chord_switch,stak_u,stak_v,xb_stk,yb_stk,stack_switch, &
