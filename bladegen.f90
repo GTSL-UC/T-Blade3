@@ -157,7 +157,7 @@ character*20 sec
 logical ellip, isdev!, isxygrid
 integer                             :: nopen
 character(len = :), allocatable     :: log_file, thickness_file_name, error_msg, &
-                                       warning_msg
+                                       warning_msg, dev_msg
 logical                             :: file_open, write_to_file, file_exist
 logical,    allocatable             :: thk_der(:)
 
@@ -339,7 +339,8 @@ else if (clustering_switch .eq. 4) then
     !    call elliptical_clustering(np,np_cluster,cp_LE,cp_TE,u)
     else
         error_msg   = 'Ellipse-hyperbolic clustering not available for current thickness distribution'
-        call fatal_error(error_msg)
+        dev_msg     = 'Check subroutine bladegen in bladegen.f90'
+        call fatal_error(error_msg, dev_msg = dev_msg)
     end if
 end if
 
@@ -775,7 +776,8 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
             
             if (thickness(i) < 0) then
                 error_msg   = 'Negative thickness encountered for blade section '//sec
-                call fatal_error(error_msg)
+                dev_msg     = 'Check subroutine bladegen in bladegen.f90'
+                call fatal_error(error_msg, dev_msg = dev_msg)
             end if
 
         end do    
@@ -788,7 +790,8 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
             thk_der(i)  = (thickness_data(i,3) .gt. 0.0)
             if (thk_der(i)) then
                 warning_msg = 'Thickness distribution for blade section = '//sec//" isn't monotonic'"
-                call warning(warning_msg)
+                dev_msg     = 'Check subroutine bladegen in bladegen.f90'
+                call warning(warning_msg, dev_msg = dev_msg)
                 !write(nopen,*) "Thickness distribution for blade section = ", js, " isn't monotonic"
                 exit
             end if
@@ -880,7 +883,8 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         !close (81)
         ! endif
         error_msg   = 'Exact thickness distribution is no longer available with this release of T-Blade3'
-        call fatal_error(error_msg)
+        dev_msg     = 'Check subroutine bladegen in bladegen.f90'
+        call fatal_error(error_msg, dev_msg = dev_msg)
     elseif (thick_distr.eq.3) then
         ! Added by Karthik Balasubramanian
         !call log_file_exists(log_file, nopen, file_open)
@@ -910,7 +914,8 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         !! endif
         !call close_log_file(nopen, file_open)
         error_msg   = 'Direct thickness distribution is no longer available with this release of T-Blade3'
-        call fatal_error(error_msg)
+        dev_msg     = 'Check subroutine bladegen in bladegen.f90'
+        call fatal_error(error_msg, dev_msg = dev_msg)
     elseif(thick_distr.ne.0) then
         ! -----------------------------------------------------------------------------
         !Spline thickness distr. with LE control

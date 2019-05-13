@@ -15,7 +15,7 @@ subroutine readinput(fname)
     
     ! Local variables
     character(256)                                      :: temp, temp1, temp2, beta_switch_2
-    character(:),   allocatable                         :: log_file, error_msg, warning_msg
+    character(:),   allocatable                         :: log_file, error_msg, warning_msg, dev_msg
     integer                                             :: er, stat, n_temp1, n_temp2, &
                                                            nopen, nopen1
     real                                                :: inBetaInci, outBetaDevn, temp_offsets(2)
@@ -259,7 +259,8 @@ subroutine readinput(fname)
 
         error_msg   = 'Invalid argument for beta_switch'
         warning_msg = 'Valid arguments are 0, 1, 2, 3 and 4 (refer to T-Blade3 documentation)'
-        call fatal_error(error_msg, warning_msg)
+        dev_msg     = 'Check subroutine readinput in readinput.f90'
+        call fatal_error(error_msg, warning_msg, dev_msg)
 
     endif
 
@@ -361,7 +362,8 @@ subroutine readinput(fname)
 
         error_msg   = 'Invalid argument for anglespline'
         warning_msg = 'Valid arguments are "inletspline", "outletspline", "inoutspline" or "inci_dev_spline"'
-        call fatal_error(error_msg, warning_msg)
+        dev_msg     = 'Check subroutine readinput in readinput.f90'
+        call fatal_error(error_msg, warning_msg, dev_msg)
 
     end if
 
@@ -393,7 +395,8 @@ subroutine readinput(fname)
 
         error_msg   = 'Invalid argument for camber definition switch'
         warning_msg = 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
-        call fatal_error(error_msg, warning_msg)
+        dev_msg     = 'Check subroutine readinput in readinput.f90'
+        call fatal_error(error_msg, warning_msg, dev_msg)
 
     end if
 
@@ -403,7 +406,8 @@ subroutine readinput(fname)
 
         error_msg   = 'Invalid argument for curvature control switch'
         warning_msg = 'Valid argument for using spancontrolinputs is "spanwise_spline" (refer to T-Blade3 documentation)'
-        call fatal_error(error_msg, warning_msg)
+        dev_msg     = 'Check subroutine readinput in readinput.f90'
+        call fatal_error(error_msg, warning_msg, dev_msg)
 
     end if 
 
@@ -434,13 +438,15 @@ subroutine readinput(fname)
 
         error_msg   = 'Invalid argument for thickness distribution switch'
         warning_msg = 'Direct and Exact thickness distributions are no longer available with T-Blade3'
-        call fatal_error(error_msg, warning_msg)
+        dev_msg     = 'Check subroutine readinput in readinput.f90'
+        call fatal_error(error_msg, warning_msg, dev_msg)
 
     else if (thick_distr .ne. 0 .and. thick_distr .ne. 1 .and. thick_distr .ne. 2 .and. thick_distr .ne. 5) then
 
         error_msg   = 'Invalid argument for thickness distribution switch'
         warning_msg = 'Valid arguments are 0, 1, 2, 3, 4 or 5 (refer to T-Blade3 documentation)'
-        call fatal_error(error_msg, warning_msg)
+        dev_msg     = 'Check subroutine readinput in readinput.f90'
+        call fatal_error(error_msg, warning_msg, dev_msg)
 
     end if
 
@@ -464,7 +470,8 @@ subroutine readinput(fname)
 
         error_msg   = 'Invalid argument for thickness multiplier switch'
         warning_msg = 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
-        call fatal_error(error_msg, warning_msg)
+        dev_msg     = 'Check subroutine readinput in readinput.f90'
+        call fatal_error(error_msg, warning_msg, dev_msg)
 
     end if
 
@@ -484,7 +491,8 @@ subroutine readinput(fname)
 
         error_msg   = 'Invalid argument for LE spline control switch'
         warning_msg = 'Valaid arguments are 0 or 1 (refer to T-Blade3 documentation)'
-        call fatal_error(error_msg, warning_msg)
+        dev_msg     = 'Check subroutine readinput in readinput.f90'
+        call fatal_error(error_msg, warning_msg, dev_msg)
 
     end if
 
@@ -504,7 +512,8 @@ subroutine readinput(fname)
 
         error_msg   = 'Invalid argument for non-dimensional actual chord switch'
         warning_msg = 'Valid arguments are 0, 1 or 2 (refer to T-Blade3 documentation)'
-        call fatal_error(error_msg, warning_msg)
+        dev_msg     = 'Check subroutine readinput in readinput.f90'
+        call fatal_error(error_msg, warning_msg, dev_msg)
 
     end if
 
@@ -527,7 +536,8 @@ subroutine readinput(fname)
     else
         error_msg   = 'Invalid argument for leansweep_switch'
         warning_msg = 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
-        call fatal_error(error_msg, warning_msg)
+        dev_msg     = 'Check subroutine readinput in readinput.f90'
+        call fatal_error(error_msg, warning_msg, dev_msg)
     end if
 
 
@@ -549,7 +559,8 @@ subroutine readinput(fname)
 
         error_msg   = 'Invalid argument for clustering_switch'
         warning_msg = 'Valid arguments are 0, 1, 2 or 3 (refer to T-Blade3 documentation)'
-        call fatal_error(error_msg, warning_msg)
+        dev_msg     = 'Check subroutine readinput in readinput.f90'
+        call fatal_error(error_msg, warning_msg, dev_msg)
 
     end if
 
@@ -1518,7 +1529,7 @@ subroutine read_spanwise_input(row_type, path)
 
     ! Local variables
     character(256)                                  :: temps, file_name
-    character(:),   allocatable                     :: log_file, error_msg
+    character(:),   allocatable                     :: log_file, error_msg, dev_msg
     real,           allocatable                     :: temp(:), temp_exact(:)
     real                                            :: span_dum
     integer                                         :: temp_thk_flag(3), jj, nopen, nopen1
@@ -1574,7 +1585,8 @@ subroutine read_spanwise_input(row_type, path)
     if(control_inp_flag .eq. 1 .and. ncp_span_curv .ne. nsl) then
         error_msg   = ' In auxiliary file inputs, number of spanwise curvature specifications'//&
                       ' must equal number of streamlines if spanwise spline is not used.'
-        call fatal_error(error_msg)
+        dev_msg     = 'Check subroutine read_spanwise_input in readinput.f90'
+        call fatal_error(error_msg, dev_msg = dev_msg)
     endif
     
     
@@ -1989,7 +2001,8 @@ subroutine read_spanwise_input(row_type, path)
         if(control_inp_flag .eq. 1 .and. ncp_span_thk .ne. nsl) then
             error_msg   = 'In auxiliary file inputs, number of spanwise thickness specifications'//&
                           ' must equal number of streamlines if spanwise spline is not used.'
-            call fatal_error(error_msg)
+            dev_msg     = 'Check subroutine read_spanwise_input in readinput.f90'
+            call fatal_error(error_msg, dev_msg = dev_msg)
         end if
        
        
@@ -2562,7 +2575,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
     character(*),                   intent(in)      :: path
 
     ! Local variables
-    character(:),   allocatable                     :: file_name, log_file, error_msg, warning_msg
+    character(:),   allocatable                     :: file_name, log_file, error_msg, warning_msg, dev_msg
     character(256)                                  :: temps
     integer                                         :: nopen_aux = 10, nopen, nopen1, kk, n_temp
     real                                            :: span_dum
@@ -2928,7 +2941,8 @@ subroutine read_spanwise_NACA_input(row_type,path)
         error_msg   = "Auxiliary input file "//file_name//" can only be used with the modified &
                       &NACA thickness distribution"
         warning_msg = "Refer to T-Blade3 documentation"
-        call fatal_error(error_msg, warning_msg)
+        dev_msg     = 'Check read_spanwise_NACA_input in readinput.f90'
+        call fatal_error(error_msg, warning_msg, dev_msg)
     else
         do i = 1,2
             read(nopen_aux,'(A)') temps

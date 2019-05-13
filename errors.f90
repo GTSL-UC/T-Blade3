@@ -16,24 +16,30 @@ module errors
     !                   warning_msg - optional message to warn user about why the error has occurred
     !
     !--------------------------------------------------------------------------------------------------
-    subroutine fatal_error(error_msg, warning_msg)
+    subroutine fatal_error(error_msg, warning_msg, dev_msg)
        
         character(:),   allocatable,                intent(in)  :: error_msg
         character(:),   allocatable,    optional,   intent(in)  :: warning_msg
+        character(:),   allocatable,    optional,   intent(in)  :: dev_msg
 
         ! Local variables
         character(:),   allocatable                             :: error_file
         integer                                                 :: nopen
-        logical                                                 :: file_open
+        logical                                                 :: file_open, isdev_local
 
+
+        ! Get the value of isdev
+        call get_dev_status(isdev_local)
 
         ! Print the messages to the screen and stop execution
         print *, ''
         print *, 'FATAL ERROR: '//error_msg
         if (present(warning_msg)) &
             print *, warning_msg
+        if (isdev_local .and. present(dev_msg)) &
+            print *, 'For developers: '//dev_msg
         print *, ''
-
+        
         !
         ! Write the error messages to the error log file
         ! error_file_exists and close_error_file in file_operations.f90
@@ -42,6 +48,8 @@ module errors
         write(nopen,*) 'FATAL ERROR: '//error_msg
         if (present(warning_msg)) &
             write(nopen,*) warning_msg
+        if (isdev_local .and. present(dev_msg)) &
+            write(nopen,*) 'For developers: '//dev_msg
         call close_error_file(nopen, file_open)
 
         stop
@@ -58,20 +66,26 @@ module errors
     ! Input paramaters: error_msg   - mandatory message showing where the error has occurred
     !
     !--------------------------------------------------------------------------------------------------
-    subroutine error(error_msg)
+    subroutine error(error_msg, dev_msg)
         use file_operations
 
         character(:),   allocatable,                intent(in)  :: error_msg
+        character(:),   allocatable,    optional,   intent(in)  :: dev_msg
 
         ! Local variables
         character(:),   allocatable                             :: error_file
         integer                                                 :: nopen
-        logical                                                 :: file_open
+        logical                                                 :: file_open, isdev_local
 
+
+        ! Get the value of isdev
+        call get_dev_status(isdev_local)
 
         ! Print the error message to the screen and exit
         print *, ''
         print *, 'ERROR: '//error_msg
+        if (isdev_local .and. present(dev_msg)) &
+            print *, 'For developers: '//dev_msg
         print *, ''
 
         !
@@ -81,6 +95,8 @@ module errors
         call error_file_exists(error_file, nopen, file_open)
         write(nopen,*) ''
         write(nopen,*) 'ERROR: '//error_msg
+        if (isdev_local .and. present(dev_msg)) &
+            write(nopen,*) 'For developers: '//dev_msg
         write(nopen,*) ''
         call close_error_file(nopen, file_open)
 
@@ -96,23 +112,29 @@ module errors
     ! Input paramaters: warning_msg     - mandatory message showing where the warning has occurred
     !                   warning_msg_1   - optional warning message 
     !--------------------------------------------------------------------------------------------------
-    subroutine warning(warning_msg,warning_msg_1)
+    subroutine warning(warning_msg, warning_msg_1, dev_msg)
         use file_operations
 
         character(:),   allocatable,                intent(in)  :: warning_msg
         character(:),   allocatable,    optional,   intent(in)  :: warning_msg_1
+        character(:),   allocatable,    optional,   intent(in)  :: dev_msg
 
         ! Local variables
         character(:),   allocatable                             :: error_file
         integer                                                 :: nopen
-        logical                                                 :: file_open
+        logical                                                 :: file_open, isdev_local
 
+
+        ! Get the value of isdev
+        call get_dev_status(isdev_local)
 
         ! Print the warning message to the screen
         print *, ''
         print *, 'WARNING: '// warning_msg
         if (present(warning_msg_1)) &
             print *, 'WARNING: '//warning_msg_1
+        if (isdev_local .and. present(dev_msg)) &
+            print *, 'For developers: '//dev_msg
         print *, ''
 
         !
@@ -124,6 +146,8 @@ module errors
         write(nopen,*) 'WARNING: '//warning_msg
         if (present(warning_msg_1)) &
             write(nopen,*) 'WARNING: '//warning_msg_1
+        if (isdev_local .and. present(dev_msg)) &
+            print *, 'For developers: '//dev_msg
         write(nopen,*) ''
         call close_error_file(nopen, file_open)
 

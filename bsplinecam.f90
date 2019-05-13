@@ -164,7 +164,7 @@ real, intent (in) :: xcp(ncp), ycp(ncp), u(np), ainl, aext, chrdx
 character (len = 32), intent (in) :: casename
 logical, intent (in) :: isdev
 integer                             :: nopen
-character(len = :), allocatable     :: log_file, error_msg
+character(len = :), allocatable     :: log_file, error_msg, dev_msg
 logical                             :: file_open
 
 !!		Outputs from this subroutine
@@ -249,7 +249,8 @@ write (*, '(A, F20.15)') 'Determinant is: ', det
 write (nopen, '(A, F20.15)') 'Determinant is: ', det
 if (det.lt.0.) then 
     error_msg   = 'All possible scaling factors for curvature control points are complex'
-    call error(error_msg)
+    dev_msg     = 'Check subroutine camline in bsplinecam.f90'
+    call error(error_msg, dev_msg)
     call exit
 endif
 ! Calculating both possible roots to solve for k

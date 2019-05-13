@@ -524,14 +524,15 @@ integer, intent(in):: nsl,throat_index(nsl),n_normal_distance
 character*20, intent(out):: throat_pos(nsl)
 integer, intent(in)     :: thick_distr
 integer                             :: nopen
-character(:),   allocatable         :: log_file, warning_msg
+character(:),   allocatable         :: log_file, warning_msg, dev_msg
 logical                             :: file_open
 
 call log_file_exists(log_file, nopen, file_open)
 if(throat_index(js) == 0) then
   throat_pos(js) = 'none'
   warning_msg   = 'No Throat found'
-  call warning(warning_msg)
+  dev_msg       = 'Check subroutine throatindex in funcNsubs.f90'
+  call warning(warning_msg, dev_msg = dev_msg)
   write(nopen,*) 'No Throat Found'
   !exit
 elseif(throat_index(js) < 0.25*n_normal_distance) then
@@ -1037,7 +1038,7 @@ character(*) :: casename,develop
 logical isdev
 
 integer                                         :: nopen
-character(len = :), allocatable                 :: log_file, warning_msg
+character(len = :), allocatable                 :: log_file, warning_msg, dev_msg
 logical                                         :: file_open
 
 ! Initializing x_interup and y_interup
@@ -1123,7 +1124,8 @@ print*, 'n_normal_distance =',n_normal_distance
 write(nopen,*) 'n_normal_distance = ', n_normal_distance
 if(n_normal_distance == 0) then
   warning_msg   = 'No throats found because of low number of blades'
-  call warning(warning_msg)
+  dev_msg       = 'Check subroutine throat_calc_pitch_line in funcNsubs.f90'
+  call warning(warning_msg, dev_msg = dev_msg)
   !write(nopen,*) 'No throats found because of low number of blades'
   return
 endif
@@ -1693,6 +1695,24 @@ end subroutine constantslopemeanline3D
 
 
 !
+!
+!
+!*******************************************************************************************
+subroutine get_dev_status(isdev_local)
+    use globvar
+    implicit none
+
+    logical,                    intent(inout)       :: isdev_local
+
+
+    isdev_local = isdev
+
+end subroutine get_dev_status
+!*******************************************************************************************
+
+
+
+!
 ! Subroutine for Gauss-Jordan elimination to solve a nxn linear system by converting the 
 ! coefficient matrix to its reduced row echelon form
 ! Row pivoting is implemented
@@ -1714,7 +1734,7 @@ subroutine gauss_jordan(n, nrhs, a, fail_flag)
     integer                                         :: i, j, c, ipvt
     real                                            :: pvt, temp(n + nrhs)
     real,   parameter                               :: eps = 10e-16
-    character(:),   allocatable                     :: error_msg
+    character(:),   allocatable                     :: error_msg, dev_msg
 
 
     ! Set number of columns
@@ -1739,7 +1759,8 @@ subroutine gauss_jordan(n, nrhs, a, fail_flag)
         ! If all pivot column elements are zero, return fail
         if (abs(pvt) < eps) then
             error_msg   = 'gauss_jordan - zero pivot term'
-            call error(error_msg)
+            dev_msg     = 'Check subroutine gauss_jordan in funcNsubs.f90'
+            call error(error_msg, dev_msg)
             fail_flag           = 1
             return
         end if
@@ -2173,7 +2194,7 @@ subroutine quartic_roots (ceff, er, root)
                                                        x1, x2, x3, b, c, d, e, temp(4)
     complex(kind = dp)                              :: w
     integer                                         :: i, j
-    character(:),   allocatable                     :: counter, warning_msg
+    character(:),   allocatable                     :: counter, warning_msg, dev_msg
 
 
     ! If equation is cubic, use the previous subroutine
@@ -2201,7 +2222,8 @@ subroutine quartic_roots (ceff, er, root)
         if (root(i) /= root(i)) then
             write(counter, '(i2)') i
             warning_msg = 'cubic_roots subroutine failed: '//counter//'th root undefined'
-            call warning(warning_msg)
+            dev_msg     = 'Check subroutine quartic_roots in funcNsubs.f90'
+            call warning(warning_msg, dev_msg = dev_msg)
         end if
     end do
 
@@ -2896,7 +2918,7 @@ subroutine LE_clustering_parameter_solver(xi,K,delta,solver_flag)
                                                        tol = 10E-6
     integer                                         :: nopen, niter
     character(:),   allocatable                     :: log_file, warning_msg, &
-                                                       warning_msg_1
+                                                       warning_msg_1, dev_msg
     logical                                         :: file_open
     interface LE_clustering_parameter_func
         real function LE_clustering_parameter_func(Kf,xif,func_coordinate) 
@@ -2951,7 +2973,8 @@ subroutine LE_clustering_parameter_solver(xi,K,delta,solver_flag)
     else
         warning_msg     = "Could not find initial guesses for the clustering_parameter bisection solver"
         warning_msg_1   = "Returning to uniform midchord clustering"
-        call warning(warning_msg, warning_msg_1)
+        dev_msg         = 'Check subroutine LE_clustering_parameter_solver in funcNsubs.f90'
+        call warning(warning_msg, warning_msg_1, dev_msg)
         !write(nopen,*) 'Could not find initial guesses for the clustering_parameter bisection solver'
         !write(nopen,*) 'Returning to uniform midchord clustering'
         delta       = 0.0
@@ -2991,7 +3014,7 @@ subroutine TE_clustering_parameter_solver(xi,K,delta,solver_flag)
                                                        tol = 10E-6
     integer                                         :: nopen, niter
     character(:),   allocatable                     :: log_file, warning_msg, &
-                                                       warning_msg_1
+                                                       warning_msg_1, dev_msg
     logical                                         :: file_open
     interface TE_clustering_parameter_func
         real function TE_clustering_parameter_func(Kf,xif,func_coordinate)
@@ -3046,7 +3069,8 @@ subroutine TE_clustering_parameter_solver(xi,K,delta,solver_flag)
     else
         warning_msg     = 'Could not find initial guesses for the TE clustering_parameter bisection solver'
         warning_msg_1   = 'Returning to uniform midchord clustering'
-        call warning(warning_msg, warning_msg_1)
+        dev_msg         = 'Check subroutine TE_clustering_parameter_solver in funcNsubs.f90'
+        call warning(warning_msg, warning_msg_1, dev_msg)
         !write(nopen,*) 'Could not find initial guesses for the TE clustering_parameter bisection solver'
         !write(nopen,*) 'Returning to uniform midchord clustering'
         delta       = 0.0

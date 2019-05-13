@@ -72,14 +72,16 @@ real, intent (inout) :: d(n), ld(n), ud(n), r(n)
 integer :: k
 real :: m
 real,   parameter    :: tol = 10e-10
-character(:),   allocatable :: error_msg
+character(:),   allocatable :: error_msg, dev_msg
+
 
 do k = 2, n
     ! If d(k - 1) = 0
     ! Compare to a tolerance to avoid floating point errors in an equality comparison
     if (abs(d(k-1)) .le. tol) then
         error_msg   = 'tridiag_solve failed - zero diagonal element'
-        call fatal_error(error_msg)
+        dev_msg     = 'Check subroutine tridiag_solve in spline.f90'
+        call fatal_error(error_msg, dev_msg = dev_msg)
     end if
     m = ld(k)/d(k-1)
     d(k) = d(k) - m*ud(k-1)
@@ -90,7 +92,8 @@ enddo
 ! Compare to a tolerance to avoid floating point errors in an equality comparison
 if (abs(d(n)) .le. tol) then
     error_msg   = 'tridiag_solve failed - zero diagonal element'
-    call fatal_error(error_msg)
+    dev_msg     = 'Check subroutine tridiag_solve in spline.f90'
+    call fatal_error(error_msg, dev_msg = dev_msg)
 end if
 
 r(n) = r(n)/d(n)
@@ -235,7 +238,8 @@ real, intent (in) :: y(n), dydt(n), t(n), tt
 integer :: knt1, knt2, find_knt
 real :: dt, dy, a(4), dt2, frac, spl_eval
 real,   parameter   :: tol = 10e-10
-character(:),   allocatable :: error_msg
+character(:),   allocatable :: error_msg, dev_msg
+
 
 knt1 = find_knt(tt, t, n)
 knt2 = knt1+1
@@ -250,7 +254,8 @@ frac = dt2/dt
 ! Compare to a tolerance to avoid floating point errors in an equality comparison
 if (abs(dt) .le. tol) then
     error_msg   = 'spl_eval failed - identical knot locations'
-    call fatal_error(error_msg)
+    dev_msg     = 'Check function spl_eval in spline.f90'
+    call fatal_error(error_msg, dev_msg = dev_msg)
 end if
 
 a(1) = y(knt1)
@@ -290,7 +295,7 @@ real, intent (in) ::y(n), dydt(n), t(n), tt
 integer :: knt1, knt2, find_knt
 real :: dt, dy, a(3), dt2, frac, dspl_eval
 real,   parameter   :: tol = 10e-10
-character(:),   allocatable :: error_msg
+character(:),   allocatable :: error_msg, dev_msg
 
 knt1 = find_knt(tt, t, n)
 knt2 = knt1+1
@@ -304,7 +309,8 @@ frac = dt2/dt
 ! Compare to a tolerance to avoid floating point errors in an equality comparison
 if (abs(dt) .le. tol) then
     error_msg   = 'dspl_eval failed - identical knot locations'
-    call fatal_error(error_msg)
+    dev_msg     = 'Check function dspl_eval in spline.f90'
+    call fatal_error(error_msg, dev_msg = dev_msg)
 end if
 
 a(1) = dydt(knt1)
@@ -345,17 +351,19 @@ real, intent (inout) :: tt
 !!		Other local variables
 integer :: iter, maxiter
 real :: spl_eval, dspl_eval, dt_newt, y_newt, dy_newt, tol, mint, maxt
-character(:),   allocatable :: error_msg, warning_msg
+character(:),   allocatable :: error_msg, warning_msg, dev_msg
 
 mint = minval(t)
 maxt = maxval(t)
 if (tt .lt. mint) then
     warning_msg = 'Bad initial guess provided. Using minimum value.'
-    call warning(warning_msg)
+    dev_msg     = 'Check subroutine spl_inv in spline.f90'
+    call warning(warning_msg, dev_msg = dev_msg)
     tt = mint
 elseif (tt .gt. maxt) then
     warning_msg = 'Bad initial guess provided. Using maximum value.'
-    call warning(warning_msg)
+    dev_msg     = 'Check subroutine spl_inv in spline.f90'
+    call warning(warning_msg, dev_msg = dev_msg)
     tt = maxt
 endif
 
@@ -368,18 +376,21 @@ do iter = 1, maxiter
     tt = tt + 0.8*dt_newt
     if (tt < mint) then
         warning_msg = 'spl_inv - spline parameter clipped at spline begin'
-        call warning(warning_msg)
+        dev_msg     = 'Check subroutine spl_inv in spline.f90'
+        call warning(warning_msg, dev_msg = dev_msg)
         tt = mint
     elseif(tt > maxt) then
         warning_msg = 'spl_inv- spline parameter clipped at spline end'
-        call warning(warning_msg)
+        dev_msg     = 'Check subroutine spl_inv in spline.f90'
+        call warning(warning_msg, dev_msg = dev_msg)
         tt = maxt
     endif
     if(abs(dt_newt/(t(n)-t(1))) .lt. tol) return
 enddo
 
 error_msg   = 'spl_inv - spline parameter not determined. Maximum iteration reached.'
-call error(error_msg)
+dev_msg     = 'Check subroutine spl_inv in spline.f90'
+call error(error_msg, dev_msg)
 return
 
 end subroutine spl_inv
@@ -408,18 +419,20 @@ real, intent (out) :: dydt(n)
 !!		Other local variables
 integer :: i, seg_start, seg_end, n0
 real,   parameter   :: tol = 10e-10
-character(:),   allocatable :: error_msg
+character(:),   allocatable :: error_msg, dev_msg
 
 ! If t(1) = t(2)
 ! If t(n) = t(n - 1)
 ! Compare to a tolerance to avoid floating point errors in an equality comparison
 if(abs(t(1) - t(2)) .le. tol) then
     error_msg   = 'spl_discjoint - identical knot locations at spline begin'
-    call fatal_error(error_msg)
+    dev_msg     = 'Check subroutine spl_discjoint in spline.f90'
+    call fatal_error(error_msg, dev_msg = dev_msg)
 end if
 if(abs(t(n) - t(n-1)) .le. tol) then
     error_msg   = 'spl_discjoint - identical knot locations at spline end'
-    call fatal_error(error_msg)
+    dev_msg     = 'Check subroutine spl_discjoint in spline.f90'
+    call fatal_error(error_msg, dev_msg = dev_msg)
 end if
 
 seg_start = 1
@@ -481,27 +494,31 @@ real :: dt1, dt2, r, ra, rb, rt1, rt2, F, Fa, Fb, Ft1, Ft2, &
         mint1, mint2, maxt1, maxt2
 integer :: iter, i, l, nopen
 real :: dspl_eval
-character(len = :), allocatable :: log_file, warning_msg
+character(len = :), allocatable :: log_file, warning_msg, dev_msg
 logical                         :: file_open
 
 mint1 = minval(t1); maxt1 = maxval(t1)
 mint2 = minval(t2); maxt2 = maxval(t2)
 if (tt1 .lt. mint1) then
     warning_msg = 'Bad initial guess provided for spline 1. Using minimum value.'
-    call warning(warning_msg)
+    dev_msg     = 'Check subroutine spl_intersect in spline.f90'
+    call warning(warning_msg, dev_msg = dev_msg)
     tt1 = mint1
 elseif (tt1 .gt. maxt1) then
     warning_msg = 'Bad initial guess provided for spline 1. Using maximum value.'
-    call warning(warning_msg)
+    dev_msg     = 'Check subroutine spl_intersect in spline.f90'
+    call warning(warning_msg, dev_msg = dev_msg)
     tt1 = maxt1
 endif
 if (tt2 .lt. mint2) then
     warning_msg = 'Bad initial guess provided for spline 2. Using minimum value.'
-    call warning(warning_msg)
+    dev_msg     = 'Check subroutine spl_intersect in spline.f90'
+    call warning(warning_msg, dev_msg = dev_msg)
     tt2 = mint2
 elseif (tt2 .gt. maxt2) then
     warning_msg = 'Bad initial guess provided for spline 2. Using maximum value.'
-    call warning(warning_msg)
+    dev_msg     = 'Check subroutine spl_intersect in spline.f90'
+    call warning(warning_msg, dev_msg = dev_msg)
     tt2 = maxt2
 endif
 
@@ -573,22 +590,26 @@ enddo
 call log_file_exists(log_file, nopen, file_open)
 if(trunc1knt1) then
     warning_msg = 'spl_intersect - splines may not intersect. Knot 1 of spline 1 is closest possible to spline 2.'
-    call warning(warning_msg)
+    dev_msg     = 'Check subroutine spl_intersect in spline.f90'
+    call warning(warning_msg, dev_msg = dev_msg)
     !write(nopen,*) 'spl_intersect - splines may not intersect. Knot 1 of spline 1 is closest possible to spline 2.'
 end if
 if(trunc1kntn) then
     warning_msg = 'spl_intersect - splines may not intersect. End knot of spline 1 is closest possible to spline 2.'
-    call warning(warning_msg)
+    dev_msg     = 'Check subroutine spl_intersect in spline.f90'
+    call warning(warning_msg, dev_msg = dev_msg)
     !write(nopen,*) 'spl_intersect - splines may not intersect. End knot of spline 1 is closest possible to spline 2.'
 end if
 if(trunc2knt1) then
     warning_msg = 'spl_intersect - splines may not intersect. Knot 1 of spline 2 is closest possible to spline 1.'
-    call warning(warning_msg)
+    dev_msg     = 'Check subroutine spl_intersect in spline.f90'
+    call warning(warning_msg, dev_msg = dev_msg)
     !write(nopen,*) 'spl_intersect - splines may not intersect. Knot 1 of spline 2 is closest possible to spline 1.'
 end if
 if(trunc2kntn) then
     warning_msg = 'spl_intersect - Splines may not intersect. End knot of spline 2 is closest possible to spline 1.'
-    call warning(warning_msg)
+    dev_msg     = 'Check subroutine spl_intersect in spline.f90'
+    call warning(warning_msg, dev_msg = dev_msg)
     !write(nopen,*) 'spl_intersect - Splines may not intersect. End knot of spline 2 is closest possible to spline 1.'
 end if
 

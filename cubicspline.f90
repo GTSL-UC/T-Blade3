@@ -100,7 +100,7 @@ integer ii,j, nspline, nx,nspan
 parameter(nx=1000)
 real*8 xbs(nspline),ybs(nspline), xin(nspan), yout(nspan)
 real*8 min, max, xmax, xmin, xint
-character(:),   allocatable :: error_msg, warning_msg, warning_arg
+character(:),   allocatable :: error_msg, warning_msg, warning_arg, dev_msg
 !print*,'xin:',xin
 do j = 1, nspan
  do ii = 1, nspline-1
@@ -117,7 +117,8 @@ do j = 1, nspan
      error_msg      = 'Curve-line intersection point was not found'
      write(warning_arg, '(f20.16)') xint
      warning_msg    = 'xint = '//warning_arg 
-     call fatal_error(error_msg, warning_msg)
+     dev_msg        = 'Check subroutine curv_line_inters in cubicspline.f90'
+     call fatal_error(error_msg, warning_msg, dev_msg)
   end if
  enddo
 !write(*,*)
