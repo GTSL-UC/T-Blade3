@@ -1529,7 +1529,7 @@ subroutine read_spanwise_input(row_type, path)
 
     ! Local variables
     character(256)                                  :: temps, file_name
-    character(:),   allocatable                     :: log_file, error_msg, dev_msg
+    character(:),   allocatable                     :: log_file, error_msg, warning_msg, dev_msg
     real,           allocatable                     :: temp(:), temp_exact(:)
     real                                            :: span_dum
     integer                                         :: temp_thk_flag(3), jj, nopen, nopen1
@@ -1628,6 +1628,14 @@ subroutine read_spanwise_input(row_type, path)
     allocate(cp_chord_curv(ncp_span_curv, ncp_chord_curv))
     
     read(10,'(A)') temps
+    
+    ! If control table for cur1 is present, raise a fatal error
+    if (index(trim(temps), 'cur1') /= 0) then
+        error_msg   = 'Incorrect auxiliary file format'
+        warning_msg = 'This is a newer spancontrolinputs file format compatible with modified NACA thickness distribution only'
+        dev_msg     = 'Check subroutine read_spanwise_input in readinput.f90'
+        call fatal_error(error_msg, warning_msg, dev_msg)
+    end if
     write(nopen1,'(A)') temps
     
 
@@ -2587,7 +2595,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
     !
     ! Read auxiliary input file name
     !
-    file_name       = trim(path)//'spancontrolinputs_NACA_'//trim(row_type)//'.dat'
+    file_name       = trim(path)//'spancontrolinputs.'//trim(row_type)//'.dat'
 
 
 
@@ -2649,6 +2657,14 @@ subroutine read_spanwise_NACA_input(row_type,path)
     allocate(cp_chord_curv(ncp_span_curv, ncp_chord_curv))
 
     read(nopen_aux,'(A)') temps
+
+    ! If control table for cur1 is not found, raise a fatal error
+    if (index(trim(temps), 'cur1') == 0) then
+        error_msg   = 'Incorrect auxiliary file format'
+        warning_msg = 'This is an older format of the spancontrolinputs file'
+        dev_msg     = 'Check subroutine read_spanwise_NACA_input in readinput.f90'
+        call fatal_error(error_msg, warning_msg, dev_msg)
+    end if
     write(nopen1,'(A)') trim(temps)
 
 
@@ -2938,8 +2954,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
     ! Only applies for the modified NACA thickness distribution
     !
     if (thick_distr .ne. 5) then
-        error_msg   = "Auxiliary input file "//file_name//" can only be used with the modified &
-                      &NACA thickness distribution"
+        error_msg   = "Incorrect auxiliary file format"
         warning_msg = "Refer to T-Blade3 documentation"
         dev_msg     = 'Check read_spanwise_NACA_input in readinput.f90'
         call fatal_error(error_msg, warning_msg, dev_msg)

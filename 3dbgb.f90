@@ -560,7 +560,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         ! If auxiliary input file doesn't exist, warn and quit
         ! read_spanwise_NACA_input() and read_spanwise_input() in readinput.f90
         if (thick_distr == 5) then
-            auxinput_filename = trim(path)//'spancontrolinputs_NACA_'//trim(row_type)//'.dat'
+            auxinput_filename = trim(path)//'spancontrolinputs.'//trim(row_type)//'.dat'
             inquire(file = auxinput_filename, exist=file_exist)
             if (file_exist) then
                 call read_spanwise_NACA_input(row_type, path)
