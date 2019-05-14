@@ -545,7 +545,7 @@ subroutine span_variation()
     !
     ! Write thickness spanwise spline data to a file, if command line option "dev" is used
     !
-    if (isdev) then
+    if (isdev .and. (thick /= 0 .or. thick_distr == 5)) then
         
         print *, 'Writing spanwise thickness variation data to file'
         call log_file_exists(log_file, nopen, file_open)

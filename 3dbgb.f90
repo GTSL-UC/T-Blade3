@@ -524,11 +524,6 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
     ! Determine which auxiliary input file should be read
     call log_file_exists(log_file, nopen, file_open)
-    
-    write(nopen,*) ''
-    write(nopen,*) 'From 3dbgb - ', trim(spanwise_spline)
-    write(nopen,*) 'From 3dbgb - ', control_inp_flag
-    write(nopen,*) ''
 
 
 
