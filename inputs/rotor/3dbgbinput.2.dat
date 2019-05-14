@@ -45,12 +45,12 @@
  # Use +200 for stacking on airfoil area centroid.                # 
  Variable Radial stacking (0=no,1=yes):
            0
- J   type |stk_u |stk_v |umxthk |lethk |tethk  |Jcells(Grid:4n+1) |eta_ofst(<=10){%thkc/Jmax}  |BGgrid(0=no,1=yes) |
- 1   sect1 25.00  0.00  0.30  0.028  0.02   33   10   1
- 6   sect1 25.00  0.00  0.30  0.028  0.02   33   10   1
-11   sect1 25.00  0.00  0.30  0.028  0.02   33   10   1
-16   sect1 25.00  0.00  0.30  0.028  0.02   33   10   1
-21   sect1 25.00  0.00  0.30  0.028  0.02   33   10   1
+ J   type |stk_u |stk_v |umxthk |lethk |tethk  
+ 1   sect1 25.00  0.00  0.30  0.028  0.02   
+ 6   sect1 25.00  0.00  0.30  0.028  0.02   
+11   sect1 25.00  0.00  0.30  0.028  0.02   
+16   sect1 25.00  0.00  0.30  0.028  0.02   
+21   sect1 25.00  0.00  0.30  0.028  0.02   
 
  Control table for blending section variable:
            5           0           0

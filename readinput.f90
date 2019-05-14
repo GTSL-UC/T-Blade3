@@ -673,6 +673,15 @@ subroutine readinput(fname)
     read(1,*)stack_switch
     write(nopen1,*) stack_switch
     read(1,'(A)')temp
+
+    ! Raise fatal error if grid generation parameters are still present in main input file
+    if ((index(trim(temp), 'Jcells') /= 0) .or. (index(trim(temp), 'eta_ofst') /= 0) &
+        .or. (index(trim(temp), 'BGgrid') /= 0)) then
+        error_msg   = 'Background grid generation is no longer available with T-Blade3'
+        warning_msg = 'Remove background grid generation parameters from main input file'
+        dev_msg     = 'Check subroutine readinput in readinput.f90'
+        call fatal_error(error_msg, warning_msg, dev_msg)
+    end if
     write(nopen1,'(A)') trim(temp)
 
 
