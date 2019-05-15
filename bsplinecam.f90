@@ -161,7 +161,7 @@ integer, parameter :: splinedata_col = 6
 
 integer, intent (in) :: np, ncp, wing_flag
 real, intent (in) :: xcp(ncp), ycp(ncp), u(np), ainl, aext, chrdx
-character (len = 32), intent (in) :: casename
+character (*), intent (in) :: casename
 logical, intent (in) :: isdev
 integer                             :: nopen
 character(len = :), allocatable     :: log_file, error_msg, dev_msg

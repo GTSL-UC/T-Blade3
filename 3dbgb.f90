@@ -1617,7 +1617,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                     umxthk_all, C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all, &
                     LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments, &
                     sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
-                    n_normal_distance,casename,develop,isdev,mble,mbte,mles,mtes,i_slope,jcellblade_all, &
+                    n_normal_distance,casename,develop,mble,mbte,mles,mtes,i_slope,jcellblade_all, &
                     etawidth_all,BGgrid_all,thk_tm_c_spl, theta_offset, te_flag, &
                     le_opt_flag, te_opt_flag, le_angle_all, te_angle_all)
 
