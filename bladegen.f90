@@ -5,22 +5,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                     C_le_y_top_all,C_le_y_bot_all,LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,        &
                     sting_h_all,LEdegree,no_LE_segments,sec_radius,bladedata,amount_data,scf,             &
                     intersec_coord,throat_index, n_normal_distance,casename,develop,mble,mbte,msle, &
-                    mste,i_slope,jcellblade_all, etawidth_all,BGgrid_all,thk_tm_c_spl, theta_offset,      &
-                    te_flag, le_opt_flag, te_opt_flag, le_angle_all, te_angle_all)
-
-!
-! bladegen definition including isxygrid and thick_distr_3_flag - will be deleted in the future
-!
-!subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, &
-!                    stagger,stack,chord_switch,stk_u,stk_v,xb_stk,yb_stk,stack_switch, &
-!                    clustering_switch, clustering_parameter,nsl,nbls,curv_camber,thick,LE,np, ncp_curv,ncp_thk, &
-!                    curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,ee_all,thick_distr,thick_distr_3_flag, &
-!                    umxthk_all,C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all,&
-!                    LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments,&
-!                    sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index, &
-!                    n_normal_distance,casename,develop,isdev,mble,mbte,msle,mste,i_slope,jcellblade_all, &
-!                    etawidth_all,BGgrid_all,thk_tm_c_spl,isxygrid, theta_offset, te_flag, &
-!                    le_opt_flag, te_opt_flag, le_angle_all, te_angle_all)
+                    mste,i_slope,jcellblade_all, etawidth_all,BGgrid_all,thk_tm_c_spl, theta_offset)
 
     use file_operations
     use errors
@@ -28,15 +13,14 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
     integer,                                intent(in)          :: nspn, js, stack, stack_switch, chord_switch, clustering_switch, nsl, nbls, curv_camber,         &
                                                                    thick, LE, ncp_curv(nsl), ncp_thk(nsl), wing_flag, thick_distr, LEdegree, no_LE_segments,       &
-                                                                   amount_data, throat_index(nspn), n_normal_distance, i_slope, te_flag, le_opt_flag, te_opt_flag
+                                                                   amount_data, throat_index(nspn), n_normal_distance, i_slope
     integer,                                intent(inout)       :: np
     real,                                   intent(in)          :: thkc, mr1, chrdx, xcen, ycen, stk_u(1), stk_v(1), xb_stk, yb_stk, clustering_parameter,         &
                                                                    curv_cp(20,2*nsl), thk_cp(20,2*nsl), lethk_all(nsl), tethk_all(nsl), s_all(nsl), ee_all(nsl),   &
                                                                    umxthk_all(nsl), C_le_x_top_all(nsl), C_le_x_bot_all(nsl), C_le_y_top_all(nsl),                 &
                                                                    C_le_y_bot_all(nsl), LE_vertex_ang_all(nsl), LE_vertex_dis_all(nsl), sting_l_all(nsl),          &
                                                                    sting_h_all(nsl), sec_radius(nsl,2), scf, intersec_coord(12,nsl), mble, mbte, msle, mste,       &
-                                                                   jcellblade_all(nspn), etawidth_all(nspn), BGgrid_all(nspn), thk_tm_c_spl(nsl), theta_offset,    &
-                                                                   le_angle_all(nsl), te_angle_all(nsl)
+                                                                   jcellblade_all(nspn), etawidth_all(nspn), BGgrid_all(nspn), thk_tm_c_spl(nsl), theta_offset
     real,                                   intent(inout)       :: sinl, sext, stagger, bladedata(amount_data,nsl)
     character(*),                           intent(in)          :: fext, airfoil, casename, develop
 
@@ -242,22 +226,6 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
             call elliptical_clustering(np,np_cluster,cp_LE,cp_TE,u)
 
-        !else if (thick_distr == 4) then
-        !    np_cluster  = int(clustering_parameter)
-
-        !    ! LE ellipse control points
-        !    xcp_LE      = thk_cp(1,2*js - 1)
-        !    ycp_LE      = thk_cp(1,2*js)
-        !    cp_LE(:,1)  = [xcp_LE, xcp_LE , 0.0, xcp_LE]
-        !    cp_LE(:,2)  = [ycp_LE, -ycp_LE, 0.0, 0.0   ]
-
-        !    ! TE ellipse control points
-        !    xcp_TE      = thk_cp(ncp_thk(js),2*js - 1)
-        !    ycp_TE      = thk_cp(ncp_thk(js),2*js)
-        !    cp_TE(:,1)  = [xcp_TE, xcp_TE , 1.0, xcp_TE]
-        !    cp_TE(:,2)  = [ycp_TE, -ycp_TE, 0.0, 0.0   ]
-
-        !    call elliptical_clustering(np,np_cluster,cp_LE,cp_TE,u)
         else
             error_msg   = 'Ellipse-hyperbolic clustering not available for current thickness distribution'
             dev_msg     = 'Check subroutine bladegen in bladegen.f90'
@@ -698,94 +666,6 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             close(11)
 
             call close_log_file(nopen, file_open)
-
-        !
-        ! Exact thickness distribution
-        !
-        else if (thick_distr == 4) then
-            
-            !call log_file_exists(log_file, nopen, file_open)
-            !write (*, '(/, A)') 'Implementing exact thickness control'
-            !write(nopen, '(/, A)') 'Implementing exact thickness control'
-            !ncp = ncp_thk(js)
-            !if (allocated(xcp_thk)) deallocate(xcp_thk)
-            !if (allocated(ycp_thk)) deallocate(ycp_thk)
-            !Allocate(xcp_thk(ncp)) 
-            !Allocate(ycp_thk(ncp)) 
-            !do i = 1, ncp
-            !    xcp_thk(i) = thk_cp(i, 2*js-1)
-            !    ycp_thk(i) = thk_cp(i, 2*js)
-            !end do
-            !print*, 'Exact thickness points:'
-            !write(nopen,*) 'Exact thickness points:'
-            !write(*, '(2F10.5)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
-            !write(nopen, '(2F10.5)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
-            !print*, 'LE Angle', le_angle_all(js)
-            !print*, 'TE Angle', te_angle_all(js)
-            !write(nopen,*) 'LE Angle', le_angle_all(js)
-            !write(nopen,*) 'TE Angle', te_angle_all(js)
-            !! thk_ctrl_gen_driver (uthk, thk, n, u_spl, np, te_angle_all, te_flag, out_coord)
-            !print*, 'TE flag', te_flag
-            !print*, 'LE optimization flag', le_opt_flag
-            !print*, 'TE optimization flag', te_opt_flag
-            !write(nopen,*) 'TE flag', te_flag
-            !write(nopen,*) 'LE optimization flag', le_opt_flag
-            !write(nopen,*) 'TE optimization flag', te_opt_flag
-            !write_to_file   = .true.
-            !write(nopen,*) 'te_angle_all(j) = ', te_angle_all(js)
-            !call thk_ctrl_gen_driver(casename, isdev, sec, xcp_thk, ycp_thk, ncp, u, np, le_angle_all(js), &
-            !                         te_angle_all(js), te_flag, le_opt_flag, te_opt_flag, thickness_data,  &
-            !                         write_to_file)
-            !thickness = thickness_data(:, 2)
-            !call close_log_file(nopen, file_open)
-            !! if(isdev) then
-            !open (unit = 81, file = 'thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
-            !write (81, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
-            !close (81)
-            !open (unit = 81, file = 'thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
-            !! write (81, '(2F20.16)') (u(i), thickness(i), i = 1, np)
-            !write (81, '(6F40.16)') (thickness_data(i, 1), thickness_data(i, 2), thickness_data(i, 3),     &
-            !                         thickness_data(i, 4), thickness_data(i, 5), thickness_data(i, 6), i = 1, np)
-            !close (81)
-            ! end if
-            error_msg   = 'Exact thickness distribution is no longer available with this release of T-Blade3'
-            dev_msg     = 'Check subroutine bladegen in bladegen.f90'
-            call fatal_error(error_msg, dev_msg = dev_msg)
-
-        !
-        ! Direct thickness distribution
-        !
-        else if (thick_distr == 3) then
-            
-            !call log_file_exists(log_file, nopen, file_open)
-            !write (*, '(/, A)') 'Implementing direct thickness control'
-            !write (nopen, '(/, A)') 'Implementing direct thickness control'
-            !ncp = ncp_thk(js)
-            !        if (allocated(xcp_thk)) deallocate(xcp_thk)
-            !        if (allocated(ycp_thk)) deallocate(ycp_thk)
-            !Allocate(xcp_thk(ncp)) 
-            !Allocate(ycp_thk(ncp)) 
-            !do i = 1, ncp
-            !    xcp_thk(i) = thk_cp(i, 2*js-1)
-            !    ycp_thk(i) = thk_cp(i, 2*js)
-            !end do
-            !write (*, '(A)') 'User input thickness control points including internally generated dummy points : '
-            !write (*, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
-            !write (nopen, '(A)') 'User input thickness control points including internally generated dummy points : '
-            !write (nopen, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
-            !call splinethickcontrol(umxthk, thkc, ncp, xcp_thk, ycp_thk, np, u, thickness, thick_distr_3_flag)
-            !! if(isdev) then
-            !    open (unit = 81, file = 'thk_CP.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
-            !    write (81, '(2F20.16)') (xcp_thk(i), ycp_thk(i), i = 1, ncp)
-            !    close (81)
-            !    open (unit = 81, file = 'thk_dist.' // trim(adjustl(sec)) // '.' // trim(casename) // '.dat')
-            !    write (81, '(2F20.16)') (u(i), thickness(i), i = 1, np)
-            !    close (81)
-            !! end if
-            !call close_log_file(nopen, file_open)
-            error_msg   = 'Direct thickness distribution is no longer available with this release of T-Blade3'
-            dev_msg     = 'Check subroutine bladegen in bladegen.f90'
-            call fatal_error(error_msg, dev_msg = dev_msg)
 
         !
         ! Spline thickness distribution with LE control

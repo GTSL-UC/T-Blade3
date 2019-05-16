@@ -4,7 +4,7 @@ implicit none
 integer ibrow,ile,ite,j,LEdegree,no_LE_segments,csng
 !
 character*256 :: fext,line2,argp1,ok
-character*16 blrow,radialsec!,thick_distr_3_flag
+character*16 blrow,radialsec
 character*32 blext(100),casename,spanwise_spline
 character*256 anglespline
 character*10 ibrowc,ibrowc1
@@ -33,7 +33,7 @@ parameter (nspan=200,nrow=1,nx=500,nax=50,jk=12,amount_data= 15)
 integer nsp(nspan),curve,npoints,nbls,i_slope,i_slope_nonoffset_hub,ii,nspline,ncp1,k_tip, rad_in_flag(nspan), rad_out_flag(nspan)
 integer cpdeltam,cpdeltheta,cpinbeta,cpoutbeta,cpchord,cptm_c
 integer, allocatable, dimension(:) :: ncp_curv,ncp_thk,throat_index,BGgrid_all
-integer n_inter_intervals,nsp_interpolated_hub, te_flag, le_opt_flag, te_opt_flag, spline_switch
+integer n_inter_intervals,nsp_interpolated_hub, spline_switch
 !
 real*8, allocatable, dimension(:,:) :: bladedata,splinedata
 real*8 sinl,sext,thkc ,chrdx,mr1,stak_u,stak_v, x1hub,x1tip,r1hub,r1tip
@@ -54,7 +54,7 @@ real*8, allocatable, dimension(:) :: C_le_x_top_all,C_le_x_bot_all,C_le_y_top_al
 real*8, allocatable, dimension(:) :: LE_vertex_ang_all,LE_vertex_dis_all
 real*8, allocatable, dimension(:,:) :: intersec_coord
 real*8, allocatable, dimension(:) :: throat_3D,mouth_3D,exit_3D
-real*8, allocatable, dimension(:) :: hub_slope, le_angle_cp, le_angle_all, te_angle_cp, te_angle_all
+real*8, allocatable, dimension(:) :: hub_slope, le_angle_cp, te_angle_cp
 real*8 :: clustering_parameter
 real*8  le_throat,te_throat
 real*8 pi,dtor,xcg(nspan),ycg(nspan),chrd(nspan), xcen, ycen, xb_stk, yb_stk, xb_stack(nspan), yb_stack(nspan)
@@ -111,7 +111,7 @@ character*15::istr1,istr2,H(13)
 !real*8 inBetaInci, outBetaDevn
 
 logical isdev, tm_c_spline, is_xyzstreamlines, spanwise_angle_spline,spanwise_inci_dev_spline, &
-is2d!, isold, isxygrid
+is2d!, isxygrid
 
 common / bladesectionpoints /xxa(nx,nax),yya(nx,nax)
 !
