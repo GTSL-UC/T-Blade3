@@ -31,7 +31,7 @@
  *     MA  02110-1301  USA
  */
 
-#define NUMUDPARGS 53
+#define NUMUDPARGS 36
 #include "udpUtilities.h"
 
 /* shorthands for accessing argument values and velocities */
@@ -66,28 +66,11 @@
 #define SPAN_DEL_M(         IUDP,I) ((double *) (udps[IUDP].arg[28].val))[I]
 #define SPAN_DEL_THETA(     IUDP,I) ((double *) (udps[IUDP].arg[29].val))[I]
 #define SPAN_THK_CTRL(      IUDP,I) ((double *) (udps[IUDP].arg[30].val))[I]
-#define EXACT_U1(           IUDP,I) ((double *) (udps[IUDP].arg[31].val))[I]
-#define EXACT_U2(           IUDP,I) ((double *) (udps[IUDP].arg[32].val))[I]
-#define EXACT_U3(           IUDP,I) ((double *) (udps[IUDP].arg[33].val))[I]
-#define EXACT_U4(           IUDP,I) ((double *) (udps[IUDP].arg[34].val))[I]
-#define EXACT_U5(           IUDP,I) ((double *) (udps[IUDP].arg[35].val))[I]
-#define EXACT_U6(           IUDP,I) ((double *) (udps[IUDP].arg[36].val))[I]
-#define EXACT_U7(           IUDP,I) ((double *) (udps[IUDP].arg[37].val))[I]
-#define EXACT_THK1(         IUDP,I) ((double *) (udps[IUDP].arg[38].val))[I]
-#define EXACT_THK2(         IUDP,I) ((double *) (udps[IUDP].arg[39].val))[I]
-#define EXACT_THK3(         IUDP,I) ((double *) (udps[IUDP].arg[40].val))[I]
-#define EXACT_THK4(         IUDP,I) ((double *) (udps[IUDP].arg[41].val))[I]
-#define EXACT_THK5(         IUDP,I) ((double *) (udps[IUDP].arg[42].val))[I]
-#define EXACT_THK6(         IUDP,I) ((double *) (udps[IUDP].arg[43].val))[I]
-#define EXACT_THK7(         IUDP,I) ((double *) (udps[IUDP].arg[44].val))[I]
-#define EXACT_LETHK(        IUDP,I) ((double *) (udps[IUDP].arg[45].val))[I]
-#define EXACT_TETHK(        IUDP,I) ((double *) (udps[IUDP].arg[46].val))[I] 
-#define THK_FLAGS(          IUDP,I) ((int    *) (udps[IUDP].arg[47].val))[I]
-#define OFFSETS(            IUDP,I) ((double *) (udps[IUDP].arg[48].val))[I] 
-#define NACA_LE_RADIUS(		IUDP,I) ((double *) (udps[IUDP].arg[49].val))[I]
-#define NACA_U_MAX(			IUDP,I) ((double *) (udps[IUDP].arg[50].val))[I]
-#define NACA_T_MAX(			IUDP,I) ((double *) (udps[IUDP].arg[51].val))[I]
-#define NACA_T_TE(			IUDP,I) ((double *) (udps[IUDP].arg[52].val))[I]
+#define OFFSETS(            IUDP,I) ((double *) (udps[IUDP].arg[31].val))[I] 
+#define NACA_LE_RADIUS(		IUDP,I) ((double *) (udps[IUDP].arg[32].val))[I]
+#define NACA_U_MAX(			IUDP,I) ((double *) (udps[IUDP].arg[33].val))[I]
+#define NACA_T_MAX(			IUDP,I) ((double *) (udps[IUDP].arg[34].val))[I]
+#define NACA_T_TE(			IUDP,I) ((double *) (udps[IUDP].arg[35].val))[I]
 
 /* data about possible arguments */
 static char*  argNames[NUMUDPARGS] = {"ncp",                "filename",         "auxname",          "average",
@@ -97,13 +80,8 @@ static char*  argNames[NUMUDPARGS] = {"ncp",                "filename",         
                                       "u5",                 "u6",               "cur1",             "cur2",             
                                       "cur3",               "cur4",             "cur5",             "cur6",             
                                       "cur7",               "span_curv_ctrl",   "span_del_m_ctrl",  "span_del_theta_ctrl",
-                                      "span_del_m",         "span_del_theta",   "span_thk_ctrl",    "exact_u1",         
-                                      "exact_u2",           "exact_u3",         "exact_u4",         "exact_u5",         
-                                      "exact_u6",           "exact_u7",         "exact_thk1",       "exact_thk2",       
-                                      "exact_thk3",         "exact_thk4",       "exact_thk5",       "exact_thk6",       
-                                      "exact_thk7",         "exact_lethk",      "exact_tethk",      "thk_flags",        
-                                      "offsets",            "naca_le_radius",	"naca_u_max",		"naca_t_max",
-								  	  "naca_t_te",			};
+                                      "span_del_m",         "span_del_theta",   "span_thk_ctrl",    "offsets",            
+                                      "naca_le_radius",	    "naca_u_max",		"naca_t_max",       "naca_t_te",			};
 static int    argTypes[NUMUDPARGS] = {ATTRINT,      ATTRSTRING, ATTRSTRING, ATTRSTRING, 
                                       ATTRSTRING,   ATTRREAL,   ATTRREAL,   ATTRREAL,   
                                       ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
@@ -112,12 +90,7 @@ static int    argTypes[NUMUDPARGS] = {ATTRINT,      ATTRSTRING, ATTRSTRING, ATTR
                                       ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
                                       ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
                                       ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
-                                      ATTRREAL,     ATTRREAL,   ATTRREAL, 	ATTRREAL,	
-                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
-                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,
-                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRINT,      
-                                      ATTRREAL,     ATTRREAL,	ATTRREAL,	ATTRREAL,
-								  	  ATTRREAL,		};
+                                      ATTRREAL,     ATTRREAL,	ATTRREAL,	ATTRREAL,		};
 static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,
@@ -126,12 +99,7 @@ static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,
-                                      0,        0, 			0, 	        0,
-                                      0,        0,          0,          0,
-                                      0,        0,          0,          0,
-                                      0,        0,          0,          0,
-                                      0,        0,			0,			0,
-								  	  0,		};
+                                      0,        0,			0,			0,		};
 static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
@@ -140,12 +108,7 @@ static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
-                                      0.,       0., 		0.,  		0.,
-                                      0.,       0.,         0.,         0.,
-                                      0.,       0.,         0.,         0.,
-                                      0.,       0.,         0.,         0.,
-                                      0.,		0.,			0.,			0.,
-								  	  0.,		};
+                                      0.,		0.,			0.,			0.,		};
 
 /* get utility routines: udpErrorStr, udpInitialize, udpReset, udpSet,
                          udpGet, udpVel, udpClean, udpMesh */
@@ -200,23 +163,6 @@ void   override_span_del_theta_ctrl_(int *nspn, double span_del_theta_ctrl[ ]);
 void   override_span_del_m_(         int *nspn, double span_del_m[          ]);
 void   override_span_del_theta_(     int *nspn, double span_del_theta[      ]);
 void   override_span_thk_ctrl_(      int *nspn, double span_thk_ctrl[       ]);
-void   override_exact_u1_(           int *nspn, double exact_u1[            ]);
-void   override_exact_u2_(           int *nspn, double exact_u2[            ]);
-void   override_exact_u3_(           int *nspn, double exact_u3[            ]);
-void   override_exact_u4_(           int *nspn, double exact_u4[            ]);
-void   override_exact_u5_(           int *nspn, double exact_u5[            ]);
-void   override_exact_u6_(           int *nspn, double exact_u6[            ]);
-void   override_exact_u7_(           int *nspn, double exact_u7[            ]);
-void   override_exact_thk1_(         int *nspn, double exact_thk1[          ]);
-void   override_exact_thk2_(         int *nspn, double exact_thk2[          ]);
-void   override_exact_thk3_(         int *nspn, double exact_thk3[          ]);
-void   override_exact_thk4_(         int *nspn, double exact_thk4[          ]);
-void   override_exact_thk5_(         int *nspn, double exact_thk5[          ]);
-void   override_exact_thk6_(         int *nspn, double exact_thk6[          ]);
-void   override_exact_thk7_(         int *nspn, double exact_thk7[          ]);
-void   override_exact_lethk_(        int *nspn, double exact_lethk[         ]);
-void   override_exact_tethk_(        int *nspn, double exact_tethk[         ]);
-void   override_thk_flags_(                     int    thk_flags[           ]);
 void   override_offsets_(                       double offsets[             ]);
 void   override_naca_le_radius_(     int *nspn, double naca_le_radius[      ]);
 void   override_naca_u_max_(         int *nspn, double naca_u_max[          ]);
@@ -1275,448 +1221,6 @@ void override_span_thk_ctrl_(int *nspn, double span_thk_ctrl[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_exact_u1 - callback from Tblade3 to change                *
- *                       exact_u1 array                                 *
- *                                                                      *
- ************************************************************************
- */
-
-void override_exact_u1_(int *nspn, double exact_u1[])
-{
-    int    ispn, narg=31;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding exact_u1\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            exact_u1[ispn] = EXACT_U1(numUdp,ispn);
-            printf("     exact_u1(%2d) = %12.5f\n", ispn+1, exact_u1[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding exact_u1 (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_exact_u2 - callback from Tblade3 to change                *
- *                       exact_u2 array                                 *
- *                                                                      *
- ************************************************************************
- */
-
-void override_exact_u2_(int *nspn, double exact_u2[])
-{
-    int    ispn, narg=32;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding exact_u2\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            exact_u2[ispn] = EXACT_U2(numUdp,ispn);
-            printf("     exact_u2(%2d) = %12.5f\n", ispn+1, exact_u2[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding exact_u2 (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_exact_u3 - callback from Tblade3 to change                *
- *                       exact_u3 array                                 *
- *                                                                      *
- ************************************************************************
- */
-
-void override_exact_u3_(int *nspn, double exact_u3[])
-{
-    int    ispn, narg=33;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding exact_u3\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            exact_u3[ispn] = EXACT_U3(numUdp,ispn);
-            printf("     exact_u3(%2d) = %12.5f\n", ispn+1, exact_u3[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding exact_u3 (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_exact_u4 - callback from Tblade3 to change                *
- *                       exact_u4 array                                 *
- *                                                                      *
- ************************************************************************
- */
-
-void override_exact_u4_(int *nspn, double exact_u4[])
-{
-    int    ispn, narg=34;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding exact_u4\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            exact_u4[ispn] = EXACT_U4(numUdp,ispn);
-            printf("     exact_u4(%2d) = %12.5f\n", ispn+1, exact_u4[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding exact_u4 (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_exact_u5 - callback from Tblade3 to change                *
- *                       exact_u5 array                                 *
- *                                                                      *
- ************************************************************************
- */
-
-void override_exact_u5_(int *nspn, double exact_u5[])
-{
-    int    ispn, narg=35;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding exact_u5\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            exact_u5[ispn] = EXACT_U5(numUdp,ispn);
-            printf("     exact_u5(%2d) = %12.5f\n", ispn+1, exact_u5[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding exact_u5 (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_exact_u6 - callback from Tblade3 to change                *
- *                       exact_u6 array                                 *
- *                                                                      *
- ************************************************************************
- */
-
-void override_exact_u6_(int *nspn, double exact_u6[])
-{
-    int    ispn, narg=36;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding exact_u6\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            exact_u6[ispn] = EXACT_U6(numUdp,ispn);
-            printf("     exact_u6(%2d) = %12.5f\n", ispn+1, exact_u6[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding exact_u6 (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_exact_u7 - callback from Tblade3 to change                *
- *                       exact_u7 array                                 *
- *                                                                      *
- ************************************************************************
- */
-
-void override_exact_u7_(int *nspn, double exact_u7[])
-{
-    int    ispn, narg=37;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding exact_u7\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            exact_u7[ispn] = EXACT_U7(numUdp,ispn);
-            printf("     exact_u7(%2d) = %12.5f\n", ispn+1, exact_u7[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding exact_u7 (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_exact_thk1 - callback from Tblade3 to change              *
- *                         exact_thk1 array                             *
- *                                                                      *
- ************************************************************************
- */
-
-void override_exact_thk1_(int *nspn, double exact_thk1[])
-{
-    int    ispn, narg=38;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding exact_thk1\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            exact_thk1[ispn] = EXACT_THK1(numUdp,ispn);
-            printf("     exact_thk1(%2d) = %12.5f\n", ispn+1, exact_thk1[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding exact_thk1 (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_exact_thk2 - callback from Tblade3 to change              *
- *                         exact_thk2 array                             *
- *                                                                      *
- ************************************************************************
- */
-
-void override_exact_thk2_(int *nspn, double exact_thk2[])
-{
-    int    ispn, narg=39;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding exact_thk2\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            exact_thk2[ispn] = EXACT_THK2(numUdp,ispn);
-            printf("     exact_thk2(%2d) = %12.5f\n", ispn+1, exact_thk2[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding exact_thk2 (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_exact_thk3 - callback from Tblade3 to change              *
- *                         exact_thk3 array                             *
- *                                                                      *
- ************************************************************************
- */
-
-void override_exact_thk3_(int *nspn, double exact_thk3[])
-{
-    int    ispn, narg=40;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding exact_thk3\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            exact_thk3[ispn] = EXACT_THK3(numUdp,ispn);
-            printf("     exact_thk3(%2d) = %12.5f\n", ispn+1, exact_thk3[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding exact_thk3 (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_exact_thk4 - callback from Tblade3 to change              *
- *                         exact_thk4 array                             *
- *                                                                      *
- ************************************************************************
- */
-
-void override_exact_thk4_(int *nspn, double exact_thk4[])
-{
-    int    ispn, narg=41;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding exact_thk4\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            exact_thk4[ispn] = EXACT_THK4(numUdp,ispn);
-            printf("     exact_thk4(%2d) = %12.5f\n", ispn+1, exact_thk4[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding exact_thk4 (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_exact_thk5 - callback from Tblade3 to change              *
- *                         exact_thk5 array                             *
- *                                                                      *
- ************************************************************************
- */
-
-void override_exact_thk5_(int *nspn, double exact_thk5[])
-{
-    int    ispn, narg=42;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding exact_thk5\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            exact_thk5[ispn] = EXACT_THK5(numUdp,ispn);
-            printf("     exact_thk5(%2d) = %12.5f\n", ispn+1, exact_thk5[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding exact_thk5 (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_exact_thk6 - callback from Tblade3 to change              *
- *                         exact_thk6 array                             *
- *                                                                      *
- ************************************************************************
- */
-
-void override_exact_thk6_(int *nspn, double exact_thk6[])
-{
-    int    ispn, narg=43;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding exact_thk6\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            exact_thk6[ispn] = EXACT_THK6(numUdp,ispn);
-            printf("     exact_thk6(%2d) = %12.5f\n", ispn+1, exact_thk6[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding exact_thk6 (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_exact_thk7 - callback from Tblade3 to change              *
- *                         exact_thk7 array                             *
- *                                                                      *
- ************************************************************************
- */
-
-void override_exact_thk7_(int *nspn, double exact_thk7[])
-{
-    int    ispn, narg=44;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding exact_thk7\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            exact_thk7[ispn] = EXACT_THK7(numUdp,ispn);
-            printf("     exact_thk7(%2d) = %12.5f\n", ispn+1, exact_thk7[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding exact_thk7 (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_exact_lethk - callback from Tblade3 to change             *
- *                          exact_lethk array                           *
- *                                                                      *
- ************************************************************************
- */
-
-void override_exact_lethk_(int *nspn, double exact_lethk[])
-{
-    int    ispn, narg=45;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding exact_lethk\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            exact_lethk[ispn] = EXACT_LETHK(numUdp,ispn);
-            printf("     exact_lethk(%2d) = %12.5f\n", ispn+1, exact_lethk[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding exact_lethk (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_exact_tethk - callback from Tblade3 to change             *
- *                          exact_tethk array                           *
- *                                                                      *
- ************************************************************************
- */
-
-void override_exact_tethk_(int *nspn, double exact_tethk[])
-{
-    int    ispn, narg=46;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding exact_tethk\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            exact_tethk[ispn] = EXACT_TETHK(numUdp,ispn);
-            printf("     exact_tethk(%2d) = %12.5f\n", ispn+1, exact_tethk[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding exact_tethk (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_thk_flags - callback from Tblade3 to change               *
- *                        thk_flags array                               *
- *                                                                      *
- ************************************************************************
- */
-
-void override_thk_flags_(int thk_flags[])
-{
-    int    iflag, narg=47;
-
-    if (udps[numUdp].arg[narg].size == 3) {
-        printf(" ==> overriding thk_flags\n");
-        for (iflag = 0; iflag < 3; iflag++) {
-            thk_flags[iflag] = THK_FLAGS(numUdp,iflag);
-            printf("     thk_flags(%2d) = %d\n", iflag+1, thk_flags[iflag]);
-        }
-    } else {
-        printf(" ==> not overriding thk_flags (nflag=3 but size=%d)\n",
-               udps[numUdp].arg[narg].size);
-    }
-}
-
-
-/*
- ************************************************************************
- *                                                                      *
  *   override_offsets - callback from Tblade3 to change                 *
  *                      offsets array                                   *
  *                                                                      *
@@ -1725,7 +1229,7 @@ void override_thk_flags_(int thk_flags[])
 
 void override_offsets_(double offsets[])
 {
-    int    ioffset, narg=48;
+    int    ioffset, narg=31;
 
     if (udps[numUdp].arg[narg].size == 2) {
         printf(" ==> overriding offsets\n");
@@ -1750,7 +1254,7 @@ void override_offsets_(double offsets[])
 
 void override_naca_le_radius_(int *nspn, double naca_le_radius[])
 {
-    int    ispn, narg=49;
+    int    ispn, narg=32;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_le_radius\n");
@@ -1776,7 +1280,7 @@ void override_naca_le_radius_(int *nspn, double naca_le_radius[])
 
 void override_naca_u_max_(int *nspn, double naca_u_max[])
 {
-    int    ispn, narg=50;
+    int    ispn, narg=33;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_u_max\n");
@@ -1802,7 +1306,7 @@ void override_naca_u_max_(int *nspn, double naca_u_max[])
 
 void override_naca_t_max_(int *nspn, double naca_t_max[])
 {
-    int    ispn, narg=51;
+    int    ispn, narg=34;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_t_max\n");
@@ -1828,7 +1332,7 @@ void override_naca_t_max_(int *nspn, double naca_t_max[])
 
 void override_naca_t_te_(int *nspn, double naca_t_te[])
 {
-    int    ispn, narg=52;
+    int    ispn, narg=35;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_t_te\n");

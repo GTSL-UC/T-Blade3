@@ -28,12 +28,12 @@ VPATH = $(ODIR)
 
 OBJS  =	$(ODIR)/globvar.o \
     $(ODIR)/file_operations.o\
+    $(ODIR)/errors.o\
 	$(ODIR)/spline.o \
 	$(ODIR)/readinput.o \
 	$(ODIR)/funcNsubs.o \
 	$(ODIR)/bladegen.o \
 	$(ODIR)/3dbgb.o \
-	$(ODIR)/b3d2sec.o \
 	$(ODIR)/bladestack.o \
 	$(ODIR)/bspline3.o \
 	$(ODIR)/lesting.o \
@@ -41,16 +41,8 @@ OBJS  =	$(ODIR)/globvar.o \
 	$(ODIR)/lespline.o \
 	$(ODIR)/bsplinecam.o \
 	$(ODIR)/splinethick.o \
-	$(ODIR)/gauss_jordan.o \
 	$(ODIR)/airfoiltypes.o \
-	$(ODIR)/bladegrid2D.o \
-	$(ODIR)/ellipgrid.o \
-	$(ODIR)/spanwise_variation.o \
-	$(ODIR)/poly_solve_bisect.o \
-	$(ODIR)/quartic_poly_solve.o \
-	$(ODIR)/thk_ctr_gen_driver.o \
-	$(ODIR)/thk_ctrl_gen_der.o \
-	$(ODIR)/thk_ctrl_gen_spl.o
+	$(ODIR)/spanwise_variation.o 
 
 ifeq ($(EFCOMP),ifort)
 FOPTX = -cpp -norecursive -save -noautomatic -module $(ODIR)
@@ -70,6 +62,8 @@ $(ODIR)/globvar.o:	globvar.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) globvar.f90            -o $(ODIR)/globvar.o
 $(ODIR)/file_operations.o:	file_operations.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) file_operations.f90    -o $(ODIR)/file_operations.o
+$(ODIR)/errors.o:	errors.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) errors.f90             -o $(ODIR)/errors.o
 $(ODIR)/spline.o:	spline.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) spline.f90             -o $(ODIR)/spline.o
 $(ODIR)/readinput.o:	readinput.f90
@@ -80,8 +74,6 @@ $(ODIR)/bladegen.o:	bladegen.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) bladegen.f90           -o $(ODIR)/bladegen.o
 $(ODIR)/3dbgb.o:	3dbgb.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) 3dbgb.f90              -o $(ODIR)/3dbgb.o
-$(ODIR)/b3d2sec.o:	b3d2sec.f90
-	$(FCOMP) -c $(FOPTS) $(FOPTX) b3d2sec.f90            -o $(ODIR)/b3d2sec.o
 $(ODIR)/bladestack.o:	bladestack.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) bladestack.f90         -o $(ODIR)/bladestack.o
 $(ODIR)/bspline3.o:	bspline3.f90
@@ -96,26 +88,10 @@ $(ODIR)/bsplinecam.o:	bsplinecam.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) bsplinecam.f90         -o $(ODIR)/bsplinecam.o
 $(ODIR)/splinethick.o:	splinethick.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) splinethick.f90        -o $(ODIR)/splinethick.o
-$(ODIR)/gauss_jordan.o:	gauss_jordan.f90
-	$(FCOMP) -c $(FOPTS) $(FOPTX) gauss_jordan.f90       -o $(ODIR)/gauss_jordan.o
 $(ODIR)/airfoiltypes.o:	airfoiltypes.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) airfoiltypes.f90       -o $(ODIR)/airfoiltypes.o
-$(ODIR)/bladegrid2D.o:	bladegrid2D.f90
-	$(FCOMP) -c $(FOPTS) $(FOPTX) bladegrid2D.f90        -o $(ODIR)/bladegrid2D.o
-$(ODIR)/ellipgrid.o:	ellipgrid.f90
-	$(FCOMP) -c $(FOPTS) $(FOPTX) ellipgrid.f90          -o $(ODIR)/ellipgrid.o
 $(ODIR)/spanwise_variation.o:	spanwise_variation.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) spanwise_variation.f90 -o $(ODIR)/spanwise_variation.o
-$(ODIR)/poly_solve_bisect.o:	poly_solve_bisect.f90
-	$(FCOMP) -c $(FOPTS) $(FOPTX) poly_solve_bisect.f90  -o $(ODIR)/poly_solve_bisect.o
-$(ODIR)/quartic_poly_solve.o:	quartic_poly_solve.f90
-	$(FCOMP) -c $(FOPTS) $(FOPTX) quartic_poly_solve.f90  -o $(ODIR)/quartic_poly_solve.o
-$(ODIR)/thk_ctr_gen_driver.o:	thk_ctr_gen_driver.f90
-	$(FCOMP) -c $(FOPTS) $(FOPTX) thk_ctr_gen_driver.f90  -o $(ODIR)/thk_ctr_gen_driver.o
-$(ODIR)/thk_ctrl_gen_der.o:	thk_ctrl_gen_der.f90
-	$(FCOMP) -c $(FOPTS) $(FOPTX) thk_ctrl_gen_der.f90  -o $(ODIR)/thk_ctrl_gen_der.o
-$(ODIR)/thk_ctrl_gen_spl.o:	thk_ctrl_gen_spl.f90
-	$(FCOMP) -c $(FOPTS) $(FOPTX) thk_ctrl_gen_spl.f90  -o $(ODIR)/thk_ctrl_gen_spl.o
 
 $(LDIR)/tblade.so:	$(ODIR)/udpTblade.o $(LDIR)/libTBlade3.a
 	touch $(LDIR)/tblade.so
