@@ -96,6 +96,7 @@
     call vector_rotation(xtop,ytop,dimen,-camber_ang,xtop,ytop)
     call vector_rotation(xbot,ybot,dimen,-camber_ang,xbot,ybot)
 
+    ! TODO: Move to file_operations
     write(90,*) 'xtop rotated',xtop
     write(90,*) 'ytop rotated',ytop
     write(90,*) 'xbot rotated',xbot
@@ -515,6 +516,7 @@
 
 
      ! write values to files:
+     ! TODO: Move to file_operations
       file1 = 'lesting_CP_top.'//trim(adjustl(sec))//'.'//trim(casename)//'.txt'
       open(unit=71,file=file1, form="formatted")
          write(71,*) 'xcp_top',"	",'ycp_top'

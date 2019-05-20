@@ -173,6 +173,16 @@ subroutine readinput(fname)
     write(nopen1,'(A)') trim(temp)
     units = temp(24:25)
 
+    print *, 'From readinput - ', units
+
+    ! Invalid unit for the blade scaling factor
+    if (units .ne. 'mm' .and. units .ne. 'cm' .and. units .ne. 'm)' .and. units .ne. 'm ') then
+        error_msg   = 'Incorrect units for blade scaling factor'
+        warning_msg = 'Only mm, cm or m can be specified'
+        dev_msg     = 'Check subroutine readinput in readinput.f90'
+        call fatal_error(error_msg, warning_msg, dev_msg)
+    end if
+
 
 
     !
@@ -1280,6 +1290,7 @@ subroutine readcontrolinput(row_type, path)
         end do
 
         ! If command line option "dev" is used, write curvature control points to a file
+        ! TODO: Move to file_operations
         if(isdev) then
 
             fname4 = 'curvature_ctrl_pts.'//trim(adjustl(radialsec))//'.'//trim(casename)//'.txt'

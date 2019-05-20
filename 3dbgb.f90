@@ -1049,6 +1049,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
     !-------------------------------------------------------
     !! Assigning to separate variables to be written to a file later
+    ! TODO: Move to file_operations
     fname1 = 'LE_TE_intersection.'//trim(casename)//'.dat'
     open(3, file = fname1, status = 'unknown')
 

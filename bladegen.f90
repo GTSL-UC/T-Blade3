@@ -39,10 +39,10 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                                                                    y_le_spl(:), xcp_thk(:), ycp_thk(:), ueq(:), xmean(:), ymean(:), xtop(:), ytop(:), xbot(:),     &
                                                                    ybot(:), u(:), xb(:), yb(:), u_new(:), splthick(:), thickness(:), angle(:), camber(:), slope(:),&
                                                                    thickness_data(:,:), splinedata(:,:)
-    character(80)                                               :: file1, file2, file3, file7
+    character(80)                                               :: file1, file7
     character(20)                                               :: sec
-    character(:),           allocatable                         :: log_file, thickness_file_name, error_msg, warning_msg, dev_msg
-    logical                                                     :: ellip, file_open, file_exist, isdev
+    character(:),           allocatable                         :: log_file, error_msg, warning_msg, dev_msg
+    logical                                                     :: ellip, file_open, isdev
     logical,    allocatable                                     :: thk_der(:)
     common / BladeSectionPoints /xxa(nxx, nax), yya(nxx, nax) 
 
@@ -546,14 +546,9 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
             ! Writing a file in developer mode for debugging.
             if (isdev) then
-                
-                file2 = 'thick_Multi_cp.'//trim(adjustl(sec))//'.'//trim(casename)//'.txt'
-                open(unit = 81, file = file2, status = 'unknown', action = 'write', form = "formatted")
-                write(81, *) 'xcp_thk', "	", 'ycp_thk'
-                do i = 1, ncp
-                    write(81, *) xcp_thk(i), "	", ycp_thk(i)
-                end do
-                close(81)
+
+                ! write_thick_multi_cp in file_operations               
+                call write_thick_multi_cp(sec,casename,ncp,xcp_thk,ycp_thk) 
 
             end if 
 
@@ -646,24 +641,12 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             write(nopen,*) ''
 
             ! Write thickness data to sectionwise files
+            ! write_NACA_thickness in file_operations
             print *, 'Writing thickness data to file'
             print *, ''
             write(nopen,*) 'Writing thickness data to file'
             write(nopen,*) ''
-
-            thickness_file_name = 'thickness_data.'//trim(adjustl(sec))//'.'//trim(casename)
-            inquire(file = thickness_file_name, exist=file_exist)
-            if (file_exist) then
-                open(11, file = thickness_file_name, status = 'old', action = 'write', form = 'formatted')
-            else
-                open(11, file = thickness_file_name, status = 'new', action = 'write', form = 'formatted')
-            end if
-            do i = 1,np
-
-                write(11,'(4F40.16)') u(i), thickness_data(i,1), thickness_data(i,2), thickness_data(i,3)
-
-            end do 
-            close(11)
+            call write_NACA_thickness(sec,casename,np,u,thickness_data)
 
             call close_log_file(nopen, file_open)
 
@@ -785,18 +768,6 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             end do
             camber_le = cam_refine
             
-            ! Refined values
-            file3 = 'compare.'//trim(casename)//'.txt'
-            open(unit = 90, file = file3, form = "formatted")
-            write(90, *) 'xtop_refine',  xtop_refine
-            write(90, *) 'ytop_refine',  ytop_refine
-            write(90, *) 'xtop(le_pos)', xtop(le_pos)
-            write(90, *) 'ytop(le_pos)', ytop(le_pos)
-            write(90, *) 'xbot_refine',  xbot_refine
-            write(90, *) 'ybot_refine',  ybot_refine
-            write(90, *) 'xbot(le_pos)', xbot(le_pos)
-            write(90, *) 'ybot(le_pos)', ybot(le_pos)
-
             ! 
             ! LE spline definition
             ! 
@@ -974,7 +945,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     ! throat_calc_pitch_line in funcNsubs.f90
     call throat_calc_pitch_line(xb, yb, np, camber, angle, sang, u, pi, pitch, intersec_coord(1:4, js), &
                                 intersec_coord(5:8, js), intersec_coord(9:12, js), min_throat_2D,       &
-                                throat_index(js), n_normal_distance, casename, js, nsl, develop, isdev)
+                                throat_index(js), n_normal_distance, casename, js, nsl, develop)
 
 
 

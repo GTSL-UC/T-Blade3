@@ -441,6 +441,7 @@ enddo
 write(*,*)"Number of radial sections:",nsec
 write(nopen,*) 'Number of radial sections:', nsec
 !---- output ...
+! TODO: Move to file_operations
 fname1 = 'blade3d.'//trim(casename)//'.dat'
 open(3,file=fname1,status='unknown')
 write(*,*)

@@ -95,6 +95,7 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
     !print*,'xtop',xtop
     !print*,'ytop',ytop
 
+    ! TODO: Move to file_operations
         write(90,*) 'xtop rotated',xtop
         write(90,*) 'ytop rotated',ytop
         write(90,*) 'xbot rotated',xbot
@@ -436,6 +437,7 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
          
      ! write values to files:
     !	if (plot == js) then 
+    ! TODO: Move to file_operations
       file1 = 'le_CP.'//trim(adjustl(sec))//'.'//trim(casename)//'.txt'
       open(unit=71,file=file1, form="formatted")
          write(71,*) 'xcp_le',"	",'ycp_le'

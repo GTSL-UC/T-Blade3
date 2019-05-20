@@ -444,6 +444,7 @@ do i = 1, np
     splinedata(5, i) = thickness(i)
 enddo 
 
+! TODO: Move to file_operations
 if(isdev)then
     file1 = 'splthickness_tec.'//trim(adjustl(sec))//'.'//trim(casename)//'.dat'
     open(unit = 16, file = file1, form = "formatted")
@@ -644,6 +645,7 @@ do j = 1, ncp-3
 enddo
 
 ! write the thickness values in a file:
+! TODO: Move to file_operations
 open(unit = 61, file = "thickness_multip.txt", form = "formatted")
 write(61, *) "ui splthick"     
 do i = 1, np     

@@ -8,6 +8,7 @@
 !-------------------------------------------------------------------------------------------------------------------------------
 subroutine span_output_2()
     use globvar
+    use file_operations
     use errors
     implicit none
 
@@ -185,11 +186,8 @@ subroutine span_output_2()
     
     
     ! Write curvature control points to file
-    open(150, file = 'curv_cp.dat')
-        do i = 1,20
-            write(150,'(22F15.2)') curv_cp(i,1:2*na)
-        end do
-    close(150)
+    ! write_curv_cp in file_operations
+    call write_curv_cp(na,curv_cp)
 
 
 end subroutine span_output_2
@@ -217,8 +215,8 @@ subroutine span_variation()
     integer                         :: np_fine, nopen
     real,           allocatable     :: span_fine(:), out_coord_u_fine(:,:), out_coord_v_fine(:,:)
     real                            :: intersec_u(nspan)
-    character(:),   allocatable     :: log_file, thickness_file_name, curvature_file_name, LE_file_name
-    logical                         :: file_open, file_exist
+    character(:),   allocatable     :: log_file
+    logical                         :: file_open
 
 
 
@@ -305,22 +303,9 @@ subroutine span_variation()
         call log_file_exists(log_file, nopen, file_open)
         write(nopen,*) 'Writing spanwise curvature variation data to file'
         call close_log_file(nopen, file_open)
-
-        curvature_file_name = 'curvature_span_variation.'//trim(casename)//'.dat'
-        inquire(file = curvature_file_name, exist=file_exist)
-
-        if (file_exist) then
-            open(97, file = curvature_file_name, status = 'old', action = 'write', form = 'formatted')
-        else
-            open(97, file = curvature_file_name, status = 'new', action = 'write', form = 'formatted')
-        end if
-
-        do i = 1,nsl
-
-            write(97, '(20F20.16)') bspline_chord_curv(i,:)
-
-        end do
-        close(97)
+        
+        ! write_span_curv in file_operations
+        call write_span_curv(nsl,ncp_chord_curv,casename,bspline_chord_curv)
 
     end if  ! isdev
 
@@ -389,21 +374,13 @@ subroutine span_variation()
         write(nopen,*) 'Writing spanwise thickness variation data to file'
         call close_log_file(nopen, file_open)
 
-        thickness_file_name = 'thickness_span_variation.'//trim(casename)//'.dat'
-        inquire(file = thickness_file_name, exist=file_exist)
-
-        if (file_exist) then
-            open(97, file = thickness_file_name, status = 'old', action = 'write', form = 'formatted')
+        ! write_span_thk in file_operations
+        if (thick_distr == 5) then
+            call write_span_thk(nsl,size(cp_chord_thk,2),casename,bspline_thk)
         else
-            open(97, file = thickness_file_name, status = 'new', action = 'write', form = 'formatted')
+            call write_span_thk(nsl,ncp_chord_thk,casename,bspline_thk)
         end if
 
-        do i = 1,nsl
-
-            write(97, '(20F20.16)') bspline_thk(i,:)
-
-        end do
-        close(97)
 
     end if  ! isdev
 
@@ -443,21 +420,8 @@ subroutine span_variation()
             write(nopen,*) 'Writing spanwise LE variation data to file'
             call close_log_file(nopen, file_open)
 
-            LE_file_name = 'LE_span_variation.'//trim(casename)//'.dat'
-            inquire(file = LE_file_name, exist=file_exist)
-
-            if (file_exist) then
-                open(97, file = LE_file_name, status = 'old', action = 'write', form = 'formatted')
-            else
-                open(97, file = LE_file_name, status = 'new', action = 'write', form = 'formatted')
-            end if
-
-            do i = 1,nsl
-
-                write(97, '(20F20.16)') bspline_LE(i,:)
-
-            end do
-            close(97)
+            ! write_span_LE in file_operations
+            call write_span_LE(nsl,ncp_LE,casename,bspline_LE)
 
         end if  ! isdev
 
