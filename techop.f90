@@ -4,7 +4,8 @@ program TEchop
 !output: blade file rewritten to the same file with chopped TE.
 
 !---Kiran Siddappaji
-
+use file_operations
+use errors
 implicit none
 
 integer i,points,nx,ny,np
@@ -13,17 +14,22 @@ parameter (nx=500,ny=500)
 real*8 xb(nx),yb(nx),trarray(2)
 real*8 sinl,sext,chrd1,chrd2,pitch
 character*32 fname,fext,npoints
+character(:),   allocatable :: error_msg, warning_msg, dev_msg
 
 call getarg(1,fname)
 !Error message
 if((fname.eq.'help').or.(fname.eq.''))then
- write(*,*)
- print *, 'FATAL ERROR: techop command line error'
- print *, 'Usage: techop blade.#.#.casename npoints'
- print *, 'Example: techop blade.1.1.case 8'
- print *, 'This takes off 8 points from PS and SS curves'
- write(*,*)
- stop
+ !write(*,*)
+ !print *, 'FATAL ERROR: techop command line error'
+ !print *, 'Usage: techop blade.#.#.casename npoints'
+ !print *, 'Example: techop blade.1.1.case 8'
+ !print *, 'This takes off 8 points from PS and SS curves'
+ !write(*,*)
+ !stop
+ error_msg      = 'techop command line error'
+ warning_msg    = 'Usage: techop blade.#.#.casename npoints'
+ dev_msg        = 'Check techop.f90'
+ call fatal_error(error_msg, warning_msg, dev_msg)
 endif
 !
 call getarg(2,npoints)

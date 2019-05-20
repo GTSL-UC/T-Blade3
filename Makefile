@@ -1,3 +1,4 @@
+.PHONY: all clean redo
 .SUFFIXES:
 .SUFFIXES: .f .o .f90
 #
@@ -39,15 +40,15 @@ ifeq ($(detected_OS),Windows)
 	$(FCOMP)  -g -static $(OBJS) -o 3dbgb
   tblade3:$(OBJS)
 	$(FCOMP)  -g -static $(OBJS) -o tblade3
-  techop:techop.o
-	$(FCOMP) -g -static techop.o -o techop
+  techop:globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o
+	$(FCOMP) -g -static globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o -o techop
 else
   3dbgb:$(OBJS)
 	$(FCOMP)  -g $(OBJS) -o 3dbgb 
   tblade3:$(OBJS)
 	$(FCOMP)  -g $(OBJS) -o tblade3
-  techop:techop.o
-	$(FCOMP) -g techop.o -o techop
+  techop:globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o
+	$(FCOMP) -g globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o -o techop
 endif
 
 .f.o:; $(FCOMP) -c -o $@ $(FOPTS) $*.f
@@ -60,3 +61,9 @@ clean:
     ifeq ($(detected_OS),Darwin)
 	    -rm -r *.dSYM
     endif
+
+redo:
+
+	make clean
+	clear
+	make all

@@ -385,7 +385,6 @@ module file_operations
     !
     !---------------------------------------------------------------------------
     subroutine hubTipStreamline(xhub,rhub,nphub,xtip,rtip,nptip,nsl,scf,casename)
-        implicit none
 
         integer,                intent(in)              :: nphub, nptip
         real,                   intent(in)              :: xhub(nphub,1), rhub(nphub,1), &
@@ -436,7 +435,6 @@ module file_operations
     !
     !---------------------------------------------------------------------------
     subroutine streamlines(xml,rml,np,scf,casename,ia)
-        implicit none
 
         integer,                    intent(in)          :: np
         real,                       intent(in)          :: xml(np), rml(np)
@@ -480,7 +478,6 @@ module file_operations
     !
     !---------------------------------------------------------------------------
     subroutine outputfiledata(bladedata,nsl,amount_data,throat_pos,casename,units)
-        implicit none
 
         integer,                    intent(in)          :: nsl, amount_data
         real,                       intent(in)          :: bladedata(amount_data,nsl)
@@ -580,7 +577,6 @@ module file_operations
     !---------------------------------------------------------------------------
     subroutine cascade_nondim_file(msle,mste,mprime_ble,mprime_bte,chordm,pitch, &
                                    nsl,ibrow,casename)
-        implicit none
 
         integer,                    intent(in)      :: nsl, ibrow
         real,                       intent(in)      :: msle(nsl), mste(nsl), mprime_ble(nsl), &
@@ -622,7 +618,6 @@ module file_operations
     !
     !---------------------------------------------------------------------------
     subroutine write_blade_files(np,nx,ii,fext,sinls,sexts,chrdd,pitch,xb,yb)
-        implicit none
 
         integer,                    intent(in)      :: np, nx, ii
         character(32),              intent(in)      :: fext
@@ -659,7 +654,6 @@ module file_operations
     subroutine write_2D_throat_data(js,np,np_sidee,n_normal_distance,casename,u,camber,  &
                                     camber_upper,pitch_line,u1_top,v1_top,u2_bot,v2_bot, &
                                     inter_coord,min_throat_2D,throat_index)
-        implicit none
 
         integer,                    intent(in)      :: js, np, np_sidee, n_normal_distance
         character(*),               intent(in)      :: casename
@@ -715,7 +709,6 @@ module file_operations
     !
     !---------------------------------------------------------------------------
     subroutine write_3D_meanline(ia,uplmt,casename,nx,nax,xmeanline,ymeanline,zmeanline)
-        implicit none
 
         integer,                    intent(in)      :: ia, uplmt, nx, nax
         character(32),              intent(in)      :: casename
@@ -751,7 +744,6 @@ module file_operations
     !---------------------------------------------------------------------------
     subroutine write_constantslope_meanline(ia,uplmt,npts,casename,nx,nax,xmeanline,ymeanline, &
                                             zmeanline)
-        implicit none
 
         integer,                    intent(in)      :: ia, uplmt, npts, nx, nax
         character(32),              intent(in)      :: casename
@@ -786,7 +778,6 @@ module file_operations
     !
     !---------------------------------------------------------------------------
     subroutine write_thick_multi_cp(sec,casename,ncp,xcp_thk,ycp_thk)
-        implicit none
 
         character(20),              intent(in)      :: sec
         character(*),               intent(in)      :: casename
@@ -820,7 +811,6 @@ module file_operations
     !
     !---------------------------------------------------------------------------
     subroutine write_NACA_thickness(sec,casename,np,u,thickness_data)
-        implicit none
 
         character(20),              intent(in)      :: sec
         character(*),               intent(in)      :: casename
@@ -912,7 +902,6 @@ module file_operations
     !
     !---------------------------------------------------------------------------
     subroutine write_span_curv(nsl,ncp_chord_curv,casename,bspline_chord_curv)
-        implicit none
 
         integer,                intent(in)              :: nsl, ncp_chord_curv
         character(*),           intent(in)              :: casename
@@ -952,7 +941,6 @@ module file_operations
     !
     !---------------------------------------------------------------------------
     subroutine write_span_thk(nsl,ncp_chord_thk,casename,bspline_thk)
-        implicit none
 
         integer,                intent(in)              :: nsl, ncp_chord_thk
         character(*),           intent(in)              :: casename
@@ -992,7 +980,6 @@ module file_operations
     !
     !---------------------------------------------------------------------------
     subroutine write_span_LE(nsl,ncp_LE,casename,bspline_LE)
-        implicit none
 
         integer,                intent(in)              :: nsl, ncp_LE
         character(*),           intent(in)              :: casename
@@ -1032,7 +1019,6 @@ module file_operations
     !
     !---------------------------------------------------------------------------
     subroutine write_curv_cp(na,curv_cp)
-        implicit none
 
         integer,                intent(in)              :: na
         real,                   intent(in)              :: curv_cp(20,2*na)
