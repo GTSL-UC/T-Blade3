@@ -1,9 +1,7 @@
 .PHONY: all clean redo
 .SUFFIXES:
 .SUFFIXES: .f .o .f90
-#
-#LIBDIR = lib
-#UNAME := $(shell uname)
+
 ifeq ($(OS),Windows_NT)
     detected_OS := Windows
 else
@@ -20,11 +18,16 @@ endif
 ifdef UNDEFINED
 FOPTS += -fsanitize=undefined -fno-omit-frame-pointer
 endif
-LDFLAGS = -shared
-EXEC1 = bin/3dbgb
-EXEC2 = bin/tblade3
-EXEC3 = bin/techop
-TARGET_LIB = lib/tblade3.so
+EXEC1 = 3dbgb
+EXEC2 = tblade3
+EXEC3 = techop
+ifeq ($(detected_OS),Linux)
+    LDFLAGS = -shared -fPIC -o
+    MKDIR_P := mkdir -p
+    EXEC_DIR := bin
+    LIB_DIR := lib
+    TARGET_LIB = lib/tblade3.so
+endif
 
 OBJS =  globvar.o file_operations.o errors.o spline.o readinput.o funcNsubs.o 3dbgb.o bladegen.o bladestack.o bspline3.o lesting.o \
         cubicspline.o lespline.o bsplinecam.o splinethick.o airfoiltypes.o spanwise_variation.o \
@@ -37,10 +40,11 @@ OBJS =  globvar.o file_operations.o errors.o spline.o readinput.o funcNsubs.o 3d
 XLIBS  = -L/usr/X11R6/lib64 -lX11 -lpthread
 GLIBS  = -L/usr/X11R6/lib64 -lGLU -lGL -lX11 -lXext -lpthread
 
-#all: $(OBJS)
-all: $(EXEC1) $(EXEC2) $(EXEC3) $(TARGET_LIB)
-
-print-% : ; @echo $* = $($*)
+ifeq ($(detected_OS),Linux)
+    all: $(EXEC_DIR) $(LIB_DIR) $(EXEC1) $(EXEC2) $(EXEC3) $(TARGET_LIB)
+else
+    all: $(EXEC1) $(EXEC2) $(EXEC3)
+endif
 
 ifeq ($(detected_OS),Windows)
   $(EXEC1):$(OBJS)
@@ -49,22 +53,27 @@ ifeq ($(detected_OS),Windows)
 	$(FCOMP)  -g -static $(OBJS) -o $(EXEC2)
   $(EXEC3):globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o
 	$(FCOMP) -g -static globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o -o $(EXEC3)
-else ifeq($(detected_OS),Linux)
+else #ifeq($(detected_OS),Linux)
+  $(EXEC_DIR):
+	$(MKDIR_P) $(EXEC_DIR)
   $(EXEC1):$(OBJS)
-	$(FCOMP)  -g $(OBJS) -o $(EXEC1) 
+	$(FCOMP)  -g $(OBJS) -o $(EXEC_DIR)/$(EXEC1) 
   $(EXEC2):$(OBJS)
-	$(FCOMP)  -g $(OBJS) -o $(EXEC2)
+	$(FCOMP)  -g $(OBJS) -o $(EXEC_DIR)/$(EXEC2)
   $(EXEC3):globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o
-	$(FCOMP) -g globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o -o $(EXEC3)
+	$(FCOMP) -g globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o -o $(EXEC_DIR)/$(EXEC3)
+  $(LIB_DIR):
+	$(MKDIR_P) $(LIB_DIR)
   $(TARGET_LIB):$(OBJS)
-	$(FCOMP)  -shared -fPIC -o $@ $^
-else
-  $(EXEC1):$(OBJS)
-	$(FCOMP)  -g $(OBJS) -o $(EXEC1) 
-  $(EXEC2):$(OBJS)
-	$(FCOMP)  -g $(OBJS) -o $(EXEC2)
-  $(EXEC3):globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o
-	$(FCOMP) -g globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o -o $(EXEC3)
+	$(FCOMP)  $(LDFLAGS) $@ $^
+  ifeq ($(detected_OS),Darwin)
+	  $(EXEC1):$(OBJS)
+		$(FCOMP)  -g $(OBJS) -o $(EXEC1) 
+	  $(EXEC2):$(OBJS)
+		$(FCOMP)  -g $(OBJS) -o $(EXEC2)
+	  $(EXEC3):globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o
+		$(FCOMP) -g globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o -o $(EXEC3)
+  endif
 endif
 
 .f.o:; $(FCOMP) -c -o $@ $(FOPTS) $*.f
@@ -73,9 +82,11 @@ endif
 
 clean:
 
-	-rm -f $(EXEC1) $(EXEC2) $(EXEC3) techop.o $(TARGET_LIB) $(OBJS) *.mod *.x *.exe
-    ifeq ($(detected_OS),Darwin)
-	    -rm -r *.dSYM
+    ifeq ($(detected_OS),Linux)
+		-rm -f $(EXEC_DIR)/$(EXEC1) $(EXEC_DIR)/$(EXEC2) $(EXEC_DIR)/$(EXEC3) techop.o $(LIB_DIR)/$(TARGET_LIB) $(OBJS) *.mod *.x *.exe
+		-rm -r $(LIB_DIR) $(EXEC_DIR)
+    else
+		-rm -f $(EXEC1) $(EXEC2) $(EXEC3) techop.o $(OBJS) *.mod *.x *.exe
     endif
 
 redo:
