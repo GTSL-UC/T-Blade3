@@ -1,4 +1,4 @@
-.PHONY: all clean redo
+.PHONY: all clean redo library
 .SUFFIXES:
 .SUFFIXES: .f .o .f90
 
@@ -59,7 +59,8 @@ GLIBS  = -L/usr/X11R6/lib64 -lGLU -lGL -lX11 -lXext -lpthread
 ifeq ($(detected_OS),Windows)
     all: $(EXEC1) $(EXEC2) $(EXEC3)
 else
-    all: $(EXEC_DIR) $(LIB_DIR) $(EXEC1) $(EXEC2) $(EXEC3) $(TARGET_LIB)
+    all: $(EXEC_DIR) $(EXEC1) $(EXEC2) $(EXEC3) #$(TARGET_LIB)
+    library: $(LIB_DIR) $(TARGET_LIB)
 endif
 
 # Compilation for Windows
@@ -94,8 +95,16 @@ clean:
     ifeq ($(detected_OS),Windows)
 		-rm -f $(EXEC1) $(EXEC2) $(EXEC3) techop.o $(OBJS) *.mod *.x *.exe
     else
-		-rm -f $(EXEC_DIR)/$(EXEC1) $(EXEC_DIR)/$(EXEC2) $(EXEC_DIR)/$(EXEC3) techop.o $(LIB_DIR)/$(TARGET_LIB) $(OBJS) *.mod *.x *.exe
-		-rm -r $(LIB_DIR) $(EXEC_DIR)
+		-rm -f $(EXEC_DIR)/$(EXEC1) $(EXEC_DIR)/$(EXEC2) $(EXEC_DIR)/$(EXEC3) techop.o $(OBJS) *.mod *.x *.exe
+		-rm -r $(EXEC_DIR)
+    endif
+
+# 'Make clean_lib'
+clean_lib:
+
+    ifneq ($(detected_OS),Windows)
+		-rm -f $(LIB_DIR)/$(TARGET_LIB)
+		-rm -r $(LIB_DIR)
     endif
 
 # 'Make redo'
