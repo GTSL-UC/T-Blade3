@@ -32,7 +32,7 @@ ifeq ($(detected_OS),Linux)
     MKDIR_P := mkdir -p
     EXEC_DIR := bin
     LIB_DIR := lib
-    TARGET_LIB = lib/tblade3.so
+    TARGET_LIB = lib/libTBlade3.so
 endif
 
 # Mac-only variables
