@@ -66,9 +66,9 @@ With T-Blade3 version 1.13, static builds for Linux, Unix and MacOS are no longe
     \item \textit{Prerequisites}: Make and gfortran (gfortran-6 and above recommended)
     \item Using the terminal in \$TBLADEROOT, run\\
           \textcolor{blue}{\fontfamily{lmr}\selectfont \% make}
-    \item This will generate three executables in \$TBLADEROOT: \textcolor{blue}{\fontfamily{lmr}\selectfont 3dbgb, tblade3, techop}
+    \item This will generate three executables in \$TBLADEROOT/bin: \textcolor{blue}{\fontfamily{lmr}\selectfont 3dbgb, tblade3, techop}
     \item To add to the PATH environment variable permanently, edit the .bashrc/.bash\_profile file (for Linux/MacOS only)\\
-          \textcolor{blue}{\fontfamily{lmr}\selectfont export PATH="/path/to/\$TBLADEROOT:\$PATH"}
+          \textcolor{blue}{\fontfamily{lmr}\selectfont export PATH="/path/to/\$TBLADEROOT/bin:\$PATH"}
 \end{enumerate}
 
 \section{Running T-Blade3}
@@ -190,7 +190,7 @@ This is the main input file for T-Blade3. It contains all the geometric and aero
         \item Spanwise definitions of incidence and deviation can be created by setting the angle switch (line 12) to "$\mathbf{0}$ \textbf{inci\_dev\_spline}". This splines both the incidence and deviation using control inputs which are specified in this file further below as '\textit{in\_beta*}' and '\textit{out\_beta*}'. The incidence and deviation definitions are added to the inlet and outlet angles defined in T-Blade3 in the sectionwise properties table (line 23). Refer to the example case \textit{spanwise\_inci\_dev\_spline} on \url{http://gtsl.ase.uc.edu/t-blade3}
         \item Any combination of the two options can also be utilized (e.g.: "$\mathbf{2}$ \textbf{inci\_dev\_spline}"). 
     \end{enumerate}
-    \item Camber definition switch (line 14). If the switch is set to "$\mathbf{1}$ \textbf{spanwise\_spline}", the auxiliary input file \textit{\textcolor{blue}{spancontrolinputs.dat}} is used (also see \textbf{\ref{auxinput}}). Refer to the example case \textit{spanwise\_curvature} on \url{http://gtsl.ase.uc.edu/t-blade3}
+    \item Camber definition switch (line 14). If the switch is set to "$\mathbf{1}$ \textbf{spanwise\_spline}", the auxiliary input file \textit{\textcolor{blue}{spancontrolinputs.dat}} is used (also see \textbf{\ref{auxinput1}}). Refer to the example case \textit{spanwise\_curvature} on \url{http://gtsl.ase.uc.edu/t-blade3}
     \item Thickness distribution switch (line 16). If the switch is set to:
     \begin{enumerate}[label=\alph*]
         \item "$\mathbf{0}$": Wennerstrom thickness distribution is used
