@@ -1,4 +1,4 @@
-.PHONY: all clean redo library
+.PHONY: all clean redo library clean_lib
 .SUFFIXES:
 .SUFFIXES: .f .o .f90
 
@@ -111,5 +111,11 @@ clean_lib:
 redo:
 
 	make clean
-	clear
-	make all
+    ifneq ($(detected_OS),Windows)
+		make clean_lib
+		clear
+		make all
+		make library
+    else
+        make all
+    endif
