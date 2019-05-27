@@ -30,18 +30,18 @@ EXEC3 = techop
 ifeq ($(detected_OS),Linux)
     LDFLAGS = -shared -fPIC -o
     MKDIR_P := mkdir -p
-    EXEC_DIR := bin
-    LIB_DIR := lib
-    TARGET_LIB = lib/libTBlade3.so
+    EXEC_DIR := ../bin
+    LIB_DIR := ../lib
+    TARGET_LIB = ../lib/libTBlade3.so
 endif
 
 # Mac-only variables
 ifeq ($(detected_OS),Darwin)
     LDFLAGS = -dynamiclib -fPIC -o
     MKDIR_P := mkdir -p
-    EXEC_DIR := bin
-    LIB_DIR := lib
-    TARGET_LIB = lib/tblade3.dylib
+    EXEC_DIR := ../bin
+    LIB_DIR := ../lib
+    TARGET_LIB = ../lib/tblade3.dylib
 endif
 
 OBJS =  globvar.o file_operations.o errors.o spline.o readinput.o funcNsubs.o 3dbgb.o bladegen.o bladestack.o bspline3.o lesting.o \
@@ -66,11 +66,11 @@ endif
 # Compilation for Windows
 ifeq ($(detected_OS),Windows)
   $(EXEC1):$(OBJS)
-	$(FCOMP)  -g -static $(OBJS) -o $(EXEC1)
+	$(FCOMP)  -g -static $(OBJS) -o ..\$(EXEC1)
   $(EXEC2):$(OBJS)
-	$(FCOMP)  -g -static $(OBJS) -o $(EXEC2)
+	$(FCOMP)  -g -static $(OBJS) -o ..\$(EXEC2)
   $(EXEC3):globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o
-	$(FCOMP) -g -static globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o -o $(EXEC3)
+	$(FCOMP) -g -static globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o -o ..\$(EXEC3)
 else # Compilation for Linux/MacOS
   $(EXEC_DIR):
 	$(MKDIR_P) $(EXEC_DIR)
