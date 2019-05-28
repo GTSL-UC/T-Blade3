@@ -1489,11 +1489,11 @@ subroutine read_spanwise_input(row_type, path)
 
     ! Local variables
     character(256)                                  :: temps, file_name
-    character(:),   allocatable                     :: log_file, error_msg, warning_msg, dev_msg
+    character(:),   allocatable                     :: log_file, error_msg, dev_msg!warning_msg
     real,           allocatable                     :: temp(:)
     real                                            :: span_dum
     integer                                         :: jj, nopen, nopen1
-    logical                                         :: file_open, file_open_1
+    logical                                         :: file_open, file_open_1, deprecated
 
 
 
@@ -1572,31 +1572,30 @@ subroutine read_spanwise_input(row_type, path)
     ! Including phantom points spanwise						
     ncp_span_curv1 = ncp_span_curv+2
 
-    ! Account for cur1 if using exact thickness distribution
-    !ncp_chord_curv = ncp_chord-2+ncp_curvature+1-1
 
 
-
-    !
-    ! Allocate array to store curvature control points table read from auxiliary input file
-    !
-    !if (allocated(cp_chord_curv)) deallocate(cp_chord_curv)
-    !allocate(cp_chord_curv(ncp_span_curv, ncp_chord_curv))
-    
     read(10,'(A)') temps
     
-    ! If control table for cur1 is present, raise a fatal error
+    ! If control table for cur1 is present, assign ncp_chord_curv accordingly
+    ! TODO: Shouldn't be here once everyone moves on to NACA file
     if (index(trim(temps), 'cur1') /= 0) then
     !    error_msg   = 'Incorrect auxiliary file format'
     !    warning_msg = 'This is a newer spancontrolinputs file format compatible with modified NACA thickness distribution only'
     !    dev_msg     = 'Check subroutine read_spanwise_input in readinput.f90'
     !    call fatal_error(error_msg, warning_msg, dev_msg)
         ncp_chord_curv = ncp_chord - 2 + ncp_curvature + 1
+        deprecated = .true.
     else
         ncp_chord_curv = ncp_chord - 2 + ncp_curvature + 1 - 1
+        deprecated = .false.
     end if
+
+    !
+    ! Allocate array to store curvature control points table read from auxiliary input file
+    !
     if (allocated(cp_chord_curv)) deallocate(cp_chord_curv)
     allocate(cp_chord_curv(ncp_span_curv,ncp_chord_curv))
+
     write(nopen1,'(A)') temps
     
 
@@ -1672,13 +1671,36 @@ subroutine read_spanwise_input(row_type, path)
         end do
 
         !
+        ! Override cur1 if needed
+        ! override_cur1() in 3dbgb.f90
+        ! Callback to override_cur1_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+        ! TODO: Will be removed once everyone moves onto NACA auxiliary file
+        !
+        if (deprecated) then
+
+            jj = 1 + ncp_chord - 2 + 1
+            do i = 1,ncp_span_curv
+                temp(i) = cp_chord_curv(i,jj)
+            end do
+            call override_cur1(ncp_span_curv, temp)
+            do i = 1,ncp_span_curv
+                cp_chord_curv(i,jj) = temp(i)
+            end do
+
+        end if
+        
+        !
         ! Override cur2 if needed
         ! override_cur2() in 3dbgb.f90
         ! Callback to override_cur2_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
         ! 
         if (ncp_curvature >= 1) then
-            
-            jj = 1 + ncp_chord-2 + 2-1
+           
+            if (deprecated) then
+                jj = 1 + ncp_chord - 2 + 2
+            else 
+                jj = 1 + ncp_chord - 2 + 2 - 1
+            end if
             
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
@@ -1697,7 +1719,11 @@ subroutine read_spanwise_input(row_type, path)
         !
         if (ncp_curvature >= 2) then
             
-            jj = 1 + ncp_chord-2 + 3-1
+            if (deprecated) then
+                jj = 1 + ncp_chord - 2 + 3
+            else
+                jj = 1 + ncp_chord - 2 + 3 - 1
+            end if
             
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
@@ -1715,8 +1741,12 @@ subroutine read_spanwise_input(row_type, path)
         ! Callback to override_cur4_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
         !
         if (ncp_curvature >= 3) then
-            
-            jj = 1 + ncp_chord-2 + 4-1
+           
+            if (deprecated) then
+                jj = 1 + ncp_chord - 2 + 4
+            else 
+                jj = 1 + ncp_chord - 2 + 4 - 1
+            end if
 
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
@@ -1734,8 +1764,12 @@ subroutine read_spanwise_input(row_type, path)
         ! Callback to override_cur5_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
         !
         if (ncp_curvature >= 4) then
-            
-            jj = 1 + ncp_chord-2 + 5-1
+           
+            if (deprecated) then
+                jj = 1 + ncp_chord - 2 + 5
+            else 
+                jj = 1 + ncp_chord - 2 + 5 - 1
+            end if
             
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
@@ -1753,8 +1787,12 @@ subroutine read_spanwise_input(row_type, path)
         ! Callback to override_cur6_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
         !
         if (ncp_curvature >= 5) then
-            
-            jj = 1 + ncp_chord-2 + 6-1
+           
+            if (deprecated) then
+                jj = 1 + ncp_chord - 2 + 6
+            else 
+                jj = 1 + ncp_chord - 2 + 6 - 1
+            end if
             
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
@@ -1772,8 +1810,12 @@ subroutine read_spanwise_input(row_type, path)
         ! Callback to override_cur7_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
         !
         if (ncp_curvature >= 6) then
-            
-            jj = 1 + ncp_chord-2 + 7-1
+           
+            if (deprecated) then
+                jj = 1 + ncp_chord - 2 + 7
+            else 
+                jj = 1 + ncp_chord - 2 + 7 - 1 
+            end if
 
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
