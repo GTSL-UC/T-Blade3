@@ -1573,25 +1573,30 @@ subroutine read_spanwise_input(row_type, path)
     ncp_span_curv1 = ncp_span_curv+2
 
     ! Account for cur1 if using exact thickness distribution
-    ncp_chord_curv = ncp_chord-2+ncp_curvature+1-1
+    !ncp_chord_curv = ncp_chord-2+ncp_curvature+1-1
 
 
 
     !
     ! Allocate array to store curvature control points table read from auxiliary input file
     !
-    if (allocated(cp_chord_curv)) deallocate(cp_chord_curv)
-    allocate(cp_chord_curv(ncp_span_curv, ncp_chord_curv))
+    !if (allocated(cp_chord_curv)) deallocate(cp_chord_curv)
+    !allocate(cp_chord_curv(ncp_span_curv, ncp_chord_curv))
     
     read(10,'(A)') temps
     
     ! If control table for cur1 is present, raise a fatal error
-    !if (index(trim(temps), 'cur1') /= 0) then
+    if (index(trim(temps), 'cur1') /= 0) then
     !    error_msg   = 'Incorrect auxiliary file format'
     !    warning_msg = 'This is a newer spancontrolinputs file format compatible with modified NACA thickness distribution only'
     !    dev_msg     = 'Check subroutine read_spanwise_input in readinput.f90'
     !    call fatal_error(error_msg, warning_msg, dev_msg)
-    !end if
+        ncp_chord_curv = ncp_chord - 2 + ncp_curvature + 1
+    else
+        ncp_chord_curv = ncp_chord - 2 + ncp_curvature + 1 - 1
+    end if
+    if (allocated(cp_chord_curv)) deallocate(cp_chord_curv)
+    allocate(cp_chord_curv(ncp_span_curv,ncp_chord_curv))
     write(nopen1,'(A)') temps
     
 
