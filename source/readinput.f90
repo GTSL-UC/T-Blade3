@@ -1586,12 +1586,12 @@ subroutine read_spanwise_input(row_type, path)
     read(10,'(A)') temps
     
     ! If control table for cur1 is present, raise a fatal error
-    if (index(trim(temps), 'cur1') /= 0) then
-        error_msg   = 'Incorrect auxiliary file format'
-        warning_msg = 'This is a newer spancontrolinputs file format compatible with modified NACA thickness distribution only'
-        dev_msg     = 'Check subroutine read_spanwise_input in readinput.f90'
-        call fatal_error(error_msg, warning_msg, dev_msg)
-    end if
+    !if (index(trim(temps), 'cur1') /= 0) then
+    !    error_msg   = 'Incorrect auxiliary file format'
+    !    warning_msg = 'This is a newer spancontrolinputs file format compatible with modified NACA thickness distribution only'
+    !    dev_msg     = 'Check subroutine read_spanwise_input in readinput.f90'
+    !    call fatal_error(error_msg, warning_msg, dev_msg)
+    !end if
     write(nopen1,'(A)') temps
     
 

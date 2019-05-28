@@ -19,17 +19,10 @@ character(:),   allocatable :: error_msg, warning_msg, dev_msg
 call getarg(1,fname)
 !Error message
 if((fname.eq.'help').or.(fname.eq.''))then
- !write(*,*)
- !print *, 'FATAL ERROR: techop command line error'
- !print *, 'Usage: techop blade.#.#.casename npoints'
- !print *, 'Example: techop blade.1.1.case 8'
- !print *, 'This takes off 8 points from PS and SS curves'
- !write(*,*)
- !stop
- error_msg      = 'techop command line error'
- warning_msg    = 'Usage: techop blade.#.#.casename npoints'
- dev_msg        = 'Check techop.f90'
- call fatal_error(error_msg, warning_msg, dev_msg)
+     error_msg      = 'techop command line error'
+     warning_msg    = 'Usage: techop blade.#.#.casename npoints'
+     dev_msg        = 'Check techop.f90'
+     call fatal_error(error_msg, warning_msg, dev_msg)
 endif
 !
 call getarg(2,npoints)
