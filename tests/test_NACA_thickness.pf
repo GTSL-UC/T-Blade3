@@ -1,4 +1,51 @@
 !
+! Test subroutine compute_TE_angle in funcNsubs.f90
+! Reference: Abbott, I.H., van Doenhoff, A.E., "Families of Wing Sections", Theory of Wing
+!            Sections, Dover Publications, New York, 1999, pp. 116-118
+!
+!-----------------------------------------------------------------------------------------------
+@test
+subroutine test_TE_angle()
+    use pfunit_mod
+    implicit none
+
+    real(kind = 8)  :: u_max(5), TE_slope(5)
+    real(kind = 8)  :: tol = 10E-4
+
+
+
+    !
+    ! Set u_max values
+    !
+    u_max       = [real(0.2,8), real(0.3,8), real(0.4,8), real(0.5,8), real(0.6,8)]
+
+    ! Call subroutine for all u_max values
+    call compute_TE_angle(u_max(1), TE_slope(1))
+    call compute_TE_angle(u_max(2), TE_slope(2))
+    call compute_TE_angle(u_max(3), TE_slope(3))
+    call compute_TE_angle(u_max(4), TE_slope(4))
+    call compute_TE_angle(u_max(5), TE_slope(5))
+
+
+
+    !
+    ! Test TE angles
+    ! Comparing to values taken from Reference listed in the subroutine description
+    !
+    @assertEqual(1.000, TE_slope(1), tol)
+    @assertEqual(1.170, TE_slope(2), tol)
+    @assertEqual(1.575, TE_slope(3), tol)
+    @assertEqual(2.325, TE_slope(4), tol)
+    @assertEqual(3.500, TE_slope(5), tol)
+end subroutine test_TE_angle
+!-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+!
 ! Test subroutine modified_NACA_four_digit_thickness_coeffs in funcNsubs.f90
 ! Comparing to a standard 0020-65 airfoil
 !
@@ -110,4 +157,156 @@ subroutine test_modified_NACA_coefficients_2()
 
 
 end subroutine test_modified_NACA_coefficients_2
+!-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+!
+! Test subroutine modified_NACA_four_digit_thickness_2 in funcNsubs.f90
+!
+!-----------------------------------------------------------------------------------------------
+@test
+subroutine test_modified_NACA_thickness()
+    use pfunit_mod
+    implicit none
+
+    real(kind = 8)                  :: t_max, u_max, t_TE, TE_slope, LE_radius, a(4), d(4)
+    real(kind = 8)                  :: tol = 10E-8, dydxTE
+    integer                         :: np 
+    real(kind = 8), allocatable     :: u(:), thk_data(:,:)
+
+
+
+    !
+    ! Max thickness, location of max thickness, TE thickness and LE rounding parameter
+    !
+    t_max       = real(0.1,8)
+    u_max       = real(0.5,8)
+    t_TE        = real(0.002,8)
+    LE_radius   = real(6.0,8)
+
+    ! Compute slope at TE associated with u_max
+    ! compute_TE_angle in funcNsubs.f90
+    call compute_TE_angle(u_max, TE_slope)
+    dydxTE      = -real(2.0,8)*t_max*TE_slope
+
+    ! Compute modified NACA thickness coefficients
+    call modified_NACA_four_digit_thickness_coeffs(t_max,u_max,t_TE,TE_slope,LE_radius,a,d)
+
+
+
+    !
+    ! Set number of points and u (points along camber line)
+    !
+    np          = 3
+    if (allocated(u)) deallocate(u)
+    allocate(u(np))
+    if (allocated(thk_data)) deallocate(thk_data)
+    allocate(thk_data(np,3))
+
+    u           = [real(0.0,8), real(0.5,8), real(1.0,8)]
+
+    ! Call subroutine
+    call modified_NACA_four_digit_thickness(np,u,u_max,t_max,a,d,thk_data)
+
+
+
+    !
+    ! Test thickness at LE, u_max and TE
+    !
+    @assertEqual(0.0   , thk_data(1,1), tol)
+    @assertEqual(t_max , thk_data(2,1), tol)
+    @assertEqual(t_TE  , thk_data(3,1), tol)
+
+    ! Test first derivative of thickness at u_max and TE
+    @assertEqual(0.0   , thk_data(2,2), tol)
+    @assertEqual(dydxTE, thk_data(3,2), tol)
+
+    ! Test second derivative of thickness at all locations
+    @assertLessThan(thk_data(1,3), real(0.0,8))
+    @assertLessThan(thk_data(2,3), real(0.0,8))
+    @assertLessThan(thk_data(3,3), real(0.0,8))
+
+
+end subroutine test_modified_NACA_thickness
+!-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+!
+! Test subroutine modified_NACA_four_digit_thickness_2 in funcNsubs.f90
+!
+!-----------------------------------------------------------------------------------------------
+@test
+subroutine test_modified_NACA_thickness_2()
+    use pfunit_mod
+    implicit none
+
+    real(kind = 8)                  :: t_max, u_max, t_TE, TE_slope, LE_radius, a(4), d(4)
+    real(kind = 8)                  :: tol = 10E-8, tol1 = 10E-4
+    integer                         :: np
+    real(kind = 8), allocatable     :: u(:), thk_data(:,:)
+
+
+
+    !
+    ! Max thickness, location of max thickness, TE thickness, slope at TE and
+    ! LE rounding parameter
+    !
+    t_max       = real(0.065,8)
+    u_max       = real(0.4,8)
+    t_TE        = real(0.011,8)
+    TE_slope    = real(-0.20475,8)
+    LE_radius   = real(5.5,8)
+
+    ! Compute coefficients for the NACA thickness distribution
+    call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,TE_slope,LE_radius,a,d)
+
+
+
+    !
+    ! Set number of points and u (points along camber line)
+    !
+    np          = 7
+    if (allocated(u)) deallocate(u)
+    allocate(u(np))
+    if (allocated(thk_data)) deallocate(thk_data)
+    allocate(thk_data(np,3))
+    
+    u           = [real(0.0,8), real(0.2,8), real(0.4,8), real(0.6,8), real(0.8,8), real(1.0,8) - t_TE, &
+                  &real(1.0,8)]
+
+    ! Call subroutine
+    call modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a,d,thk_data)
+
+
+
+    !
+    ! Test thickness at LE, u_max and u_TE
+    !
+    @assertEqual(0.0     , thk_data(1,1), tol)
+    @assertEqual(t_max   , thk_data(3,1), tol)
+    @assertEqual(t_TE    , thk_data(6,1), tol)
+    @assertEqual(0.0     , thk_data(7,1), tol)
+
+    ! Test frst derivative of thickness at u_max and u_TE
+    @assertEqual(0.0     , thk_data(3,2), tol)
+    @assertEqual(TE_slope, thk_data(6,2), tol)
+
+    ! Test second derivative of thickness at all locations except TE
+    @assertLessThan(thk_data(1,3), real(0.0,8))
+    @assertLessThan(thk_data(2,3), real(0.0,8))
+    @assertLessThan(thk_data(3,3), real(0.0,8))
+    @assertLessThan(thk_data(4,3), real(0.0,8))
+    @assertLessThan(thk_data(5,3), real(0.0,8))
+    @assertLessThan(thk_data(6,3), real(0.0,8))
+
+
+end subroutine test_modified_NACA_thickness_2
 !-----------------------------------------------------------------------------------------------
