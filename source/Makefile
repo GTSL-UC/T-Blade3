@@ -2,25 +2,6 @@
 .SUFFIXES:
 .SUFFIXES: .f .o .f90
 
-# OS detection
-ifeq ($(OS),Windows_NT)
-    detected_OS := Windows
-else
-    detected_OS := $(shell uname -s)
-endif
-
-# Compilation flags
-DEFINE = 
-FCOMP  = gfortran
-FOPTS  = -fdefault-real-8 -g -fbounds-check -fbacktrace -O2 -Wline-truncation -Wall -Wno-unused-dummy-argument -cpp -DSTAND_ALONE
-F90OPTS = -ffree-form -ffree-line-length-none -fPIC
-ifdef MEMCHECK
-FOPTS += -fsanitize=address -fno-omit-frame-pointer
-endif
-ifdef UNDEFINED
-FOPTS += -fsanitize=undefined -fno-omit-frame-pointer
-endif
-
 # Common executable variables
 EXEC1 = 3dbgb
 EXEC2 = tblade3
@@ -51,9 +32,6 @@ OBJS =  globvar.o file_operations.o errors.o spline.o readinput.o funcNsubs.o 3d
 #		spanwise_variation.o poly_solve_bisect.o quartic_poly_solve.o thk_ctr_gen_driver.o \
 #		thk_ctrl_gen_der.o thk_ctrl_gen_spl.o \
 #MYLIBS = $(HOME)/$(LIBDIR)/dtnurbsPIC_i.a
-
-XLIBS  = -L/usr/X11R6/lib64 -lX11 -lpthread
-GLIBS  = -L/usr/X11R6/lib64 -lGLU -lGL -lX11 -lXext -lpthread
 
 # 'Make all' behavior
 ifeq ($(detected_OS),Windows)
