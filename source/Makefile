@@ -1,4 +1,4 @@
-.PHONY: all clean redo library clean_lib
+.PHONY: code clean redo library clean_lib
 .SUFFIXES:
 .SUFFIXES: .f .o .f90
 
@@ -33,11 +33,11 @@ OBJS =  globvar.o file_operations.o errors.o spline.o readinput.o funcNsubs.o 3d
 #		thk_ctrl_gen_der.o thk_ctrl_gen_spl.o \
 #MYLIBS = $(HOME)/$(LIBDIR)/dtnurbsPIC_i.a
 
-# 'Make all' behavior
+# 'Make code' behavior
 ifeq ($(detected_OS),Windows)
-    all: $(EXEC1) $(EXEC2) $(EXEC3)
+    code: $(EXEC1) $(EXEC2) $(EXEC3)
 else
-    all: $(EXEC_DIR) $(EXEC1) $(EXEC2) $(EXEC3) #$(TARGET_LIB)
+    code: $(EXEC_DIR) $(EXEC1) $(EXEC2) $(EXEC3) #$(TARGET_LIB)
     library: $(LIB_DIR) $(TARGET_LIB)
 endif
 
@@ -92,8 +92,8 @@ redo:
     ifneq ($(detected_OS),Windows)
 		make clean_lib
 		clear
-		make all
+		make code
 		make library
     else
-        make all
+        make code
     endif

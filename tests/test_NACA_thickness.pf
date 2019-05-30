@@ -1,0 +1,48 @@
+!
+! Test subroutine modified_NACA_four_digit_thickness_coeffs in funcNsubs.f90
+! Comparing to a 0020-65 airfoil
+!
+!-----------------------------------------------------------------------------------------------
+@test
+subroutine test_modified_NACA_coefficients()
+    use pfunit_mod
+    implicit none
+
+    real(kind = 8)  :: t_max, u_max, t_TE, TE_slope, LE_radius, a(4), d(4)
+    real(kind = 8)  :: tol = 10E-4
+
+
+    !
+    ! Maximum thickness, location of max thickness, TE thickness and LE rounding parameter
+    !
+    t_max       = 0.1
+    u_max       = 0.5
+    t_TE        = 0.002
+    LE_radius   = 6.0
+
+    !
+    ! Compute slope at TE associated with u_max
+    ! compute_TE_angle in funcNsubs.f90
+    !
+    call compute_TE_angle(u_max,TE_slope)
+
+    ! Call subroutine
+    call modified_NACA_four_digit_thickness_coeffs(t_max,u_max,t_TE,TE_slope,LE_radius,a,d)
+
+
+
+    !
+    ! Test NACA coefficients
+    !
+    @assertEqual(0.2969 , a(1), tol)
+    @assertEqual(-0.3102, a(2), tol)
+    @assertEqual(0.3417 , a(3), tol)
+    @assertEqual(-0.3218, a(4), tol)
+    @assertEqual(0.0020 , d(1), tol)
+    @assertEqual(0.4650 , d(2), tol)
+    @assertEqual(-0.6840, d(3), tol)
+    @assertEqual(0.2920 , d(4), tol)
+
+
+end subroutine test_modified_NACA_coefficients
+!-----------------------------------------------------------------------------------------------
