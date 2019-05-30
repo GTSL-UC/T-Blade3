@@ -1,6 +1,6 @@
 !
 ! Test subroutine modified_NACA_four_digit_thickness_coeffs in funcNsubs.f90
-! Comparing to a 0020-65 airfoil
+! Comparing to a standard 0020-65 airfoil
 !
 !-----------------------------------------------------------------------------------------------
 @test
@@ -12,6 +12,7 @@ subroutine test_modified_NACA_coefficients()
     real(kind = 8)  :: tol = 10E-4
 
 
+
     !
     ! Maximum thickness, location of max thickness, TE thickness and LE rounding parameter
     !
@@ -20,10 +21,8 @@ subroutine test_modified_NACA_coefficients()
     t_TE        = 0.002
     LE_radius   = 6.0
 
-    !
     ! Compute slope at TE associated with u_max
     ! compute_TE_angle in funcNsubs.f90
-    !
     call compute_TE_angle(u_max,TE_slope)
 
     ! Call subroutine
@@ -45,4 +44,70 @@ subroutine test_modified_NACA_coefficients()
 
 
 end subroutine test_modified_NACA_coefficients
+!-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+!
+! Test subroutine modified_NACA_four_digit_thickness_coeffs_2 in funcNsubs.f90
+! TODO: Make parameterized test?
+!
+!-----------------------------------------------------------------------------------------------
+@test
+subroutine test_modified_NACA_coefficients_2()
+    use pfunit_mod
+    implicit none
+
+    real(kind = 8)  :: t_max, u_max, t_TE, TE_slope, LE_radius, a(4), d(4)
+    real(kind = 8)  :: thk_1, thk_2, thk_3, u_TE
+    real(kind = 8)  :: tol = 10E-8
+
+
+
+    !
+    ! Max thickness, location of max thickness, TE thickness, slope at TE and 
+    ! LE rounding parameter
+    !
+    t_max       = 0.065
+    u_max       = 0.4
+    t_TE        = 0.011
+    u_TE        = 1.0 - t_TE
+    TE_slope    = -0.20475
+    LE_radius   = 5.5
+
+    ! Call subroutine
+    call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,TE_slope,LE_radius,a,d)
+
+
+
+    !
+    ! Test NACA coefficients directly
+    !
+    @assertEqual(0.17690531 , a(1), tol)
+    @assertEqual(-0.08469654, a(2), tol)
+    @assertEqual(-0.10596640, a(3), tol)
+    @assertEqual(0.06169529 , a(4), tol)
+    @assertEqual(0.00872004 , d(1), tol)
+    @assertEqual(0.20979456 , d(2), tol)
+    @assertEqual(-0.23031559, d(3), tol)
+    @assertEqual(0.06165199 , d(4), tol)
+
+
+
+    !
+    ! Compute thickness at u_max and u_TE using coefficients obtained above
+    !
+    thk_1       = (a(1)*sqrt(u_max)) + (a(2)*u_max) + (a(3)*(u_max**2)) + (a(4)*(u_max**3))
+    thk_2       = d(1) + (d(2)*(1.0 - u_max)) + (d(3)*((1.0 - u_max)**2)) + (d(4)*((1.0 - u_max)**3))
+    thk_3       = d(1) + (d(2)*(1.0 - u_TE)) + (d(3)*((1.0 - u_TE)**2)) + (d(4)*((1.0 - u_TE)**3))
+
+    ! Test computed thicknesses against reference thicknesses
+    @assertEqual(t_max, thk_1, tol)
+    @assertEqual(t_max, thk_2, tol)
+
+
+end subroutine test_modified_NACA_coefficients_2
 !-----------------------------------------------------------------------------------------------
