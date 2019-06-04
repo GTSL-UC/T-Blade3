@@ -1,0 +1,72 @@
+!
+! Test subroutine gauss_jordan in funcNsubs.f90
+!
+!---------------------------------------------------------------------------
+@test
+subroutine test_gauss_jordan()
+    use pfunit_mod
+    implicit none
+
+    integer                         :: n, nrhs, fail_flag
+    real(kind = 8), allocatable     :: aug_matrix(:,:)
+    real(kind = 8)                  :: tol = 10E-8
+
+
+    !
+    ! Test 3x3 matrix
+    ! Test system: 4x + 5y - 2z = -14
+    !              7x -  y + 2z =  42
+    !              3x +  y + 4z =  28
+    !
+    n                   = 3
+    nrhs                = 1
+
+    ! Generate augmented matrix
+    if (allocated(aug_matrix)) deallocate(aug_matrix)
+    allocate(aug_matrix(n, n + nrhs))
+
+    aug_matrix(1,:)     = [4.0,  5.0, -2.0, -14.0]
+    aug_matrix(2,:)     = [7.0, -1.0,  2.0,  42.0]
+    aug_matrix(3,:)     = [3.0,  1.0,  4.0,  28.0]
+
+    ! Call subroutine
+    call gauss_jordan(n,nrhs,aug_matrix,fail_flag)
+
+    ! Test computed solution against reference values
+    @assertEqual( 4.0, aug_matrix(1,4), tol)
+    @assertEqual(-4.0, aug_matrix(2,4), tol)
+    @assertEqual( 5.0, aug_matrix(3,4), tol)
+
+
+
+    !
+    ! Test 4x4 matrix
+    ! Test system:  x + 2y +  z -  w =  5
+    !              3x + 2y + 4z + 4w = 16
+    !              4x + 4y + 3z + 4w = 22
+    !              2x +       z + 5w = 15
+    !
+    n                   = 4
+    nrhs                = 1
+
+    ! Generate augmented matrix
+    if (allocated(aug_matrix)) deallocate(aug_matrix)
+    allocate(aug_matrix(n, n + nrhs))
+
+    aug_matrix(1,:)     = [1.0, 2.0, 1.0, -1.0,  5.0]
+    aug_matrix(2,:)     = [3.0, 2.0, 4.0,  4.0, 16.0]
+    aug_matrix(3,:)     = [4.0, 4.0, 3.0,  4.0, 22.0]
+    aug_matrix(4,:)     = [2.0, 0.0, 1.0,  5.0, 15.0]
+
+    ! Call subroutine
+    call gauss_jordan(n,nrhs,aug_matrix,fail_flag)
+
+    ! Test computed solution against reference values
+    @assertEqual(16.0, aug_matrix(1,5), tol)
+    @assertEqual(-6.0, aug_matrix(2,5), tol)
+    @assertEqual(-2.0, aug_matrix(3,5), tol)
+    @assertEqual(-3.0, aug_matrix(4,5), tol)
+
+
+end subroutine test_gauss_jordan
+!---------------------------------------------------------------------------

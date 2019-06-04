@@ -1,0 +1,57 @@
+T-Blade3 VERSION 1.13.1 BUILDING GUIDE
+
+
+1. PREREQUISITES
+
+Obtaining and running T-Blade3 depends on the following
+
+git
+Fortran
+    Tested with: GFortran 6.0+
+GNU Make
+
+2. OBTAINING T-BLADE3
+
+The best way to obtain T-Blade3 is to clone the git repository from
+GitHub as follows:
+
+git clone https://github.com/GTSL-UC/T-Blade3.git
+
+This will create the directory T-Blade3 in the current working 
+directory.
+
+3. DIRECTORY CONTENTS
+
+In the top level of the T-Blade3 directory are the following files
+
+README - This file.
+
+Copyright.txt - Contains information pertaining to the use and
+                distribution of T-Blade3
+
+GitHub.address - Contains the address of the GitHub page with
+                 the T-Blade3 git repository
+
+documentation - Subdirectory which contains additional documentation
+                for T-Blade3
+
+source - Source code for T-Blade3 and ESP UDPs (also contains
+         makefiles)
+
+inputs - Contains example cases for T-Blade3
+
+4. BUILDING T-BLADE3
+
+a. Change to the directory into which T-Blade3 has been placed
+b. To build T-Blade3, execute make
+    $ make
+c. The source directory now contains object files and Fortran
+   module files
+d. The executables are generated in a bin directory one level
+   above the source directory
+
+4.1. CLEANING
+
+Run the following command to remove object files, module files
+and the T-Blade3 binaries (from the top level directory):
+    $ make clean
