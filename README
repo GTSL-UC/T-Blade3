@@ -1,4 +1,4 @@
-T-Blade3 VERSION 1.13.1 BUILDING GUIDE
+T-Blade3 VERSION 1.2 BUILDING GUIDE
 
 
 1. PREREQUISITES
@@ -9,6 +9,11 @@ git
 Fortran
     Tested with: GFortran 6.0+
 GNU Make
+
+Additionally for building the test suite on non-Windows systems,
+the following is needed
+
+pFUnit (pfunit.sourceforge.net)
 
 2. OBTAINING T-BLADE3
 
@@ -38,6 +43,8 @@ documentation - Subdirectory which contains additional documentation
 source - Source code for T-Blade3 and ESP UDPs (also contains
          makefiles)
 
+tests - Subdirectory which contains unit tests for T-Blade3
+
 inputs - Contains example cases for T-Blade3
 
 4. BUILDING T-BLADE3
@@ -50,7 +57,16 @@ c. The source directory now contains object files and Fortran
 d. The executables are generated in a bin directory one level
    above the source directory
 
-4.1. CLEANING
+4.1. TESTING
+
+Additionally, to build and run the T-Blade3 test suite, run
+    $ make tests
+
+This requires a serial installation of pFUnit with $PFUNIT
+being defined as
+    $ export PFUNIT=/path/to/pfunit/serial/install
+
+4.2. CLEANING
 
 Run the following command to remove object files, module files
 and the T-Blade3 binaries (from the top level directory):
