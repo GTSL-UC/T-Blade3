@@ -1,6 +1,6 @@
 -----------------------------------------------
 T-Blade3: Turbomachinery 3D Blade Generator 
-Version 1.13.1 - 4 March 2019
+Version 1.2 - 4 June 2019
 -----------------------------------------------
 by Mayank Sharma
 Dept. of Aerospace Engineering
@@ -8,9 +8,9 @@ University of Cincinnati
 sharmamm@mail.uc.edu
 -----------------------------------------------
 
-1.  Introduction
+1.  INTRODUCTION
 
-    T-Blade3 version 1.13.1 has been integrated with Engineering Sketch Pad (ESP) which is a 
+    T-Blade3 version 1.2 has been integrated with Engineering Sketch Pad (ESP) which is a 
     geometry creation and manipulation system targeted at aerospace design and analysis. ESP
     is used to drive T-Blade3 via user defined primitives (UDPs) which generate a single
     solid. Various spanwise parameters provided by T-Blade3 can be further manipulated using
@@ -23,26 +23,32 @@ sharmamm@mail.uc.edu
 
     The latest ESP source code can be obtained here: https://acdl.mit.edu/ESP/ 
     
-    This document explains how to compile ESP 1.13 using T-Blade3 version 1.13.1 so that exact 
-    thickness controls can be used.
+    This document explains how to compile ESP 1.13 using T-Blade3 version 1.2 so that NACA 
+    thickness controls can be used. 
+
+    ESP 1.14 is the latest release with ESP but is not being used for geometry generation 
+    with T-Blade3 at this moment. Users are thus directed to the package ESP1.13.tgz at 
+    https://acdl.mit.edu/ESP/archive
     
-2.1 T-Blade3 Source Distribution Layout
+2.1 T-BLADE3 SOURCE DISTRIBUTION LAYOUT
     
     $TBLADEROOT will be used here as the name of the directory that contains:
-    
-    3dbgb_ReadMe_New.txt    -   instruction on how to run T-Blade3
-    T-Blade3_ReadMe_ESP.txt -   this file
-    github.address          -   file containing T-Blade3 GitHub repository URL
-    Makefile                -   makefile for compiling T-Blade3
-    MakefileESP             -   makefile to be used when compiling ESP to run T-Blade version
-                                1.13.1
-    README.md               -   readme file
+   
+    README                  -   file containing instructions on buliding T-Blade3
+    Copyright.txt           -   file containing information pertaining to the use
+                                and distribution of T-Blade3
+    GitHub.address          -   file containing T-Blade3 GitHub repository URL
+    Makefile                -   master makefile for compiling T-Blade3/test suite/ESP UDPs
     license.txt             -   T-Blade3 license information
+    source                  -   source code for T-Blade3 and ESP UDPs (contains sub makefiles
+                                for T-Blade3 and ESP)
+    tests                   -   subdirectory which contains unit tests for T-Blade3 (also
+                                contains sub makefile for the test suite)
+    documentation           -   subdirectory which contains additional documentation for 
+                                T-Blade3
     inputs                  -   directory containing various example input files 
-    *.f90                   -   T-Blade3 source files
-    *.c                     -   ESP UDPs 
 
-2.2 ESP Source Distribution Layout
+2.2 ESP SOURCE DISTRIBUTION LAYOUT
 
     $ESPROOT will be used here as the name of the directory that contains:
 
@@ -62,15 +68,22 @@ sharmamm@mail.uc.edu
     udc                     -   a collection of User Defined Components
     wvClient                -   simple examples of Web viewing used by EGADS
 
-3.  Instructions
+3.  INSTRUCTIONS
 
     1. Refer to $ESPROOT/README.txt for instructions to compile ESP for the first time.
-    2. Copy $TBLADEROOT/Makefile, $TBLADEROOT/MakefileESP, $TBLADEROOT/*.f90 and 
-       $TBLADEROOT/*.c and paste them to $ESPROOT/src/OpenCSM/Tblade3
-    3. In the terminal, run:
+    2. Change to the following directory:
+       
+       $ cd ESPROOT/src/OpenCSM/
+       $ rm -rf Tblade3
+       $ git clone https://github.com/GTSL-UC/T-Blade3.git
+       $ cd T-Blade3
+       $ git fetch origin
+       $ git checkout develop
+
+    3. In $TBLADEROOT, execute make:
             
-       $ESPROOT/src/OpenCSM/Tblade3% make -f MakefileESP cleanall
-       $ESPROOT/src/OpenCSM/Tblade3% make -f MakefileESP 
+       $ make clean_esp
+       $ make esp
 
     4. This will generate the executable .serveCSM in $ESPROOT/bin
     5. The sample input files in $TBLADEROOT/inputs/OpenCSM can now be run and modified

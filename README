@@ -34,16 +34,21 @@ README - This file.
 Copyright.txt - Contains information pertaining to the use and
                 distribution of T-Blade3
 
+License.txt - T-Blade3 license information
+
 GitHub.address - Contains the address of the GitHub page with
                  the T-Blade3 git repository
+
+Makefile - Master makefile for compiling T-Blade3/test suite/ESP UDPs
 
 documentation - Subdirectory which contains additional documentation
                 for T-Blade3
 
 source - Source code for T-Blade3 and ESP UDPs (also contains
-         makefiles)
+         sub makefiles for T-Blade3 and ESP)
 
-tests - Subdirectory which contains unit tests for T-Blade3
+tests - Subdirectory which contains unit tests for T-Blade3 (also
+        contains sub makefile for the test suite)
 
 inputs - Contains example cases for T-Blade3
 
