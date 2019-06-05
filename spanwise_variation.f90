@@ -265,7 +265,8 @@ subroutine span_variation()
 
     ! Local variables
     integer                         :: np_fine, nopen
-    real,           allocatable     :: span_fine(:), out_coord_u_fine(:,:), out_coord_v_fine(:,:)
+    real,           allocatable     :: span_fine(:), out_coord_u_fine(:,:), out_coord_v_fine(:,:), &
+                                       bspline_thk_local(:,:)
     real                            :: out_coord_u(na, 12), out_coord_v(na, 12), intersec_u(nspan), &
                                        intersec_v(nspan)
     character(20)                   :: ind
@@ -558,7 +559,14 @@ subroutine span_variation()
 
         do i = 1,nsl
 
-            write(97, '(20F20.16)') bspline_thk(i,:)
+            if (thick_distr == 5) then
+                bspline_thk_local       = bspline_thk
+                bspline_thk_local(:,4)  = 2.0*bspline_thk_local(:,4)
+                bspline_thk_local(:,5)  = 2.0*bspline_thk_local(:,5)
+                write(97, '(20F20.16)') bspline_thk(i,:)
+            else
+                write(97, '(20F20.16)') bspline_thk(i,:)
+            end if
 
         end do
         close(97)

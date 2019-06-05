@@ -823,7 +823,7 @@ if(trim(airfoil).eq.'sect1')then ! thickness is to be defined only for default s
         end if
         do i = 1,np
 
-            write(11,'(4F40.16)') u(i), thickness_data(i,1), thickness_data(i,2), thickness_data(i,3)
+            write(11,'(4F40.16)') u(i), 2.0*thickness_data(i,1), thickness_data(i,2), thickness_data(i,3)
 
         end do 
         close(11)
