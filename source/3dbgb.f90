@@ -304,8 +304,9 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     ! Local variables
     integer                     :: nopen, nopen_error
     real                        :: spl_eval, dspl_eval, xdiff, inBetaInci, outBetaDevn
+    real,           allocatable :: um_spl(:)
     character(256)              :: fname, temp, fname1, row_type, path
-    character(:),  allocatable  :: log_file, error_file, auxinput_filename, error_msg
+    character(:),   allocatable :: log_file, error_file, auxinput_filename, error_msg
     logical                     :: axial_LE, radial_LE, axial_TE, radial_TE, file_open, file_exist, &
                                    initial, open_error
 
@@ -1439,6 +1440,33 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
       enddo
       call close_log_file(nopen, file_open)
     endif
+
+
+    !
+    ! Control points for max thickness location (umxthk_all) spline
+    !
+    if (u_max_spline) then
+        if (allocated(um_spl)) deallocate(um_spl)
+        allocate(um_spl(na))
+
+        call log_file_exists(log_file, nopen, file_open)
+        write(*,*) '' 
+        write(*,*) 'Max thickness location defined spanwise by a cubic B-spline using control points'
+        write(nopen,*) ''
+        write(nopen,*) 'Max thickness location defined spanwise by a cubic B-spline using control points'
+
+        call cubicspline(xcpumax, spantm_c, cptm_c, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
+        call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, um_spl, na, xbs, ybs)
+        umxthk_all = um_spl
+
+        do ia = 1, na
+            print *, span(ia), umxthk_all(ia)
+            write(nopen,*) span(ia), umxthk_all(ia)
+        end do
+        call close_log_file(nopen, file_open)
+
+    end if
+
 
     !-------------------------------------------------------------
     ! Allocating variables for further calculations

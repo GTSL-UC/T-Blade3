@@ -17,12 +17,14 @@ subroutine readinput(fname)
     character(256)                                      :: temp, temp1, temp2, beta_switch_2
     character(:),   allocatable                         :: log_file, error_msg, warning_msg, dev_msg
     integer                                             :: er, stat, n_temp1, n_temp2, &
-                                                           nopen, nopen1
+                                                           nopen, nopen1, itm_c, iumax
     real                                                :: inBetaInci, outBetaDevn, temp_offsets(2)
     real,           allocatable                         :: temp_in(:)
     real,           parameter                           :: tol = 1E-8
     logical                                             :: equal, beta_value(5), ang_spl_value(5), file_open, &
-                                                           file_open_1
+                                                           file_open_1, read_tm_c_then_u_max = .false., &
+                                                           read_u_max_then_tm_c = .false., read_tm_c_only = .false., &
+                                                           read_u_max_only = .false.
 
 
     !
@@ -1043,20 +1045,51 @@ subroutine readinput(fname)
     read(1,'(A)') temp
     write(nopen1,'(A)') trim(temp)
 
+    ! Find index of 'tm/c' and 'u_max'
+    iumax   = index(trim(temp), 'u_max')
+    itm_c   = index(trim(temp), 'tm/c')
+
+    ! Set reading options based on the indices of 'tm/c' and 'u_max'
+    if (itm_c < iumax .and. itm_c /= 0) read_tm_c_then_u_max    = .True.
+    if (itm_c > iumax .and. iumax /= 0) read_u_max_then_tm_c    = .True.
+    if (itm_c /= 0 .and. iumax == 0)    read_tm_c_only          = .True.
+    if (itm_c == 0 .and. iumax /= 0)    read_u_max_only         = .True.
+
     ! Next line to always use the thickness tm/c as it is a multiplier (default = 1):
-    if ((thick_distr .ne. 0) .and. .not. is2d) then
+    if ((thick_distr .ne. 0) .and. (.not. is2d) .and. (read_tm_c_then_u_max .or. &
+       &read_u_max_then_tm_c .or. read_tm_c_only)) then
         tm_c_spline = .True.
     else
         tm_c_spline = .False.
-    endif    
+    endif   
 
-    do i = 1, cptm_c
-        read(1, *)spantm_c(i), xcptm_c(i)
+    ! Determine if u_max spline needs to be used or not
+    if ((thick_distr == 0 .or. thick_distr == 1 .or. thick_distr == 2) .and. &
+       &(read_tm_c_then_u_max .or. read_u_max_then_tm_c .or. read_u_max_only)) then
+       u_max_spline = .true.
+    end if 
+
+    ! Read inputs in appropriate order
+    do i = 1,cptm_c
+
+        if (read_tm_c_then_u_max) then
+            read(1,*) spantm_c(i), xcptm_c(i), xcpumax(i)
+            xcptm_c(i) = xcptm_c(i) + 1.0
+        else if (read_u_max_then_tm_c) then
+            read(1,*) spantm_c(i), xcpumax(i), xcptm_c(i)
+            xcptm_c(i) = xcptm_c(i) + 1.0
+        else if (read_tm_c_only) then
+            read(1,*) spantm_c(i), xcptm_c(i)
+            xcptm_c(i) = xcptm_c(i) + 1.0
+        else if (read_u_max_only) then
+            read(1,*) spantm_c(i), xcpumax(i)
+        end if
+
         backspace(1)
         read(1,'(A)') temp
         write(nopen1,'(A)') trim(temp)
-        xcptm_c(i) = xcptm_c(i) + 1.0
-    enddo
+
+    end do
 
     !
     ! Call ESP tm/c override subroutines

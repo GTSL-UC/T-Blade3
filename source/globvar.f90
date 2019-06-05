@@ -83,7 +83,7 @@ real*8 phi_s_in_nonoffset_hub,phi_s_out_nonoffset_hub
 real*8 xcpdelm(100),xcpdeltheta(100),xcpinbeta(100),xcpoutbeta(100),staggspline
 real*8 spanmp(100),xcpdelmp(100),spaninbeta(100),spanoutbeta(100)
 real*8 spantheta(100),chords(nspan),inbeta_s(nspan),outbeta_s(nspan),thk_tm_c_spl(nspan),inci_s(nspan),intersec(nspan),dev_s(nspan)
-real*8 xcpchord(100),xcptm_c(100),spanchord(100),spantm_c(100)
+real*8 xcpchord(100),xcptm_c(100),xcpumax(100),spanchord(100),spantm_c(100)
 real*8 hub,tip, sweep1,radius_tolerance
 
 real*8 xle(nx),xte(nx),rle(nx),rte(nx),xles(nx),xtes(nx),rles(nx),rtes(nx),sle(nx),ste(nx)
@@ -112,6 +112,7 @@ character*15::istr1,istr2,H(13)
 
 logical isdev, tm_c_spline, is_xyzstreamlines, spanwise_angle_spline,spanwise_inci_dev_spline, &
 is2d!, isxygrid
+logical :: u_max_spline = .false.
 
 common / bladesectionpoints /xxa(nx,nax),yya(nx,nax)
 !

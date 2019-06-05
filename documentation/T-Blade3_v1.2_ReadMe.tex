@@ -297,11 +297,19 @@ This is the main input file for T-Blade3. It contains all the geometric and aero
         \item First column specifies spanwise cations ranging from $0$ to $1$
         \item Second column specifies control points which generate \textit{chord\_multiplier}
     \end{enumerate}
-    \item Control table for the maximum thickness to chord ratio:
+    \item Control table for the maximum thickness to chord ratio (\textit{tm/c}) and/or maximum thickness location (\textit{u\_max}):
     \begin{enumerate}[label=\alph*]
         \item Above the table is the number of control points which determines the size of the table
         \item First column specifies spanwise locations ranging from $0$ to $1$
-        \item Second column specifies control points which generate \textit{tm/c}
+        \item There are several options when specifying the control points for either \textit{tm/c} or \textit{u\_max}:
+        \begin{itemize}[label=\FilledSmallSquare]
+            \item The second column can specify control points to generate \textit{tm/c} and a third column can specify control points to generate \textit{u\_max}
+            \item The second column can specify control points to generate \textit{u\_max} and a third column can specify control points to generate \textit{tm/c}
+            \item The second column can specify control points to generate \textit{tm/c} and no third column is defined
+            \item The second column can specify control points to generate \textit{u\_max} and no third column is defined
+        \end{itemize}
+        \item The column specifying control points for \textit{tm/c} should \textbf{always} be defined with a header "$tm/c$" and the column specifying control points for \textit{u\_max} should \textbf{always} be defined with a header "$u\_max$"
+        \item If control points for \textit{u\_max} are not defined, the maximum thickness location values for Wennerstrom thickness or quartic spline thickness are set equal to the \textit{umxthk} values specified earlier in this file
     \end{enumerate}
     \item Hub and tip offsets: Offset values as a fraction to determine the hub and tip offset percentage
     \item Streamline data: $(x,r)$ coordinates of the specified number of streamlines
