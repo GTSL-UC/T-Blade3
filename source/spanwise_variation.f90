@@ -376,9 +376,9 @@ subroutine span_variation()
 
         ! write_span_thk in file_operations
         if (thick_distr == 5) then
-            call write_span_thk(nsl,size(cp_chord_thk,2),casename,bspline_thk)
+            call write_span_thk(nsl,size(cp_chord_thk,2),casename,bspline_thk,thick_distr)
         else
-            call write_span_thk(nsl,ncp_chord_thk,casename,bspline_thk)
+            call write_span_thk(nsl,ncp_chord_thk,casename,bspline_thk,thick_distr)
         end if
 
 

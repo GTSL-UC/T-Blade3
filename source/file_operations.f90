@@ -832,7 +832,7 @@ module file_operations
         end if
         do i = 1,np
 
-            write(funit,'(4F40.16)') u(i), thickness_data(i,1), thickness_data(i,2), thickness_data(i,3)
+            write(funit,'(4F40.16)') u(i), 2.0*thickness_data(i,1), thickness_data(i,2), thickness_data(i,3)
 
         end do
         close(funit)
@@ -940,13 +940,15 @@ module file_operations
     ! Write thickness spanwise spline data to a file, if using isdev
     !
     !---------------------------------------------------------------------------
-    subroutine write_span_thk(nsl,ncp_chord_thk,casename,bspline_thk)
+    subroutine write_span_thk(nsl,ncp_chord_thk,casename,bspline_thk,thick_distr)
 
         integer,                intent(in)              :: nsl, ncp_chord_thk
         character(*),           intent(in)              :: casename
         real,                   intent(in)              :: bspline_thk(nsl,ncp_chord_thk)
+        integer,                intent(in)              :: thick_distr
 
         ! Local variables
+        real,           allocatable                     :: bspline_thk_local(:,:)
         character(:),   allocatable                     :: thickness_file_name
         integer                                         :: funit = 97, i
         logical                                         :: file_exist
@@ -961,7 +963,14 @@ module file_operations
         end if
         do i = 1,nsl
 
-            write(funit, '(20F20.16)') bspline_thk(i,:)
+            if (thick_distr == 5) then
+                bspline_thk_local       = bspline_thk
+                bspline_thk_local(:,4)  = 2.0*bspline_thk_local(:,4)
+                bspline_thk_local(:,5)  = 2.0*bspline_thk_local(:,5)
+                write(funit, '(20F20.16)') bspline_thk_local(i,:)
+            else
+                write(funit, '(20F20.16)') bspline_thk(i,:)
+            end if
 
         end do
         close(funit)
