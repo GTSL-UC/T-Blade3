@@ -208,57 +208,6 @@
     subroutine     override_span_thk_ctrl(n, a)
       real*8 a(*)
     end subroutine override_span_thk_ctrl
-    subroutine     override_exact_u1(n, a)
-      real*8 a(*)
-    end subroutine override_exact_u1
-    subroutine     override_exact_u2(n, a)
-      real*8 a(*)
-    end subroutine override_exact_u2
-    subroutine     override_exact_u3(n, a)
-      real*8 a(*)
-    end subroutine override_exact_u3
-    subroutine     override_exact_u4(n, a)
-      real*8 a(*)
-    end subroutine override_exact_u4
-    subroutine     override_exact_u5(n, a)
-      real*8 a(*)
-    end subroutine override_exact_u5
-    subroutine     override_exact_u6(n, a)
-      real*8 a(*)
-    end subroutine override_exact_u6
-    subroutine     override_exact_u7(n, a)
-      real*8 a(*)
-    end subroutine override_exact_u7
-    subroutine     override_exact_thk1(n, a)
-      real*8 a(*)
-    end subroutine override_exact_thk1
-    subroutine     override_exact_thk2(n, a)
-      real*8 a(*)
-    end subroutine override_exact_thk2
-    subroutine     override_exact_thk3(n, a)
-      real*8 a(*)
-    end subroutine override_exact_thk3
-    subroutine     override_exact_thk4(n, a)
-      real*8 a(*)
-    end subroutine override_exact_thk4
-    subroutine     override_exact_thk5(n, a)
-      real*8 a(*)
-    end subroutine override_exact_thk5
-    subroutine     override_exact_thk6(n, a)
-      real*8 a(*)
-    end subroutine override_exact_thk6
-    subroutine     override_exact_thk7(n, a)
-      real*8 a(*)
-    end subroutine override_exact_thk7
-    subroutine     override_exact_lethk(n, a)
-      real*8 a(*)
-    end subroutine override_exact_lethk
-    subroutine     override_exact_tethk(n, a)
-      real*8 a(*)
-    end subroutine override_exact_tethk
-    subroutine     override_thk_flags(a)
-      integer a(*)
-    end subroutine override_thk_flags
     subroutine     override_offsets(a)
       integer a(*)
     end subroutine override_offsets
