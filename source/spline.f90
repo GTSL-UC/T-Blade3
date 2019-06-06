@@ -456,7 +456,7 @@ return
 end subroutine spl_discjoint
 
 
-subroutine spl_intersect(tt1, tt2, x1, dxdt1, y1, dydt1, t1, n1, x2, dxdt2, y2, dydt2, t2, n2) ! used by(3dbgb)
+subroutine spl_intersect(ia,tt1, tt2, x1, dxdt1, y1, dydt1, t1, n1, x2, dxdt2, y2, dydt2, t2, n2) ! used by(3dbgb)
     use errors  
     use file_operations
 
@@ -477,6 +477,7 @@ implicit none
 !			dydt2
 !			tt1,	Real,		Initial guesses of spline parameters
 !			tt2					at intersection.
+integer,    intent(in)   :: ia
 integer, intent (in) :: n1, n2
 real, intent (in) :: x1(n1), y1(n1), t1(n1), dxdt1(n1), dydt1(n1), &
                      x2(n2), y2(n2), t2(n2), dxdt2(n2), dydt2(n2)
@@ -494,29 +495,32 @@ real :: dt1, dt2, r, ra, rb, rt1, rt2, F, Fa, Fb, Ft1, Ft2, &
         mint1, mint2, maxt1, maxt2
 integer :: iter, i, l, nopen
 real :: dspl_eval
+character(10)                   :: warning_arg
 character(len = :), allocatable :: log_file, warning_msg, dev_msg
 logical                         :: file_open
+
+write(warning_arg, '(I5)') ia
 
 mint1 = minval(t1); maxt1 = maxval(t1)
 mint2 = minval(t2); maxt2 = maxval(t2)
 if (tt1 .lt. mint1) then
-    warning_msg = 'Bad initial guess provided for spline 1. Using minimum value.'
+    warning_msg = 'Bad initial guess provided for spline 1 in section '//adjustl(trim(warning_arg))//'. Using minimum value.'
     dev_msg     = 'Check subroutine spl_intersect in spline.f90'
     call warning(warning_msg, dev_msg = dev_msg)
     tt1 = mint1
 elseif (tt1 .gt. maxt1) then
-    warning_msg = 'Bad initial guess provided for spline 1. Using maximum value.'
+    warning_msg = 'Bad initial guess provided for spline 1 in section '//adjustl(trim(warning_arg))//'. Using maximum value.'
     dev_msg     = 'Check subroutine spl_intersect in spline.f90'
     call warning(warning_msg, dev_msg = dev_msg)
     tt1 = maxt1
 endif
 if (tt2 .lt. mint2) then
-    warning_msg = 'Bad initial guess provided for spline 2. Using minimum value.'
+    warning_msg = 'Bad initial guess provided for spline 2 in section '//adjustl(trim(warning_arg))//'. Using minimum value.'
     dev_msg     = 'Check subroutine spl_intersect in spline.f90'
     call warning(warning_msg, dev_msg = dev_msg)
     tt2 = mint2
 elseif (tt2 .gt. maxt2) then
-    warning_msg = 'Bad initial guess provided for spline 2. Using maximum value.'
+    warning_msg = 'Bad initial guess provided for spline 2 in section '//adjustl(trim(warning_arg))//'. Using maximum value.'
     dev_msg     = 'Check subroutine spl_intersect in spline.f90'
     call warning(warning_msg, dev_msg = dev_msg)
     tt2 = maxt2
@@ -589,25 +593,25 @@ enddo
 !	F1/min(t1(n1), t2(n2)), F2/min(t1(n1), t2(n2))
 call log_file_exists(log_file, nopen, file_open)
 if(trunc1knt1) then
-    warning_msg = 'spl_intersect - splines may not intersect. Knot 1 of spline 1 is closest possible to spline 2.'
+    warning_msg = 'spl_intersect - splines may not intersect for section '//adjustl(trim(warning_arg))//'. Knot 1 of spline 1 is closest possible to spline 2.'
     dev_msg     = 'Check subroutine spl_intersect in spline.f90'
     call warning(warning_msg, dev_msg = dev_msg)
     !write(nopen,*) 'spl_intersect - splines may not intersect. Knot 1 of spline 1 is closest possible to spline 2.'
 end if
 if(trunc1kntn) then
-    warning_msg = 'spl_intersect - splines may not intersect. End knot of spline 1 is closest possible to spline 2.'
+    warning_msg = 'spl_intersect - splines may not intersect for section '//adjustl(trim(warning_arg))//'. End knot of spline 1 is closest possible to spline 2.'
     dev_msg     = 'Check subroutine spl_intersect in spline.f90'
     call warning(warning_msg, dev_msg = dev_msg)
     !write(nopen,*) 'spl_intersect - splines may not intersect. End knot of spline 1 is closest possible to spline 2.'
 end if
 if(trunc2knt1) then
-    warning_msg = 'spl_intersect - splines may not intersect. Knot 1 of spline 2 is closest possible to spline 1.'
+    warning_msg = 'spl_intersect - splines may not intersect for section '//adjustl(trim(warning_arg))//'. Knot 1 of spline 2 is closest possible to spline 1.'
     dev_msg     = 'Check subroutine spl_intersect in spline.f90'
     call warning(warning_msg, dev_msg = dev_msg)
     !write(nopen,*) 'spl_intersect - splines may not intersect. Knot 1 of spline 2 is closest possible to spline 1.'
 end if
 if(trunc2kntn) then
-    warning_msg = 'spl_intersect - Splines may not intersect. End knot of spline 2 is closest possible to spline 1.'
+    warning_msg = 'spl_intersect - Splines may not intersect for section '//adjustl(trim(warning_arg))//'. End knot of spline 2 is closest possible to spline 1.'
     dev_msg     = 'Check subroutine spl_intersect in spline.f90'
     call warning(warning_msg, dev_msg = dev_msg)
     !write(nopen,*) 'spl_intersect - Splines may not intersect. End knot of spline 2 is closest possible to spline 1.'

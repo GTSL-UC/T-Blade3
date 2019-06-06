@@ -15,7 +15,7 @@ subroutine readinput(fname)
     
     ! Local variables
     character(256)                                      :: temp, temp1, temp2, beta_switch_2
-    character(:),   allocatable                         :: log_file, error_msg, warning_msg, dev_msg
+    character(:),   allocatable                         :: log_file, error_msg, warning_msg, warning_msg_1, dev_msg
     integer                                             :: er, stat, n_temp1, n_temp2, &
                                                            nopen, nopen1, itm_c, iumax
     real                                                :: inBetaInci, outBetaDevn, temp_offsets(2)
@@ -24,7 +24,7 @@ subroutine readinput(fname)
     logical                                             :: equal, beta_value(5), ang_spl_value(5), file_open, &
                                                            file_open_1, read_tm_c_then_u_max = .false., &
                                                            read_u_max_then_tm_c = .false., read_tm_c_only = .false., &
-                                                           read_u_max_only = .false.
+                                                           read_u_max_only = .false., zero_u_max = .false.
 
 
     !
@@ -174,8 +174,6 @@ subroutine readinput(fname)
     read(1, '(A)') temp
     write(nopen1,'(A)') trim(temp)
     units = temp(24:25)
-
-    print *, 'From readinput - ', units
 
     ! Invalid unit for the blade scaling factor
     if (units .ne. 'mm' .and. units .ne. 'cm' .and. units .ne. 'm)' .and. units .ne. 'm ') then
@@ -1063,12 +1061,6 @@ subroutine readinput(fname)
         tm_c_spline = .False.
     endif   
 
-    ! Determine if u_max spline needs to be used or not
-    if ((thick_distr == 0 .or. thick_distr == 1 .or. thick_distr == 2) .and. &
-       &(read_tm_c_then_u_max .or. read_u_max_then_tm_c .or. read_u_max_only)) then
-       u_max_spline = .true.
-    end if 
-
     ! Read inputs in appropriate order
     do i = 1,cptm_c
 
@@ -1089,7 +1081,30 @@ subroutine readinput(fname)
         read(1,'(A)') temp
         write(nopen1,'(A)') trim(temp)
 
+        ! If u_max is being read from file and is zero, activate flag
+        ! TODO: Add warning?
+        if ((.not. read_tm_c_only) .and. (xcpumax(i) < tol) .and. (.not. zero_u_max)) then
+            zero_u_max = .true.
+        end if 
+
     end do
+
+    ! Determine if u_max spline needs to be used or not
+    if ((thick_distr == 0 .or. thick_distr == 1 .or. thick_distr == 2) .and.  &
+       &(read_tm_c_then_u_max .or. read_u_max_then_tm_c .or. read_u_max_only) &
+       &.and. (.not. zero_u_max)) then
+
+       u_max_spline = .true.
+
+    end if 
+
+    ! Warning message for u_max spline zero values
+    if (zero_u_max) then
+        warning_msg     = "Zero value for u_max spline control points detected, reverting to umxthk values"
+        warning_msg_1   = "If you want to use u_max spline, please use non-zero values otherwise ignore this warning"
+        dev_msg         = "Check subroutine readinput in readinput.f90"
+        call warning(warning_msg, warning_msg_1, dev_msg)
+    end if
 
     !
     ! Call ESP tm/c override subroutines

@@ -1009,7 +1009,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
             ! print*, 'inlet to spl_intersect', s1le(ia), s2le(ia), xm(1, ia), xms(1, ia), rm(1, ia), &
                        ! rms(1, ia), mp(1, ia), nsp(ia), xle(1), xles(1), rle(1), &
                        ! rles(1), sle(1), npoints 
-            call spl_intersect(s1le(ia), s2le(ia), xm(1, ia), xms(1, ia), rm(1, ia), &
+            call spl_intersect(ia,s1le(ia), s2le(ia), xm(1, ia), xms(1, ia), rm(1, ia), &
                        rms(1, ia), mp(1, ia), nsp(ia), xle(1), xles(1), rle(1), &
                        rles(1), sle(1), npoints)
             x_le(ia) = spl_eval(s1le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
@@ -1039,7 +1039,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                 s2te(ia) = s2te(ia-1)
             endif
             !print*, 's1te, s2te', s1te(ia), s2te(ia)
-            call spl_intersect(s1te(ia), s2te(ia), xm(1, ia), xms(1, ia), rm(1, ia), &
+            call spl_intersect(ia,s1te(ia), s2te(ia), xm(1, ia), xms(1, ia), rm(1, ia), &
                         rms(1, ia), mp(1, ia), nsp(ia), xte(1), xtes(1), rte(1), &
                         rtes(1), ste(1), npoints)
             x_te(ia) = spl_eval(s1te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
