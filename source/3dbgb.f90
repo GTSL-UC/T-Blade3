@@ -1438,7 +1438,6 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
          print*, span(ia), thk_tm_c_spl(ia)
          write(nopen,*) span(ia), thk_tm_c_spl(ia)
       enddo
-      call close_log_file(nopen, file_open)
     endif
 
 
@@ -1582,7 +1581,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
        !tm/c thickness spline switch
        !----------------------------------------------------------------------
        call log_file_exists(log_file, nopen, file_open)
-       if(tm_c_spline)then
+       if(tm_c_spline .and. thick_distr /= 0)then
          print*, 'Thickness t/c will be multiplied by tm/c 2D spline definition...'
          write(nopen,*) 'Thickness t/c will be multiplied by tm/c 2D spline definition...'
          thkc = thk_c(js)*thk_tm_c_spl(js)

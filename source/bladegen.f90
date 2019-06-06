@@ -553,7 +553,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             end if 
 
         ! Thickness multiplier is not required
-        else 
+        else if (thick == 0 .and. thick_distr == 0) then
             splthick = 0
         end if 
 
@@ -675,7 +675,18 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             
             do i = 1, np
                 ui           = u(i)
-                thkmultip    = splthick(i)
+
+                if (thick == 0) then
+                    thkmultip   = thk_tm_c_spl(js)
+                else
+                    thkmultip    = splthick(i)
+                end if
+
+                if (i == 51 .and. js == 1) then
+                    call log_file_exists(log_file, nopen, file_open)
+                    write(nopen,*) 'from bladegen - thkmultip = ', thkmultip
+                    call close_log_file(nopen, file_open)
+                end if
                
                 ! thickellip in airfoiltypes.f90 
                 call thickellip(i, ui, thk, lethk, tethk, fmxthk, umxthk, rr1, rr2, thkmultip, u_le, uin_le, i_le, oo, i_te)

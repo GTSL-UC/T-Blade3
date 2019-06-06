@@ -1054,12 +1054,12 @@ subroutine readinput(fname)
     if (itm_c == 0 .and. iumax /= 0)    read_u_max_only         = .True.
 
     ! Next line to always use the thickness tm/c as it is a multiplier (default = 1):
-    if ((thick_distr .ne. 0) .and. (.not. is2d) .and. (read_tm_c_then_u_max .or. &
+    if ((thick /= 1) .and. (.not. is2d) .and. (read_tm_c_then_u_max .or. &
        &read_u_max_then_tm_c .or. read_tm_c_only)) then
         tm_c_spline = .True.
     else
         tm_c_spline = .False.
-    endif   
+    endif  
 
     ! Read inputs in appropriate order
     do i = 1,cptm_c
