@@ -1137,6 +1137,16 @@ subroutine readinput(fname)
         xcptm_c(1:cptm_c) = temp_in
     end if
 
+    !
+    ! override_span_u_max() in 3dbgb.f90
+    ! Callback to override_span_u_max_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+    !
+    if (allocated(temp_in)) deallocate(temp_in)
+    allocate(temp_in(cptm_c))
+    temp_in = xcpumax(1:cptm_c)
+    call override_span_u_max(cptm_c, temp_in)
+    xcpumax(1:cptm_c) = temp_in
+
 
 
     ! 

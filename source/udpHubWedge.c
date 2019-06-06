@@ -31,7 +31,7 @@
  *     MA  02110-1301  USA
  */
 
-#define NUMUDPARGS 36
+#define NUMUDPARGS 37
 #include "udpUtilities.h"
 
 /* shorthands for accessing argument values and velocities */
@@ -46,42 +46,44 @@
 #define SPAN_OUT_BETA_CTRL( IUDP,I) ((double *) (udps[IUDP].arg[ 8].val))[I]
 #define SPAN_CHORD(         IUDP,I) ((double *) (udps[IUDP].arg[ 9].val))[I]
 #define SPAN_THK_C(         IUDP,I) ((double *) (udps[IUDP].arg[10].val))[I]
-#define SPAN_IN_BETA(       IUDP,I) ((double *) (udps[IUDP].arg[11].val))[I]
-#define SPAN_OUT_BETA(      IUDP,I) ((double *) (udps[IUDP].arg[12].val))[I]
-#define U2(                 IUDP,I) ((double *) (udps[IUDP].arg[13].val))[I]
-#define U3(                 IUDP,I) ((double *) (udps[IUDP].arg[14].val))[I]
-#define U4(                 IUDP,I) ((double *) (udps[IUDP].arg[15].val))[I]
-#define U5(                 IUDP,I) ((double *) (udps[IUDP].arg[16].val))[I]
-#define U6(                 IUDP,I) ((double *) (udps[IUDP].arg[17].val))[I]
-#define CUR1(               IUDP,I) ((double *) (udps[IUDP].arg[18].val))[I]
-#define CUR2(               IUDP,I) ((double *) (udps[IUDP].arg[19].val))[I]
-#define CUR3(               IUDP,I) ((double *) (udps[IUDP].arg[20].val))[I]
-#define CUR4(               IUDP,I) ((double *) (udps[IUDP].arg[21].val))[I]
-#define CUR5(               IUDP,I) ((double *) (udps[IUDP].arg[22].val))[I]
-#define CUR6(               IUDP,I) ((double *) (udps[IUDP].arg[23].val))[I]
-#define CUR7(               IUDP,I) ((double *) (udps[IUDP].arg[24].val))[I]
-#define SPAN_CURV_CTRL(     IUDP,I) ((double *) (udps[IUDP].arg[25].val))[I]
-#define SPAN_DEL_M_CTRL(    IUDP,I) ((double *) (udps[IUDP].arg[26].val))[I]
-#define SPAN_DEL_THETA_CTRL(IUDP,I) ((double *) (udps[IUDP].arg[27].val))[I]
-#define SPAN_DEL_M(         IUDP,I) ((double *) (udps[IUDP].arg[28].val))[I]
-#define SPAN_DEL_THETA(     IUDP,I) ((double *) (udps[IUDP].arg[29].val))[I]
-#define SPAN_THK_CTRL(      IUDP,I) ((double *) (udps[IUDP].arg[30].val))[I]
-#define OFFSETS(            IUDP,I) ((double *) (udps[IUDP].arg[31].val))[I] 
-#define NACA_LE_RADIUS(		IUDP,I) ((double *) (udps[IUDP].arg[32].val))[I]
-#define NACA_U_MAX(			IUDP,I) ((double *) (udps[IUDP].arg[33].val))[I]
-#define NACA_T_MAX(			IUDP,I) ((double *) (udps[IUDP].arg[34].val))[I]
-#define NACA_T_TE(			IUDP,I) ((double *) (udps[IUDP].arg[35].val))[I]
+#define SPAN_U_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[11].val))[I]
+#define SPAN_IN_BETA(       IUDP,I) ((double *) (udps[IUDP].arg[12].val))[I]
+#define SPAN_OUT_BETA(      IUDP,I) ((double *) (udps[IUDP].arg[13].val))[I]
+#define U2(                 IUDP,I) ((double *) (udps[IUDP].arg[14].val))[I]
+#define U3(                 IUDP,I) ((double *) (udps[IUDP].arg[15].val))[I]
+#define U4(                 IUDP,I) ((double *) (udps[IUDP].arg[16].val))[I]
+#define U5(                 IUDP,I) ((double *) (udps[IUDP].arg[17].val))[I]
+#define U6(                 IUDP,I) ((double *) (udps[IUDP].arg[18].val))[I]
+#define CUR1(               IUDP,I) ((double *) (udps[IUDP].arg[19].val))[I]
+#define CUR2(               IUDP,I) ((double *) (udps[IUDP].arg[20].val))[I]
+#define CUR3(               IUDP,I) ((double *) (udps[IUDP].arg[21].val))[I]
+#define CUR4(               IUDP,I) ((double *) (udps[IUDP].arg[22].val))[I]
+#define CUR5(               IUDP,I) ((double *) (udps[IUDP].arg[23].val))[I]
+#define CUR6(               IUDP,I) ((double *) (udps[IUDP].arg[24].val))[I]
+#define CUR7(               IUDP,I) ((double *) (udps[IUDP].arg[25].val))[I]
+#define SPAN_CURV_CTRL(     IUDP,I) ((double *) (udps[IUDP].arg[26].val))[I]
+#define SPAN_DEL_M_CTRL(    IUDP,I) ((double *) (udps[IUDP].arg[27].val))[I]
+#define SPAN_DEL_THETA_CTRL(IUDP,I) ((double *) (udps[IUDP].arg[28].val))[I]
+#define SPAN_DEL_M(         IUDP,I) ((double *) (udps[IUDP].arg[29].val))[I]
+#define SPAN_DEL_THETA(     IUDP,I) ((double *) (udps[IUDP].arg[30].val))[I]
+#define SPAN_THK_CTRL(      IUDP,I) ((double *) (udps[IUDP].arg[31].val))[I]
+#define OFFSETS(            IUDP,I) ((double *) (udps[IUDP].arg[32].val))[I] 
+#define NACA_LE_RADIUS(		IUDP,I) ((double *) (udps[IUDP].arg[33].val))[I]
+#define NACA_U_MAX(			IUDP,I) ((double *) (udps[IUDP].arg[34].val))[I]
+#define NACA_T_MAX(			IUDP,I) ((double *) (udps[IUDP].arg[35].val))[I]
+#define NACA_T_TE(			IUDP,I) ((double *) (udps[IUDP].arg[36].val))[I]
 
 /* data about possible arguments */
-static char*  argNames[NUMUDPARGS] = {"ncp",                "filename",         "auxname",          "average",
-                                      "arg_2",              "span_chord_ctrl",  "span_thk_c_ctrl",  "span_in_beta_ctrl",
-                                      "span_out_beta_ctrl", "span_chord",       "span_thk_c",       "span_in_beta",     
-                                      "span_out_beta",      "u2",               "u3",               "u4",               
-                                      "u5",                 "u6",               "cur1",             "cur2",             
-                                      "cur3",               "cur4",             "cur5",             "cur6",             
-                                      "cur7",               "span_curv_ctrl",   "span_del_m_ctrl",  "span_del_theta_ctrl",
-                                      "span_del_m",         "span_del_theta",   "span_thk_ctrl",    "offsets",            
-                                      "naca_le_radius",	    "naca_u_max",		"naca_t_max",       "naca_t_te",			};
+static char*  argNames[NUMUDPARGS] = {"ncp",                    "filename",         "auxname",          "average",
+                                      "arg_2",                  "span_chord_ctrl",  "span_thk_c_ctrl",  "span_in_beta_ctrl",
+                                      "span_out_beta_ctrl",     "span_chord",       "span_thk_c",       "span_u_max",
+                                      "span_in_beta",           "span_out_beta",    "u2",               "u3",               
+                                      "u4",                     "u5",               "u6",               "cur1",             
+                                      "cur2",                   "cur3",             "cur4",             "cur5",             
+                                      "cur6",                   "cur7",             "span_curv_ctrl",   "span_del_m_ctrl",  
+                                      "span_del_theta_ctrl",    "span_del_m",       "span_del_theta",   "span_thk_ctrl",    
+                                      "offsets",                "naca_le_radius",	"naca_u_max",		"naca_t_max",       
+                                      "naca_t_te",			    };
 static int    argTypes[NUMUDPARGS] = {ATTRINT,      ATTRSTRING, ATTRSTRING, ATTRSTRING, 
                                       ATTRSTRING,   ATTRREAL,   ATTRREAL,   ATTRREAL,   
                                       ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
@@ -90,7 +92,8 @@ static int    argTypes[NUMUDPARGS] = {ATTRINT,      ATTRSTRING, ATTRSTRING, ATTR
                                       ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
                                       ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
                                       ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
-                                      ATTRREAL,     ATTRREAL,	ATTRREAL,	ATTRREAL,		};
+                                      ATTRREAL,     ATTRREAL,	ATTRREAL,	ATTRREAL,		
+                                      ATTRREAL,     };
 static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,
@@ -99,7 +102,8 @@ static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,
-                                      0,        0,			0,			0,		};
+                                      0,        0,			0,			0,		
+                                      0,        };
 static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
@@ -108,7 +112,8 @@ static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
-                                      0.,		0.,			0.,			0.,		};
+                                      0.,		0.,			0.,			0.,		
+                                      0.,       };
 
 /* get utility routines: udpErrorStr, udpInitialize, udpReset, udpSet,
                          udpGet, udpVel, udpClean, udpMesh */
@@ -144,6 +149,7 @@ void   override_span_in_beta_ctrl_(  int *nspn, double span_in_beta_ctrl[   ]);
 void   override_span_out_beta_ctrl_( int *nspn, double span_out_beta_ctrl[  ]);
 void   override_span_chord_(         int *nspn, double span_chord[          ]);
 void   override_span_thk_c_(         int *nspn, double span_thk_c[          ]);
+void   override_span_u_max_(         int *nspn, double span_u_max[          ]);
 void   override_span_in_beta_(       int *nspn, double span_in_beta[        ]);
 void   override_span_out_beta_(      int *nspn, double span_out_beta[       ]);
 void   override_u2_(                 int *nspn, double u2[                  ]);
@@ -714,6 +720,32 @@ void override_span_thk_c_(int *nspn, double span_thk_c[])
 /*
  ************************************************************************
  *                                                                      *
+ *   override_span_u_max - callback from Tblade3 to change              *
+ *                         span_u_max array                             *
+ *                                                                      *
+ ************************************************************************
+ */
+
+void override_span_u_max_(int *nspn, double span_u_max[])
+{
+    int    ispn, narg=11;
+
+    if (udps[numUdp].arg[narg].size == *nspn) {
+        printf(" ==> overrdiing span_u_max\n");
+        for (ispn = 0; ispn < *nspn; ispn++) {
+            span_u_max[ispn] = SPAN_U_MAX(numUdp,ispn);
+            printf("     span_u_max(%2d) = %12.5f\n", ispn+1, span_u_max[ispn]);
+            }
+        } else {
+            printf(" ==> not overriding span_u_max (nspn=%d but size=%d)\n",
+                  *nspn, udps[numUdp].arg[narg].size);
+            }
+}
+
+
+/*
+ ************************************************************************
+ *                                                                      *
  *   override_span_in_beta - callback from Tblade3 to change            *
  *                           span_in_beta array                         *
  *                                                                      *
@@ -722,7 +754,7 @@ void override_span_thk_c_(int *nspn, double span_thk_c[])
 
 void override_span_in_beta_(int *nspn, double span_in_beta[])
 {
-    int    ispn, narg=11;
+    int    ispn, narg=12;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_in_beta\n");
@@ -748,7 +780,7 @@ void override_span_in_beta_(int *nspn, double span_in_beta[])
 
 void override_span_out_beta_(int *nspn, double span_out_beta[])
 {
-    int    ispn, narg=12;
+    int    ispn, narg=13;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_out_beta\n");
@@ -773,7 +805,7 @@ void override_span_out_beta_(int *nspn, double span_out_beta[])
 
 void override_u2_(int *nspn, double u2[])
 {
-    int    ispn, narg=13;
+    int    ispn, narg=14;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding u2\n");
@@ -798,7 +830,7 @@ void override_u2_(int *nspn, double u2[])
 
 void override_u3_(int *nspn, double u3[])
 {
-    int    ispn, narg=14;
+    int    ispn, narg=15;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding u3\n");
@@ -823,7 +855,7 @@ void override_u3_(int *nspn, double u3[])
 
 void override_u4_(int *nspn, double u4[])
 {
-    int    ispn, narg=15;
+    int    ispn, narg=16;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding u4\n");
@@ -848,7 +880,7 @@ void override_u4_(int *nspn, double u4[])
 
 void override_u5_(int *nspn, double u5[])
 {
-    int    ispn, narg=16;
+    int    ispn, narg=17;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding u5\n");
@@ -873,7 +905,7 @@ void override_u5_(int *nspn, double u5[])
 
 void override_u6_(int *nspn, double u6[])
 {
-    int    ispn, narg=17;
+    int    ispn, narg=18;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding u6\n");
@@ -898,7 +930,7 @@ void override_u6_(int *nspn, double u6[])
 
 void override_cur1_(int *nspn, double cur1[])
 {
-    int    ispn, narg=18;
+    int    ispn, narg=19;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur1\n");
@@ -923,7 +955,7 @@ void override_cur1_(int *nspn, double cur1[])
 
 void override_cur2_(int *nspn, double cur2[])
 {
-    int    ispn, narg=19;
+    int    ispn, narg=20;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur2\n");
@@ -948,7 +980,7 @@ void override_cur2_(int *nspn, double cur2[])
 
 void override_cur3_(int *nspn, double cur3[])
 {
-    int    ispn, narg=20;
+    int    ispn, narg=21;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur3\n");
@@ -973,7 +1005,7 @@ void override_cur3_(int *nspn, double cur3[])
 
 void override_cur4_(int *nspn, double cur4[])
 {
-    int    ispn, narg=21;
+    int    ispn, narg=22;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur4\n");
@@ -998,7 +1030,7 @@ void override_cur4_(int *nspn, double cur4[])
 
 void override_cur5_(int *nspn, double cur5[])
 {
-    int    ispn, narg=22;
+    int    ispn, narg=23;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur5\n");
@@ -1023,7 +1055,7 @@ void override_cur5_(int *nspn, double cur5[])
 
 void override_cur6_(int *nspn, double cur6[])
 {
-    int    ispn, narg=23;
+    int    ispn, narg=24;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur6\n");
@@ -1048,7 +1080,7 @@ void override_cur6_(int *nspn, double cur6[])
 
 void override_cur7_(int *nspn, double cur7[])
 {
-    int    ispn, narg=24;
+    int    ispn, narg=25;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur7\n");
@@ -1074,7 +1106,7 @@ void override_cur7_(int *nspn, double cur7[])
 
 void override_span_curv_ctrl_(int *nspn, double span_curv_ctrl[])
 {
-    int    ispn, narg=25;
+    int    ispn, narg=26;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_curv_ctrl\n");
@@ -1100,7 +1132,7 @@ void override_span_curv_ctrl_(int *nspn, double span_curv_ctrl[])
 
 void override_span_del_m_ctrl_(int *nspn, double span_del_m_ctrl[])
 {
-    int    ispn, narg=26;
+    int    ispn, narg=27;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_del_m_ctrl\n");
@@ -1126,7 +1158,7 @@ void override_span_del_m_ctrl_(int *nspn, double span_del_m_ctrl[])
 
 void override_span_del_theta_ctrl_(int *nspn, double span_del_theta_ctrl[])
 {
-    int    ispn, narg=27;
+    int    ispn, narg=28;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_del_theta_ctrl\n");
@@ -1152,7 +1184,7 @@ void override_span_del_theta_ctrl_(int *nspn, double span_del_theta_ctrl[])
 
 void override_span_del_m_(int *nspn, double span_del_m[])
 {
-    int    ispn, narg=28;
+    int    ispn, narg=29;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_del_m\n");
@@ -1178,7 +1210,7 @@ void override_span_del_m_(int *nspn, double span_del_m[])
 
 void override_span_del_theta_(int *nspn, double span_del_theta[])
 {
-    int    ispn, narg=29;
+    int    ispn, narg=30;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_del_theta\n");
@@ -1203,7 +1235,7 @@ void override_span_del_theta_(int *nspn, double span_del_theta[])
 
 void override_span_thk_ctrl_(int *nspn, double span_thk_ctrl[])
 {
-    int    ispn, narg=30;
+    int    ispn, narg=31;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_thk_ctrl\n");
@@ -1229,7 +1261,7 @@ void override_span_thk_ctrl_(int *nspn, double span_thk_ctrl[])
 
 void override_offsets_(double offsets[])
 {
-    int    ioffset, narg=31;
+    int    ioffset, narg=32;
 
     if (udps[numUdp].arg[narg].size == 2) {
         printf(" ==> overriding offsets\n");
@@ -1254,7 +1286,7 @@ void override_offsets_(double offsets[])
 
 void override_naca_le_radius_(int *nspn, double naca_le_radius[])
 {
-    int    ispn, narg=32;
+    int    ispn, narg=33;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_le_radius\n");
@@ -1280,7 +1312,7 @@ void override_naca_le_radius_(int *nspn, double naca_le_radius[])
 
 void override_naca_u_max_(int *nspn, double naca_u_max[])
 {
-    int    ispn, narg=33;
+    int    ispn, narg=34;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_u_max\n");
@@ -1306,7 +1338,7 @@ void override_naca_u_max_(int *nspn, double naca_u_max[])
 
 void override_naca_t_max_(int *nspn, double naca_t_max[])
 {
-    int    ispn, narg=34;
+    int    ispn, narg=35;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_t_max\n");
@@ -1332,7 +1364,7 @@ void override_naca_t_max_(int *nspn, double naca_t_max[])
 
 void override_naca_t_te_(int *nspn, double naca_t_te[])
 {
-    int    ispn, narg=35;
+    int    ispn, narg=36;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_t_te\n");

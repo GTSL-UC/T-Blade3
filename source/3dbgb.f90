@@ -202,6 +202,9 @@
     subroutine     override_span_thk_c(n, a)
       real*8 a(*)
     end subroutine override_span_thk_c
+    subroutine     override_span_u_max(n, a)
+      real*8 a(*)
+    end subroutine override_span_u_max
     subroutine     override_span_curv_ctrl(n, a)
        real*8 a(*)
     end subroutine override_span_curv_ctrl
