@@ -24,7 +24,8 @@ subroutine readinput(fname)
     logical                                             :: equal, beta_value(5), ang_spl_value(5), file_open, &
                                                            file_open_1, read_tm_c_then_u_max = .false., &
                                                            read_u_max_then_tm_c = .false., read_tm_c_only = .false., &
-                                                           read_u_max_only = .false., zero_u_max = .false.
+                                                           read_u_max_only = .false., zero_u_max = .false., &
+                                                           grid_gen_present = .false.
 
 
     !
@@ -678,13 +679,15 @@ subroutine readinput(fname)
     write(nopen1,*) stack_switch
     read(1,'(A)')temp
 
-    ! Raise fatal error if grid generation parameters are still present in main input file
+    ! Raise warning if grid generation parameters are still present in main input file
+    ! TODO: Will be made a fatal error in future commits
     if ((index(trim(temp), 'Jcells') /= 0) .or. (index(trim(temp), 'eta_ofst') /= 0) &
         .or. (index(trim(temp), 'BGgrid') /= 0)) then
-        error_msg   = 'Background grid generation is no longer available with T-Blade3'
-        warning_msg = 'Remove background grid generation parameters from main input file'
-        dev_msg     = 'Check subroutine readinput in readinput.f90'
-        call fatal_error(error_msg, warning_msg, dev_msg)
+        warning_msg     = 'Background grid generation is no longer available with T-Blade3'
+        warning_msg_1   = 'Background grid generation parameters should be removed from main input file'
+        dev_msg         = 'Check subroutine readinput in readinput.f90'
+        call warning(warning_msg, warning_msg_1, dev_msg)
+        grid_gen_present = .true.
     end if
     write(nopen1,'(A)') trim(temp)
 
@@ -698,17 +701,23 @@ subroutine readinput(fname)
     allocate(umxthk_all(nsl))
 
     ! If spline LE is being used, don't store LE and TE thickness
+    ! TODO: grid_gen_present will be removed in future commits
     if (LE.ne.0) then
 
         do js = 1, nspn
-            read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), tempr, tempr
-                      !jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+            if (grid_gen_present) then
+                read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), tempr, tempr, &
+                          jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+            else
+                read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), tempr, tempr
+            end if
             backspace(1)
             read(1,'(A)') temp
             write(nopen1,'(A)') trim(temp)
         enddo
 
     ! If elliptical LE is being used, read LE and TE thickness
+    ! TODO: grid_gen_present will be removed in future commits
     elseif (LE == 0) then
         
         if (allocated(lethk_all)) deallocate(lethk_all)
@@ -717,8 +726,13 @@ subroutine readinput(fname)
         allocate(tethk_all(nsl))
         
         do js = 1, nspn
-            read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), &
-                      tethk_all(js)!, jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+            if (grid_gen_present) then
+                read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), &
+                          tethk_all(js), jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+            else
+                read(1, *)tempr, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), &
+                          tethk_all(js)
+            end if
             backspace(1)
             read(1,'(A)') temp
             write(nopen1,'(A)') trim(temp)
