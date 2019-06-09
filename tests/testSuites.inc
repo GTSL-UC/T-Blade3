@@ -1,2 +1,3 @@
 ADD_TEST_SUITE(test_NACA_thickness_suite)
 ADD_TEST_SUITE(test_numerical_methods_suite)
+ADD_TEST_SUITE(rtest_NACA_thickness_suite)

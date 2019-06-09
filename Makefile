@@ -90,7 +90,7 @@ esp:
 
 # Build tests
 ifeq ($(TESTING),yes)
-$(EXE): testSuites.inc test_NACA_thickness.pf $(OBJS_SRC) TEMP
+$(EXE): testSuites.inc $(OBJS_SRC) TEMP
 	$(FCOMP) -o $@ -I$(PFUNIT)/mod -I$(PFUNIT)/include -Itests $(PFUNIT)/include/driver.F90 $(TEST_DIR)/*.o $(OBJS_SRC) $(LIBS_TEST) $(FFLAGS) $(FPPFLAGS)
 endif 
 
