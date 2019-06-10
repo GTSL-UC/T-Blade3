@@ -49,6 +49,7 @@
       real h
       real, allocatable, dimension(:) :: theta
       real sting_h_top,sting_h_bot, sting_l  ! sting height and length
+      logical   :: isquiet
       
       character*32 casename,develop,sec
       character*80 file1,file2,file3,file4
@@ -58,6 +59,9 @@
 !	ss =+ve upward deflection of LE, s=-ve Downward deflection, s=0 No deflection
 !   ee ...The elongation of the leading edge.
 ! print*,'js in lespline',js
+
+    call get_quiet_status(isquiet)
+
     write(sec,'(i2)')js
     ss    = s_all(js)
     ee   = ee_all(js)
@@ -112,7 +116,7 @@
     call vector_rotation(u_vec,cam_vec,1,theta,u_vec,cam_vec)
     uin_le = u_vec(1)
     cam_le =cam_vec(1)
-    print*,'uin_le rotated to zero camber =',uin_le,'cam_le =',cam_le,'theta =',theta
+    if (.not. isquiet) print*,'uin_le rotated to zero camber =',uin_le,'cam_le =',cam_le,'theta =',theta
     deallocate(theta)
 
 ! Calculated parameters:
@@ -131,8 +135,10 @@
     ! vLE_bot =  ss*(chrd_le)-sting_h_bot*le_thk/cos(theta_rad)/2
 
     !print*,'uLE =', uLE
-    print*,'uLE_top and bottom =', uLE_top,uLE_bot
-    print*,'vLE top and bottom =', vLE_top,vLE_bot
+    if (.not. isquiet) then
+        print*,'uLE_top and bottom =', uLE_top,uLE_bot
+        print*,'vLE top and bottom =', vLE_top,vLE_bot
+    end if
 
 
 ! calculating the control point for defining the tip:
@@ -148,7 +154,7 @@
     ! Refined finite difference:----------------------------------------
     h = (xtop(dimen) - xtop(1))/interval
     if (abs((h)-(xtop(2)-xtop(1)))>1e-05) then
-        print*,'FATAL ERROR: h in LE spline top not calculated'
+        if (.not. isquiet) print*,'FATAL ERROR: h in LE spline top not calculated'
         stop
     endif
     !print*,'h top',h
@@ -179,7 +185,7 @@
     ! Refined finite difference:----------------------------------------
         h = (xbot(dimen) - xbot(1))/interval
         if (abs((h)-(xbot(2)-xbot(1)))>1e-05) then
-            print*,'FATAL ERROR: h in spline LE bot not calculated'
+            if (.not. isquiet) print*,'FATAL ERROR: h in spline LE bot not calculated'
             stop
         endif
         !print*,'h bot',h
@@ -197,16 +203,16 @@
                 
     !0000000000000000000000000000000000000000000000000000000000000		
 
-      print*, "slope_le_top" ,slope_le_top
-      print*, "slope_le_bot" ,slope_le_bot
-      print*, "curv_le_top" ,curv_le_top
-      print*, "curv_le_bot" ,curv_le_bot
-      print*, "slope_curv_top" ,slope_curv_top
-      print*, "slope_curv_bot" ,slope_curv_bot
-
-     
-      print*, 'LE_Degree = ',degree
-      print*,'no_segments =',no_segments
+      if (.not. isquiet) then
+          print*, "slope_le_top" ,slope_le_top
+          print*, "slope_le_bot" ,slope_le_bot
+          print*, "curv_le_top" ,curv_le_top
+          print*, "curv_le_bot" ,curv_le_bot
+          print*, "slope_curv_top" ,slope_curv_top
+          print*, "slope_curv_bot" ,slope_curv_bot
+          print*, 'LE_Degree = ',degree
+          print*,'no_segments =',no_segments
+      end if
 
 !=====================================================
 
@@ -335,9 +341,9 @@
     ! solving for the upper spline CP:
     !------------------------------------
      call gauss_jordan ( 2*(degree+no_segments), 1, a_top, info )
-     print*, "info==0 == ", info
+     if (.not. isquiet) print*, "info==0 == ", info
      if (info.ne.0) then 
-        print*,'Sting top spline Singular Matrix ...'
+        if (.not. isquiet) print*,'Sting top spline Singular Matrix ...'
         stop
      endif
      xcp_top(1:ncp) =  a_top(1          : (degree+no_segments)          ,2*(degree+no_segments)+1)  
@@ -346,9 +352,9 @@
      ! solving for the bottom spline CP:
      !-------------------------------------
      call gauss_jordan ( 2*(degree+no_segments), 1, a_bot, info )
-     print*, "info==0 == ", info
+     if (.not. isquiet) print*, "info==0 == ", info
      if (info.ne.0) then 
-        print*,'Sting bot spline Singular Matrix ...'
+        if (.not. isquiet) print*,'Sting bot spline Singular Matrix ...'
         stop
      endif
      xcp_bot(1:ncp) =  a_bot(1          : (degree+no_segments)          ,2*(degree+no_segments)+1)  
@@ -357,7 +363,7 @@
     ! do i = 1,ncp	 
         ! print*,i,'xcp_bot',xcp_bot(i),' ','ycp_bot',ycp_bot(i)
     ! end do
-    print*,'========================================='
+    if (.not. isquiet) print*,'========================================='
 
    !stop		 
 !--------------------------------------------------------  
@@ -386,7 +392,7 @@
        enddo
 
        call bspline_arclength(arclength,xcp_top,ycp_top,ncp,degree)
-       print*, 'arclength', arclength
+       if (.not. isquiet) print*, 'arclength', arclength
  ! xs = x1(control point)*B1+x2(control point)*B2+x3(control point)
  !                                         *B3+x4(control point)*B4
  ! clustering the spacing of the LE spline
@@ -444,7 +450,7 @@
        enddo
          
        call bspline_arclength(arclength,xcp_bot,ycp_bot,ncp,degree)
-       print*, 'arclength', arclength
+       if (.not. isquiet) print*, 'arclength', arclength
     ! xs = x1(control point)*B1+x2(control point)*B2+x3(control point)
     !                                         *B3+x4(control point)*B4
     ! clustering the spacing of the LE spline

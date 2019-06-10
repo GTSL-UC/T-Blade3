@@ -42,15 +42,16 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     character(80)                                               :: file1, file7
     character(20)                                               :: sec
     character(:),           allocatable                         :: log_file, error_msg, warning_msg, dev_msg
-    logical                                                     :: ellip, file_open, isdev
+    logical                                                     :: ellip, file_open, isdev, isquiet
     logical,    allocatable                                     :: thk_der(:)
     common / BladeSectionPoints /xxa(nxx, nax), yya(nxx, nax) 
 
 
     !
-    ! Get the value of isdev
+    ! Get the value of isdev and isquiet
     !
     call get_dev_status(isdev)
+    call get_quiet_status(isquiet)
 
     ! Initialize LE and TE indices
     i_le = 0
@@ -79,7 +80,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     if(len_trim(airfoil) == 4)then
         naca = 0
         read (airfoil, '(i4)') naca
-        print*, "naca = ", naca
+        if (.not. isquiet) print*, "naca = ", naca
     end if
    
 
@@ -88,10 +89,12 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     ! Print airfoil type data to screen and write to log file
     !
     call log_file_exists(log_file, nopen, file_open)
-    write(*, *)
-    write(*, *) '---------------------------------------------------------------------------------'
-    write(*, *) 'airfoil type:', js, trim(airfoil)
-    write(*, *) ' =================================================== '
+    if (.not. isquiet) then
+        write(*, *)
+        write(*, *) '---------------------------------------------------------------------------------'
+        write(*, *) 'airfoil type:', js, trim(airfoil)
+        write(*, *) ' =================================================== '
+    end if
 
     write(nopen, *)
     write(nopen, *) '---------------------------------------------------------------------------------'
@@ -253,7 +256,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     rr2     = 1.0
 
     call log_file_exists(log_file, nopen, file_open)
-    print*, "lethk = ", lethk
+    if (.not. isquiet) print*, "lethk = ", lethk
     write(nopen,*) "lethk = ", lethk
     call close_log_file(nopen, file_open)
 
@@ -268,7 +271,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     if (curv_camber == 0) then
         
         call log_file_exists(log_file, nopen, file_open)
-        print*, 'Using specified airfoil definition...'
+        if (.not. isquiet) print*, 'Using specified airfoil definition...'
         write(nopen,*) 'Using specified airfoil definition...'
         call close_log_file(nopen, file_open)
 
@@ -423,8 +426,10 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         else if(trim(airfoil).eq.'sect1')then
             
             call log_file_exists(log_file, nopen, file_open)
-            print*, 'Using the default airfoil definition'
-            write(*, *)
+            if (.not. isquiet) then
+                print*, 'Using the default airfoil definition'
+                write(*, *)
+            end if
             write(nopen,*) 'Using the default airfoil definition'
             write(nopen,*) ''
             
@@ -437,7 +442,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             sext = tan(aext)
             chrd = chrdx/abs(cos(sang))
             
-            print*, 'sinl sext sang', sinl, sext, sang
+            if (.not. isquiet) print*, 'sinl sext sang', sinl, sext, sang
             write(nopen,*) 'sinl sext sang ', sinl, sext, sang
             call close_log_file(nopen, file_open)
             
@@ -486,7 +491,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     else if (curv_camber == 1) then 
 
         call log_file_exists(log_file, nopen, file_open)
-        write (*, '(/, A)') 'Using curvature control for camber definition...'
+        if (.not. isquiet) write (*, '(/, A)') 'Using curvature control for camber definition...'
         write (nopen, '(/, A)') 'Using curvature control for camber definition...'
         call close_log_file(nopen, file_open)
         
@@ -573,19 +578,21 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             allocate(thk_der(np))
 
             call log_file_exists(log_file, nopen, file_open)
-            print *, ''
-            print *, 'Using modified NACA four digit thickness distribution'
+            if (.not. isquiet) then
+                print *, ''
+                print *, 'Using modified NACA four digit thickness distribution'
+            end if
             write(nopen,*) ''
             write(nopen,*) 'Using modified NACA four digit thickness distribution'
              
             ! Print input values to screen and write to log file
-            print *, 'Maximum thickness for the blade section = ', t_max
+            if (.not. isquiet) print *, 'Maximum thickness for the blade section = ', t_max
             write(nopen,*) 'Maximum thickness for the blade section = ', t_max
-            print *, 'Chordwise location for the maximum thickness = ', u_max
+            if (.not. isquiet) print *, 'Chordwise location for the maximum thickness = ', u_max
             write(nopen,*) 'Chordwise location for the maximum thickness = ', u_max
-            print *, 'Thickness at TE = ', t_TE
+            if (.not. isquiet) print *, 'Thickness at TE = ', t_TE
             write(nopen,*) 'Thickness at TE = ', t_TE
-            print *, 'Leading edge radius = ', LE_round
+            if (.not. isquiet) print *, 'Leading edge radius = ', LE_round
             write(nopen,*) 'Leading edge radius = ', LE_round
 
             !
@@ -593,10 +600,10 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             ! Display on screen and write to log file
             !
             if (abs(thk_cp(5,js)) .le. 10e-8) then
-                print *, 'TE derivative for maximum thickness chordwise location = ', dy_dx_te
+                if (.not. isquiet) print *, 'TE derivative for maximum thickness chordwise location = ', dy_dx_te
                 write(nopen,*) 'TE derivative for maximum thickness chordwise location = ', dy_dx_te
             else
-                print *, 'Using TE derivative defined in auxiliary input file as = ', dy_dx_te
+                if (.not. isquiet) print *, 'Using TE derivative defined in auxiliary input file as = ', dy_dx_te
                 write(nopen,*) 'Using TE derivative defined in auxiliary input file as = ', dy_dx_te
             end if
 
@@ -633,17 +640,19 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             end do
 
             ! Print coefficients to screen and write to log file
-            print *, 'Modified NACA thickness coefficients (u < u_max) = ', a_NACA
+            if (.not. isquiet) print *, 'Modified NACA thickness coefficients (u < u_max) = ', a_NACA
             write(nopen,*) 'Modified NACA thickness coefficients (u < u_max) = ', a_NACA
-            print *, 'Modified NACA thickness coefficients (u > u_max) = ', d_NACA
+            if (.not. isquiet) print *, 'Modified NACA thickness coefficients (u > u_max) = ', d_NACA
             write(nopen,*) 'Modified NACA thickness coefficients (u > u_max) = ', d_NACA
-            print *, ''
+            if (.not. isquiet) print *, ''
             write(nopen,*) ''
 
             ! Write thickness data to sectionwise files
             ! write_NACA_thickness in file_operations
-            print *, 'Writing thickness data to file'
-            print *, ''
+            if (.not. isquiet) then
+                print *, 'Writing thickness data to file'
+                print *, ''
+            end if
             write(nopen,*) 'Writing thickness data to file'
             write(nopen,*) ''
             call write_NACA_thickness(sec,casename,np,u,thickness_data)
@@ -656,8 +665,10 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         else if(thick_distr.ne.0) then
             
             call log_file_exists(log_file, nopen, file_open)
-            print*, 'np = ', np
-            print*, ' the thickness segment points'
+            if (.not. isquiet) then
+                print*, 'np = ', np
+                print*, ' the thickness segment points'
+            end if
             write(nopen,*) 'mp = ', np
             write(nopen,*) ' the thickness segment points'
             call close_log_file(nopen, file_open)
@@ -682,12 +693,6 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                     thkmultip    = splthick(i)
                 end if
 
-                if (i == 51 .and. js == 1) then
-                    call log_file_exists(log_file, nopen, file_open)
-                    write(nopen,*) 'from bladegen - thkmultip = ', thkmultip
-                    call close_log_file(nopen, file_open)
-                end if
-               
                 ! thickellip in airfoiltypes.f90 
                 call thickellip(i, ui, thk, lethk, tethk, fmxthk, umxthk, rr1, rr2, thkmultip, u_le, uin_le, i_le, oo, i_te)
                 thickness(i) = thk
@@ -701,8 +706,10 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         ! Print LE and TE indices to screen and write to main log file
         !
         call log_file_exists(log_file, nopen, file_open)
-        print*, 'i_le = ', i_le
-        print*, 'i_te = ', i_te
+        if (.not. isquiet) then
+            print*, 'i_le = ', i_le
+            print*, 'i_te = ', i_te
+        end if
         write(nopen,*) 'i_le = ', i_le
         write(nopen,*) 'i_te = ', i_te
         call close_log_file(nopen, file_open)
@@ -742,8 +749,10 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             
             le_pos = i_le
             call log_file_exists(log_file, nopen, file_open)
-            print*, 'uin_le bladgen = ', uin_le
-            print*, 'le_pos bladgen = ', le_pos
+            if (.not. isquiet) then
+                print*, 'uin_le bladgen = ', uin_le
+                print*, 'le_pos bladgen = ', le_pos
+            end if
             write(nopen,*) 'uin_le bladegen = ', uin_le
             write(nopen,*) 'le_pos_bladegen = ', le_pos
             
@@ -763,7 +772,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                      xbot_refine(interval + 1), ybot_refine(interval + 1), &
                      cam_refine(interval + 1), u_refine(interval + 1))
 
-            print*, 'KB reached fini_diff_refine in bladegen'
+            if (.not. isquiet) print*, 'KB reached fini_diff_refine in bladegen'
             write(nopen,*) 'KB reached fini_diff_refine in bladegen'
             call close_log_file(nopen ,file_open)
 
@@ -797,7 +806,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                 
                 ncp = LEdegree + 2
                 call log_file_exists(log_file, nopen, file_open)
-                print*, 'ncp_sting', ncp
+                if (.not. isquiet) print*, 'ncp_sting', ncp
                 write(nopen,*) 'ncp_sting', ncp
                 call close_log_file(nopen, file_open)
                 call lesting(xtop_refine,ytop_refine,xbot_refine,ybot_refine,interval + 1,camber_ang,camber_le,uin_le,     &
@@ -840,7 +849,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         else 
             
             call log_file_exists(log_file, nopen, file_open)
-            print*, np
+            if (.not. isquiet) print*, np
             write(nopen,*) np
             call close_log_file(nopen, file_open)
             
@@ -870,7 +879,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         end if
 
         call log_file_exists(log_file, nopen, file_open)
-        print*, 'chrd bladegen: ', chrd
+        if (.not. isquiet) print*, 'chrd bladegen: ', chrd
         write(nopen,*) 'chrd bladegen: ', chrd
         call close_log_file(nopen, file_open)
 
@@ -917,7 +926,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     bladedata(11, js) = tethk*chrd*scf
     bladedata(13, js) = pitch              
     radius_pitch      = pitch*sec_radius(js, 1)  
-    print*, 'pitch ', pitch 
+    if (.not. isquiet) print*, 'pitch ', pitch 
     call log_file_exists(log_file, nopen, file_open)
     write(nopen,*) 'pitch ', pitch
     call close_log_file(nopen, file_open)
@@ -993,7 +1002,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     bladedata(14, js) = Zweifel(js)
 
     call log_file_exists(log_file, nopen, file_open)
-    print*, '******************************************'
+    if (.not. isquiet) print*, '******************************************'
     write(nopen,*) '******************************************'
     call close_log_file(nopen, file_open)
     return

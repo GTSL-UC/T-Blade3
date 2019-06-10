@@ -111,7 +111,7 @@ character*15::istr1,istr2,H(13)
 !real*8 inBetaInci, outBetaDevn
 
 logical isdev, tm_c_spline, is_xyzstreamlines, spanwise_angle_spline,spanwise_inci_dev_spline, &
-is2d!, isxygrid
+is2d, isquiet!, isxygrid
 logical :: u_max_spline = .false.
 
 common / bladesectionpoints /xxa(nx,nax),yya(nx,nax)

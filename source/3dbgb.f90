@@ -130,102 +130,102 @@
     end program bgb3d
 
     ! ESP override subroutine templates
-    subroutine     override_cur1(n, a)
-       real*8 a(*)
-    end subroutine override_cur1
-    subroutine     override_cur2(n, a)
-       real*8 a(*)
-    end subroutine override_cur2
-    subroutine     override_cur3(n, a)
-       real*8 a(*)
-    end subroutine override_cur3
-    subroutine     override_cur4(n, a)
-       real*8 a(*)
-    end subroutine override_cur4
-    subroutine     override_cur5(n, a)
-       real*8 a(*)
-    end subroutine override_cur5
-    subroutine     override_cur6(n, a)
-       real*8 a(*)
-    end subroutine override_cur6
-    subroutine     override_cur7(n, a)
-       real*8 a(*)
-    end subroutine override_cur7
-    subroutine     override_u2(n, a)
-       real*8 a(*)
-    end subroutine override_u2
-    subroutine     override_u3(n, a)
-       real*8 a(*)
-    end subroutine override_u3
-    subroutine     override_u4(n, a)
-       real*8 a(*)
-    end subroutine override_u4
-    subroutine     override_u5(n, a)
-       real*8 a(*)
-    end subroutine override_u5
-    subroutine     override_u6(n, a)
-       real*8 a(*)
-    end subroutine override_u6
-    subroutine     override_span_del_m_ctrl(n, a)
-       real*8 a(*)
-    end subroutine override_span_del_m_ctrl
-    subroutine     override_span_del_theta_ctrl(n, a)
-       real*8 a(*)
-    end subroutine override_span_del_theta_ctrl
-    subroutine     override_span_in_beta_ctrl(n, a)
-       real*8 a(*)
-    end subroutine override_span_in_beta_ctrl
-    subroutine     override_span_out_beta_ctrl(n, a)
-       real*8 a(*)
-    end subroutine override_span_out_beta_ctrl
-    subroutine     override_span_chord_ctrl(n, a)
-       real*8 a(*)
-    end subroutine override_span_chord_ctrl
-    subroutine     override_span_thk_c_ctrl(n, a)
-       real*8 a(*)
-    end subroutine override_span_thk_c_ctrl
-    subroutine     override_span_del_m(n, a)
-       real*8 a(*)
-    end subroutine override_span_del_m
-    subroutine     override_span_del_theta(n, a)
-       real*8 a(*)
-    end subroutine override_span_del_theta
-    subroutine     override_span_in_beta(n, a)
-       real*8 a(*)
-    end subroutine override_span_in_beta
-    subroutine     override_span_out_beta(n, a)
-       real*8 a(*)
-    end subroutine override_span_out_beta
-    subroutine     override_span_chord(n, a)
-       real*8 a(*)
-    end subroutine override_span_chord
-    subroutine     override_span_thk_c(n, a)
-      real*8 a(*)
-    end subroutine override_span_thk_c
-    subroutine     override_span_u_max(n, a)
-      real*8 a(*)
-    end subroutine override_span_u_max
-    subroutine     override_span_curv_ctrl(n, a)
-       real*8 a(*)
-    end subroutine override_span_curv_ctrl
-    subroutine     override_span_thk_ctrl(n, a)
-      real*8 a(*)
-    end subroutine override_span_thk_ctrl
-    subroutine     override_offsets(a)
-      integer a(*)
-    end subroutine override_offsets
-    subroutine     override_naca_le_radius(n, a)
-      real*8 a(*)
-    end subroutine override_naca_le_radius
-    subroutine     override_naca_u_max(n, a)
-      real*8 a(*)
-    end subroutine override_naca_u_max
-    subroutine     override_naca_t_max(n, a)
-      real*8 a(*)
-    end subroutine override_naca_t_max
-    subroutine     override_naca_t_te(n, a)
-      real*8 a(*)
-    end subroutine override_naca_t_te
+    !subroutine     override_cur1(n, a)
+    !   real*8 a(*)
+    !end subroutine override_cur1
+    !subroutine     override_cur2(n, a)
+    !   real*8 a(*)
+    !end subroutine override_cur2
+    !subroutine     override_cur3(n, a)
+    !   real*8 a(*)
+    !end subroutine override_cur3
+    !subroutine     override_cur4(n, a)
+    !   real*8 a(*)
+    !end subroutine override_cur4
+    !subroutine     override_cur5(n, a)
+    !   real*8 a(*)
+    !end subroutine override_cur5
+    !subroutine     override_cur6(n, a)
+    !   real*8 a(*)
+    !end subroutine override_cur6
+    !subroutine     override_cur7(n, a)
+    !   real*8 a(*)
+    !end subroutine override_cur7
+    !subroutine     override_u2(n, a)
+    !   real*8 a(*)
+    !end subroutine override_u2
+    !subroutine     override_u3(n, a)
+    !   real*8 a(*)
+    !end subroutine override_u3
+    !subroutine     override_u4(n, a)
+    !   real*8 a(*)
+    !end subroutine override_u4
+    !subroutine     override_u5(n, a)
+    !   real*8 a(*)
+    !end subroutine override_u5
+    !subroutine     override_u6(n, a)
+    !   real*8 a(*)
+    !end subroutine override_u6
+    !subroutine     override_span_del_m_ctrl(n, a)
+    !   real*8 a(*)
+    !end subroutine override_span_del_m_ctrl
+    !subroutine     override_span_del_theta_ctrl(n, a)
+    !   real*8 a(*)
+    !end subroutine override_span_del_theta_ctrl
+    !subroutine     override_span_in_beta_ctrl(n, a)
+    !   real*8 a(*)
+    !end subroutine override_span_in_beta_ctrl
+    !subroutine     override_span_out_beta_ctrl(n, a)
+    !   real*8 a(*)
+    !end subroutine override_span_out_beta_ctrl
+    !subroutine     override_span_chord_ctrl(n, a)
+    !   real*8 a(*)
+    !end subroutine override_span_chord_ctrl
+    !subroutine     override_span_thk_c_ctrl(n, a)
+    !   real*8 a(*)
+    !end subroutine override_span_thk_c_ctrl
+    !subroutine     override_span_del_m(n, a)
+    !   real*8 a(*)
+    !end subroutine override_span_del_m
+    !subroutine     override_span_del_theta(n, a)
+    !   real*8 a(*)
+    !end subroutine override_span_del_theta
+    !subroutine     override_span_in_beta(n, a)
+    !   real*8 a(*)
+    !end subroutine override_span_in_beta
+    !subroutine     override_span_out_beta(n, a)
+    !   real*8 a(*)
+    !end subroutine override_span_out_beta
+    !subroutine     override_span_chord(n, a)
+    !   real*8 a(*)
+    !end subroutine override_span_chord
+    !subroutine     override_span_thk_c(n, a)
+    !  real*8 a(*)
+    !end subroutine override_span_thk_c
+    !subroutine     override_span_u_max(n, a)
+    !  real*8 a(*)
+    !end subroutine override_span_u_max
+    !subroutine     override_span_curv_ctrl(n, a)
+    !   real*8 a(*)
+    !end subroutine override_span_curv_ctrl
+    !subroutine     override_span_thk_ctrl(n, a)
+    !  real*8 a(*)
+    !end subroutine override_span_thk_ctrl
+    !subroutine     override_offsets(a)
+    !  integer a(*)
+    !end subroutine override_offsets
+    !subroutine     override_naca_le_radius(n, a)
+    !  real*8 a(*)
+    !end subroutine override_naca_le_radius
+    !subroutine     override_naca_u_max(n, a)
+    !  real*8 a(*)
+    !end subroutine override_naca_u_max
+    !subroutine     override_naca_t_max(n, a)
+    !  real*8 a(*)
+    !end subroutine override_naca_t_max
+    !subroutine     override_naca_t_te(n, a)
+    !  real*8 a(*)
+    !end subroutine override_naca_t_te
 
 #endif
 !----------------------------------------------------------------------------------------------------------
@@ -273,6 +273,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     radial_TE         = .False.
     is_xyzstreamlines = .False.
     is2d              = .False.
+    isquiet           = .false.
     initial           = .true.
     wing_flag         = 0
    
@@ -285,17 +286,6 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     dtor              = pi/180.
     radius_tolerance  = 1e-05
     abs_zero          = 0.0000000000000000
-
-    
-   
-    ! 
-    ! Display the welcome message and some info about the code capabilities
-    ! displayMessage() in funcNsubs.f90
-    !
-    call displayMessage
-    
-    ! Input file name
-    fname = fname_in
 
 
 
@@ -317,74 +307,112 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
     ! Types of 2nd argument
     if (trim(arg2).eq.'dev') then
-        print*, '2nd Argument:', 'develop'
         write(nopen,*) '2nd Argument:', 'develop'
         isdev = .true.
     elseif (trim(arg2).eq.'xygrid') then 
-        print *, 'Command line option "xygrid" is no longer available with T-Blade3'
+        error_msg = 'Command line option "xygrid" is no longer available with T-Blade3'
         call fatal_error(error_msg)
-    !    print*, '2nd Argument:', 'xygrid'
-    !    write(nopen,*) '2nd Argument:', 'xygrid'
-    !    isxygrid = .true.
     elseif (trim(arg2).eq.'xyzstreamlines') then 
-        print*, '2nd Argument:', 'xyzstreamlines'
         write(nopen,*) '2nd Argument:', 'xyzstreamlines'
         is_xyzstreamlines = .true.
     elseif ((trim(arg2).eq.'2d') .or. (trim(arg2).eq.'2D')) then
-        print*, '2nd Argument:', '2D'
         write(nopen,*) '2nd Argument:', '2D'
         is2d = .True.
     elseif ((trim(arg2).eq.'v0') .or. (trim(arg2).eq.'V0')) then
         error_msg   = 'Command line option "v0" is no longer available with T-Blade3'
         call fatal_error(error_msg)
+    else if (trim(arg2) == 'quiet') then
+        isquiet = .true.
     endif
 
     ! Types of 3rd argument
     if (trim(arg3).eq.'dev') then
-        print*, '3rd Argument:', 'develop'
         write(nopen,*) '3rd Argument:', 'develop'
         isdev = .true.
     elseif (trim(arg3).eq.'xygrid') then 
         error_msg   = 'Command line option "xygrid" is no longer available with T-Blade3'
         call fatal_error(error_msg)
-    !    print*, '3rd Argument:', 'xygrid'
-    !    write(nopen,*) '3rd Argument:', 'xygrid'
-    !    isxygrid = .true.
     elseif (trim(arg3).eq.'xyzstreamlines') then 
-        print*, '3rd Argument:', 'xyzstreamlines'
         write(nopen,*) '3rd Argument:', 'xyzstreamlines'
         is_xyzstreamlines = .true.
     elseif ((trim(arg3).eq.'2d') .or. (trim(arg3).eq.'2D')) then
-        print*, '3rd Argument:', '2D'
         write(nopen,*) '3rd Argument:', '2D'
         is2d = .True.
     elseif ((trim(arg3).eq.'v0') .or. (trim(arg3).eq.'V0')) then
         error_msg   = 'Command line option "v0" is no longer available with T-Blade3'
+    else if (trim(arg3) == 'quiet') then
+        isquiet = .true.
     endif
 
     ! Types of 4th argument
     if (trim(arg4).eq.'dev') then
-        print*, '4th Argument:', 'develop'
         write(nopen,*) '4th Argument:', 'develop'
         isdev = .true.
     elseif (trim(arg4).eq.'xygrid') then 
         error_msg   =  'Command line option "xygrid" is no longer available with T-Blade3'
         call fatal_error(error_msg)
-    !    print*, '4th Argument:', 'xygrid'
-    !    write(nopen,*) '4th Argument:', 'xygrid'
-    !    isxygrid = .true.
     elseif (trim(arg4).eq.'xyzstreamlines') then 
-        print*, '4th Argument:', 'xyzstreamlines'
         write(nopen,*) '4th Argument:', 'xyzstreamlines'
         is_xyzstreamlines = .true.
     elseif ((trim(arg4).eq.'2d') .or. (trim(arg4).eq.'2D')) then
-        print*, '4th Argument:', '2D'
         write(nopen,*) '4th Argument:', '2D'
         is2d = .True.
     elseif ((trim(arg4).eq.'v0') .or. (trim(arg4).eq.'V0')) then
         error_msg   = 'Command line option "v0" is no longer available with T-Blade3'
         call fatal_error(error_msg)
+    else if (trim(arg4) == 'quiet') then
+        isquiet = .true.
     endif
+
+
+
+    ! 
+    ! Display the welcome message and some info about the code capabilities
+    ! displayMessage() in funcNsubs.f90
+    !
+    call displayMessage
+    
+    ! Input file name
+    fname = fname_in
+
+
+
+    !
+    ! Print command-line argument related data to screen
+    !
+    if (.not. isquiet) then
+
+        ! Print 2nd argument
+        select case(arg2)
+            case('dev')
+                print *, '2nd Argument: ', 'develop'
+            case('xyzstreamlines')
+                print *, '2nd Argument: ', 'xyzstreamlines'
+            case('2d','2D')
+                print *, '2nd Argument: ', '2D'
+        end select
+
+        ! Print 3rd argument
+        select case(arg3)
+            case('dev')
+                print *, '3rd Argument: ', 'develop'
+            case('xyzstreamlines')
+                print *, '3rd Argument: ', 'xyzstreamlines'
+            case('2d','2D')
+                print *, '3rd Argument: ', '2D'
+        end select
+       
+        ! Print 4th argument 
+        select case(arg4)
+            case('dev')
+                print *, '4th Argument: ', 'develop'
+            case('xyzstreamlines')
+                print *, '4th Argument: ', 'xyzstreamlines'
+            case('2d','2D')
+                print *, '4th Argument: ', '2D'
+        end select
+    end if  ! if (.not. isquiet)
+
 
     ! close_log_file() in file_operation.f90
     call close_log_file(nopen,file_open)
@@ -433,7 +461,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     row_type = fname(k:j)
 
     call log_file_exists(log_file, nopen, file_open)
-    print*, 'Row number and blade type is ', row_type
+    if (.not. isquiet) print*, 'Row number and blade type is ', row_type
     write(nopen,*) 'Row number and blade  type is ', row_type
     call close_log_file(nopen, file_open)
 
@@ -443,10 +471,13 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     ! Read the main input file 
     ! readinput() in readinput.f90
     !
+    print *, 'From 3dbgb - ', fname
     call readinput(fname)
     call log_file_exists(log_file, nopen, file_open)
-    write(*,*)
-    write(*,*) 'Reading inputs from file : ', fname
+    if (.not. isquiet) then
+        write(*,*)
+        write(*,*) 'Reading inputs from file : ', fname
+    end if
     write(nopen,*) ''
     write(nopen,*) 'Reading inputs from file: ', fname
     call close_log_file(nopen, file_open)
@@ -473,9 +504,11 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     ! Read old controlinputs file (added by Nemnem)
     ! TODO: To be removed
     if (control_inp_flag .eq. 1) then
-        write(*, *)
-        print*, 'Reading the controlinput file ....'
-        write(*, *)
+        if (.not. isquiet) then
+            write(*, *)
+            print*, 'Reading the controlinput file ....'
+            write(*, *)
+        end if
         write(nopen,*) ''
         write(nopen,*) 'Reading the controlinput file ....'
         write(nopen,*) ''
@@ -493,9 +526,11 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
     ! Read old spancontrolinputs file (added by Syed)
     elseif (control_inp_flag .eq. 2) then 
-        write(*, *)
-        print*, 'Reading the spanwise_input file ....'
-        write(*, *)
+        if (.not. isquiet) then
+            write(*, *)
+            print*, 'Reading the spanwise_input file ....'
+            write(*, *)
+        end if
         write(nopen,*) ''
         write(nopen,*) 'Reading the spanwise_input file ....'
         write(nopen,*) ''
@@ -532,16 +567,18 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     ! Print basic case data to the screen and write to main log file
     !
     call log_file_exists(log_file, nopen, file_open)
-    write(*, *)
-    write(*, *) 'case:', fext
-    write(*, *) 'bladerow #:', ibrow
-    write(*, *) ibrowc
-    write(*, *)
-    write(*, *) 'Number of blades in this row:', nbls
-    write(*, *) 'bsf:', scf
-    write(*, *)
-    write(*, *) 'Number of streamlines:', nsl
-    write(*, *)
+    if (.not. isquiet) then
+        write(*, *)
+        write(*, *) 'case:', fext
+        write(*, *) 'bladerow #:', ibrow
+        write(*, *) ibrowc
+        write(*, *)
+        write(*, *) 'Number of blades in this row:', nbls
+        write(*, *) 'bsf:', scf
+        write(*, *)
+        write(*, *) 'Number of streamlines:', nsl
+        write(*, *)
+    end if
 
     write(nopen, *)
     write(nopen, *) 'case:', fext
@@ -563,10 +600,10 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !
     if (.not. spanwise_angle_spline) then
         call log_file_exists(log_file, nopen, file_open)
-        print*, '   in_betaZ*    out_betaZ*'
+        if (.not. isquiet) print*, '   in_betaZ*    out_betaZ*'
         write(nopen,*) '   in_betaZ*    out_betaZ*'
         do js = 1, nspn
-            print*, in_beta(js), out_beta(js)
+            if (.not. isquiet) print*, in_beta(js), out_beta(js)
             write(nopen,*) in_beta(js), out_beta(js)
         enddo
         call close_log_file(nopen, file_open)
@@ -576,18 +613,20 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
     ! Cubic spline for the LE and TE coordinates from the input file
     call log_file_exists(log_file, nopen, file_open)
-    write(*, *)
-    write(*, *)'LE/TE defined by a curve with no. of points as:', npoints
-    write(*, *)'xLE    rLE     xTE     rTE'
+    if (.not. isquiet) then
+        write(*, *)
+        write(*, *)'LE/TE defined by a curve with no. of points as:', npoints
+        write(*, *)'xLE    rLE     xTE     rTE'
 
-    write(nopen, *)
-    write(nopen, *)'LE/TE defined by a curve with no. of points as:', npoints
-    write(nopen, *)'xLE    rLE     xTE     rTE'
+        write(nopen, *)
+        write(nopen, *)'LE/TE defined by a curve with no. of points as:', npoints
+        write(nopen, *)'xLE    rLE     xTE     rTE'
+    end if
 
     ! arclength() and spline() in spline.f90
     do i = 1, npoints
 
-        print*, xle(i), rle(i), xte(i), rte(i)
+        if (.not. isquiet) print*, xle(i), rle(i), xte(i), rte(i)
         write(nopen,*) xle(i), rle(i), xte(i), rte(i)
         
         ! Spline LE curve
@@ -615,8 +654,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     if(LE.ne.0) then 
         
         do js = 1, nspn
-            print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), jcellblade_all(js), etawidth_all(js), &
-                    BGgrid_all(js)
+            if (.not. isquiet) print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), jcellblade_all(js), etawidth_all(js), &
+                                       &BGgrid_all(js)
             write(nopen,*) airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), jcellblade_all(js),            &
                            etawidth_all(js), BGgrid_all(js)
         enddo
@@ -625,8 +664,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     elseif(LE == 0) then
 
         do js = 1, nspn
-            print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), tethk_all(js),         &
-                    jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
+            if (.not. isquiet) print*, airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), tethk_all(js),         &
+                                       &jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
             write(nopen,*) airfoil(js), stk_u(js), stk_v(js), umxthk_all(js), lethk_all(js), tethk_all(js),  &
                            jcellblade_all(js), etawidth_all(js), BGgrid_all(js)
                            
@@ -643,14 +682,18 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !
     call log_file_exists(log_file, nopen, file_open)
     if(trim(trueleansweep).ne.'')then
-        print*, 'Sweep along the chord (1 = yes): ', chrdsweep
-        write(*, *)
+        if (.not. isquiet) then
+            print*, 'Sweep along the chord (1 = yes): ', chrdsweep
+            write(*, *)
+        end if
         write(nopen,*) ''
         write(nopen,*) 'Sweep along the chord (1 = yes): ', chrdsweep
         write(nopen,*) ''
     else
-        print*, 'Sweep in the axial direction (m-prime).'
-        write(*, *)
+        if (.not. isquiet) then
+            print*, 'Sweep in the axial direction (m-prime).'
+            write(*, *)
+        end if
         write(nopen,*) ''
         write(nopen,*) 'Sweep in the axial direction (m-prime).'
         write(nopen,*) ''
@@ -661,13 +704,17 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     ! Differentiate between true and axial lean
     !
     if(trim(trueleansweep).ne.'')then
-        print*, 'Lean normal to the chord (1 = yes): ', chrdlean
-        write(*, *)
+        if (.not. isquiet) then
+            print*, 'Lean normal to the chord (1 = yes): ', chrdlean
+            write(*, *)
+        end if
         write(nopen,*) 'Lean normal to the chord (1 = yes): ', chrdlean
         write(nopen,*)
     else
-        print*, 'Lean in the tangential direction (theta).'
-        write(*, *)
+        if (.not. isquiet) then
+            print*, 'Lean in the tangential direction (theta).'
+            write(*, *)
+        end if
         write(nopen,*) 'Lean in the tangential direction (theta).'
         write(nopen,*) ''
     endif
@@ -692,11 +739,13 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     ! input for streamlines
     !
     call log_file_exists(log_file, nopen, file_open)
-    write(*, *)
-    print*, 'Using x_s and r_s coordinates for streamline from the input file...'
-    write(*, *)
-    print*, 'Calculating the m_prime coordinates for each streamline...'
-    write(*, *)
+    if (.not. isquiet) then
+        write(*, *)
+        print*, 'Using x_s and r_s coordinates for streamline from the input file...'
+        write(*, *)
+        print*, 'Calculating the m_prime coordinates for each streamline...'
+        write(*, *)
+    end if
 
     write(nopen, *)
     write(nopen, *) 'Using x_s and r_s coordinates for streamline from the input file...'
@@ -737,11 +786,11 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         do i = 2, nsp(ia)
             if (rm(i, ia)< radius_tolerance) then
                 k = k + 1   ! nemnem 6 10 2014
-                print*, 'Radius less than', radius_tolerance, ', excluding point number', k
+                if (.not. isquiet) print*, 'Radius less than', radius_tolerance, ', excluding point number', k
                 write(nopen,*) 'Radius less than', radius_tolerance, ', excluding point number', k
                 xm(1, ia) = xm(i, ia)  ! switch to new intial value after elimination zero radius points
                 rm(1, ia) = rm(i, ia)
-                print*, 'xm(1, ia)', xm(1, ia), 'rm(1, ia)', rm(1, ia)
+                if (.not. isquiet) print*, 'xm(1, ia)', xm(1, ia), 'rm(1, ia)', rm(1, ia)
                 write(nopen,*) 'xm(1, ia)', xm(1, ia), 'rm(1, ia)', rm(1, ia)
             else
                 !print*, 'i-k, nsp(ia)', i-k, nsp(ia)
@@ -764,7 +813,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         if (k /= 0) then
             nsp_hub = nsp(ia)       ! nsp_hub is used for full hub streamline extraction nemnem 6 10 2014
             nsp(ia) = i-k-1         ! Update the hub number of valid points
-            print*, 'nsp for streamline', ia, 'changed from', nsp_hub, 'to', nsp(ia)
+            if (.not. isquiet) print*, 'nsp for streamline', ia, 'changed from', nsp_hub, 'to', nsp(ia)
             write(nopen,*) 'nsp for streamline', ia, 'changed from', nsp_hub, 'to', nsp(ia)
         endif
         call close_log_file(nopen, file_open)
@@ -856,10 +905,12 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !Calculating offsets for the streamlines if the offset is given as input.
     !---------------------------------------------------------------------------
     call log_file_exists(log_file, nopen, file_open)
-    write(*, *)
-    print*, 'hub offset:', hub
-    print*, 'tip offset:', tip
-    write(*, *)
+    if (.not. isquiet) then
+        write(*, *)
+        print*, 'hub offset:', hub
+        print*, 'tip offset:', tip
+        write(*, *)
+    end if
 
     write(nopen,*) ''
     write(nopen,*) 'hub offset:', hub
@@ -936,11 +987,11 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     ! ...the streamline curve intersection 3/27/12----
     !----------------------------------------------------------------------------------
     call log_file_exists(log_file, nopen, file_open)
-    write(*, *)'xLE    rLE     xTE     rTE'
+    if (.not. isquiet) write(*, *)'xLE    rLE     xTE     rTE'
     write(nopen,*) 'xLE    rLE     xTE     rTE'
     write(nopen,*) ''
     ! LE curve intersection with the streamline curve---------
-    print*, 'Calculating LE x, r points... '
+    if (.not. isquiet) print*, 'Calculating LE x, r points... '
     write(nopen,*) 'Calculating LE x, r points... '
     call close_log_file(nopen, file_open)
 
@@ -972,7 +1023,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     ! TE curve intersection with the streamline curve---------
     !if(xslope_TE.ge.rslope_TE)then
     call log_file_exists(log_file, nopen, file_open)
-    print*, 'Calculating TE x, r points...'
+    if (.not. isquiet) print*, 'Calculating TE x, r points...'
     write(nopen,*) ''
     write(nopen,*) 'Calculating TE x, r points...'
     call close_log_file(nopen, file_open)
@@ -1036,7 +1087,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
             rm_slope = abs(rms(i, ia))
             if(rm_slope.ge.xm_slope.and.i_slope.eq.0) i_slope = i  
         enddo
-        print*, 'i_slope', i_slope
+        if (.not. isquiet) print*, 'i_slope', i_slope
         write(nopen,*) 'i_slope', i_slope
     enddo
     call close_log_file(nopen, file_open)
@@ -1080,7 +1131,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
             endif       
             endif     
         enddo
-        print*, 'ile:', ile
+        if (.not. isquiet) print*, 'ile:', ile
         write(nopen,*) 'ile:', ile
         ! if(ile.le.2)then
          ! msle(ia) = 0.
@@ -1111,7 +1162,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
             endif       
           endif     
         enddo
-        print*, 'ite:', ite
+        if (.not. isquiet) print*, 'ite:', ite
         write(nopen,*) 'ite:', ite
         ! mste(ia) = mp(ite+2, ia)
         ! print*, 'mste-initial guess', mste(ia)
@@ -1133,18 +1184,10 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         mste(ia) = s1te(ia)
         ! print*, msle(ia), s1le(ia)
        if(i_slope.eq.0)then ! purely axial flow
-         print*, 'Using x values for msLE due to a purely axial flow.'
-            !print*, 'msle(ia), x_le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia) before'
-            !print*, msle(ia), x_le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia)
-         ! call spl_inv(msle(ia), x_le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
-            !print*, 'msle(ia), x_le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia) after'
-            !print*, msle(ia), x_le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia)
-         print*, 'Using x values for msTE due to a purely axial flow.'
-            !print*, 'mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia) before'
-            !print*, mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia)
-         ! call spl_inv(mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
-            !print*, 'mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia) after'
-            !print*, mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia)
+         if (.not. isquiet) then
+             print*, 'Using x values for msLE due to a purely axial flow.'
+             print*, 'Using x values for msTE due to a purely axial flow.'
+         end if
          write(nopen,*) 'Using x values for msLE due to a purely axial flow.'
          write(nopen,*) 'Using x values for msTE due to a purely axial flow.'
          
@@ -1158,7 +1201,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
          !----Leading Edge--------------------------------------------------
          if(axial_LE)then ! axial flow at LE
          
-           print*, 'Using x values for msLE due to axial flow at LE.'
+           if (.not. isquiet) print*, 'Using x values for msLE due to axial flow at LE.'
            write(nopen,*) 'Using x values for msLE due to axial flow at LE.'
            ! call spl_inv(msle(ia), x_le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
            
@@ -1168,7 +1211,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
            
          elseif(radial_LE)then! non-axial flow at LE
          
-           print*, 'Using r values for msLE due to non-axial flow at LE.'
+           if (.not. isquiet) print*, 'Using r values for msLE due to non-axial flow at LE.'
            write(nopen,*) 'Using r values for msLE due to non-axial flow at LE.'
            ! call spl_inv(msle(ia), r_le(ia), rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))
            
@@ -1182,13 +1225,13 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
          !----Trailing Edge	------------------------------------------------
          if(axial_TE)then ! axial flow at TE
          
-           print*, 'Using x values for msTE due to axial flow at TE.'
+           if (.not. isquiet) print*, 'Using x values for msTE due to axial flow at TE.'
            write(nopen,*) 'Using x values for msTE due to axial flow at TE.'
            ! call spl_inv(mste(ia), x_te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
      
          elseif(radial_TE)then ! non-axial flow at TE
          
-           print*, 'Using r values for msTE due to non-axial flow at TE.'
+           if (.not. isquiet) print*, 'Using r values for msTE due to non-axial flow at TE.'
            write(nopen,*) 'Using r values for msTE due to non-axial flow at TE.'
            ! call spl_inv(mste(ia), r_te(ia), rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))
 
@@ -1196,10 +1239,12 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
          
        endif ! endif for axial/radial flow determination
 
-       print*, 'msle:', msle(ia)
-       print*, 'mste:', mste(ia)
        chordm(ia) = abs(mste(ia) - msle(ia))
-       print*, 'chordm:', chordm(ia)
+       if (.not. isquiet) then
+           print*, 'msle:', msle(ia)
+           print*, 'mste:', mste(ia)
+           print*, 'chordm:', chordm(ia)
+       end if
 
        write(nopen,*) 'msle:', msle(ia)
        write(nopen,*) 'mste:', mste(ia)
@@ -1222,7 +1267,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
        rmsle(ia) = dspl_eval(msle(ia), rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))
        !-----Calculating dphi_s_in = dr/dx = (dr/dm')/(dx/dm') -------
        phi_s_in(ia) = (atan(rmsle(ia)/xmsle(ia)))
-       print*, 'phi_s_in(ia)', phi_s_in(ia)/dtor
+       if (.not. isquiet) print*, 'phi_s_in(ia)', phi_s_in(ia)/dtor
        write(nopen,*) 'phi_s_in(ia)', phi_s_in(ia)/dtor
     enddo
     do ia = 1, na
@@ -1233,7 +1278,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
        rmste(ia) = dspl_eval(mste(ia), rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))
        !-----Calculating dphi_s_out = dr/dx = (dr/dm')/(dx/dm') -------
        phi_s_out(ia) = (atan(rmste(ia)/xmste(ia)))
-       print*, 'phi_s_out(ia)', phi_s_out(ia)/dtor
+       if (.not. isquiet) print*, 'phi_s_out(ia)', phi_s_out(ia)/dtor
        write(nopen,*) 'phi_s_out(ia)', phi_s_out(ia)/dtor
     enddo
     write(nopen,*) ''
@@ -1266,33 +1311,37 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !!-Control points for spanwise inlet Betaz------------------------------------------
     call log_file_exists(log_file, nopen, file_open)
     if((trim(anglespline).eq.'inletspline').or.(trim(anglespline).eq.'inoutspline'))then
-      write(*, *)
-      write(*, *)' Inlet Beta defined spanwise by a cubic B-spline using control points.'
-      write(*, *)'   span         in_Beta (spline)'
-      write(nopen,*) ''
-      write(nopen,*) ' Inlet Beta defined spanwise by a cubic B-spline using control points.'
-      write(nopen,*) '   span         in_Beta (spline)'
+        if (.not. isquiet) then
+            write(*, *)
+            write(*, *)' Inlet Beta defined spanwise by a cubic B-spline using control points.'
+            write(*, *)'   span         in_Beta (spline)'
+        end if
+        write(nopen,*) ''
+        write(nopen,*) ' Inlet Beta defined spanwise by a cubic B-spline using control points.'
+        write(nopen,*) '   span         in_Beta (spline)'
 
       call cubicspline(xcpinbeta, spaninbeta, cpinbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
       call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, inbeta_s, na, xbs, ybs)
       do ia = 1, na
-         print*, span(ia), inbeta_s(ia)
+         if (.not. isquiet) print*, span(ia), inbeta_s(ia)
          write(nopen,*) span(ia), inbeta_s(ia)
          in_beta(ia) = inbeta_s(ia)
       enddo
     elseif (trim(anglespline).eq.'inci_dev_spline')then
-      write(*, *)
-      write(*, *)' Inlet Beta incidence defined spanwise by a cubic B-spline using control points.'
-      write(*, *)'   span         in_Beta (spline)'
-      write(nopen, *)
-      write(nopen, *)' Inlet Beta incidence defined spanwise by a cubic B-spline using control points.'
-      write(nopen, *)'   span         in_Beta (spline)'
+        if (.not. isquiet) then
+            write(*, *)
+            write(*, *)' Inlet Beta incidence defined spanwise by a cubic B-spline using control points.'
+            write(*, *)'   span         in_Beta (spline)'
+        end if
+        write(nopen, *)
+        write(nopen, *)' Inlet Beta incidence defined spanwise by a cubic B-spline using control points.'
+        write(nopen, *)'   span         in_Beta (spline)'
 
       call cubicspline(xcpinbeta, spaninbeta, cpinbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
       call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, inci_s, na, xbs, ybs)
       do ia = 1, na
          in_beta(ia) = inBetaInci(in_beta(ia), inci_s(ia))
-         print*, span(ia), in_beta(ia)
+         if (.not. isquiet) print*, span(ia), in_beta(ia)
          write(nopen,*) span(ia), in_beta(ia)
       enddo
     endif
@@ -1301,35 +1350,39 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !!-Control points for panwise outlet BetaZ------------------------------------------
     call log_file_exists(log_file, nopen, file_open)
     if((trim(anglespline).eq.'outletspline').or.(trim(anglespline).eq.'inoutspline'))then
-      write(*, *)
-      write(*, *)' Outlet Beta defined spanwise by a cubic B-spline using control points.'
-      write(*, *)'   span        out_Beta (spline)'
+        if (.not. isquiet) then
+            write(*, *)
+            write(*, *)' Outlet Beta defined spanwise by a cubic B-spline using control points.'
+            write(*, *)'   span        out_Beta (spline)'
+        end if
 
-      write(nopen, *)
-      write(nopen, *)' Outlet Beta defined spanwise by a cubic B-spline using control points.'
-      write(nopen, *)'   span        out_Beta (spline)'
+        write(nopen, *)
+        write(nopen, *)' Outlet Beta defined spanwise by a cubic B-spline using control points.'
+        write(nopen, *)'   span        out_Beta (spline)'
 
       call cubicspline(xcpoutbeta, spanoutbeta, cpoutbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
       call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, outbeta_s, na, xbs, ybs)
       do ia = 1, na
-         print*, span(ia), outbeta_s(ia)
+         if (.not. isquiet) print*, span(ia), outbeta_s(ia)
          write(nopen,*) span(ia),  outbeta_s(ia)
          out_beta(ia) = outbeta_s(ia)     
       enddo
     elseif (trim(anglespline).eq.'inci_dev_spline')then
-      write(*, *)
-      write(*, *)' Outlet Beta deviation defined spanwise by a cubic B-spline using control points.'
-      write(*, *)'   span        out_Beta (spline)'
+        if (.not. isquiet) then
+            write(*, *)
+            write(*, *)' Outlet Beta deviation defined spanwise by a cubic B-spline using control points.'
+            write(*, *)'   span        out_Beta (spline)'
+        end if
 
-      write(nopen, *)
-      write(nopen, *)' Outlet Beta deviation defined spanwise by a cubic B-spline using control points.'
-      write(nopen, *)'   span        out_Beta (spline)'
+        write(nopen, *)
+        write(nopen, *)' Outlet Beta deviation defined spanwise by a cubic B-spline using control points.'
+        write(nopen, *)'   span        out_Beta (spline)'
 
       call cubicspline(xcpoutbeta, spanoutbeta, cpoutbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
       call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, dev_s, na, xbs, ybs)
       do ia = 1, na
          out_beta(ia) = outBetaDevn(in_beta(ia), out_beta(ia), dev_s(ia))
-         print*, span(ia), out_beta(ia)
+         if (.not. isquiet) print*, span(ia), out_beta(ia)
          write(nopen,*) span(ia), out_beta(ia)
       enddo
     endif
@@ -1340,15 +1393,17 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !!---Control points for chord -----------------------------------------
     if(chord_switch.eq.2)then   ! Changed to spline multiplier 9 3 2014 Nemnem (default = 1)
       call log_file_exists(log_file, nopen, file_open)
-      write(*, *)
-      write(*, *)'   span        chord_multipliers'
+      if (.not. isquiet) then
+          write(*, *)
+          write(*, *)'   span        chord_multipliers'
+      end if
       write(nopen,*) ''
       write(nopen,*) '   span        chord_multipliers'
 
       call cubicspline(xcpchord, spanchord, cpchord, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
       call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, chords, na, xbs, ybs)
       do ia = 1, na
-         print*, span(ia), chords(ia)
+         if (.not.isquiet) print*, span(ia), chords(ia)
          write(nopen,*) span(ia), chords(ia)
       enddo
       call close_log_file(nopen, file_open)
@@ -1359,9 +1414,11 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     staggspline = in_beta(1)
     if(staggspline.eq.999.)then
       call log_file_exists(log_file, nopen, file_open)
-      write(*, *)
-      write(*, *)' Stagger defined spanwise by a cubic B-spline using control points.'
-      write(*, *)'   span        stagger'
+      if (.not. isquiet) then
+          write(*, *)
+          write(*, *)' Stagger defined spanwise by a cubic B-spline using control points.'
+          write(*, *)'   span        stagger'
+      end if
 
       write(nopen, *)
       write(nopen, *)' Stagger defined spanwise by a cubic B-spline using control points.'
@@ -1370,7 +1427,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
       call cubicspline(xcpinbeta, spaninbeta, cpinbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
       call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, inbeta_s, na, xbs, ybs)
       do ia = 1, na
-         print*, span(ia), inbeta_s(ia)
+         if (.not. isquiet) print*, span(ia), inbeta_s(ia)
          write(nopen,*) span(ia), inbeta_s(ia)
       enddo
       call close_log_file(nopen, file_open)
@@ -1380,14 +1437,16 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !!-Control points for tm/c spline multiplier---------------------------------------
     if(tm_c_spline)then
       call log_file_exists(log_file, nopen, file_open)
-      write(*, *)
-      write(*, *)' tm/c thickness ratio defined radially with 2D spline using control points.'
+      if (.not. isquiet) then
+          write(*, *)
+          write(*, *)' tm/c thickness ratio defined radially with 2D spline using control points.'
+      end if
       write(nopen,*) ''
       write(nopen,*) 'tm/c thickness ratio defined radially with 2D spline using control points.'
       call cubicspline(xcptm_c, spantm_c, cptm_c, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
       call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, thk_tm_c_spl, na, xbs, ybs)
       do ia = 1, na
-         print*, span(ia), thk_tm_c_spl(ia)
+         if (.not. isquiet) print*, span(ia), thk_tm_c_spl(ia)
          write(nopen,*) span(ia), thk_tm_c_spl(ia)
       enddo
     endif
@@ -1401,8 +1460,10 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         allocate(um_spl(na))
 
         call log_file_exists(log_file, nopen, file_open)
-        write(*,*) '' 
-        write(*,*) 'Max thickness location defined spanwise by a cubic B-spline using control points'
+        if (.not. isquiet) then
+            write(*,*) '' 
+            write(*,*) 'Max thickness location defined spanwise by a cubic B-spline using control points'
+        end if
         write(nopen,*) ''
         write(nopen,*) 'Max thickness location defined spanwise by a cubic B-spline using control points'
 
@@ -1411,7 +1472,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         umxthk_all = um_spl
 
         do ia = 1, na
-            print *, span(ia), umxthk_all(ia)
+            if (.not. isquiet) print *, span(ia), umxthk_all(ia)
             write(nopen,*) span(ia), umxthk_all(ia)
         end do
         call close_log_file(nopen, file_open)
@@ -1477,17 +1538,17 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
        call log_file_exists(log_file, nopen, file_open)
        write(nopen,*) ''
        if(chord_switch.eq.1)then
-         print*, 'Non-dimensional chord from the input...'
+         if (.not. isquiet) print*, 'Non-dimensional chord from the input...'
          write(nopen,*) 'Non-dimensional chord from the input...'
          chrdx = chord(js)
          axchrd(js) = chord(js)
        elseif(chord_switch.eq.0)then
-         print*, 'Internally calculated chord...'
+         if (.not. isquiet) print*, 'Internally calculated chord...'
          write(nopen,*) 'Internally calculated chord...'
          chrdx = chordm(js)
          axchrd(js) = chord(js)
        elseif(chord_switch.eq.2)then
-         print*, 'Chord multiplier calculated using spline control points...'
+         if (.not. isquiet) print*, 'Chord multiplier calculated using spline control points...'
          write(nopen,*) 'Chord multiplier calculated using spline control points...'
          chrdx = chordm(js) * chords(js)
          axchrd(js) = chord(js)
@@ -1504,7 +1565,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
          stgr = in_beta(js) ! stagger from the angles table
        else
          stgr = 0.
-         print*, 'Stagger calculated from the inlet and exit angles...'
+         if (.not. isquiet) print*, 'Stagger calculated from the inlet and exit angles...'
          write(nopen,*) 'Stagger calculated from the inlet and exit angles...'
        endif ! endif for stagger options
        call close_log_file(nopen, file_open)
@@ -1534,7 +1595,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
        !----------------------------------------------------------------------
        call log_file_exists(log_file, nopen, file_open)
        if(tm_c_spline .and. thick_distr /= 0)then
-         print*, 'Thickness t/c will be multiplied by tm/c 2D spline definition...'
+         if (.not. isquiet) print*, 'Thickness t/c will be multiplied by tm/c 2D spline definition...'
          write(nopen,*) 'Thickness t/c will be multiplied by tm/c 2D spline definition...'
          thkc = thk_c(js)*thk_tm_c_spl(js)
        else
@@ -1559,7 +1620,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
        ycg(js) = ycen
        xb_stack(js) = xb_stk
        yb_stack(js) = yb_stk
-       write(*, *)
+       if (.not. isquiet) write(*, *)
        stagger(js) = stgr
        !
        if(curv.eq.0.and.LE.ne.2)then
@@ -1604,7 +1665,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
     call log_file_exists(log_file, nopen, file_open)
     write(nopen,*) ''
-    print*, (np+1)/2
+    if (.not. isquiet) print*, (np+1)/2
     write(nopen,*) (np + 1)/2
     call close_log_file(nopen, file_open)
 

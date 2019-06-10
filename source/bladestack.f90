@@ -106,11 +106,14 @@ integer np,nspline
 logical axial_LE,radial_LE
 integer                                 :: nopen
 character(:),   allocatable             :: log_file
-logical                                 :: file_open
+logical                                 :: file_open, isquiet
 common / BladeSectionPoints /xxa(nxx,nax),yya(nxx,nax)
 
 ! Initialize ile
 ile = 0
+
+! Get the value of isquiet
+call get_quiet_status(isquiet)
 
 ! -----------------------------------------------------------------------------
 ! --------Constants---------( Pi value)----------------------------------------
@@ -153,7 +156,7 @@ endif
 !*******************************************************************************************
 na = nspn
 call log_file_exists(log_file, nopen, file_open)
-print*,'Number of airfoil coordinates:',np
+if (.not. isquiet) print*,'Number of airfoil coordinates:',np
 write(nopen,*) 'Number of airfoil coordinates:', np
 do ia = 1, na
    nap(ia) = np!199
@@ -164,17 +167,19 @@ do ia = 1, na
    enddo         
 enddo
 !
-write(*,*)
-print*,'Stacking Axis location:',stack 
-write(*,*)
+if (.not. isquiet) then
+    write(*,*)
+    print*,'Stacking Axis location:',stack 
+    write(*,*)
+end if
 write(nopen,*) ''
 write(nopen,*) 'Stacking Axis location:', stack
 write(nopen,*) ''
 do ia = 1,na
-   print*,'Section #',ia
+   if (.not. isquiet) print*,'Section #',ia
    write(nopen,*) 'Section #', ia
 enddo
-write(*,*) 
+if (.not. isquiet) write(*,*) 
 
 !*******************************************************************************************
 ! SPAN calculation
@@ -190,7 +195,7 @@ do ia = 1,na
       if(rm_slope.ge.xm_slope.and.i_slope.eq.0) i_slope = i
    enddo
    !write(*,*)
-   print*,'i_slope',i_slope
+   if (.not. isquiet) print*,'i_slope',i_slope
    write(nopen,*) 'i_slope', i_slope
 enddo
 call close_log_file(nopen, file_open)
@@ -250,26 +255,26 @@ call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,delta_theta,na,xbs,ybs)
 call log_file_exists(log_file, nopen, file_open)
 write(nopen,*) ''
 if(chrdsweep.eq.1)then ! sweep along the blade chord; true sweep
-  write(*,*)'span          true_sweep'
+  if (.not. isquiet) write(*,*)'span          true_sweep'
   write(nopen,*)'span          true_sweep'
   do ia = 1, na
      delmp(ia) = (delmp(ia)*abs(cos(stagger(ia))))! + (delmp(ia)*abs(sin(stagger(ia))))
-     print*,span(ia),delmp(ia)
+     if (.not. isquiet) print*,span(ia),delmp(ia)
     write(nopen,*) span(ia), delmp(ia)
   enddo 
 elseif(chrdlean.eq.1)then ! true lean
-  write(*,*)'span          delta_m for true_lean'
+  if (.not. isquiet) write(*,*)'span          delta_m for true_lean'
   write(nopen,*)'span          delta_m for true_lean'
   do ia = 1, na
      delmp(ia) = (delta_theta(ia)*abs(sin(stagger(ia))))
-     print*,span(ia),delmp(ia)
+     if (.not. isquiet) print*,span(ia),delmp(ia)
      write(nopen,*) span(ia), delmp(ia)
   enddo
 else !axial sweep
-  write(*,*)'span          delta_m'
+  if (.not. isquiet) write(*,*)'span          delta_m'
   write(nopen,*) 'span          delta_m'
   do ia = 1, na       
-     print*,span(ia),delmp(ia)
+     if (.not. isquiet) print*,span(ia),delmp(ia)
      write(nopen,*) span(ia), delmp(ia)
   enddo 
 endif 
@@ -284,36 +289,36 @@ call close_log_file(nopen, file_open)
 !******************************************************************************************* 
 
 call log_file_exists(log_file, nopen, file_open)
-write(*,*)
+if (.not. isquiet) write(*,*)
 write(nopen,*) ''
 if(chrdlean.eq.1)then ! lean normal to the blade chord; true lean.
-  write(*,*)'span         true_lean'
+  if (.not. isquiet) write(*,*)'span         true_lean'
   write(nopen,*)'span         true_lean'
   do ia = 1, na
      delta_theta(ia) = (delta_theta(ia)*abs(cos(stagger(ia))))! + (delta_theta(ia)*abs(sin(stagger(ia))))
-     print*,span(ia),delta_theta(ia)
+     if (.not. isquiet) print*,span(ia),delta_theta(ia)
      write(nopen,*) span(ia), delta_theta(ia)
   enddo
 elseif(chrdsweep.eq.1)then ! true sweep
-  write(*,*)'span         delta_theta for true_sweep'
+  if (.not. isquiet) write(*,*)'span         delta_theta for true_sweep'
   write(nopen,*)'span         delta_theta for true_sweep'
   do ia = 1, na
      delta_theta(ia) = (delmp(ia)*abs(sin(stagger(ia))))
-     print*,span(ia),delta_theta(ia)
+     if (.not. isquiet) print*,span(ia),delta_theta(ia)
      write(nopen,*) span(ia), delta_theta(ia)
   enddo
 else ! tangential lean
-  write(*,*)'span         delta_theta'
+  if (.not. isquiet) write(*,*)'span         delta_theta'
   write(nopen,*)'span         delta_theta'
   do ia = 1, na      
-     print*,span(ia),delta_theta(ia)
+     if (.not. isquiet) print*,span(ia),delta_theta(ia)
      write(nopen,*) span(ia), delta_theta(ia)
   enddo
 endif
 do ia = 1, na
    bladedata(8,ia)= delta_theta(ia)
 enddo
-write(*,*)
+if (.not. isquiet) write(*,*)
 write(nopen,*) ''
 call close_log_file(nopen, file_open)
 
@@ -360,7 +365,7 @@ do ia = 1,na
       inter_rb(i,ia) = spl_eval(mps_inter,rm(1,ia),rms(1,ia),mp(1,ia),nsp(ia))
    enddo
 enddo
-print*,''
+if (.not. isquiet) print*,''
 
 !*******************************************************************************************
 !---Converting cylindrical coordinates to cartesian coordinates
@@ -424,10 +429,12 @@ do ia = 1,na
                 (inter_yb(5,ia)-inter_yb(6,ia))**2+ &
         (inter_zb(5,ia)-inter_zb(6,ia))**2)
    if(throat_3D(ia).ne.0) then 
-     print*,'section(',ia,')'
-     print*,'3D throat line [',units,'] =',throat_3D(ia)*scf
-     print*,'3D mouth line [',units,'] =',mouth_3D(ia)*scf
-     print*,'3D exit line [',units,'] =',exit_3D(ia)*scf
+     if (.not. isquiet) then
+         print*,'section(',ia,')'
+         print*,'3D throat line [',units,'] =',throat_3D(ia)*scf
+         print*,'3D mouth line [',units,'] =',mouth_3D(ia)*scf
+         print*,'3D exit line [',units,'] =',exit_3D(ia)*scf
+     end if
      write(nopen,*)'section(',ia,')'
      write(nopen,*) '3D throat line [',units,'] =',throat_3D(ia)*scf
      write(nopen,*) '3D mouth line [',units,'] =',mouth_3D(ia)*scf
@@ -438,15 +445,17 @@ enddo
 !*******************************************************************************************
 ! Dimensional Chord calculation and writing dimensional coordinates into a single file 'blade3D.casename.dat'.
 !*******************************************************************************************
-write(*,*)"Number of radial sections:",nsec
+if (.not. isquiet) write(*,*)"Number of radial sections:",nsec
 write(nopen,*) 'Number of radial sections:', nsec
 !---- output ...
 ! TODO: Move to file_operations
 fname1 = 'blade3d.'//trim(casename)//'.dat'
 open(3,file=fname1,status='unknown')
-write(*,*)
-write(*,*) 'Writing 3D blade geometry ...'
-write(*,*)
+if (.not. isquiet) then
+    write(*,*)
+    write(*,*) 'Writing 3D blade geometry ...'
+    write(*,*)
+end if
 write(nopen,*) ''
 write(nopen,*) 'Writing 3D blade geometry ...'
 write(nopen,*) ''
@@ -457,7 +466,7 @@ do ia = 1,nsec
         write(3,10) scf*xb(i,ia),scf*yb(i,ia),scf*zb(i,ia)       
    enddo
    chord_actual(ia) = scf*sqrt((xb(ile,ia)-xb(iap,ia))**2 + (yb(ile,ia)-yb(iap,ia))**2 + (zb(ile,ia)-zb(iap,ia))**2)
-   print*,'chord_actual(',units,'):',chord_actual(ia)
+   if (.not. isquiet) print*,'chord_actual(',units,'):',chord_actual(ia)
    write(nopen,*) 'chord_actual(',units,'):',chord_actual(ia)
    bladedata(6,ia)= chord_actual(ia) ! in input file units
 enddo
@@ -466,11 +475,13 @@ close(3)
 !*******************************************************************************************
 ! Calculating the meanline by taking the average of PS and SS curves.
 !*******************************************************************************************
-write(*,*)
-print*,'Calculating the meanline by taking the average of PS and SS in 3D...'
-print*,'Writing the meanline in 3D to meanline.sec#.dat files...'
-write(*,*)
-print*,'Writing the top and bottom periodic wall coordinates...'
+if (.not. isquiet) then
+    write(*,*)
+    print*,'Calculating the meanline by taking the average of PS and SS in 3D...'
+    print*,'Writing the meanline in 3D to meanline.sec#.dat files...'
+    write(*,*)
+    print*,'Writing the top and bottom periodic wall coordinates...'
+end if
 write(nopen,*) ''
 write(nopen,*) 'Calculating the meanline by taking the average of PS ans SS in 3D...'
 write(nopen,*) 'Writing the meanline in 3D to meanline.sec#.dat files...'

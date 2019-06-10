@@ -216,7 +216,13 @@ subroutine span_variation()
     real,           allocatable     :: span_fine(:), out_coord_u_fine(:,:), out_coord_v_fine(:,:)
     real                            :: intersec_u(nspan)
     character(:),   allocatable     :: log_file
-    logical                         :: file_open
+    logical                         :: file_open, isquiet_local
+
+
+    !
+    ! Determine if command line argument 'isquiet' is being used
+    !
+    call get_quiet_status(isquiet_local)
 
 
 
@@ -261,7 +267,7 @@ subroutine span_variation()
     ! Print message to screen and write to log file
     !
     call log_file_exists(log_file, nopen, file_open)
-    print*, 'Creating cubic B-spline with spancontrolinput file'
+    if (.not. isquiet_local) print*, 'Creating cubic B-spline with spancontrolinput file'
     write(nopen,*) 'Creating cubic B-spline with spancontrolinput file'
     call close_log_file(nopen, file_open)
 
@@ -299,7 +305,7 @@ subroutine span_variation()
     ! Write curvature spanwise spline data to a file, if command line option "dev" is used
     if (isdev) then
 
-        print *, 'Writing spanwise curvature variation data to file'
+        if (.not. isquiet_local) print *, 'Writing spanwise curvature variation data to file'
         call log_file_exists(log_file, nopen, file_open)
         write(nopen,*) 'Writing spanwise curvature variation data to file'
         call close_log_file(nopen, file_open)
@@ -369,7 +375,7 @@ subroutine span_variation()
     !
     if (isdev .and. (thick /= 0 .or. thick_distr == 5)) then
         
-        print *, 'Writing spanwise thickness variation data to file'
+        if (.not. isquiet_local) print *, 'Writing spanwise thickness variation data to file'
         call log_file_exists(log_file, nopen, file_open)
         write(nopen,*) 'Writing spanwise thickness variation data to file'
         call close_log_file(nopen, file_open)
@@ -415,7 +421,7 @@ subroutine span_variation()
         ! Write LE spanwise spline data to a file, if command line option "dev" is used
         if (isdev) then
 
-            print *, 'Writing spanwise LE variation data to file'
+            if (.not. isquiet_local) print *, 'Writing spanwise LE variation data to file'
             call log_file_exists(log_file, nopen, file_open)
             write(nopen,*) 'Writing spanwise LE variation data to file'
             call close_log_file(nopen, file_open)
@@ -433,7 +439,7 @@ subroutine span_variation()
     ! Print message to screen and write to log file
     !
     call log_file_exists(log_file, nopen, file_open)
-    print*, 'B-spline created successfully'
+    if (.not. isquiet_local) print*, 'B-spline created successfully'
     write(nopen,*) 'B-spline created successfully'
     call close_log_file(nopen, file_open)
 

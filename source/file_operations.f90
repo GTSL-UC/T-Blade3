@@ -92,7 +92,7 @@ module file_operations
         logical,                        intent(inout)       :: file_open
 
         ! Local variables
-        character(50)   :: maininput_log_file
+        character(100)   :: maininput_log_file
         logical         :: exist
         integer         :: ierr, index1
 
@@ -160,7 +160,7 @@ module file_operations
         logical,                    intent(inout)           :: file_open
         
         ! Local variables
-        character(50)       :: auxinput_log_file
+        character(100)       :: auxinput_log_file
         logical             :: exist
         integer             :: ierr, index1
         
@@ -397,11 +397,16 @@ module file_operations
         integer                                         :: i, nopen
         character(80)                                   :: fname1, fname2
         character(:),   allocatable                     :: log_file
-        logical                                         :: file_open
+        logical                                         :: file_open, isquiet_local
 
+
+        !
+        ! Determine if command line argument 'isquiet' is being used
+        !
+        call get_quiet_status(isquiet_local)
 
         call log_file_exists(log_file, nopen, file_open)
-        print *, 'Writing dimensional hub and casing streamlines'
+        if (.not. isquiet_local) print *, 'Writing dimensional hub and casing streamlines'
         write(nopen,*) 'Writing dimensional hub and casing streamlines'
         call close_log_file(nopen, file_open)
 
@@ -447,12 +452,15 @@ module file_operations
         character(32)                                   :: temp
         character(80)                                   :: fname
         character(:),   allocatable                     :: log_file
-        logical                                         :: file_open
+        logical                                         :: file_open, isquiet_local
 
-        
+
+        ! Get isquiet status
+        call get_quiet_status(isquiet_local)
+
         write(temp,*) ia
         call log_file_exists(log_file, nopen, file_open)
-        print *, 'Writing dimensional streamline '//trim(adjustl(temp))
+        if (.not. isquiet_local) print *, 'Writing dimensional streamline '//trim(adjustl(temp))
         write(nopen,*) 'Writing dimensional streamline '//trim(adjustl(temp))
         call close_log_file(nopen, file_open)
 
@@ -1071,22 +1079,29 @@ module file_operations
         character(80)                                   :: fname,fname1,temp
         integer                                         :: i,j,np,ns,nopen
         character(:),   allocatable                     :: log_file
-        logical                                         :: file_open
+        logical                                         :: file_open, isquiet
 
+
+        ! Get the value of isquiet
+        call get_quiet_status(isquiet)
 
         call log_file_exists(log_file, nopen, file_open)
-        write(*,*)
-        print *, 'casename:',trim(fext)
+        if (.not. isquiet) then
+            write(*,*)
+            print *, 'casename:',trim(fext)
+        end if
         write(nopen,*) ''
         write(nopen,*) 'casename:', trim(fext)
 
         ! File name for combined section data file
         fname               = 'blade3d.'//trim(casename)//'.dat'
 
-        write(*,*)
-        print *, 'fname: ', trim(fname)
-        write(*,*)
-        write(*,*) 'Creating section data files for CAD system'
+        if (.not.isquiet) then
+            write(*,*)
+            print *, 'fname: ', trim(fname)
+            write(*,*)
+            write(*,*) 'Creating section data files for CAD system'
+        end if
         write(nopen,*) ''
         write(nopen,*) 'fname: ', trim(fname)
         write(nopen,*) ''
@@ -1095,14 +1110,16 @@ module file_operations
         ! Open  combined section data file
         open(2, file = fname, status = 'unknown')
         read(2,*) np,  ns
-        write(*,*) ''
-        write(*,*) 'Number of points: ', np
-        write(*,*) ''
-        write(*,*) 'Number of sections: ', ns
-        write(*,*) ''
-        write(*,*) 'bsf: ', scf
-        write(*,*) 'Number of blades in this row: ', nbls
-        write(*,*)
+        if (.not. isquiet) then
+            write(*,*) ''
+            write(*,*) 'Number of points: ', np
+            write(*,*) ''
+            write(*,*) 'Number of sections: ', ns
+            write(*,*) ''
+            write(*,*) 'bsf: ', scf
+            write(*,*) 'Number of blades in this row: ', nbls
+            write(*,*)
+        end if
         write(nopen,*) ''
         write(nopen,*) 'Number of points: ', np
         write(nopen,*) ''
@@ -1136,7 +1153,7 @@ module file_operations
         ! Close combined section data file
         close(2)
 
-        write(*,*) ''
+        if (.not. isquiet) write(*,*) ''
         write(nopen,*) ''
         call close_log_file(nopen, file_open)
 

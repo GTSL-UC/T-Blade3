@@ -7,60 +7,69 @@ subroutine displayMessage
 
     character(len = :), allocatable :: log_file
     integer                         :: nopen
-    logical                         :: file_open, initial
+    logical                         :: file_open, initial, isquiet_local
 
-    write(*,*)
-    write(*,*)'************************************************************'
-    write(*,*)'************************************************************'
-    write(*,*)'****  T-BLADE3:Turbomachinery BLADE 3D Geometry Builder ****'
-    write(*,*)'****                                                    ****' 
-    write(*,*)'****  Master Version 1.13.1	                           ****' 
-    write(*,*)'****                                                    ****'
-    write(*,*)'****  ...was also called as below till Aug 2016...      ****' 
-    write(*,*)'****  3DBGB: 3 Dimensional Blade Geometry Builder       ****'
-    write(*,*)'****                                                    ****'  
-    write(*,*)'****  Develop Version 1.2                               ****' 
-    write(*,*)'****                                                    ****'
-    write(*,*)'****  This software comes with ABSOLUTELY NO WARRANTY   ****'
-    write(*,*)'****                                                    ****'
-    write(*,*)'****  This is a program which generates a 3D blade...   ****' 
-    write(*,*)'****  ...shape and outputs 3D blade section files.      ****'
-    write(*,*)'****                                                    ****'
-    write(*,*)'****  Inputs: LE and TE curve(x,r), inlet angle,        ****' 
-    write(*,*)'****          exit angle, chord, tm/c, incidence,       ****'
-    write(*,*)'****          deviation, secondary flow angles,         ****'
-    write(*,*)'****          streamline coordinates:(x,r)              ****'   
-    write(*,*)'****          control points for sweep, lean,           ****'
-    write(*,*)'****          blade scaling factor.                     ****'
-    write(*,*)'****                                                    ****'
-    write(*,*)'****  Outputs: 3D blade sections (x,y,z),               ****'
-    write(*,*)'****           2D airfoils (mprime,theta).              ****'
-    write(*,*)'****                                                    ****'
-    write(*,*)'****  ---------------by Kiran Siddappaji         ----   ****'
-    write(*,*)'****  ---------------by Mark G. Turner           ----   ****'
-    write(*,*)'****  ------------------- turnermr@ucmail.uc.edu ----   ****'
-    write(*,*)'****  ---------------by Karthik Balasubramanian  ----   ****'
-    write(*,*)'****  ---------------by Syed Moez Hussain Mahmood----   ****'
-    write(*,*)'****  ---------------by Ahmed Nemnem             ----   ****'
-    write(*,*)'****  ---------------by Marshall C. Galbraith    ----   ****'
-    write(*,*)'************************************************************'
-    write(*,*)'************************************************************'
-    write(*,*)
-    write(*,*) 'T-Blade3 Copyright (C) 2017 University of Cincinnati, developed by Kiran Siddappaji,' 
-    write(*,*) 'Dr. Mark G. Turner, Karthik  Balasubramanian, Syed Moez Hussain, Ahmed Farid Nemnem '
-    write(*,*) ' and Marshall C. Galbraith.'
-    write(*,*)
-    write(*,*) 'This program is free software; you can redistribute it and/or modify it under the '
-    write(*,*) 'terms of the GNU General Public License as published by the Free Software Foundation; '
-    write(*,*) 'either version 2 of the License, or (at your option) any later version.'
-    write(*,*)
-    write(*,*) 'This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;'
-    write(*,*) 'without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. '
-    write(*,*) 'See the GNU General Public License for more details.  For the complete terms of the '
-    write(*,*) 'GNU General Public License, please see this URL: http://www.gnu.org/licenses/gpl-2.0.html'
-    write(*,*)
-    write(*,*)'************************************************************'
-    write(*,*)
+
+    !
+    ! Determine if 'isquiet' command line argument is being used
+    !
+    call get_quiet_status(isquiet_local)
+
+
+    if (.not. isquiet_local) then
+        write(*,*)
+        write(*,*)'************************************************************'
+        write(*,*)'************************************************************'
+        write(*,*)'****  T-BLADE3:Turbomachinery BLADE 3D Geometry Builder ****'
+        write(*,*)'****                                                    ****' 
+        write(*,*)'****  Master Version 1.13.1	                           ****' 
+        write(*,*)'****                                                    ****'
+        write(*,*)'****  ...was also called as below till Aug 2016...      ****' 
+        write(*,*)'****  3DBGB: 3 Dimensional Blade Geometry Builder       ****'
+        write(*,*)'****                                                    ****'  
+        write(*,*)'****  Develop Version 1.2                               ****' 
+        write(*,*)'****                                                    ****'
+        write(*,*)'****  This software comes with ABSOLUTELY NO WARRANTY   ****'
+        write(*,*)'****                                                    ****'
+        write(*,*)'****  This is a program which generates a 3D blade...   ****' 
+        write(*,*)'****  ...shape and outputs 3D blade section files.      ****'
+        write(*,*)'****                                                    ****'
+        write(*,*)'****  Inputs: LE and TE curve(x,r), inlet angle,        ****' 
+        write(*,*)'****          exit angle, chord, tm/c, incidence,       ****'
+        write(*,*)'****          deviation, secondary flow angles,         ****'
+        write(*,*)'****          streamline coordinates:(x,r)              ****'   
+        write(*,*)'****          control points for sweep, lean,           ****'
+        write(*,*)'****          blade scaling factor.                     ****'
+        write(*,*)'****                                                    ****'
+        write(*,*)'****  Outputs: 3D blade sections (x,y,z),               ****'
+        write(*,*)'****           2D airfoils (mprime,theta).              ****'
+        write(*,*)'****                                                    ****'
+        write(*,*)'****  ---------------by Kiran Siddappaji         ----   ****'
+        write(*,*)'****  ---------------by Mark G. Turner           ----   ****'
+        write(*,*)'****  ------------------- turnermr@ucmail.uc.edu ----   ****'
+        write(*,*)'****  ---------------by Karthik Balasubramanian  ----   ****'
+        write(*,*)'****  ---------------by Syed Moez Hussain Mahmood----   ****'
+        write(*,*)'****  ---------------by Ahmed Nemnem             ----   ****'
+        write(*,*)'****  ---------------by Marshall C. Galbraith    ----   ****'
+        write(*,*)'************************************************************'
+        write(*,*)'************************************************************'
+        write(*,*)
+        write(*,*) 'T-Blade3 Copyright (C) 2017 University of Cincinnati, developed by Kiran Siddappaji,' 
+        write(*,*) 'Dr. Mark G. Turner, Karthik  Balasubramanian, Syed Moez Hussain, Ahmed Farid Nemnem '
+        write(*,*) ' and Marshall C. Galbraith.'
+        write(*,*)
+        write(*,*) 'This program is free software; you can redistribute it and/or modify it under the '
+        write(*,*) 'terms of the GNU General Public License as published by the Free Software Foundation; '
+        write(*,*) 'either version 2 of the License, or (at your option) any later version.'
+        write(*,*)
+        write(*,*) 'This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;'
+        write(*,*) 'without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. '
+        write(*,*) 'See the GNU General Public License for more details.  For the complete terms of the '
+        write(*,*) 'GNU General Public License, please see this URL: http://www.gnu.org/licenses/gpl-2.0.html'
+        write(*,*)
+        write(*,*)'************************************************************'
+        write(*,*)
+    end if
 
 
 
@@ -214,7 +223,7 @@ subroutine huboffset(mphub,x,r,dxds,drds,hub,nphub,scf,casename)
                                                        rnorm(nphub,1),dxn(nphub,1),drn(nphub,1)
     character(80)                                   :: fname1
     character(:),   allocatable                     :: log_file
-    logical                                         :: file_open
+    logical                                         :: file_open, isquiet_local
 
 
     ! Calculating the normal and offset coordinates
@@ -229,14 +238,19 @@ subroutine huboffset(mphub,x,r,dxds,drds,hub,nphub,scf,casename)
        rhub(i,1)    = r(i,1) + drn(i,1)
     end do  
 
+    ! Get isquiet status
+    call get_quiet_status(isquiet_local)
+
     write(*,*) ''
 
     ! Writing the offset coordinates to a file
     fname1 = 'hub-offset.'//trim(casename)//'.dat'
     open(1,file = fname1, status = 'unknown')
     call log_file_exists(log_file, nopen, file_open)
-    write(*,*)'Calculating hub-offset streamline coordinates...'
-    write(*,*)'Writing the coordinates to hub-offset.dat file'
+    if (.not. isquiet_local) then
+        write(*,*)'Calculating hub-offset streamline coordinates...'
+        write(*,*)'Writing the coordinates to hub-offset.dat file'
+    end if
 
     write(nopen,*) 'Calculating hub-offset streamline coordinates...'
     write(nopen,*) 'Writing the coordinates to hub-offset.dat file'
@@ -300,7 +314,7 @@ subroutine tipoffset(mptip,x,r,dxds,drds,tip,nptip,scf,nsl,casename)
                                                        dxn(nptip,1),drn(nptip,1),deltan
     character(80)                                   :: fname1
     character(:),   allocatable                     :: log_file
-    logical                                         :: file_open
+    logical                                         :: file_open, isquiet_local
     
 
     ! Calculating the normal and offset coordinates
@@ -315,14 +329,19 @@ subroutine tipoffset(mptip,x,r,dxds,drds,tip,nptip,scf,nsl,casename)
        rtip(i,1)    = r(i,1) - drn(i,1)
     end do  
 
-    write(*,*)
+    ! Get isquiet status
+    call get_quiet_status(isquiet_local)
+
+    if (.not. isquiet_local) write(*,*)
 
     ! Writing the offset coordinates to a file
     fname1 = 'tip-offset.'//trim(casename)//'.dat'
     open(1,file = fname1, status = 'unknown')
     call log_file_exists(log_file, nopen, file_open)
-    write(*,*)'Calculating tip-offset streamline coordinates...'
-    write(*,*)'Writing the coordinates to tip-offset.dat file'
+    if (.not. isquiet_local) then
+        write(*,*)'Calculating tip-offset streamline coordinates...'
+        write(*,*)'Writing the coordinates to tip-offset.dat file'
+    end if
 
     write(nopen,*) 'Calculating tip-offset streamline coordinates...'
     write(nopen,*) 'Writing the coordinates to tip-offset.dat file'
@@ -403,8 +422,11 @@ subroutine throatindex(throat_pos,throat_index,n_normal_distance,js,nsl,thick_di
     ! Local variables
     integer                             :: nopen
     character(:),   allocatable         :: log_file, warning_msg, dev_msg
-    logical                             :: file_open
+    logical                             :: file_open, isquiet
 
+
+    ! Get the value of isquiet
+    call get_quiet_status(isquiet)
 
     call log_file_exists(log_file, nopen, file_open)
 
@@ -417,17 +439,17 @@ subroutine throatindex(throat_pos,throat_index,n_normal_distance,js,nsl,thick_di
 
     else if (throat_index(js) < 0.25*n_normal_distance) then
         throat_pos(js) = 'le'
-        print*,'throat_index',js,throat_index(js)
+        if (.not. isquiet) print*,'throat_index',js,throat_index(js)
         write(nopen,*) 'throat_index', js, throat_index(js)
 
     else if (throat_index(js) > 0.75*n_normal_distance) then
         throat_pos(js) = 'te' 
-        print*,'throat_index',js,throat_index(js)
+        if (.not. isquiet) print*,'throat_index',js,throat_index(js)
         write(nopen,*) 'throat_index', js, throat_index(js)
 
     else
         throat_pos(js) = 'btween'
-        print*,'throat_index',js,throat_index(js)
+        if (.not. isquiet) print*,'throat_index',js,throat_index(js)
         write(nopen,*) 'throat_index', js, throat_index(js)
 
     end if  ! throat_index(js)
@@ -584,12 +606,16 @@ subroutine stacking(xb,yb,xbot,ybot,xtop,ytop,js,np,stack_switch,stack,stk_u,stk
                                                        v_zero_stack, const_stk_u, const_stk_v, stku, stkv, ucen,vcen, &
                                                        ei11, ei22, apx1, apx2
     character(:),    allocatable                    :: log_file
-    logical                                         :: file_open
+    logical                                         :: file_open, isquiet
+
+
+    ! Get isquiet status
+    call get_quiet_status(isquiet)
 
 
     ! Calculating the area centroid cordinates of the airfoil ucen,vcen
     call log_file_exists(log_file, nopen, file_open)
-    print*,np
+    if (.not. isquiet) print*,np
     write(nopen,*) np
     call aecalc(np,xb,yb,sb,1,area,ucen,vcen,ei11,ei22,apx1,apx2)
     
@@ -619,9 +645,11 @@ subroutine stacking(xb,yb,xbot,ybot,xtop,ytop,js,np,stack_switch,stack,stk_u,stk
     end if
 
     ! Print stacking position information to the screen and write to log file
-    write(*,*)
-    print*,'Stacking position on the chord as % of chord:',stku
-    print*,'Stacking position in % above(+ve) or below(-ve) meanline :',stkv
+    if (.not. isquiet) then
+        write(*,*)
+        print*,'Stacking position on the chord as % of chord:',stku
+        print*,'Stacking position in % above(+ve) or below(-ve) meanline :',stkv
+    end if
     write(nopen,*) ''
     write(nopen,*) 'Stacking position on the chord as % of chord:', stku
     write(nopen,*) 'Stacking position in % above(+ve) or below(-ve) meanline :', stkv
@@ -630,14 +658,14 @@ subroutine stacking(xb,yb,xbot,ybot,xtop,ytop,js,np,stack_switch,stack,stk_u,stk
     if (stku == 200.) then 
         u_stack = ucen
         v_stack = vcen
-        print*,'Stacking at the area centroid of the airfoil...'
+        if (.not. isquiet) print*,'Stacking at the area centroid of the airfoil...'
         write(nopen,*) 'Stacking at the area centroid of the airfoil...'
         goto 16
 
     ! Calculating u_stack using the % chord stacking information
     else
         if (LE == 2) then 
-          print*,'LE with sting.'
+          if (.not. isquiet) print*,'LE with sting.'
           write(nopen,*) 'LE with sting.'
         end if
         u_stack = xb(1)*(real(stku)/100)
@@ -655,7 +683,7 @@ subroutine stacking(xb,yb,xbot,ybot,xtop,ytop,js,np,stack_switch,stack,stk_u,stk
        end if
     end do
 
-    print*,'top curve points index range for % chord stacking:',j,j+1
+    if (.not. isquiet) print*,'top curve points index range for % chord stacking:',j,j+1
     write(nopen,*) 'top curve points index range for % chord stacking:',j,j+1
     vbot_stack =  ybot(j) + ((u_stack - xbot(j))*(ybot(j+1) - ybot(j))/(xbot(j+1) - xbot(j))) 
     
@@ -669,7 +697,7 @@ subroutine stacking(xb,yb,xbot,ybot,xtop,ytop,js,np,stack_switch,stack,stk_u,stk
        end if
     end do
 
-    print*,'bottom curve points index range for % chord stacking:',k,k+1
+    if (.not. isquiet) print*,'bottom curve points index range for % chord stacking:',k,k+1
     write(nopen,*) 'bottom curve points index range for % chord stacking:',k,k+1
     vtop_stack =  ytop(k) + ((u_stack - xtop(k))*(ytop(k+1) - ytop(k))/(xtop(k+1) - xtop(k))) 
     
@@ -681,13 +709,13 @@ subroutine stacking(xb,yb,xbot,ybot,xtop,ytop,js,np,stack_switch,stack,stk_u,stk
     !
     v_zero_stack = (vtop_stack + vbot_stack)/2
     
-    print*, "vtop_stack  vbot_stack", vtop_stack, vbot_stack
+    if (.not. isquiet) print*, "vtop_stack  vbot_stack", vtop_stack, vbot_stack
     write(nopen,*) 'vtop_stack vbot_stack', vtop_stack, vbot_stack
 
     ! Above meanline stacking
     if (stku /= 200 .and. stkv > 0) then
       v_stack = v_zero_stack + (real(stkv)/100)*(abs(vtop_stack - v_zero_stack))
-      print*,'+ve stack v_stack',v_stack,(real(stkv)/100)
+      if (.not. isquiet) print*,'+ve stack v_stack',v_stack,(real(stkv)/100)
       write(nopen,*) '+ve stack v_stack', v_stack, (real(stkv)/100)
 
     ! Meanline stacking
@@ -698,14 +726,16 @@ subroutine stacking(xb,yb,xbot,ybot,xtop,ytop,js,np,stack_switch,stack,stk_u,stk
     else if (stku /= 200 .and. stkv < 0) then 
       v_stack = v_zero_stack + (real(stkv)/100)*(abs(vbot_stack - v_zero_stack))
 
-      print*,'v_stack',v_stack,(real(stkv)/100)
+      if (.not. isquiet) print*,'v_stack',v_stack,(real(stkv)/100)
       write(nopen,*) 'v_stack', v_stack, (real(stkv)/100)
 
     end if
 
-    write(*,*)
-    print*,'u_stack  v_stack', u_stack, v_stack
-    write(*,*)
+    if (.not. isquiet) then
+        write(*,*)
+        print*,'u_stack  v_stack', u_stack, v_stack
+        write(*,*)
+    end if
     write(nopen,*) ''
     write(nopen,*) 'u_stack  v_stack', u_stack, v_stack
     write(nopen,*) ''
@@ -929,11 +959,12 @@ subroutine throat_calc_pitch_line(xb,yb,np,camber,angle,sang,u,pi,pitch,throat_c
     real,           allocatable                     :: throat(:)
     character(80)                                   :: file4
     character(:),   allocatable                     :: log_file, warning_msg, dev_msg
-    logical                                         :: file_open, isdev
+    logical                                         :: file_open, isdev, isquiet
 
 
-    ! Get the value of isdev
+    ! Get the value of isdev and isquiet
     call get_dev_status(isdev)
+    call get_quiet_status(isquiet)
 
     ! Initializing x_interup and y_interup
     x_interup   = 0.0
@@ -947,7 +978,7 @@ subroutine throat_calc_pitch_line(xb,yb,np,camber,angle,sang,u,pi,pitch,throat_c
     end if
     
     call log_file_exists(log_file, nopen, file_open)
-    print*,'np_sidee',np_sidee
+    if (.not. isquiet) print*,'np_sidee',np_sidee
     write(nopen,*) 'np_sidee', np_sidee
     
     ! Intialize variables
@@ -1020,7 +1051,7 @@ subroutine throat_calc_pitch_line(xb,yb,np,camber,angle,sang,u,pi,pitch,throat_c
     end do  ! j = 1,np_sidee
 
     ! Warn if no throat is found
-    print*, 'n_normal_distance =',n_normal_distance
+    if (.not. isquiet) print*, 'n_normal_distance =',n_normal_distance
     write(nopen,*) 'n_normal_distance = ', n_normal_distance
     if(n_normal_distance == 0) then
       warning_msg   = 'No throats found because of low number of blades'
@@ -1033,7 +1064,7 @@ subroutine throat_calc_pitch_line(xb,yb,np,camber,angle,sang,u,pi,pitch,throat_c
     mouth_coord = inter_coord(:,1)
     exit_coord = inter_coord(:,n_normal_distance)
 
-    print*,'number of intersection points (k) =',k-1,'from np_side of',np_sidee
+    if (.not. isquiet) print*,'number of intersection points (k) =',k-1,'from np_side of',np_sidee
     write(nopen,*) 'Number of intersection points (k) = ',k-1,'from np_side of',np_sidee
 
     if (allocated(throat)) deallocate(throat)
@@ -1055,10 +1086,12 @@ subroutine throat_calc_pitch_line(xb,yb,np,camber,angle,sang,u,pi,pitch,throat_c
     end do
 
     ! Writing to a file for debugging
-    if (isdev) then     
-        print*,""
-        print*,'Writing non-dimensional throat points to a file for debugging...'
-        print*,""
+    if (isdev) then   
+        if (.not. isquiet) then          
+            print*,""
+            print*,'Writing non-dimensional throat points to a file for debugging...'
+            print*,""
+        end if
         write(nopen,*) ''
         write(nopen,*) 'Writing non-dimensional throat points to a file for debugging...'
         write(nopen,*) ''
@@ -1102,6 +1135,11 @@ subroutine averaged_camber(xb,yb,np,u,camber,angle,sinl)
     ! Local variables
     integer                                         :: i
     real                                            :: u_i((np + 1)/2), camber_i((np + 1)/2)
+    logical                                         :: isquiet
+
+
+    ! Determine isquiet status
+    call get_quiet_status(isquiet)
 
     ! Initialize variables
     camber_i= 0
@@ -1109,7 +1147,7 @@ subroutine averaged_camber(xb,yb,np,u,camber,angle,sinl)
     camber  = 0
     angle   = 0
 
-    print*, 'np',np
+    if (.not. isquiet) print*, 'np',np
 
     ! Calculating the average:
     do i = 1,(np + 1)/2
@@ -1446,7 +1484,11 @@ subroutine constantslopemeanline3D(xb,yb,zb,xposlean,yposlean,zposlean,xneglean,
                                                        xmeanline(nx,nax), ymeanline(nx,nax), zmeanline(nx,nax),  &
                                                        phi_xz_up,phi_xz_dwn,phi_xy_up,phi_xy_dwn,coefficient(6), &
                                                        mag_coff
+    logical                                         :: isquiet
 
+
+    ! Get the value of isquiet
+    call get_quiet_status(isquiet)
 
     ! Number of points added
     npts = 4 
@@ -1539,7 +1581,7 @@ subroutine constantslopemeanline3D(xb,yb,zb,xposlean,yposlean,zposlean,xneglean,
 
     end do  ! do ia = 1,nsec
 
-    write(*,*)
+    if (.not. isquiet) write(*,*)
 
 
 end subroutine constantslopemeanline3D
@@ -1564,6 +1606,27 @@ subroutine get_dev_status(isdev_local)
     isdev_local = isdev
 
 end subroutine get_dev_status
+!------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+!
+!
+!
+!------------------------------------------------------------------------------------------------------
+subroutine get_quiet_status(isquiet_local)
+    use globvar
+    implicit none
+
+    logical,                    intent(inout)       :: isquiet_local
+
+
+    isquiet_local = isquiet
+
+end subroutine get_quiet_status
 !------------------------------------------------------------------------------------------------------
 
 
@@ -2295,13 +2358,18 @@ subroutine uniform_clustering(np,u)
     ! Local variables
     integer                                         :: i, nopen
     character(len = :), allocatable                 :: log_file
-    logical                                         :: file_open
+    logical                                         :: file_open, isquiet
 
+
+    ! Determine isquiet status
+    call get_quiet_status(isquiet)
 
     ! Print output to screen and write to log file
     call log_file_exists(log_file, nopen, file_open)
-    print *, 'Using uniform clustering distribution'
-    print *, ''
+    if (.not. isquiet) then
+        print *, 'Using uniform clustering distribution'
+        print *, ''
+    end if
     write(nopen,*) 'Using uniform clustering distribution'
     write(nopen,*) ''
     call close_log_file(nopen, file_open)
@@ -2339,13 +2407,18 @@ subroutine sine_clustering(np,u,clustering_parameter)
     integer                                         :: i, nopen
     real(kind = 8)                                  :: ui, du, pi
     character(len = :),     allocatable             :: log_file
-    logical                                         :: file_open
+    logical                                         :: file_open, isquiet
 
+
+    ! Determine isquiet status
+    call get_quiet_status(isquiet)
 
     ! Print output to screen and write to log file
     call log_file_exists(log_file, nopen, file_open)
-    print *, 'Using sine function based clustering distribution'
-    print *, ''
+    if (.not. isquiet) then
+        print *, 'Using sine function based clustering distribution'
+        print *, ''
+    end if
     write(nopen,*) 'Using sine function based clustering distribution'
     write(nopen,*) ''
     call close_log_file(nopen, file_open)
@@ -2391,13 +2464,18 @@ subroutine exponential_clustering(np,u,clustering_parameter)
     integer                                         :: np1, i, j, nopen
     real(kind = 8), allocatable                     :: xi(:), u_temp(:)
     character(len = :), allocatable                 :: log_file
-    logical                                         :: file_open
+    logical                                         :: file_open, isquiet
 
+
+    ! Determine isquiet status
+    call get_quiet_status(isquiet)
 
     ! Print output to screen and write to log file
     call log_file_exists(log_file, nopen, file_open)
-    print *, 'Using exponential function based clustering distribution'
-    print *, ''
+    if (.not. isquiet) then
+        print *, 'Using exponential function based clustering distribution'
+        print *, ''
+    end if
     write(nopen,*) 'Using exponential function based clustering distribution'
     write(nopen,*) ''
     call close_log_file(nopen, file_open)
@@ -2467,13 +2545,18 @@ subroutine hyperbolic_tan_clustering(np,u,clustering_parameter)
     integer                                         :: np1, i, j, nopen
     real(kind = 8), allocatable                     :: xi(:), u_temp(:), temp(:)
     character(len = :), allocatable                 :: log_file
-    logical                                         :: file_open
+    logical                                         :: file_open, isquiet
 
+
+    ! Determine isquiet status
+    call get_quiet_status(isquiet)
 
     ! Print output to screen and write to log file
     call log_file_exists(log_file, nopen, file_open)
-    print *, 'Using hyperbolic tangent function based clustering'
-    print *, ''
+    if (.not. isquiet) then
+        print *, 'Using hyperbolic tangent function based clustering'
+        print *, ''
+    end if
     write(nopen,*) 'Using hyperbolic tangent function based clustering'
     write(nopen,*) ''
     call close_log_file(nopen, file_open)
@@ -2882,8 +2965,6 @@ subroutine LE_clustering_parameter_solver(xi,K,delta,solver_flag)
         warning_msg_1   = "Returning to uniform midchord clustering"
         dev_msg         = 'Check subroutine LE_clustering_parameter_solver in funcNsubs.f90'
         call warning(warning_msg, warning_msg_1, dev_msg)
-        !write(nopen,*) 'Could not find initial guesses for the clustering_parameter bisection solver'
-        !write(nopen,*) 'Returning to uniform midchord clustering'
         delta       = 0.0
         solver_flag = .false.
     end if
@@ -2981,8 +3062,6 @@ subroutine TE_clustering_parameter_solver(xi,K,delta,solver_flag)
         warning_msg_1   = 'Returning to uniform midchord clustering'
         dev_msg         = 'Check subroutine TE_clustering_parameter_solver in funcNsubs.f90'
         call warning(warning_msg, warning_msg_1, dev_msg)
-        !write(nopen,*) 'Could not find initial guesses for the TE clustering_parameter bisection solver'
-        !write(nopen,*) 'Returning to uniform midchord clustering'
         delta       = 0.0
         solver_flag = .false.
     end if
@@ -3026,8 +3105,12 @@ subroutine mid_hyperbolic_clustering(np_cluster,np_mid,u_LE,u_TE,u_mid)
     real                                            :: du_LE, u_mid_pt, du_mid_LE, du_mid_TE, K_LE, delta_LE, &
                                                        du_TE, K_TE, delta_TE
     character(:),   allocatable                     :: log_file
-    logical                                         :: solver_flag_LE, solver_flag_TE, file_open
+    logical                                         :: solver_flag_LE, solver_flag_TE, file_open, &
+                                                       isquiet
 
+
+    ! Determine isquiet status
+    call get_quiet_status(isquiet)
 
     ! Calculate array sizes
     np_mid_LE   = (np_mid + 1)/2
@@ -3068,8 +3151,10 @@ subroutine mid_hyperbolic_clustering(np_cluster,np_mid,u_LE,u_TE,u_mid)
     if (solver_flag_LE .and. solver_flag_TE) then
 
         call log_file_exists(log_file, nopen, file_open)
-        print *, 'Hyperbolic midchord clustering with delta_LE = ', delta_LE
-        print *, 'Hyperbolic midchord clustering with delta_TE = ', delta_TE
+        if (.not. isquiet) then
+            print *, 'Hyperbolic midchord clustering with delta_LE = ', delta_LE
+            print *, 'Hyperbolic midchord clustering with delta_TE = ', delta_TE
+        end if
         write(nopen,*) 'Hyperbolic midchord clustering with delta_TE = ', delta_LE 
         write(nopen,*) 'Hyperbolic midchord clustering with delta_TE = ', delta_TE
         call close_log_file(nopen, file_open)
@@ -3151,12 +3236,17 @@ subroutine elliptical_clustering(np,np_cluster,cp_LE_ellip,cp_TE_ellip,u_new)
                                                        x_ellip_TE(:), y_ellip_TE(:), &
                                                        u_LE(:), u_TE(:), u_mid(:)
     character(:),   allocatable                     :: log_file
-    logical                                         :: file_open
+    logical                                         :: file_open, isquiet
 
+
+    !Determine isquiet status
+    call get_quiet_status(isquiet)
 
     ! Print to screen and write to log file
-    print *, 'Using ellipse based clustering function'
-    print *, ''
+    if (.not. isquiet) then
+        print *, 'Using ellipse based clustering function'
+        print *, ''
+    end if
     call log_file_exists(log_file, nopen, file_open)
     write(nopen,*) 'Using ellipse based clustering function'
     write(nopen,*) ''

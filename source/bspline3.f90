@@ -358,10 +358,6 @@ integer :: i, j, seg_1, seg_end
 !--------------------------------------------------------  
 ! computing the end points for each segment:
 
-print *, 'From bspline_y_of_x - ', ncp
-print *, 'From bspline_y_of_x - ', degree
-print *, 'From bspline_y_of_x - ', ncp - degree + 1
-
 t = 0
 if( degree == 3) then
     x_spl_end(1) = bspline(xcp(1:degree+1),t)

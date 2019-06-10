@@ -41,7 +41,11 @@ real*8, dimension(6, np_side):: splinedata
 character(*) :: casename, develop
 character*80 file1, sec
 character(:),   allocatable :: error_msg, dev_msg
-logical isdev
+logical isdev, isquiet
+
+
+! Determine isquiet status
+call get_quiet_status(isquiet)
 
 Ax = 0
 Ay = 0
@@ -174,7 +178,7 @@ irow = irow + 1
 Ax(irow, xrhs) = 1
 Ay(irow, yrhs) = 0
 
-print*, 'irow', irow
+if (.not. isquiet) print*, 'irow', irow
 ! - TE point Periodic contidions - 
 !xcp(1)*(-1/2) + xcp(3)*(1/2)  -  xcp(9)*(-1/2) + xcp(11)*(1/2) ) = 0
 !ycp(1)*(-1/2) + ycp(3)*(1/2)  -  ycp(9)*(-1/2) + ycp(11)*(1/2) ) = 0
@@ -192,15 +196,15 @@ elseif ( degree == 4 ) then
 endif
 
 if(thick_distr == 1)then !spline thickness with BLUNT TE
-    print*, 'thick_distr :', thick_distr, 'blunt TE'
+    if (.not. isquiet) print*, 'thick_distr :', thick_distr, 'blunt TE'
     Ay(irow, 1:ncp) = Ax(irow, 1:ncp) ; Ay(irow, yrhs) = 0.0
     !print*, "Ay"
     ! do i = 1, yrhs-1
     !  print*, Ay(i, :)
     ! enddo
 elseif(thick_distr == 2)then ! spline thickness with SHARP TE
-    print*, 'thick_distr :', thick_distr
-    print*, 'Generating sharp TE...'
+    if (.not. isquiet) print*, 'thick_distr :', thick_distr
+    if (.not. isquiet) print*, 'Generating sharp TE...'
     write(*, *)
     if( degree == 3 ) then
         !Ay(irow, 1) = (1) ; Ay(irow, 2) = (-2) ; Ay(irow, 3) = (1)  ; Ay(irow, yrhs) = 0.0 ; 
@@ -230,15 +234,15 @@ else if ( degree == 4 ) then
 endif
 
 if(thick_distr == 1)then !spline thickness with BLUNT TE
-    print*, 'thick_distr :', thick_distr, 'blunt TE'
+    if (.not. isquiet) print*, 'thick_distr :', thick_distr, 'blunt TE'
     Ay(irow, 1:ncp) = Ax(irow, 1:ncp) ; Ay(irow, yrhs) = 0.0
     !print*, "Ay"
     ! do i = 1, yrhs-1
     !  print*, Ay(i, :)
     ! enddo
 elseif(thick_distr == 2)then ! spline thickness with SHARP TE
-    print*, 'thick_distr :', thick_distr
-    print*, 'Generating sharp TE...'
+    if (.not. isquiet) print*, 'thick_distr :', thick_distr
+    if (.not. isquiet) print*, 'Generating sharp TE...'
     write(*, *)
     if( degree == 3 ) then
         !Ay(irow, ncp-2) = (-1) ; Ay(irow, ncp-1) = (2) ; Ay(irow, ncp) = (-1) ; Ay(irow, yrhs) = 0 ; 
@@ -295,7 +299,7 @@ if(thick_distr == 1)then !spline thickness with BLUNT TE
     !Specify the thickness location using a sharpness angle for sharp TE.
     te_angle = 2.5*dtor ! this should be an input parameter.
     te_thk_x = 1-((tethk/2)/tan(te_angle))
-    print*, 'thickness location sharp TE:', te_thk_x     
+    if (.not. isquiet) print*, 'thickness location sharp TE:', te_thk_x     
     ixrow = ixrow + 1 ; Ax(ixrow, ite_ee) = 1 ; Ax(ixrow, xrhs) = te_thk_x!0.95 !te_thk_x !TE
 endif
 
@@ -411,8 +415,9 @@ endif
 
 call gauss_jordan( yrhs-1, 1, Ay, info )
 if(info.ne.0)then
-    print*, 'FATAL ERROT: singular matrix encountered in solving the thickness distribution'
-    STOP
+    error_msg   = 'singular matrix encountered in solving the thickness distribution'
+    dev_msg     = 'Check subroutine splinethick in splinethick.f90'
+    call fatal_error(error_msg, dev_msg = dev_msg)
 endif
 
 !print*, "y info ", info
@@ -492,8 +497,8 @@ endif
 ! enddo
 
 ! close(61) 
-print*, 'lethk/2 = ', lethk/2.
-print*, 'tethk/2 = ', tethk/2.
+if (.not. isquiet) print*, 'lethk/2 = ', lethk/2.
+if (.not. isquiet) print*, 'tethk/2 = ', tethk/2.
 i_le = 0
 i_te = 0
 do i = 1, np-1

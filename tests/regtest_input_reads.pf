@@ -1,0 +1,324 @@
+!
+! Test subroutine readinput in readinput.f90
+!
+!----------------------------------------------------------------------------------
+@test
+subroutine regtest_readinput()
+    use globvar
+    use pfunit_mod
+    implicit none
+
+    character(256)              :: filename
+    character(:),   allocatable :: dir_path
+    real(kind = 8)              :: tol_1 = 10E-4, tol_2 = 10E-8
+
+
+    ! Set the command line argument 'quiet' as true to suppress command line output
+    ! Global variable defined in globvar.f90
+    isquiet     = .true.
+
+    ! Working directory relative path
+    dir_path    = 'inputs/OpenCSM/new_inputs/NACA_thickness_with_derivative'
+
+    ! Name of the test input file
+    filename    = dir_path//'/3dbgbinput.2.dat' 
+
+    ! Change working directory
+    call execute_command_line('cd '//dir_path) 
+
+    ! Call subroutine
+    call readinput(filename)
+
+    ! Remove any log files generated in the input file read
+    call execute_command_line('rm '//dir_path//'/*.log')
+
+
+
+    !
+    ! Test inputs
+    !
+    ! Test casename
+    @assertTrue(adjustl(trim(casename)) == 'Case6_4_Demo')  
+    ! Test blade row number
+    @assertEqual(2, ibrow)                                 
+    ! Test number of blades 
+    @assertEqual(16, nbls)
+    ! Test blade scaling factor          
+    @assertEqual(152.4, scf, tol_1)
+    ! Test blade scaling factor units
+    @assertTrue(units == 'mm')
+    ! Test number of streamlines
+    @assertEqual(21, nsl)
+    ! Test beta switch
+    @assertEqual(0, beta_switch)
+    ! Test secondary angle input
+    @assertTrue(spanwise_inci_dev_spline)
+    ! Test curvature controlled camber switch
+    @assertEqual(1, curv)
+    ! Test spanwise spline switch
+    @assertTrue(trim(spanwise_spline) == 'spanwise_spline')
+    ! Test thickness distribution switch
+    @assertEqual(5, thick_distr)
+    ! Test thickness multiplier switch
+    @assertEqual(0, thick)
+    ! Test LE spline switch
+    @assertEqual(0, LE)
+    ! Test non-dimensional actual chord switch
+    @assertEqual(0, chord_switch)
+    ! Test lean and sweep switch
+    @assertEqual(0, leansweep_switch)
+    ! Test clustering switch
+    @assertEqual(4, clustering_switch)
+    ! Test clustering parameter
+    @assertEqual(15.0, clustering_parameter, tol_2)
+
+    ! Test sectionwise properties
+    @assertEqual(-59.14963515, in_beta(21),      tol_1)
+    @assertEqual(-34.34497630, out_beta(11),     tol_1)
+    @assertEqual(0.51695300,   mrel1(1),         tol_1)
+    @assertEqual(0.25904476,   chord(17),        tol_1)
+    @assertEqual(0.07477000,   thk_c(7),         tol_1)
+    @assertEqual(0.00000000,   inci(15),         tol_1)
+    @assertEqual(0.00000000,   devn(4),          tol_1)
+    @assertEqual(0.00000000,   sec_flow_ang(12), tol_1)
+
+    ! Test curve points
+    @assertEqual(27, npoints)
+    @assertEqual(0.00619000, xle(1),  tol_2)
+    @assertEqual(0.92805700, rle(25), tol_2)
+    @assertEqual(0.33042500, xte(11), tol_2)
+    @assertEqual(0.77231900, rte(18), tol_2)
+
+    ! Test variable radial stacking switch
+    @assertEqual(0, stack_switch)
+
+    ! Test section type
+    @assertTrue(trim(airfoil(1)) == 'sect1')
+    ! Test u_stack
+    @assertEqual(25.00, stk_u(6),       tol_2)
+    ! Test v_stack
+    @assertEqual(0.00,  stk_v(11),      tol_2)
+    ! Test umxthk
+    @assertEqual(0.30,  umxthk_all(11), tol_2)
+    ! Test lethk
+    @assertEqual(0.02,  lethk_all(16),  tol_2)
+    ! Test tethk
+    @assertEqual(0.02,  tethk_all(21),  tol_2)
+
+    ! Test stacking axis location
+    @assertEqual(25000, stack)
+
+    ! Test sweep control points
+    @assertEqual(0.00, xcpdelm(1), tol_2)
+    @assertEqual(0.00, xcpdelm(2), tol_2)
+    @assertEqual(0.00, xcpdelm(3), tol_2)
+    @assertEqual(0.00, xcpdelm(4), tol_2)    
+
+    ! Test lean control points
+    @assertEqual(0.02687500, xcpdeltheta(1), tol_2)
+    @assertEqual(0.00,       xcpdeltheta(2), tol_2)
+    @assertEqual(0.00,       xcpdeltheta(3), tol_2)
+    @assertEqual(0.00,       xcpdeltheta(4), tol_2)    
+
+    ! Test incidence control points
+    @assertEqual( 0.40646825, xcpinbeta(1), tol_2)
+    @assertEqual(-3.75344661, xcpinbeta(2), tol_2)
+    @assertEqual( 6.40259870, xcpinbeta(3), tol_1)
+    @assertEqual(-0.13058341, xcpinbeta(4), tol_2)
+    @assertEqual( 1.95295865, xcpinbeta(5), tol_2)
+
+    ! Test deviation control points
+    @assertEqual( 1.71439907, xcpoutbeta(1), tol_2)
+    @assertEqual(-4.15294789, xcpoutbeta(2), tol_2)
+    @assertEqual(-3.51897673, xcpoutbeta(3), tol_2)
+    @assertEqual(-0.87688877, xcpoutbeta(4), tol_2)
+    @assertEqual(-6.23244265, xcpoutbeta(5), tol_1)
+
+    ! Test chord multiplier control points
+    @assertEqual(2.00, xcpchord(1), tol_2)
+    @assertEqual(2.00, xcpchord(2), tol_2)
+    @assertEqual(2.00, xcpchord(3), tol_2)
+    @assertEqual(2.00, xcpchord(4), tol_2)
+
+    ! Test thickness multiplier control points
+    @assertEqual(1.00, xcptm_c(1), tol_2)
+    @assertEqual(1.00, xcptm_c(2), tol_2)
+    @assertEqual(1.00, xcptm_c(3), tol_2)
+    @assertEqual(1.00, xcptm_c(4), tol_2)
+
+    ! Test hub and tip offsets
+    @assertEqual(0.00, hub, tol_2)
+    @assertEqual(0.00, tip, tol_2)
+
+
+end subroutine regtest_readinput
+!----------------------------------------------------------------------------------
+
+
+
+
+
+
+!
+! Test subroutine read_spanwise_NACA_input in readinput.f90
+!
+!----------------------------------------------------------------------------------
+@test
+subroutine regtest_read_spanwise_NACA_input()
+    use globvar
+    use pfunit_mod
+    implicit none
+
+    character(256)      :: dir_path, row_type
+    real(kind = 8)      :: tol_1 = 10E-4, tol_2 = 10E-8
+    
+    ! Set working directory
+    dir_path = 'inputs/OpenCSM/new_inputs/NACA_thickness_with_derivative/'
+
+    ! Set blade row number
+    row_type = '2'
+
+    ! Change working directory
+    call execute_command_line('cd '//dir_path)
+
+    ! Call subroutine
+    call read_spanwise_NACA_input(row_type, dir_path)
+
+    ! Delete any log files created in the working directory
+    call execute_command_line('rm *.log && cd '//dir_path//' && rm *.log')
+
+
+
+    !
+    ! Test auxiliary file inputs
+    !
+    ! Test number of curvature span control points and number of curvature control points
+    @assertEqual(4, ncp_span_curv)
+    @assertEqual(7, ncp_chord)
+
+    ! Test curvature span control points
+    @assertEqual(0.00, cp_chord_curv(1,1), tol_2)
+    @assertEqual(0.35, cp_chord_curv(2,1), tol_2)
+    @assertEqual(0.65, cp_chord_curv(3,1), tol_2)
+    @assertEqual(1.00, cp_chord_curv(4,1), tol_2)
+
+    ! Test u2 spanwise control points
+    @assertEqual(0.15, cp_chord_curv(1,2), tol_2)
+    @assertEqual(0.15, cp_chord_curv(2,2), tol_2)
+    @assertEqual(0.15, cp_chord_curv(3,2), tol_2)
+    @assertEqual(0.15, cp_chord_curv(4,2), tol_2)
+
+    ! Test u3 spanwise control points
+    @assertEqual(0.25, cp_chord_curv(1,3), tol_2)
+    @assertEqual(0.25, cp_chord_curv(2,3), tol_2)
+    @assertEqual(0.25, cp_chord_curv(3,3), tol_2)
+    @assertEqual(0.25, cp_chord_curv(4,3), tol_2)
+
+    ! Test u4 spanwise control points
+    @assertEqual(0.50, cp_chord_curv(1,4), tol_2)
+    @assertEqual(0.50, cp_chord_curv(2,4), tol_2)
+    @assertEqual(0.50, cp_chord_curv(3,4), tol_2)
+    @assertEqual(0.50, cp_chord_curv(4,4), tol_2)
+
+    ! Test u5 spanwise control points
+    @assertEqual(0.75, cp_chord_curv(1,5), tol_2)
+    @assertEqual(0.75, cp_chord_curv(2,5), tol_2)
+    @assertEqual(0.75, cp_chord_curv(3,5), tol_2)
+    @assertEqual(0.75, cp_chord_curv(4,5), tol_2)
+    
+    ! Test u6 spanwise control points
+    @assertEqual(0.95, cp_chord_curv(1,6), tol_2)
+    @assertEqual(0.95, cp_chord_curv(2,6), tol_2)
+    @assertEqual(0.95, cp_chord_curv(3,6), tol_2)
+    @assertEqual(0.95, cp_chord_curv(4,6), tol_2)
+    
+    ! Test cur1 spanwise control points
+    @assertEqual(0.00, cp_chord_curv(1,7), tol_2)
+    @assertEqual(0.00, cp_chord_curv(2,7), tol_2)
+    @assertEqual(0.00, cp_chord_curv(3,7), tol_2)
+    @assertEqual(0.00, cp_chord_curv(4,7), tol_2)
+    
+    ! Test cur2 spanwise control points
+    @assertEqual( 0.16085652, cp_chord_curv(1,8), tol_2)
+    @assertEqual( 0.02144626, cp_chord_curv(2,8), tol_2)
+    @assertEqual( 0.12192504, cp_chord_curv(3,8), tol_2)
+    @assertEqual(-0.19332628, cp_chord_curv(4,8), tol_2)
+
+    ! Test cur3 spanwise control points
+    @assertEqual( 0.36734052, cp_chord_curv(1,9), tol_2)
+    @assertEqual(-0.01227196, cp_chord_curv(2,9), tol_2)
+    @assertEqual( 0.40513258, cp_chord_curv(3,9), tol_2)
+    @assertEqual(-0.10225294, cp_chord_curv(4,9), tol_2)
+    
+    ! Test cur4 spanwise control points
+    @assertEqual( 0.06069224, cp_chord_curv(1,10), tol_2)
+    @assertEqual( 0.33493031, cp_chord_curv(2,10), tol_2)
+    @assertEqual(-0.01901009, cp_chord_curv(3,10), tol_2)
+    @assertEqual( 0.16086011, cp_chord_curv(4,10), tol_2)
+    
+    ! Test cur5 spanwise control points
+    @assertEqual( 0.39217871, cp_chord_curv(1,11), tol_2)
+    @assertEqual( 0.28192688, cp_chord_curv(2,11), tol_2)
+    @assertEqual( 0.02838869, cp_chord_curv(3,11), tol_2)
+    @assertEqual( 0.43181914, cp_chord_curv(4,11), tol_2)
+    
+    ! Test cur5 spanwise control points
+    @assertEqual(-0.07385239, cp_chord_curv(1,12), tol_2)
+    @assertEqual( 0.30328255, cp_chord_curv(2,12), tol_2)
+    @assertEqual(-0.18308617, cp_chord_curv(3,12), tol_2)
+    @assertEqual( 0.17272874, cp_chord_curv(4,12), tol_2)
+
+    ! Test cur1 spanwise control points
+    @assertEqual(0.00, cp_chord_curv(1,13), tol_2)
+    @assertEqual(0.00, cp_chord_curv(2,13), tol_2)
+    @assertEqual(0.00, cp_chord_curv(3,13), tol_2)
+    @assertEqual(0.00, cp_chord_curv(4,13), tol_2)
+
+    ! Test number of spanwise thickness control points
+    @assertEqual(5, ncp_span_thk)
+
+    ! Test thickness span control points
+    @assertEqual(0.00, cp_chord_thk(1,1), tol_2)
+    @assertEqual(0.25, cp_chord_thk(2,1), tol_2)
+    @assertEqual(0.50, cp_chord_thk(3,1), tol_2)
+    @assertEqual(0.75, cp_chord_thk(4,1), tol_2)
+    @assertEqual(1.00, cp_chord_thk(5,1), tol_2)
+
+    ! Test LE radius spanwise control points
+    @assertEqual(5.50, cp_chord_thk(1,2), tol_2)
+    @assertEqual(5.50, cp_chord_thk(2,2), tol_2)
+    @assertEqual(5.50, cp_chord_thk(3,2), tol_2)
+    @assertEqual(5.50, cp_chord_thk(4,2), tol_2)
+    @assertEqual(5.50, cp_chord_thk(5,2), tol_2)
+    
+    ! Test u_max spanwise control points
+    @assertEqual(0.40, cp_chord_thk(1,3), tol_2)
+    @assertEqual(0.41, cp_chord_thk(2,3), tol_2)
+    @assertEqual(0.43, cp_chord_thk(3,3), tol_2)
+    @assertEqual(0.48, cp_chord_thk(4,3), tol_2)
+    @assertEqual(0.60, cp_chord_thk(5,3), tol_2)
+    
+    ! Test t_max spanwise control points
+    @assertEqual(0.13  , cp_chord_thk(1,4), tol_2)
+    @assertEqual(0.0852, cp_chord_thk(2,4), tol_2)
+    @assertEqual(0.058 , cp_chord_thk(3,4), tol_2)
+    @assertEqual(0.036 , cp_chord_thk(4,4), tol_2)
+    @assertEqual(0.021 , cp_chord_thk(5,4), tol_2)
+    
+    ! Test t_TE spanwise control points
+    @assertEqual(0.022  , cp_chord_thk(1,5), tol_2)
+    @assertEqual(0.014  , cp_chord_thk(2,5), tol_2)
+    @assertEqual(0.00825, cp_chord_thk(3,5), tol_2)
+    @assertEqual(0.004  , cp_chord_thk(4,5), tol_2)
+    @assertEqual(0.001  , cp_chord_thk(5,5), tol_2)
+    
+    ! Test dy_dx_TE spanwise control points
+    @assertEqual(-0.20475, cp_chord_thk(1,6), tol_2)
+    @assertEqual(-0.13912, cp_chord_thk(2,6), tol_2)
+    @assertEqual(-0.10205, cp_chord_thk(3,6), tol_2)
+    @assertEqual(-0.07715, cp_chord_thk(4,6), tol_2)
+    @assertEqual(-0.07350, cp_chord_thk(5,6), tol_2)
+
+
+end subroutine regtest_read_spanwise_NACA_input
+!----------------------------------------------------------------------------------

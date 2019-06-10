@@ -1354,12 +1354,15 @@ end subroutine negclarky
       REAL, DIMENSION(np), INTENT(IN) :: x
       REAL, DIMENSION(np) :: yc, yt
       REAL :: t, m, p, th
-      LOGICAL :: NACA4
+      LOGICAL :: NACA4, isquiet
            
       ! Initializing t
       t = 0.0
+
+      ! Get isquiet status
+      call get_quiet_status(isquiet)
             
-      print*,"Using NACA airfoil subroutine"
+      if (.not. isquiet) print*,"Using NACA airfoil subroutine"
       ! Initialize variables
       NACA4 = .FALSE.
           ! Identify the airfoils as NACA 4 or 5 digit or decomposed NACA 4 digit
@@ -1445,15 +1448,18 @@ parameter(nx=500)
 character *20 fname1,temp,airfoil
 real x_file1(nx),y_file1(nx)
 real, intent(out) :: xb(nx),yb(nx)
+logical :: isquiet
+
+call get_quiet_status(isquiet)
 
 ! Stagger and chord values from the 3dbgbinput file....3/4/13
 fname1 = trim(airfoil)//'.dat'
 open(3,file=fname1,status='unknown')
 read(3,*)temp ! name of the airfoil
-write(*,*)'Reading the airfoil coordinates from: ',fname1
+if (.not. isquiet) write(*,*)'Reading the airfoil coordinates from: ',fname1
 read(3,*)np ! Number of airfoil coordinates.
 read(3,*)temp !Skipping "x     y"
-print*,'Number of airfoil coordinates in the file:',np
+if (.not. isquiet) print*,'Number of airfoil coordinates in the file:',np
 do i = 1, np
  read(3,*,end=5)x_file1(i),y_file1(i)
  xb(i) = x_file1(i)
@@ -1729,8 +1735,13 @@ real*8 mtop,mbot,mtop_normal,mbot_normal,ctop,cbot,radius
 real*8 xcenter,ycenter,xmean,ymean,xTEnew,yTEnew,deltax
 real*8, allocatable, dimension(:) :: xcirc,ycirc  
 real*8, intent(inout):: xbot(np),ybot(np),xtop(np),ytop(np)    
+logical :: isquiet
 
 np_side = np
+
+! Get isquiet status
+call get_quiet_status(isquiet)
+
 
 ! file1 = 'uvnaca.dat'
 ! open(1,file=file1,status='unknown')
@@ -1773,8 +1784,8 @@ radius = sqrt((ytop(np_side) - ycenter)**2 + (xtop(np_side) - xcenter)**2)
 ! Mid point of the TE points
 xmean = xtop(np_side)
 ymean = 0.5*(ytop(np_side) + ybot(np_side))
-print*,'radius: ',radius
-print*,xmean,ymean,' |xmean,ymean'
+if (.not. isquiet) print*,'radius: ',radius
+if (.not. isquiet) print*,xmean,ymean,' |xmean,ymean'
 !stop
 !The new TE. The point on the circular TE
 xTEnew = xcenter + radius

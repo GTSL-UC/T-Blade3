@@ -165,7 +165,7 @@ character (*), intent (in) :: casename
 logical, intent (in) :: isdev
 integer                             :: nopen
 character(len = :), allocatable     :: log_file, error_msg, dev_msg
-logical                             :: file_open
+logical                             :: file_open, isquiet
 
 !!		Outputs from this subroutine
 !			sang		Real,			Stagger/Twist angle
@@ -197,9 +197,15 @@ real :: P, knew, knew2, det, k1, k2, &
     t, angle0, camber0, intg_d2v_end(ncp-2), &
     intg_d1v_end(ncp-2), sang2, sc_factor_dev, inlet_uv_dev, &
     exit_uv_dev
+
+! Get isquiet status
+call get_quiet_status(isquiet)
+
 call log_file_exists(log_file, nopen, file_open)
-print*, 'xcp', xcp
-print*, 'ycp', ycp
+if (.not. isquiet) then
+    print*, 'xcp', xcp
+    print*, 'ycp', ycp
+end if
 write(nopen,*) 'xcp', xcp
 write(nopen,*) 'ycp', ycp
 
@@ -241,11 +247,11 @@ enddo
 ! intg_d1v_end(ncp-2) is total integral of first derivative of v upto u = 1
 ! P is a grouping of terms in the scaling factor equation
 P = (intg_d2v_end(ncp-2)*intg_d1v_end(ncp-2))-(intg_d1v_end(ncp-2)**2)
-write (*, '(A, F20.15)') 'Total camber is: ', tot_cam/dtor
+if (.not. isquiet) write (*, '(A, F20.15)') 'Total camber is: ', tot_cam/dtor
 write (nopen, '(A, F20.15)') 'Total camber is: ', tot_cam/dtor
 ! det is the determinant of quadratic equation in k (scaling factor)
 det = (intg_d2v_end(ncp-2)**2)+(4*P*(tan(tot_cam)**2))
-write (*, '(A, F20.15)') 'Determinant is: ', det
+if (.not. isquiet) write (*, '(A, F20.15)') 'Determinant is: ', det
 write (nopen, '(A, F20.15)') 'Determinant is: ', det
 if (det.lt.0.) then 
     error_msg   = 'All possible scaling factors for curvature control points are complex'
@@ -257,7 +263,7 @@ endif
 k1 = (-intg_d2v_end(ncp-2) + sqrt(det))/(2*P*tan(tot_cam))
 k2 = (-intg_d2v_end(ncp-2) - sqrt(det))/(2*P*tan(tot_cam))
 ! Choosing appropriate root
-write (*, '(A, 2F25.15)') 'Possible values of scaling factor are: ', k1, k2
+if (.not. isquiet) write (*, '(A, 2F25.15)') 'Possible values of scaling factor are: ', k1, k2
 write (nopen, '(A, 2F25.15)') 'Possible values of scaling factor are: ', k1, k2
 
 if (isdev) then
@@ -337,16 +343,20 @@ if (abs((atan(d1v_end(ncp-2))-atan(d1v_end(1)) - tot_cam)/tot_cam) .gt. 1E-7) th
 endif
 v_end = knew*(intg_d1v_end-(u_end*intg_d1v_end(ncp-2)))
 if (isdev) then
-    write(*, '(A, 2F25.15)') 'Camber line second derivative scaling factor: ', knew, sc_factor_dev
-    write(*, '(A, 2F25.15)') 'Inlet u-v metal angle in deg: ', atan(d1v_end(1))/dtor, inlet_uv_dev
-    write(*, '(A, 2F25.15)') 'Exit u-v metal angle in deg: ', atan(d1v_end(ncp - 2))/dtor, exit_uv_dev
+    if (.not. isquiet) then
+        write(*, '(A, 2F25.15)') 'Camber line second derivative scaling factor: ', knew, sc_factor_dev
+        write(*, '(A, 2F25.15)') 'Inlet u-v metal angle in deg: ', atan(d1v_end(1))/dtor, inlet_uv_dev
+        write(*, '(A, 2F25.15)') 'Exit u-v metal angle in deg: ', atan(d1v_end(ncp - 2))/dtor, exit_uv_dev
+    end if
     write(nopen, '(A, 2F25.15)') 'Camber line second derivative scaling factor: ', knew, sc_factor_dev
     write(nopen, '(A, 2F25.15)') 'Inlet u-v metal angle in deg: ', atan(d1v_end(1))/dtor, inlet_uv_dev
     write(nopen, '(A, 2F25.15)') 'Exit u-v metal angle in deg: ', atan(d1v_end(ncp - 2))/dtor, exit_uv_dev
 else
-    write (*, '(A, F20.15)') 'Camber line second derivative scaling factor: ', knew
-    write (*, '(A, F20.15, /, A, F20.15)') 'Inlet u-v metal angle in deg: ', atan(d1v_end(1))/dtor, &
-    'Exit u-v metal angle in deg: ', atan(d1v_end(ncp-2))/dtor
+    if (.not. isquiet) then
+        write (*, '(A, F20.15)') 'Camber line second derivative scaling factor: ', knew
+        write (*, '(A, F20.15, /, A, F20.15)') 'Inlet u-v metal angle in deg: ', atan(d1v_end(1))/dtor, &
+        'Exit u-v metal angle in deg: ', atan(d1v_end(ncp-2))/dtor
+    end if
     write (nopen, '(A, F20.15)') 'Camber line second derivative scaling factor: ', knew
     write (nopen, '(A, F20.15, /, A, F20.15)') 'Inlet u-v metal angle in deg: ', atan(d1v_end(1))/dtor, &
     'Exit u-v metal angle in deg: ', atan(d1v_end(ncp-2))/dtor
@@ -395,15 +405,15 @@ if (wing_flag .eq. 0) then
     sang = (ainl-atan(cam_u(1)))
     if (isdev) then
         sang2 = (ainl - atan(cam_u_dev(1)))
-        write(*, '(A, 2F25.15)') 'Stagger angle in deg: ', sang/dtor, sang2/dtor
+        if (.not. isquiet) write(*, '(A, 2F25.15)') 'Stagger angle in deg: ', sang/dtor, sang2/dtor
         write(nopen, '(A, 2F25.15)') 'Stagger angle in deg: ', sang/dtor, sang2/dtor
     else
-        write (*, '(A, F20.15)') 'Stagger angle in deg: ', sang/dtor
+        if (.not. isquiet) write (*, '(A, F20.15)') 'Stagger angle in deg: ', sang/dtor
         write (nopen, '(A, F20.15)') 'Stagger angle in deg: ', sang/dtor
     end if
     elseif (wing_flag .eq. 1) then
     sang = ainl
-    write (*, '(A, F20.15)') 'Twist angle in deg: ', sang/dtor
+    if (.not. isquiet) write (*, '(A, F20.15)') 'Twist angle in deg: ', sang/dtor
     write (nopen, '(A, F20.15)') 'Twist angle in deg: ', sang/dtor
 endif
 
