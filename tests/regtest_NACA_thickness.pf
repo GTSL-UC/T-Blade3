@@ -1,0 +1,45 @@
+!
+! Regression test for the modified four digit NACA thickness distribution
+!
+!--------------------------------------------------------------------------------------------------
+@test
+subroutine regtest_modified_NACA_thickness()
+    use globvar
+    use pfunit_mod
+    implicit none
+
+    character(256)              :: filename
+    character(:),   allocatable :: dir_path, aux_filename, command_1, command_2
+    character(32)               :: argument_2, argument_3, argument_4
+
+    
+
+    ! Working directory relative path
+    dir_path        = 'inputs/OpenCSM/new_inputs/NACA_thickness_with_derivative/' 
+
+    ! Name of the main test input file
+    filename        = dir_path//'3dbgbinput.2.dat'
+
+    ! Name of the auxiliary test input file
+    aux_filename    = dir_path//'spancontrolinputs.2.dat'
+
+    ! Set command line arguments
+    argument_2      = 'dev'
+    argument_3      = 'quiet'
+    argument_4      = ''
+
+    ! Run T-Blade3
+    call bgb3d_sub(filename, aux_filename, argument_2, argument_3, argument_4)
+
+    ! Move all output files to the working directory
+    command_1       = 'mv *Case6_4_Demo* curv_cp.dat *.log meanline_uv* '//dir_path
+    call execute_command_line(command_1)
+
+    ! Delete all output files in the working directory
+    command_2 = 'cd '//dir_path//' && ls | grep -v "3dbgbinput.2.dat\|spancontrolinputs.2.dat\|tblade_NACA_thickness.csm" &
+                &| xargs rm -rf'
+    call execute_command_line(command_2)
+
+
+end subroutine regtest_modified_NACA_thickness
+!--------------------------------------------------------------------------------------------------

@@ -471,7 +471,6 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     ! Read the main input file 
     ! readinput() in readinput.f90
     !
-    print *, 'From 3dbgb - ', fname
     call readinput(fname)
     call log_file_exists(log_file, nopen, file_open)
     if (.not. isquiet) then
