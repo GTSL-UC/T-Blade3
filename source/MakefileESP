@@ -34,6 +34,7 @@ OBJS  =	$(ODIR)/globvar.o \
 	$(ODIR)/funcNsubs.o \
 	$(ODIR)/bladegen.o \
 	$(ODIR)/3dbgb.o \
+    $(ODIR)/3dbgb_driver.o \
 	$(ODIR)/bladestack.o \
 	$(ODIR)/bspline3.o \
 	$(ODIR)/lesting.o \
@@ -74,6 +75,8 @@ $(ODIR)/bladegen.o:	bladegen.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) bladegen.f90           -o $(ODIR)/bladegen.o
 $(ODIR)/3dbgb.o:	3dbgb.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) 3dbgb.f90              -o $(ODIR)/3dbgb.o
+$(ODIR)/3dbgb_driver.o:	3dbgb_driver.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) 3dbgb_driver.f90       -o $(ODIR)/3dbgb_driver.o
 $(ODIR)/bladestack.o:	bladestack.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) bladestack.f90         -o $(ODIR)/bladestack.o
 $(ODIR)/bspline3.o:	bspline3.f90
