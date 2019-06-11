@@ -178,6 +178,10 @@ subroutine regtest_read_spanwise_NACA_input()
     ! Set blade row number
     row_type = '2'
 
+    ! Set command line argument to suppress terminal output
+    ! Global variable defined in globvar.f90
+    isquiet = .true.
+
     ! Change working directory
     call execute_command_line('cd '//dir_path)
 
