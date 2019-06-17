@@ -41,9 +41,8 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                                                                    thickness_data(:,:), splinedata(:,:)
     character(80)                                               :: file1, file7
     character(20)                                               :: sec
-    character(:),           allocatable                         :: log_file, error_msg, warning_msg, dev_msg
-    logical                                                     :: ellip, file_open, isdev, isquiet
-    logical,    allocatable                                     :: thk_der(:)
+    character(:),           allocatable                         :: log_file, error_msg, dev_msg
+    logical                                                     :: ellip, file_open, isdev, isquiet, monotonic = .true., write_to_file = .true.
     common / BladeSectionPoints /xxa(nxx, nax), yya(nxx, nax) 
 
 
@@ -574,8 +573,8 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             if (allocated(thickness_data)) deallocate(thickness_data)
             allocate(thickness_data(np,3))
 
-            if (allocated(thk_der)) deallocate(thk_der)
-            allocate(thk_der(np))
+            !if (allocated(thk_der)) deallocate(thk_der)
+            !allocate(thk_der(np))
 
             call log_file_exists(log_file, nopen, file_open)
             if (.not. isquiet) then
@@ -607,37 +606,12 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                 write(nopen,*) 'Using TE derivative defined in auxiliary input file as = ', dy_dx_te
             end if
 
-
             !
-            ! Find coefficients for modified NACA four digit thickness
             ! Apply modified NACA four digit thickness
             !
-            call modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a_NACA,d_NACA,thickness_data)
+            call modified_NACA_four_digit_thickness_all(sec,np,u,u_max,t_max,t_TE,a_NACA,d_NACA,thickness_data, &
+                                                        monotonic,write_to_file)
             thickness       = thickness_data(:,1)
-
-            ! Check for negative thickness
-            do i = 1,np
-                
-                if (thickness(i) < 0) then
-                    error_msg   = 'Negative thickness encountered for blade section '//sec
-                    dev_msg     = 'Check subroutine bladegen in bladegen.f90'
-                    call fatal_error(error_msg, dev_msg = dev_msg)
-                end if
-
-            end do    
-                   
-            ! Check for monotonicity
-            do i = 1,np
-
-                thk_der(i)  = (thickness_data(i,3) .gt. 0.0)
-                if (thk_der(i)) then
-                    warning_msg = 'Thickness distribution for blade section = '//sec//" isn't monotonic'"
-                    dev_msg     = 'Check subroutine bladegen in bladegen.f90'
-                    call warning(warning_msg, dev_msg = dev_msg)
-                    exit
-                end if
-
-            end do
 
             ! Print coefficients to screen and write to log file
             if (.not. isquiet) print *, 'Modified NACA thickness coefficients (u < u_max) = ', a_NACA

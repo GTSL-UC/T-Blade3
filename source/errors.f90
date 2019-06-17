@@ -25,20 +25,23 @@ module errors
         ! Local variables
         character(:),   allocatable                             :: error_file
         integer                                                 :: nopen
-        logical                                                 :: file_open, isdev_local
+        logical                                                 :: file_open, isdev_local, isquiet
 
 
-        ! Get the value of isdev
+        ! Get the value of isdev and isquiet
         call get_dev_status(isdev_local)
+        call get_quiet_status(isquiet)
 
         ! Print the messages to the screen and stop execution
-        print *, ''
-        print *, 'FATAL ERROR: '//error_msg
-        if (present(warning_msg)) &
+        if (.not. isquiet) then
+            print *, ''
+            print *, 'FATAL ERROR: '//error_msg
+        end if
+        if (present(warning_msg) .and. .not. isquiet) &
             print *, warning_msg
-        if (isdev_local .and. present(dev_msg)) &
+        if (isdev_local .and. present(dev_msg) .and. .not. isquiet) &
             print *, 'For developers: '//dev_msg
-        print *, ''
+        if (.not. isquiet) print *, ''
         
         !
         ! Write the error messages to the error log file
@@ -77,18 +80,21 @@ module errors
         ! Local variables
         character(:),   allocatable                             :: error_file
         integer                                                 :: nopen
-        logical                                                 :: file_open, isdev_local
+        logical                                                 :: file_open, isdev_local, isquiet
 
 
-        ! Get the value of isdev
+        ! Get the value of isdev and isquiet
         call get_dev_status(isdev_local)
+        call get_quiet_status(isquiet)
 
         ! Print the error message to the screen and exit
-        print *, ''
-        print *, 'ERROR: '//error_msg
-        if (isdev_local .and. present(dev_msg)) &
+        if (.not. isquiet) then
+            print *, ''
+            print *, 'ERROR: '//error_msg
+        end if
+        if (isdev_local .and. present(dev_msg) .and. .not. isquiet) &
             print *, 'For developers: '//dev_msg
-        print *, ''
+        if (.not. isquiet) print *, ''
 
         !
         ! Write the error messages to the error log file
@@ -124,20 +130,23 @@ module errors
         ! Local variables
         character(:),   allocatable                             :: error_file
         integer                                                 :: nopen
-        logical                                                 :: file_open, isdev_local
+        logical                                                 :: file_open, isdev_local, isquiet
 
 
-        ! Get the value of isdev
+        ! Get the value of isdev and isquiet
         call get_dev_status(isdev_local)
+        call get_quiet_status(isquiet)
 
         ! Print the warning message to the screen
-        print *, ''
-        print *, 'WARNING: '// warning_msg
-        if (present(warning_msg_1)) &
+        if (.not. isquiet) then
+            print *, ''
+            print *, 'WARNING: '// warning_msg
+        end if
+        if (present(warning_msg_1) .and. .not. isquiet) &
             print *, 'WARNING: '//warning_msg_1
-        if (isdev_local .and. present(dev_msg)) &
+        if (isdev_local .and. present(dev_msg) .and. .not. isquiet) &
             print *, 'For developers: '//dev_msg
-        print *, ''
+        if (.not. isquiet) print *, ''
 
         !
         ! Write the error messages to the error log file
@@ -149,7 +158,7 @@ module errors
         if (present(warning_msg_1)) &
             write(nopen,*) 'WARNING: '//warning_msg_1
         if (isdev_local .and. present(dev_msg)) &
-            print *, 'For developers: '//dev_msg
+            write(nopen,*) 'For developers: '//dev_msg
         write(nopen,*) ''
         call close_error_file(nopen, file_open)
 

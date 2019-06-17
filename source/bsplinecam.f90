@@ -163,8 +163,9 @@ integer, intent (in) :: np, ncp, wing_flag
 real, intent (in) :: xcp(ncp), ycp(ncp), u(np), ainl, aext, chrdx
 character (*), intent (in) :: casename
 logical, intent (in) :: isdev
-integer                             :: nopen
+integer                             :: nopen, js
 character(len = :), allocatable     :: log_file, error_msg, dev_msg
+character(10)                       :: error_arg
 logical                             :: file_open, isquiet
 
 !!		Outputs from this subroutine
@@ -200,6 +201,9 @@ real :: P, knew, knew2, det, k1, k2, &
 
 ! Get isquiet status
 call get_quiet_status(isquiet)
+
+! Get section number
+call get_sec_number(js)
 
 call log_file_exists(log_file, nopen, file_open)
 if (.not. isquiet) then
@@ -254,7 +258,9 @@ det = (intg_d2v_end(ncp-2)**2)+(4*P*(tan(tot_cam)**2))
 if (.not. isquiet) write (*, '(A, F20.15)') 'Determinant is: ', det
 write (nopen, '(A, F20.15)') 'Determinant is: ', det
 if (det.lt.0.) then 
-    error_msg   = 'All possible scaling factors for curvature control points are complex'
+    write(error_arg,'(I2)') js
+    error_msg   = 'All possible scaling factors for curvature control points are complex for section &
+                   &'//trim(adjustl(error_arg))
     dev_msg     = 'Check subroutine camline in bsplinecam.f90'
     call error(error_msg, dev_msg)
     call exit

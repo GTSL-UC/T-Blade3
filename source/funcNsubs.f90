@@ -422,6 +422,7 @@ subroutine throatindex(throat_pos,throat_index,n_normal_distance,js,nsl,thick_di
     ! Local variables
     integer                             :: nopen
     character(:),   allocatable         :: log_file, warning_msg, dev_msg
+    character(10)                       :: warning_arg
     logical                             :: file_open, isquiet
 
 
@@ -432,7 +433,8 @@ subroutine throatindex(throat_pos,throat_index,n_normal_distance,js,nsl,thick_di
 
     if (throat_index(js) == 0) then
         throat_pos(js) = 'none'
-        warning_msg   = 'No Throat found'
+        write(warning_arg,'(I2)') js
+        warning_msg   = 'No Throat found for section '//trim(adjustl(warning_arg))
         dev_msg       = 'Check subroutine throatindex in funcNsubs.f90'
         call warning(warning_msg, dev_msg = dev_msg)
         write(nopen,*) 'No Throat Found'
@@ -959,6 +961,7 @@ subroutine throat_calc_pitch_line(xb,yb,np,camber,angle,sang,u,pi,pitch,throat_c
     real,           allocatable                     :: throat(:)
     character(80)                                   :: file4
     character(:),   allocatable                     :: log_file, warning_msg, dev_msg
+    character(10)                                   :: warning_arg
     logical                                         :: file_open, isdev, isquiet
 
 
@@ -1054,7 +1057,8 @@ subroutine throat_calc_pitch_line(xb,yb,np,camber,angle,sang,u,pi,pitch,throat_c
     if (.not. isquiet) print*, 'n_normal_distance =',n_normal_distance
     write(nopen,*) 'n_normal_distance = ', n_normal_distance
     if(n_normal_distance == 0) then
-      warning_msg   = 'No throats found because of low number of blades'
+      write(warning_arg,'(I2)') js
+      warning_msg   = 'No throats found because of low number of blades for section '//trim(adjustl(warning_arg)) 
       dev_msg       = 'Check subroutine throat_calc_pitch_line in funcNsubs.f90'
       call warning(warning_msg, dev_msg = dev_msg)
       return
@@ -1627,6 +1631,27 @@ subroutine get_quiet_status(isquiet_local)
     isquiet_local = isquiet
 
 end subroutine get_quiet_status
+!------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+!
+!
+!
+!------------------------------------------------------------------------------------------------------
+subroutine get_sec_number(js_local)
+    use globvar
+    implicit none
+
+    integer,                    intent(inout)       :: js_local
+
+
+    js_local = js
+
+end subroutine get_sec_number
 !------------------------------------------------------------------------------------------------------
 
 
@@ -2906,9 +2931,10 @@ subroutine LE_clustering_parameter_solver(xi,K,delta,solver_flag)
     ! Local variables
     real                                            :: a, b, c, f1, f2, f3, &
                                                        tol = 10E-6
-    integer                                         :: nopen, niter
-    character(:),   allocatable                     :: log_file, warning_msg, &
-                                                       warning_msg_1, dev_msg
+    integer                                         :: nopen, niter, js
+    character(:),   allocatable                     :: log_file, warning_msg, warning_msg_1, &
+                                                       dev_msg
+    character(10)                                   :: warning_arg
     logical                                         :: file_open
     interface LE_clustering_parameter_func
         real function LE_clustering_parameter_func(Kf,xif,func_coordinate) 
@@ -2919,6 +2945,10 @@ subroutine LE_clustering_parameter_solver(xi,K,delta,solver_flag)
     end interface
 
 
+    ! Get section number
+    call get_sec_number(js)
+
+    
     ! Define initial bisection interval "[a,b]" and interval midpoint "c"
     ! Compute function values at a, b and c
     a               = 0.05
@@ -2961,7 +2991,9 @@ subroutine LE_clustering_parameter_solver(xi,K,delta,solver_flag)
         end do
 
     else
-        warning_msg     = "Could not find initial guesses for the clustering_parameter bisection solver"
+        write(warning_arg, '(I2)') js
+        warning_msg     = "Could not find initial guesses for the LE clustering_parameter bisection solver for &
+                          &section "//trim(adjustl(warning_arg))
         warning_msg_1   = "Returning to uniform midchord clustering"
         dev_msg         = 'Check subroutine LE_clustering_parameter_solver in funcNsubs.f90'
         call warning(warning_msg, warning_msg_1, dev_msg)
@@ -3003,9 +3035,10 @@ subroutine TE_clustering_parameter_solver(xi,K,delta,solver_flag)
     ! Local variables
     real                                            :: a, b, c, f1, f2, f3, &
                                                        tol = 10E-6
-    integer                                         :: nopen, niter
-    character(:),   allocatable                     :: log_file, warning_msg, &
-                                                       warning_msg_1, dev_msg
+    integer                                         :: nopen, niter, js
+    character(:),   allocatable                     :: log_file, warning_msg, warning_msg_1, &
+                                                       dev_msg
+    character(10)                                   :: warning_arg
     logical                                         :: file_open
     interface TE_clustering_parameter_func
         real function TE_clustering_parameter_func(Kf,xif,func_coordinate)
@@ -3014,7 +3047,11 @@ subroutine TE_clustering_parameter_solver(xi,K,delta,solver_flag)
             real,               intent(in)          :: func_coordinate
         end function TE_clustering_parameter_func
     end interface
-    
+   
+
+    ! Get current section number 
+    call get_sec_number(js)
+
     
     ! Define initial bisection interval "[a,b]" and interval midpoint "c"
     ! Compute function values at a, b and c
@@ -3058,7 +3095,9 @@ subroutine TE_clustering_parameter_solver(xi,K,delta,solver_flag)
         end do 
 
     else
-        warning_msg     = 'Could not find initial guesses for the TE clustering_parameter bisection solver'
+        write(warning_arg,'(I2)') js
+        warning_msg     = 'Could not find initial guesses for the TE clustering_parameter bisection solver for &
+                          &section '//trim(adjustl(warning_arg))
         warning_msg_1   = 'Returning to uniform midchord clustering'
         dev_msg         = 'Check subroutine TE_clustering_parameter_solver in funcNsubs.f90'
         call warning(warning_msg, warning_msg_1, dev_msg)
@@ -3787,6 +3826,86 @@ subroutine modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a,d,thk_da
 
 
 end subroutine modified_NACA_four_digit_thickness_2
+!------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+!
+! Collect modified NACA four digit thickness computation in one subroutine
+! To enable calling in a loop for numerical runtime checks
+!
+!------------------------------------------------------------------------------------------------------
+subroutine modified_NACA_four_digit_thickness_all(sec,np,u,u_max,t_max,t_TE,a,d,thk_data,monotonic,write_to_file)
+    use errors
+    use file_operations
+    implicit none
+
+    character(20),              intent(in)          :: sec
+    integer,                    intent(in)          :: np
+    real,                       intent(in)          :: u(np)
+    real,                       intent(in)          :: u_max
+    real,                       intent(in)          :: t_max
+    real,                       intent(in)          :: t_TE
+    real,                       intent(in)          :: a(4)
+    real,                       intent(in)          :: d(4)
+    real,                       intent(inout)       :: thk_data(np,3)
+    logical,                    intent(inout)       :: monotonic
+    logical,                    intent(in)          :: write_to_file
+
+    ! Local variables
+    character(:),   allocatable                     :: error_msg, dev_msg, warning_msg
+    integer                                         :: i
+    logical                                         :: thk_der(np)
+
+
+    !
+    ! Compute the thickness distribution
+    !
+    call modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a,d,thk_data)
+
+
+    !
+    ! Check for negative thickness
+    !
+    do i = 1,np
+    
+        if (thk_data(i,1) < 0) then
+            if (write_to_file) then
+                error_msg   = 'Negative thickness encountered for blade section '//trim(adjustl(sec))
+                dev_msg     = 'Check subroutine bladegen in bladegen.f90'
+                call fatal_error(error_msg, dev_msg = dev_msg)
+            end if
+        end if
+
+    end do
+   
+
+    !
+    ! Check for monotonicity
+    ! 
+    do i = 1,np
+
+        thk_der(i)      = (thk_data(i,3) > 0.0)
+        if (thk_der(i)) then
+
+            if (write_to_file) then
+                warning_msg = 'Thickness distribution for blade section '//trim(adjustl(sec))//" isn't monotonic"
+                dev_msg     = 'Check subroutine bladegen in bladegen.f90'
+                call warning(warning_msg, dev_msg = dev_msg)
+            end if
+            monotonic   = .false.
+            exit
+
+        end if
+
+    end do
+
+
+end subroutine modified_NACA_four_digit_thickness_all
 !------------------------------------------------------------------------------------------------------
 
 
