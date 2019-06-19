@@ -1084,7 +1084,7 @@ subroutine readinput(fname)
 
     ! Next line to always use the thickness tm/c as it is a multiplier (default = 1):
     if ((thick /= 1) .and. (.not. is2d) .and. (read_tm_c_then_u_max .or. &
-       &read_u_max_then_tm_c .or. read_tm_c_only)) then
+       &read_u_max_then_tm_c .or. read_tm_c_only) .and. (thick_distr /= 5)) then
         tm_c_spline = .True.
     else
         tm_c_spline = .False.
@@ -1095,13 +1095,13 @@ subroutine readinput(fname)
 
         if (read_tm_c_then_u_max) then
             read(1,*) spantm_c(i), xcptm_c(i), xcpumax(i)
-            xcptm_c(i) = xcptm_c(i) + 1.0
+            xcptm_c(i) = xcptm_c(i)! + 1.0
         else if (read_u_max_then_tm_c) then
             read(1,*) spantm_c(i), xcpumax(i), xcptm_c(i)
-            xcptm_c(i) = xcptm_c(i) + 1.0
+            xcptm_c(i) = xcptm_c(i)! + 1.0
         else if (read_tm_c_only) then
             read(1,*) spantm_c(i), xcptm_c(i)
-            xcptm_c(i) = xcptm_c(i) + 1.0
+            xcptm_c(i) = xcptm_c(i)! + 1.0
         else if (read_u_max_only) then
             read(1,*) spantm_c(i), xcpumax(i)
         end if
@@ -1156,15 +1156,15 @@ subroutine readinput(fname)
     !call override_span_thk_c(cptm_c, temp_in)
     
     ! If xcptm_c values have been overridden, add 1
-    do i = 1,cptm_c
-        equal = (abs(xcptm_c(i) - temp_in(i)) .le. tol)
-        if (.not. equal) exit
-    end do
-    if (.not. equal) then
-        xcptm_c(1:cptm_c) = temp_in + 1
-    else
-        xcptm_c(1:cptm_c) = temp_in
-    end if
+    !do i = 1,cptm_c
+    !    equal = (abs(xcptm_c(i) - temp_in(i)) .le. tol)
+    !    if (.not. equal) exit
+    !end do
+    !if (.not. equal) then
+    !    xcptm_c(1:cptm_c) = temp_in + 1
+    !else
+    xcptm_c(1:cptm_c) = temp_in
+    !end if
 
     !
     ! override_span_u_max() in 3dbgb.f90
