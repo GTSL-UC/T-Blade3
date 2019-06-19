@@ -141,10 +141,10 @@ subroutine regtest_readinput()
     @assertEqual(2.00, xcpchord(4), tol_2)
 
     ! Test thickness multiplier control points
-    @assertEqual(1.00, xcptm_c(1), tol_2)
-    @assertEqual(1.00, xcptm_c(2), tol_2)
-    @assertEqual(1.00, xcptm_c(3), tol_2)
-    @assertEqual(1.00, xcptm_c(4), tol_2)
+    @assertEqual(0.00, xcptm_c(1), tol_2)
+    @assertEqual(0.00, xcptm_c(2), tol_2)
+    @assertEqual(0.00, xcptm_c(3), tol_2)
+    @assertEqual(0.00, xcptm_c(4), tol_2)
 
     ! Test hub and tip offsets
     @assertEqual(0.00, hub, tol_2)
