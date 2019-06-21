@@ -609,7 +609,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             !
             ! Apply modified NACA four digit thickness
             !
-            call modified_NACA_four_digit_thickness_all(sec,np,u,u_max,t_max,t_TE,a_NACA,d_NACA,thickness_data, &
+            call modified_NACA_four_digit_thickness_all(js,np,u,u_max,t_max,t_TE,a_NACA,d_NACA,thickness_data, &
                                                         monotonic,write_to_file)
             thickness       = thickness_data(:,1)
 

@@ -95,5 +95,5 @@ redo:
 		make code
 		make library
     else
-        make code
+		make code
     endif

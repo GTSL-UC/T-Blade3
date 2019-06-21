@@ -3839,12 +3839,12 @@ end subroutine modified_NACA_four_digit_thickness_2
 ! To enable calling in a loop for numerical runtime checks
 !
 !------------------------------------------------------------------------------------------------------
-subroutine modified_NACA_four_digit_thickness_all(sec,np,u,u_max,t_max,t_TE,a,d,thk_data,monotonic,write_to_file)
+subroutine modified_NACA_four_digit_thickness_all(js,np,u,u_max,t_max,t_TE,a,d,thk_data,monotonic,write_to_file)
     use errors
     use file_operations
     implicit none
 
-    character(20),              intent(in)          :: sec
+    integer,                    intent(in)          :: js
     integer,                    intent(in)          :: np
     real,                       intent(in)          :: u(np)
     real,                       intent(in)          :: u_max
@@ -3858,6 +3858,7 @@ subroutine modified_NACA_four_digit_thickness_all(sec,np,u,u_max,t_max,t_TE,a,d,
 
     ! Local variables
     character(:),   allocatable                     :: error_msg, dev_msg, warning_msg
+    character(10)                                   :: sec
     integer                                         :: i
     logical                                         :: thk_der(np)
 
@@ -3866,6 +3867,12 @@ subroutine modified_NACA_four_digit_thickness_all(sec,np,u,u_max,t_max,t_TE,a,d,
     ! Compute the thickness distribution
     !
     call modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a,d,thk_data)
+
+
+    !
+    ! Convert section number into a string
+    !
+    write(sec, '(i2)') js
 
 
     !
