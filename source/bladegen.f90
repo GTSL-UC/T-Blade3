@@ -5,7 +5,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                     C_le_y_top_all,C_le_y_bot_all,LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,        &
                     sting_h_all,LEdegree,no_LE_segments,sec_radius,bladedata,amount_data,scf,             &
                     intersec_coord,throat_index, n_normal_distance,casename,develop,mble,mbte,msle, &
-                    mste,i_slope,jcellblade_all, etawidth_all,BGgrid_all,thk_tm_c_spl, theta_offset)
+                    mste,i_slope,jcellblade_all, etawidth_all,BGgrid_all,thk_tm_c_spl, theta_offset,xbi,ybi)
 
     use file_operations
     use errors
@@ -21,7 +21,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                                                                    C_le_y_bot_all(nsl), LE_vertex_ang_all(nsl), LE_vertex_dis_all(nsl), sting_l_all(nsl),          &
                                                                    sting_h_all(nsl), sec_radius(nsl,2), scf, intersec_coord(12,nsl), mble, mbte, msle, mste,       &
                                                                    jcellblade_all(nspn), etawidth_all(nspn), BGgrid_all(nspn), thk_tm_c_spl(nsl), theta_offset
-    real,                                   intent(inout)       :: sinl, sext, stagger, bladedata(amount_data,nsl)
+    real,                                   intent(inout)       :: sinl, sext, stagger, bladedata(amount_data,nsl), xbi(500), ybi(500)
     character(*),                           intent(in)          :: fext, airfoil, casename, develop
 
     ! Local variables
@@ -887,6 +887,17 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         call bladesection(xb, yb, np, nbls, TE_del, sinls, sexts, chrd, fext, js, pitch, mble, mbte, airfoil)
 
     end if  ! if (trim(airfoil) == 'sect1')
+
+
+
+    !
+    ! Store final (m', theta) section in separate 1D arrays
+    ! TODO: Remove xbi, ybi and combine with global variables xb, yb
+    !
+    do i = 1, size(xb)
+        xbi(i)  = xb(i)
+        ybi(i)  = yb(i)
+    end do
 
 
 

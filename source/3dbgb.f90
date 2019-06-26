@@ -255,7 +255,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
     ! Local variables
     integer                     :: nopen, nopen_error
-    real                        :: spl_eval, dspl_eval, xdiff, inBetaInci, outBetaDevn
+    real                        :: spl_eval, dspl_eval, xdiff, inBetaInci, outBetaDevn, xbi(500), ybi(500)
     real,           allocatable :: um_spl(:)
     character(256)              :: fname, temp, fname1, row_type, path
     character(:),   allocatable :: log_file, error_file, auxinput_filename, error_msg
@@ -1603,6 +1603,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
        call close_log_file(nopen, file_open)
        
        !----------------------------------------------------------------------
+       xbi    = 0.0
+       ybi    = 0.0
        call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js),stgr,stack,chord_switch,    &
                      stak_u,stak_v,xb_stk,yb_stk,stack_switch,clustering_switch,clustering_parameter,nsl,nbls,    &
                      curv,thick,LE,np,ncp_curv,ncp_thk,curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,      &
@@ -1610,7 +1612,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                      LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments,         &
                      sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index,n_normal_distance,casename, &
                      develop,mble,mbte,mles,mtes,i_slope,jcellblade_all,etawidth_all,BGgrid_all,thk_tm_c_spl,     &
-                     theta_offset)
+                     theta_offset,xbi,ybi)
 
 
        mprime_ble(js) = mble
