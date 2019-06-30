@@ -100,6 +100,11 @@ real*8 xhub(nx,nax),rhub(nx,nax),mphub(nx,nax)
 real*8 xtip(nx,nax),rtip(nx,nax),mptip(nx,nax)
 real*8 xt(nx,1),rt(nx,1)
 
+! Grid variables
+! Mayank Sharma - 6/26/2019
+integer,    allocatable         :: np_grid(:)
+real,       allocatable         :: xblade_grid(:,:), yblade_grid(:,:), chrdx_grid(:), thkc_grid(:), msle_grid(:), &
+                                   mste_grid(:), mble_grid(:), mbte_grid(:)
 
 !-----------------------------------------------------------------------------------------------------
 real*8,dimension(:,:),allocatable::cp_chord_curv,bspline_chord_curv,cp_chord_thk,bspline_thk,cp_LE,bspline_LE

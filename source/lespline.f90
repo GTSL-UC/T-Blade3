@@ -47,7 +47,11 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
       character*80 file1,file2,file3,file4
       !real, allocatable, dimension(:,:) :: xxx
       !real, allocatable, dimension(:) :: xxxx
-      logical isdev
+      logical isdev, isquiet
+
+
+    ! Get isquiet status
+    call get_quiet_status(isquiet)
 
 
 ! inputs:
@@ -111,7 +115,7 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
     call vector_rotation(u_vec,cam_vec,1,theta,u_vec,cam_vec)
     uin_le = u_vec(1)
     cam_le =cam_vec(1)
-    print*,'uin_le rotated to zero camber =',uin_le,'cam_le =',cam_le,'theta =',theta
+    if (.not. isquiet) print*,'uin_le rotated to zero camber =',uin_le,'cam_le =',cam_le,'theta =',theta
     deallocate(theta)
 
     ! Calculated parameters:
@@ -125,8 +129,10 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
     uLE = uin_le-chrd_le
     vLE =  ss*(chrd_le)  ! cam_le = 0 when rotating to zero camber
 
-   print*,'uLE =', uLE
-   print*,'vLE =', vLE
+    if (.not. isquiet) then
+        print*,'uLE =', uLE
+        print*,'vLE =', vLE
+    end if
 
 
 ! calculating the control point for defining the tip:
@@ -218,17 +224,17 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
     slope_curv_bot =(-15/8.*ybot(dimen)+13.*ybot(dimen-1)-307/8.*ybot(dimen-2)+62.*ybot(dimen-3)-&
                     461/8.*ybot(dimen-4)+29.*ybot(dimen-5)-49/8.*ybot(dimen-6))/h**3
 
-                    
-      print*, "slope_le_top" ,slope_le_top
-      print*, "slope_le_bot" ,slope_le_bot
-      print*, "curv_le_top" ,curv_le_top
-      print*, "curv_le_bot" ,curv_le_bot
-      print*, "slope_curv_top" ,slope_curv_top
-      print*, "slope_curv_bot" ,slope_curv_bot
-
-     
-      print*, 'LE_Degree = ',degree
-      print*,'no_LE_segments =',no_LE_segments
+      
+    if (.not. isquiet) then             
+        print*, "slope_le_top" ,slope_le_top
+        print*, "slope_le_bot" ,slope_le_bot
+        print*, "curv_le_top" ,curv_le_top
+        print*, "curv_le_bot" ,curv_le_bot
+        print*, "slope_curv_top" ,slope_curv_top
+        print*, "slope_curv_bot" ,slope_curv_bot
+        print*, 'LE_Degree = ',degree
+        print*,'no_LE_segments =',no_LE_segments
+    end if
 
 !===========================================================================================
 !========================================================
@@ -306,7 +312,7 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
 
     !top spline
     !----------
-    print*, 'Top LE spline optimization started ...'
+    if (.not. isquiet) print*, 'Top LE spline optimization started ...'
     ! print*, '              c_le_a_top				t1_top					t2_top					c_le_b_top				sum_alpha_top_1				sum_alpha_top_2'
     ! print*, '          0', c_le_a_top, t1_top, t2_top, c_le_b_top, sum_alpha_top_1, sum_alpha_top_2
     do i = 1,50
@@ -336,7 +342,7 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
         
         ! converge criteria:
         if (abs(c_le_b_top - c_le_a_top) < tolerance) then
-            print*, 'top le spline Golden-section seach has converged'
+            if (.not. isquiet) print*, 'top le spline Golden-section seach has converged'
             exit
         endif
     enddo
@@ -379,7 +385,7 @@ subroutine lespline (xtop, ytop,xbot, ybot,dimen, &
         
         ! converge criteria:
         if (abs(c_le_b_bot - c_le_a_bot) < tolerance) then
-            print*, 'bottom le spline Golden-section seach has converged'
+            if (.not. isquiet) print*, 'bottom le spline Golden-section seach has converged'
             exit
         endif
     enddo

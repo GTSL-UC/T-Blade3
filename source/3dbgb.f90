@@ -1614,6 +1614,44 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                      develop,mble,mbte,mles,mtes,i_slope,jcellblade_all,etawidth_all,BGgrid_all,thk_tm_c_spl,     &
                      theta_offset,xbi,ybi)
 
+       ! Allocate global grid variables (only allocate once)
+       if (js == 1) then
+
+            if (allocated(np_grid)) deallocate(np_grid)
+            allocate(np_grid(nspn))
+            if (allocated(xblade_grid)) deallocate(xblade_grid)
+            allocate(xblade_grid(nspn,np))
+            if (allocated(yblade_grid)) deallocate(yblade_grid)
+            allocate(yblade_grid(nspn,np))
+            if (allocated(chrdx_grid)) deallocate(chrdx_grid)
+            allocate(chrdx_grid(nspn))
+            if (allocated(thkc_grid)) deallocate(thkc_grid)
+            allocate(thkc_grid(nspn))
+            if (allocated(msle_grid)) deallocate(msle_grid)
+            allocate(msle_grid(nspn))
+            if (allocated(mste_grid)) deallocate(mste_grid)
+            allocate(mste_grid(nspn))
+            if (allocated(mble_grid)) deallocate(mble_grid)
+            allocate(mble_grid(nspn))
+            if (allocated(mbte_grid)) deallocate(mbte_grid)
+            allocate(mbte_grid(nspn))
+
+       end if
+
+        
+       ! Store global grid variables
+       ! TODO: Some variables are duplicates and need to be removed
+       np_grid(js)          = np
+       xblade_grid(js,:)    = xbi(1:np_grid(js))
+       yblade_grid(js,:)    = ybi(1:np_grid(js))
+       chrdx_grid(js)       = chrdx
+       thkc_grid(js)        = thkc
+       msle_grid(js)        = mles
+       mste_grid(js)        = mtes
+       mble_grid(js)        = mble
+       mbte_grid(js)        = mbte
+
+
 
        mprime_ble(js) = mble
        mprime_bte(js) = mbte
