@@ -24,31 +24,60 @@ subroutine arclength(t,y,arcl,n) ! used by(3dbgb, bladegrid2d, ellipgrid)
 !		This subroutine calculates the arc lengths at each point
 !		for a specified set of (t, y) points.
 
-implicit none
+    implicit none
 
-!!		Inputs
-!			t		Real array,	independent variable values.
-!			y		Real array,	dependent variable values.
-!			n		Integer,	number of spline points.
+    !!		Inputs
+    !			t		Real array,	independent variable values.
+    !			y		Real array,	dependent variable values.
+    !			n		Integer,	number of spline points.
 
-integer, intent (in) :: n
-real, intent (in) :: t(n), y(n)
+    integer, intent (in) :: n
+    real, intent (in) :: t(n), y(n)
 
-!!		Outputs
-!			arcl	Real array,	arc lengths at each (t, y).
-real, intent (out) :: arcl(n)
+    !!		Outputs
+    !			arcl	Real array,	arc lengths at each (t, y).
+    real, intent (out) :: arcl(n)
 
-!!		Other local variables
-integer :: i
+    !!		Other local variables
+    integer :: i
 
-arcl(1) = 0.
-do i = 2, n
-    arcl(i) = arcl(i-1) + sqrt((t(i)-t(i-1))**2 + (y(i)-y(i-1))**2)
-enddo
+    arcl(1) = 0.
+    do i = 2, n
+        arcl(i) = arcl(i-1) + sqrt((t(i)-t(i-1))**2 + (y(i)-y(i-1))**2)
+    enddo
 
-return
+    return
 
 end subroutine arclength
+
+
+
+!
+! Subroutine to compute the arc lengths at each points for a
+! specified set of (x,y,z) points
+!
+subroutine :rclength_3D(n, x, y, z, arcl)
+    implicit none
+
+    integer,        intent(in)          :: n
+    real,           intent(in)          :: x(n), y(n), z(n)
+    real,           intent(inout)       :: arcl(n)
+
+    ! Local variables
+    integer                             :: i
+
+
+    ! Arclength starts at zero
+    arcl(1)     = 0.0
+
+    do i = 2, n
+        arcl(i) = arcl(i - 1) + sqrt((x(i) - x(i - 1))**2 + (y(i) - y(i - 1))**2 + (z(i) - z(i - 1))**2) 
+    end do
+
+
+end subroutine arclength_3D
+
+
 
 
 subroutine tridiag_solve(d, ld, ud, r, n) ! used by spline
