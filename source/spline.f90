@@ -56,7 +56,7 @@ end subroutine arclength
 ! Subroutine to compute the arc lengths at each points for a
 ! specified set of (x,y,z) points
 !
-subroutine :rclength_3D(n, x, y, z, arcl)
+subroutine arclength_3D(n, x, y, z, arcl)
     implicit none
 
     integer,        intent(in)          :: n
