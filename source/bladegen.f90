@@ -41,7 +41,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                                                                    thickness_data(:,:), splinedata(:,:)
     character(80)                                               :: file1, file7
     character(20)                                               :: sec
-    character(:),           allocatable                         :: log_file, error_msg, dev_msg
+    character(:),           allocatable                         :: log_file, error_msg, dev_msg, stagger_file
     logical                                                     :: ellip, file_open, isdev, isquiet, monotonic = .true., write_to_file = .true.
     common / BladeSectionPoints /xxa(nxx, nax), yya(nxx, nax) 
 
@@ -859,8 +859,21 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
 
         !
-        ! Add stagger and scale the airfoil
+        ! Write stagger angles to a file
+        ! TODO: Move to file_operations
         !
+        stagger_file = 'stagger_angles.dat'
+        if (isdev) then
+            if (js == 1) then
+                open(903, file = stagger_file, form = 'formatted', status = 'new', action = 'write')
+            else
+                open(903, file = stagger_file, form = 'formatted', status = 'old', position = 'append', action = 'write')
+            end if
+        end if
+        write(903,'(F20.16)') sang
+        close(903)
+
+        ! Add stagger and scale the airfoil
         do i = 1, np
             
             xi = xb(i)
