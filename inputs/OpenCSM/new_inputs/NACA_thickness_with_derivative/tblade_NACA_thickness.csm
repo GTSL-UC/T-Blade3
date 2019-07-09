@@ -87,7 +87,7 @@ UDPARG    tblade      ncp               33
 #UDPARG    tblade      naca_t_max        naca_t_max
 #UDPARG    tblade      naca_t_te         naca_t_te
 UDPRIM    tblade      filename          $$/3dbgbinput.2.dat \
-                      auxname           $$/spancontrolinputs_NACA_2.dat
+                      auxname           $$/spancontrolinputs.2.dat
 #UNION
 #FILLET 1 0
 dump ../NACA_thickness_blade.step

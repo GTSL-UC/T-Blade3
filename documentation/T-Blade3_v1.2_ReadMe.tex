@@ -1,0 +1,457 @@
+\documentclass[8pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}
+%\usepackage{lipsum}
+\usepackage[margin  = 0.6in]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amssymb}
+%\usepackage[export]{adjustbox}
+%\usepackage{wrapfig}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{color}
+\usepackage{enumitem}
+\usepackage[geometry]{ifsym}
+\usepackage{hyperref}
+
+\begin{document}
+
+\begin{center}
+\textbf{\large T-Blade3 v1.2 ReadMe}\\
+by\\
+Mayank Sharma\\
+Department of Aerospace Engineering\\
+sharmamm@mail.uc.edu\\
+University of Cincinnati\\
+[1cm]
+\end{center}
+
+\section{Introduction}
+\noindent
+T-Blade3 is a general parametric 3D blade geometry builder\cite{KiranPaper}. The tool can create a variety of 3D blade geometries based on a few basic parameters. The geometric and aerodynamic parameters are used to create 2D airfoils which are then stacked on the desired stacking axis\cite{KiranThesis}. The geometry modeler can also be  used for generating 3D blades with special features like bent tip or a split tip\cite{AbhayThesis} which can be explored with minimum changes to the blade geometry. The use of control points for the definition of spanwise splines makes it easy to modify the blade shapes quickly and smoothly to obtain the desired blade model\cite{SyedPaper}. The second derivative of the mean-line (related to the curvature) is controlled using B-splines to create the airfoils. This is then analytically integrated twice to obtain the mean-line\cite{AhmedPaper}. A smooth thickness distribution is then added to the airfoil. This can either be a Wennerstrom thickness distribution\cite{WennerstromBook}, a smooth quartic thickness distribution or a new modified NACA four-digit thickness distribution\cite{AbbottText}. B-splines have also been implemented to achieve customized airfoil leading and trailing edges.\\
+
+\noindent
+New in version 1.2:
+
+\begin{enumerate}[leftmargin=*]
+    \item Smooth curvature control based on specifications of normalized meanline second derivatives which ensures curvature and slope of curvature continuity on the airfoil surface
+    \item A modified NACA four-digit thickness distribution with control over LE radius and a circular TE
+    \item Error trapping and generation of error log files for each T-Blade3 run
+    \item Test suite using pFUnit to enable unit testing and regression testing (see \url{pfunit.sourceforge.net} for additional information)
+\end{enumerate}
+
+\noindent
+This document contains instructions on how to install T-Blade3, run the code and details about the necessary input files.
+
+\section{Obtaining T-Blade3}
+\noindent 
+There are two ways of obtaining T-Blade3 version 1.2:
+ 
+\begin{enumerate}[leftmargin=*]
+    \item Linux and Windows 64-bit executables can be found on \url{http://gtsl.ase.uc.edu/t-blade3}
+    \item Source code can be found on \url{https://github.com/GTSL-UC/T-Blade3}
+\end{enumerate}
+
+\noindent
+The latter is recommended. There are two branches in use currently: {\fontfamily{lmr}\selectfont master} and {\fontfamily{lmr}\selectfont develop}; both branches can be pulled from the link above. See \textbf{\ref{compilesec}} on how to compile T-Blade3.
+
+\section{Compiling T-Blade3}\label{compilesec}
+\noindent
+With T-Blade3 version 1.2, static builds for Linux, Unix and MacOS are no longer supported. The recommended method is to clone or download the T-Blade3 source code and compile it locally. Below are instructions to compile the code. Here, \$TBLADEROOT refers to the T-Blade3 source code directory. 
+
+\begin{enumerate}[leftmargin=*]
+    \item \textit{Prerequisites}: Make and gfortran (gfortran-6 and above recommended)
+    \item Using the terminal in \$TBLADEROOT, run\\
+          \textcolor{blue}{\fontfamily{lmr}\selectfont \$ make}
+    \item This will generate three executables in \$TBLADEROOT/bin: \textcolor{blue}{\fontfamily{lmr}\selectfont 3dbgb, tblade3, techop}
+    \item To add to the PATH environment variable permanently, edit the .bashrc/.bash\_profile file (for Linux/MacOS only)\\
+          \textcolor{blue}{\fontfamily{lmr}\selectfont export PATH="/path/to/\$TBLADEROOT/bin:\$PATH"}
+    \item To build the test suite and run the unit tests in \$TBLADEROOT/tests, run\\
+          \textcolor{blue}{\fontfamily{lmr}\selectfont \$ make tests}\\
+          This build depends on having a serial install of pFUnit on the system. Refer to the pFUnit documentation for more information
+\end{enumerate}
+
+\section{Running T-Blade3}
+
+\noindent
+T-Blade3 is run from the terminal (Linux/Unix) or the DOS command prompt (Windows). In the working directory, run the following command:\\
+
+\noindent
+(Linux/Unix)\\
+\textcolor{blue}{{\fontfamily{lmr}\selectfont \$ tblade3 3dbgbinput.bladerow.dat}}\\
+
+\noindent
+(Windows)\\
+\textcolor{blue}{{\fontfamily{lmr}\selectfont \$ tblade3.exe 3dbgbinput.bladerow.dat}}\\
+
+\noindent
+If the path to the executable is not known globally, run the following command in the working directory:\\
+
+\noindent
+(Linux/Unix)\\
+\textcolor{blue}{{\fontfamily{lmr}\selectfont \$ /path/to/executable/tblade3 3dbgbinput.bladerow.dat}}\\
+
+\noindent
+(Windows)\\
+\textcolor{blue}{{\fontfamily{lmr}\selectfont \$ /path/to/executable/tblade3.exe 3dbgbinput.bladerow.dat}}
+
+\subsection{Command Line Arguments}\label{cmdargs}
+\noindent
+Additional command line arguments can be added when running which adds further capabilities. To add the arguments, run the following command in the working directory:\\
+
+\noindent
+\textcolor{blue}{{\fontfamily{lmr}\selectfont \$ tblade3 3dbgbinput.bladerow.dat argument}}\\
+
+\noindent
+The various command line arguments:
+\begin{itemize}[leftmargin=*]
+    \item argument = {\fontfamily{lmr}\selectfont xyzstreamlines}: used to create 3D streamline files
+    \item argument = {\fontfamily{lmr}\selectfont xygrid}: used to output O-grids for the 2D blade sections $(m',\theta)$
+    \item argument = {\fontfamily{lmr}\selectfont dev}: used to print additional data files for debugging
+\end{itemize}
+
+\subsection{Input and Output Files}\label{inputoutput}
+\subsubsection{Inputs:}\label{inputs}
+\noindent
+\textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}, \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} or \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} (old format) or \textit{\textcolor{blue}{controlinputs.bladerow.dat}} for both compressor and turbine design.\\
+
+\noindent
+\textit{\textcolor{blue}{3dbgbinput.bladerow.dat}} is the main T-Blade3 input file. Also see \textbf{\ref{maininput}}\\ 
+
+\noindent
+The auxiliary input file \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} is used to enforce the modified NACA four-digit thickness distribution. Also see \textbf{\ref{auxinput_NACA}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
+\begin{itemize}
+    \item Airfoil defined by curvature control (set to "\textbf{spanwise\_spline}")
+    \item Airfoil thickness distribution (set to "$\mathbf{5}$")
+\end{itemize}
+
+\noindent
+The auxiliary input file \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} (old format) is an older file which is still supported in version 1.2. Also see \textbf{\ref{auxinput1}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
+\begin{itemize}
+    \item Airfoil defined by curvature control (set to "\textbf{spanwise\_spline}")
+\end{itemize}
+
+\noindent 
+The auxiliary input file \textit{\textcolor{blue}{controlinputs.bladerow.dat}} is an older file which is still supported in version 1.2. Also see \textbf{\ref{auxinput2}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
+\begin{itemize}
+    \item Airfoil defined by curvature control 
+\end{itemize}
+
+\subsubsection{Outputs:}\label{outputs}
+\noindent
+\textit{\textcolor{blue}{T-Blade3\_run.log}} - log file generated with each T-Blade3 run\\
+\textit{\textcolor{blue}{error.log}} - error log file generated with each T-Blade3 run (empty if no errors are encountered)\\
+\textit{\textcolor{blue}{3dbgbinput.bladerow.log}} - log file for debugging in case of main input file read failure\\
+\textit{\textcolor{blue}{spancontrolinputs.bladerow.log}} - log file for debugging in case of auxiliary input file read failure\\
+\textit{\textcolor{blue}{botcurve.radialsection.bladerow.casename}} - created when command line argument {\fontfamily{lmr}\selectfont dev} is used, contains $(u,v)$ coordinates for bottom curve of blade section\\
+\textit{\textcolor{blue}{topcurve.radialsection.bladerow.casename}} - created when command line argument {\fontfamily{lmr}\selectfont dev} is used, contains $(u,v)$ coordinates for top curve of blade section\\
+\textit{\textcolor{blue}{uvblade.radialsection.bladerow.casename}} - created when command line argument {\fontfamily{lmr}\selectfont dev} is used, contains $(u,v)$ coordinates of blade section\\
+\textit{\textcolor{blue}{blade.radialsection.bladerow.casename}} - contains 2D blade section coordinates $(m',\theta)$\\
+\textit{\textcolor{blue}{sec\_radialsection.casename.dat}} - contains dimensionalized 3D blade section coordinates $(x,y,z)$\\
+\textit{\textcolor{blue}{blade3d.casename.dat}} - contains dimensionalized 3D blade section coordinates $(x,y,z)$ for all sections\\
+\textit{\textcolor{blue}{meanline\_uv.radialsection.dat}} - created when command line argument {\fontfamily{lmr}\selectfont dev} is used, contains $(u,v)$ meanline information for blade section\\
+\textit{\textcolor{blue}{meanline.sec\_radialsection.casename.dat}} - contains dimensionalized 3D meanline coordinates $(x,y,z)$\\
+%\textit{\textcolor{blue}{splinedata\_section.radialsection.casename.dat}} - contains data about various section splines\\
+\textit{\textcolor{blue}{LE\_TE\_interesection.casename.dat}} - contains LE and TE intersection points for all sections\\
+\textit{\textcolor{blue}{curvature\_span\_variation.casename.dat}} - created when command line argument {\fontfamily{lmr}\selectfont dev} is used, contains information about spanwise splines of curvature control points\\
+\textit{\textcolor{blue}{thickness\_span\_variation.casename.dat}} - created when command line argument {\fontfamily{lmr}\selectfont dev} is used, contains information about spanwise splines of thickness control points\\
+\textit{\textcolor{blue}{hub.casename.sldcrv}} - SOLIDWORKS file for the blade hub\\
+\textit{\textcolor{blue}{casing.casename.sldcrv}} - SOLIDWORKS file for the blade casing\\
+
+\noindent
+Additional output files are created when using the modified NACA thickness distribution.\\
+\noindent
+\textit{\textcolor{blue}{thickness\_data.radialsection.casename}} - contains chord-wise thickness distribution and first and second derivatives of the thickness distribution for each section
+
+\section{Description of Input Files}
+\noindent
+This section refers to specific examples which can be found on the T-Blade3 website (\url{http://gtsl.ase.uc.edu/t-blade3})
+
+\subsection{3dbgbinput.bladerow.dat}\label{maininput}
+\noindent
+This is the main input file for T-Blade3. It contains all the geometric and aerodynamic properties of the blade to be designed. Following are the details of the file:
+\begin{itemize}[leftmargin=*]
+    \item Case name: e.g. e3c = EEE HPC full definition
+    \item Bladerow number
+    \item Number of blades in the current row
+    \item Blade scaling factor: The output coordinates are in mm. This value is used to scale the non-dimensional blade to the desired scale
+    \item Number of streamlines: Upto 21 streamlines can be specified
+    \item Input angle switch (line 12): There are several options to specify the angles:
+    \begin{enumerate}[label=\alph*]
+        \item Four primary options to distinguish between several configurations as below
+        \begin{itemize}[label=\FilledSmallSquare]
+            \item "$\mathbf{0}$": completely AXIAL machines with $\beta_{Z}$ angles at inlet and outlet
+            \item "$\mathbf{1}$": completely RADIAL machines with $\beta_{R}$ angles at inlet and outlet
+            \item "$\mathbf{2}$": AXIAL inlet and RADIAL outlet machines with $\beta_{Z}$ angles at inlet and $\beta_{R}$ angles at outlet
+            \item "$\mathbf{3}$": RADIAL inlet and AXIAL outlet machines with $\beta_{R}$ angles at inlet and $\beta_{Z}$ angles at outlet
+        \end{itemize}
+        \item Spanwise definitions of inlet and outlet angles can be created by setting the angle switch (line 12) to "$\mathbf{0}$ \textbf{inoutspline}". This splines both the inlet and outlet angles using control inputs which are specified in this file further below as '\textit{in\_beta*}' and '\textit{out\_beta*}'. Refer to the example case \textit{spanwise\_beta\_spline} on \url{http://gtsl.ase.uc.edu/t-blade3}
+        \item Spanwise definitions of incidence and deviation can be created by setting the angle switch (line 12) to "$\mathbf{0}$ \textbf{inci\_dev\_spline}". This splines both the incidence and deviation using control inputs which are specified in this file further below as '\textit{in\_beta*}' and '\textit{out\_beta*}'. The incidence and deviation definitions are added to the inlet and outlet angles defined in T-Blade3 in the sectionwise properties table (line 23). Refer to the example case \textit{spanwise\_inci\_dev\_spline} on \url{http://gtsl.ase.uc.edu/t-blade3}
+        \item Any combination of the two options can also be utilized (e.g.: "$\mathbf{2}$ \textbf{inci\_dev\_spline}"). 
+    \end{enumerate}
+    \item Camber definition switch (line 14). If the switch is set to "$\mathbf{1}$ \textbf{spanwise\_spline}", the auxiliary input file \textit{\textcolor{blue}{spancontrolinputs.dat}} is used (also see \textbf{\ref{auxinput1}}). Refer to the example case \textit{spanwise\_curvature} on \url{http://gtsl.ase.uc.edu/t-blade3}
+    \item Thickness distribution switch (line 16). If the switch is set to:
+    \begin{enumerate}[label=\alph*]
+        \item "$\mathbf{0}$": Wennerstrom thickness distribution is used
+        \item "$\mathbf{1}$": a smooth quartic thickness distribution is used
+        \item "$\mathbf{2}$": a smooth quartic thickness distribution is used along with a sharp trailing edge
+        \item "$\mathbf{5}$": modified NACA four-digit thickness distribution is used. Refer to the example case \textit{modified\_NACA\_thickness} on \url{http://gtsl.ase.uc.edu/t-blade3}
+    \end{enumerate}
+    \item Thickness multiplier switch (line 18)
+    \item Leading edge definition switch (line 20)
+    \item Non-dimensional actual chord switch (line 22). If this switch is set to:
+    \begin{enumerate}[label=\alph*]
+        \item "$\mathbf{1}$": the code uses the actual chord values from the sectionwise properties table rather than computing the meridional chord values (all non-dimensional) and then converting them to the actua values
+        \item "$\mathbf{2}$": the chord can be controlled using a spline chord multiplier definition radially the control points for which are defined further below as '\textit{chord\_multiplier}'
+    \end{enumerate}
+    \item Lean/sweep switch (line 24). If this switch is set to:
+    \begin{enumerate}[label=\alph*]
+        \item "$\mathbf{0}$": tangential lean and axial sweep are used
+        \item "$\mathbf{1}$": true lean and true sweep are used. Refer to the example case \textit{trueleansweep} on \url{http://gtsl.ase.uc.edu/t-blade3}
+    \end{enumerate}
+    \item Clustering control switch (line 26): If this switch is set to:
+    \begin{enumerate}[label=\alph*]
+        \item "$\mathbf{1}$": sine function based clustering distribution is used. Refer to the example case \textit{sine\_clustering} on \url{http://gtsl.ase.uc.edu/t-blade3}
+        \begin{itemize}[label=\FilledSmallSquare]
+            \item Clustering parameter is an exponent, higher value specifies more clustering
+        \end{itemize}
+        \item "$\mathbf{2}$": exponential stretching function based clustering distribution is used. Refer to the example case \textit{exponential\_clustering} on \url{http://gtsl.ase.uc.edu/t-blade3}
+        \begin{itemize}[label=\FilledSmallSquare]
+            \item Clustering parameter denotes the strength of the stretching, higher value specifies more clustering
+        \end{itemize}
+        \item "$\mathbf{3}$": hyperbolic stretching function based clustering distribution is used. Refer to the example case \textit{hyperbolic\_clustering} on \url{http://gtsl.ase.uc.edu/t-blade3}
+        \begin{itemize}[label=\FilledSmallSquare]
+            \item Clustering parameter denotes the strength of the stretching, higher values specifies more clustering
+        \end{itemize}
+        \item "$\mathbf{4}$": ellipse based clustering distribution at the LE and TE with hyperbolic midchord clustering is used. This option is only available when the thickness distribution switch (line 16) is set to $"\mathbf{4}"$. Refer to the example case \textit{ellipse\_based\_clustering} on \url{http://gtsl.ase.uc.edu/t-blade3}
+        \begin{itemize}[label=\FilledSmallSquare]
+            \item Clustering parameter denotes the number of points placed near the LE and TE, higher value specifies more clustering
+        \end{itemize}
+    \end{enumerate} 
+    \item Sectionwise properties: This table contains options to specify the following quantities
+    \begin{enumerate}[label=\alph*]
+        \item Flow angle at leading edge of a blade section ($\beta_{in}$). These values are not used when input angle switch (line 12) is set to "\textbf{inoutspline}"
+        \item Flow angle at trailing edge of a blade section ($\beta_{out}$). These values are not used when input angle switch (line 12) is set to "\textbf{inoutspline}"
+        \item Relative inlet Mach number 
+        \item Blade section chord. These values are used when the non-dimensional actual chord switch (line 22) is switched to "$\mathbf{1}$"
+        \item Thickness to maximum chord ratio. These values are used when the thickness distribution switch (line 16) is switched to "$\mathbf{0}$"
+        \item Incidence angle ($i$). If ($\beta_{in}^{*} > 0$), $i = \beta_{in} - \beta_{in}^{*}$ and if ($\beta_{in}^{*} < 0$), $i = \beta_{in}^{*} - \beta_{in}$ where $\beta_{in}^{*}$ is the inlet blade metal angle. Thus, the inlet blade metal angle is computed using the user specified leading edge flow angle and incidence. These values are not used when the input angle switch (line 12) is set to "\textbf{inci\_dev\_spline}"
+        \item Deviation angle ($\delta$). If the camber is negative $\delta = \beta_{out} - \beta_{out}^{*}$ and if the camber is positive $\delta = \beta_{out}^{*} - \beta_{out}$ where $\beta_{out}^{*}$ is the exit blade metal angle. Thus, the exit blade metal angle is computed using the user specified trailing edge flow angle and deviation. These values are not used when the input angle switch (line 12) is set to "\textbf{inci\_dev\_spline}"
+    \end{enumerate}
+    \item Leading edge/trailing edge definition at hub and tip or more if needed
+    \item Variable radial stacking switch: Enables the user to stack the airfoils radially at different locations
+    \item Airfoil type: Enables the user to define the type of airfoil sections to be used
+    \begin{enumerate}[label=\alph*]
+        \item \textbf{sect1}: default airfoil section type
+        \item \textbf{naca4}: NACA 4 digit airfoil section
+        \item \textbf{s809m}: S809 airfoil section with modified tip
+        \item \textbf{crcle}: circular section
+    \end{enumerate}
+    \item stack\_u, stack\_v: Stacking values along the chord and perpendicular to the chord. The stacking can be varied radially by activating the switch here and using different values
+    \item umxthk: Location of max thickness along the chord for an airfoil
+    \item lethk, tethk: Thickness of the leading edge and trailing edge. Do not use while switching on the LE defined by spline switch
+    \item Control table for a blending section variable
+    \item Stacking axis as a fraction of chord: The user can define the position of the stacking axis as a fraction of chord. The first 3 digits are for \%chord stacking. The last 3 digits for stacking above or below the meanline
+    \begin{enumerate}[label=\alph*]
+        \item $\mathbf{000000}$: Stacking at leading edge
+        \item $\mathbf{100000}$: Stacking at trailing edge
+        \item $\mathbf{025000}$: Stacking at quarter chord
+        \item $\mathbf{200000}$: Stacking at the center of area of the airfoil
+        \item $\mathbf{050030}$: Stacking at half chord and $30\%$ above the camber or meanline
+        \item $\mathbf{-050030}$: Stacking at half chord and $30\%$ below the camber or meanline
+    \end{enumerate} 
+    \item Control table for sweep:
+    \begin{enumerate}[label=\alph*]
+        \item Above the table is the number of control points which determines the size of the table
+        \item First column specifies spanwise locations ranging from $0$ to $1$
+        \item If the lean/sweep switch (line 24) has been switched to "$\mathbf{0}$", second column specifies control points which generate \textit{sweep} interpreted as axial sweep
+        \item If the lean/sweep switch (line 24) has been switched to "$\mathbf{1}$", second column specifies control points which generate \textit{sweep} interpreted as true sweep. Refer to the example case \textit{trueleansweep} on \url{http://gtsl.ase.uc.edu/t-blade3}
+    \end{enumerate}
+    \item Control table for lean:
+    \begin{enumerate}[label=\alph*]
+        \item Above the table is the number of control points which determines the size of the table
+        \item First column specifies spanwise locations ranging from $0$ to $1$
+        \item If the lean/sweep switch (line 24) has been switched to "$\mathbf{0}$", second column specifies control points which generate \textit{lean} interpreted as tangential lean
+        \item If the lean/sweep switch (line 24) has been switched to "$\mathbf{1}$", second column specifies control points which generate \textit{lean} interpreted as true lean. Refer to the example case \textit{trueleansweep} on \url{http://gtsl.ase.uc.edu/t-blade3}
+    \end{enumerate}
+    \item Control table for inlet\_angles:
+    \begin{enumerate}[label=\alph*]
+        \item Above the table is the number of control points which determines the size of the table
+        \item First column specifies spanwise locations ranging from $0$ to $1$
+        \item If the input angle switch (line 12) has been switched to "\textbf{inoutspline}", second column specifies control points which generate \textit{in\_beta*} interpreted as the inlet angle. Refer to the example case \textit{spanwise\_beta\_spline} on \url{http://gtsl.ase.uc.edu/t-blade3}
+        \item If the input angle switch (line 12) has been switched to "\textbf{inci\_dev\_spline}", second column specifies control points which generate \textit{in\_beta*} interpreted as the incidence. Refer to the example case \textit{spanwise\_inci\_dev\_spline} on \url{http://gtsl.ase.uc.edu/t-blade3}
+    \end{enumerate}
+    \item Control table for exit\_angles:
+    \begin{enumerate}[label=\alph*]
+        \item Above the table is the number of control points which determines the size of the table
+        \item First column specifies spanwise locations ranging from $0$ to $1$
+        \item If the input angle switch (line 12) has been switched to "\textbf{inoutspline}", second column specifies control points which generate \textit{out\_beta*} interpreted as the exit angle. Refer to the example case \textit{spanwise\_beta\_spline} on \url{http://gtsl.ase.uc.edu/t-blade3}
+        \item If the input angle switch (line 12) has been switched to "\textbf{inci\_dev\_spline}", second column specifies control points which generate \textit{out\_beta*} interpreted as the deviation. Refer to the example case \textit{spanwise\_inci\_dev\_spline} on \url{http://gtsl.ase.uc.edu/t-blade3}
+    \end{enumerate}
+    \item Control table for the chord multiplier:
+    \begin{enumerate}[label=\alph*]
+        \item Above the table is the number of control points which determines the size of the table
+        \item First column specifies spanwise cations ranging from $0$ to $1$
+        \item Second column specifies control points which generate \textit{chord\_multiplier}
+    \end{enumerate}
+    \item Control table for the thickness multiplier (\textit{tm/c}) and/or maximum thickness location (\textit{u\_max}):
+    \begin{enumerate}[label=\alph*]
+        \item Above the table is the number of control points which determines the size of the table
+        \item First column specifies spanwise locations ranging from $0$ to $1$
+        \item There are several options when specifying the control points for either \textit{tm/c} or \textit{u\_max}:
+        \begin{itemize}[label=\FilledSmallSquare]
+            \item The second column can specify control points to generate \textit{tm/c} and a third column can specify control points to generate \textit{u\_max}
+            \item The second column can specify control points to generate \textit{u\_max} and a third column can specify control points to generate \textit{tm/c}
+            \item The second column can specify control points to generate \textit{tm/c} and no third column is defined
+            \item The second column can specify control points to generate \textit{u\_max} and no third column is defined
+        \end{itemize}
+        \item The column specifying control points for \textit{tm/c} should \textbf{always} be defined with a header "$tm/c$" and the column specifying control points for \textit{u\_max} should \textbf{always} be defined with a header "$u\_max$"
+        \item If the thickness multiplier switch (line 18) has been switched to "$\mathbf{0}$", the control points for \textit{tm/c} describe a thickness multiplier spline for Wennerstrom thickness too (added in T-Blade3 v1.2) without the need for an auxiliary input file
+        \item If control points for \textit{u\_max} are not defined, the maximum thickness location values for Wennerstrom thickness or quartic spline thickness are set equal to the \textit{umxthk} values specified earlier in this file
+    \end{enumerate}
+    \item Hub and tip offsets: Offset values as a fraction to determine the hub and tip offset percentage
+    \item Streamline data: $(x,r)$ coordinates of the specified number of streamlines
+\end{itemize}
+
+\subsection{spancontrolinputs.bladerow.dat (current format)}\label{auxinput_NACA}
+\noindent
+This is an auxiliary input file for T-Blade3. This file is used when the camber definition switch (line 14) is set to "\textbf{spanwise\_spline}" and the thickness distribution switch (line 16) is set to "$\mathbf{5}$". It is used to create blade geometries by varying the curvature of the camber line and the thickness distribution through chord-wise control points at various span locations which are used to generate cubic splines for these parameters. See \textbf{\ref{inputs}} and \textbf{\ref{maininput}} and refer to example cases \textit{modified\_NACA\_thickness} \& \textit{NACA\_thickness\_with\_derivative} and the document \textit{Modified NACA Thickness Control Manual} on \url{http://gtsl.ase.uc.edu/t-blade3} for information on how to use this file when running T-Blade3. Following are the details of the file:
+
+\noindent
+\begin{itemize}[leftmargin=*]
+    \item Casename: Should match the casename specified in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}
+    \item Bladerow number: Should match the bladerow number specfied in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}
+    \item Control table specifying control points for chord-wise location and curvature of camber line
+    \begin{enumerate}[label=\alph*]
+        \item Above the table are the number of spanwise control points ($nspan$) and number of control points for chord and curvature ($ncp$)
+        \item The first column specifies spanwise location ranging from $0$ to $1$
+        \item The next $ncp - 2$ columns specify control points for chord-wise locations for a section. Only $ncp - 2$ control points are user specified with the first control point being set to 0 and the last control point being set to 1
+        \item The next $ncp$ columns specify control points for camber line curvature
+    \end{enumerate}
+    \item Control table specifying control parameters involved in the modified NACA four-digit thickness distribution
+    \begin{enumerate}[label=\alph*]
+        \item Above the table are the number of spanwise control points ($nspan$) and the spline switch
+        \item The spline switch can be set to:
+        \begin{itemize}[label=\FilledSmallSquare]
+            \item "$\mathbf{1}$": a cubic B-spline is used for spanwise splining
+            \item "$\mathbf{2}$": a cubic spline is used for spanwise splining
+        \end{itemize}
+        \item The first column specifies spanwise locations ranging from $0$ to $1$
+        \item The second column specifies LE radius values for a section
+        \item The third column specifies the chord-wise location of the maximum thickness for a section
+        \item The fourth column specifies the maximum thickness for a section
+        \item The fifth column specifies the thickness at the TE for a section
+        \item An optional sixth column can be added, specifying the first derivative of the thickness at the TE for a section. This should \textbf{always} be the sixth column and should be specified with a header "$dy\_dx\_TE$". If the derivatives are not specified by the user, they are computed based on the chord-wise location of the maximum thickness
+    \end{enumerate}
+\end{itemize}
+
+\subsection{spancontrolinputs.bladerow.dat (old format)}\label{auxinput1}
+\noindent
+This is an auxiliary input file for T-Blade3. This section describes the old format of the \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} file. While this file is still supported in T-Blade3 version 1.2 (refer \textbf{\ref{cmdargs}} for information on how to run T-Blade3 with this file), it is recommended that the modified NACA four-digit thickness distribution is used with the current format of \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} file (refer to \textbf{\ref{auxinput_NACA}}). The file in this format is used when the camber definition switch (line 14) is set to "\textbf{spanwise\_spline}" and the thickness distribution switch (line 16) is set to "$\mathbf{1}$" and "$\mathbf{2}$". Following are the details of the file:
+
+\noindent
+\begin{itemize}[leftmargin=*]
+    \item Casename: Should match the casename specified in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}
+    \item Bladerow number: Should match the bladerow number specified in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}
+    \item Control table specifying control points for chord wise location and curvature of camber line
+    \begin{enumerate}[label=\alph*]
+        \item Above the table are the number of spanwise control points ($nspan$) and number of control points for chord and curvature ($ncp$)
+        \item The first column specifies spanwise location ranging from $0$ to $1$
+        \item The next $ncp - 2$ clouns specify control points for chord-wise locations for a section. Only $ncp - 2$ control points are user specified with the first control point being set to 0 and the last control point being set to 1
+        \item The next $ncp - 1$ columns specify control points for camber line curvature. Only $ncp - 1$ control points are user specified with the first control point being set to 0 
+    \end{enumerate}
+    \item Control table specifying control points for chord wise location and thickness distribution
+    \begin{enumerate}[label=\alph*]
+        \item Above the table are the number of spanwise control points ($nspan$) and the number of control points for the thickness distribution ($ncp$)
+        \item The first column specifies spanwise locations ranging from $0$ to $1$
+        \item The next $ncp - 1$ columns specify control points for the thickness distribution. Only $ncp - 1$ control points are user specified with the first control point being set to 0
+    \end{enumerate}
+    \item Control table specifying leading edge definition
+    \begin{enumerate}[label=\alph*]
+        \item Above the table is the specification of the leading edge degree and the number of leading edge segments
+        \item The first column specifies spanwise locations ranging from $0$ to $1$
+        \item The next column specifies the leading edge thickness ($lethk$)
+        \item The next column specifies trailing edge thickness ($tethk$)
+        \item The next column specifies the leading edge droop ($s(-1<defl.<1)$)
+        \item the next column specifies the leading edge elongation ($ee$)
+        \item The next 2 columns specify $x$ coordinates for specific control points affecting the leading edge tip shape
+        \item The next 2 columns specify $y$ coordinates for specific control points affecting the leading edge inflation
+        \item The next column specifies the angle of the leading edge vertex 
+        \item The next column specifies the leading edge vertrex distance
+    \end{enumerate}
+\end{itemize}
+
+\subsection{controlinputs.bladerow.dat}\label{auxinput2}
+\noindent
+This is an auxiliary input file for T-Blade3. This is an older file, which is still supported in T-Blade3 version 1.2 (refer \textbf{\ref{cmdargs}} for information on how to run T-Blade3 with this file) but it is recommended that the modified NACA four-digit thickness distribution is used with the current format of \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}}. This file is used when the thickness distribution switch (line 16) is set to "$\mathbf{1}$" and "$\mathbf{2}$". Following are the details of the file:
+
+\noindent
+\begin{itemize}[leftmargin=*]
+    \item Casename: Should match the casename specified in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}
+    \item Control tables for curvature control. Control points have to be specified for each blade section
+    \begin{enumerate}[label=\alph*]
+        \item The first column in these tables specifies spanwise location ranging from $0$ to $1$
+        \item The second column in these tables specifies control points for curvature
+    \end{enumerate}
+    \item Control tables for thickness multiplier. Control points have to be specified for each blade section
+    \begin{enumerate}[label=\alph*]
+        \item The first column in these tables specifies spanwise locations ranging from $0$ to $1$
+        \item The second column in these tables specifies control points for the thickness multiplier
+    \end{enumerate} 
+    \item Control table specifying leading edge definition
+    \begin{enumerate}[label=\alph*]
+        \item Above the table is the specification of the leading edge degree and the number of leading edge segments
+        \item The first column specifies spanwise locations ranging from $0$ to $1$
+        \item The next column specifies the leading edge thickness ($lethk$)
+        \item The next column specifies the trailing edge thickness ($tethk$)
+        \item The next column specifies the leading edge droop ($s(-1<defl.<1$)
+        \item The next column specifies the leading edge elongation ($ee$)
+        \item The next 2 columns specify the $x$ coordinates for specific control points affecting the leading edge tip shape
+        \item The next 2 columns specify the $y$ coordinates for specific control points affecting the leading edge inflation
+        \item The next column specifies the angle of the leading edge vertex
+        \item The next column specifies the leading edge vertex distance
+        \item The leading edge definition control points have to be specified for each blade section
+    \end{enumerate}
+\end{itemize}
+
+\begin{thebibliography}{1}
+    
+    \bibitem{KiranPaper}
+    Siddappaji, K., Turner, M., Merchant, A., "General Capability of Parametric 3D Blade Design Tool for Turbomachinery", 
+    \textit{Proceeedings of ASME Turbo Expo 2012, Turbomachinery: Design Methods and CFD Modeling for Turbomachinery}, ASME,
+    2012, pp. 2331-2344
+
+    \bibitem{KiranThesis}
+    Siddappaji, K., "Parametric 3D Blade Geometry Modeling Tool for Turbomachinery Systems", MS Thesis,
+    Department of Aerospace Engineering and Engineering Mechanics, University of Cincinnati, Cincinnati, OH, 2012
+
+    \bibitem{AbhayThesis}
+    Srinivas, A., "Novel Compressor Blade Design Study", MS Thesis, Department of Aerospace Engineering and Engineering 
+    Mechanics, University of Cincinnati, Cincinnati, OH, 2015
+
+    \bibitem{SyedPaper}
+    Mahmood, S.M.H., Turner, M.G., Siddappaji, K., "Flow Characteristics of an Optimized Axial Compressor Rotor Using Smooth
+    Design Parameters", \textit{Proceedings of ASME Turbo Expo 2016}, ASME, 2016
+
+    \bibitem{AhmedPaper}
+    Nemnem, A., Turner, M.G., Siddappaji, K., Galbraith, M., 
+    "A Smooth Curvature-Defined Meanline Section Option for a General Turbomachinery Geometry Generator", 
+    \textit{Proceedings of ASME Turbo Expo 2014}, ASME, 2014
+
+    \bibitem{WennerstromBook}
+    Wennerstrom, A., \textit{Design of Highly Loaded Axial-Flow Fans and Compressors}, Concepts Eti., Vermont, 2001
+
+    \bibitem{KarthikThesis}
+    Balasubramanian, K., "Novel, Unified, Curvature-Based Airfoil Parametrization Model for Turbomachinery Blades and Wings",
+    MS Thesis, Department of Aerospace Engineering and Engineering Mechanics, University of Cincinnati, Cincinnati, OH, 2018
+
+    \bibitem{AbbottText}
+    Abbott, I.H., von Doenhoff, A.E., "Families of Wing Sections", Theory of Wing Sections, Dover Publications, New York, 
+    1999, pp. 116-118
+
+\end{thebibliography}
+
+\end{document}
