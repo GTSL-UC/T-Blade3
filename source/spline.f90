@@ -77,65 +77,6 @@ subroutine arclength_3D(n, x, y, z, arcl)
 
 end subroutine arclength_3D
 
-
-
-
-subroutine tridiag_solve(d, ld, ud, r, n) ! used by spline
-
-!		This subroutine solves a tridiagonal linear system.
-use errors
-implicit none
-
-!!		Inputs
-!			n		Integer, 	matric order.
-!			d		Real array,	diagonal elements.
-!			ld		Real array,	lower diagonal elements.
-!			ud		Real array,	upper diagonal elements.
-!			r		Real array,	RHS elements.
-!!		Outputs
-!			r		Real array,	RHS elements are replaced.
-integer, intent (in) :: n
-real, intent (inout) :: d(n), ld(n), ud(n), r(n)
-
-!!		Other local variables
-integer :: k
-real :: m
-real,   parameter    :: tol = 10e-10
-character(:),   allocatable :: error_msg, dev_msg
-
-
-do k = 2, n
-    ! If d(k - 1) = 0
-    ! Compare to a tolerance to avoid floating point errors in an equality comparison
-    if (abs(d(k-1)) .le. tol) then
-        error_msg   = 'tridiag_solve failed - zero diagonal element'
-        dev_msg     = 'Check subroutine tridiag_solve in spline.f90'
-        call fatal_error(error_msg, dev_msg = dev_msg)
-    end if
-    m = ld(k)/d(k-1)
-    d(k) = d(k) - m*ud(k-1)
-    r(k) = r(k) - m*r(k-1)
-enddo
-
-! If d(n) = 0 
-! Compare to a tolerance to avoid floating point errors in an equality comparison
-if (abs(d(n)) .le. tol) then
-    error_msg   = 'tridiag_solve failed - zero diagonal element'
-    dev_msg     = 'Check subroutine tridiag_solve in spline.f90'
-    call fatal_error(error_msg, dev_msg = dev_msg)
-end if
-
-r(n) = r(n)/d(n)
-
-do k = n-1, 1, -1
-    r(k) = (r(k) - ud(k)*r(k+1))/d(k)
-enddo
-
-return
-
-end subroutine tridiag_solve
-
-
 function find_knt (tt, t, n)
 
 implicit none
@@ -164,7 +105,7 @@ return
 end function find_knt
 
 
-subroutine spline(y, dydt, t, n, dspec1, dspecn) ! Used by(3dbgb, bladegen, bladegrid2D, ellipgrid, funcNsubs, lespline)
+subroutine spline(y, dydt, t, n, dspec1, dspecn, from_gridgen) ! Used by(3dbgb, bladegen, bladegrid2D, ellipgrid, funcNsubs, lespline)
 
 !		This subroutine calculates spline first derivatives at knots for y(t).
 !		First derivative, zero 2nd and/or 3rd derivatives at spline begin t(1)
@@ -191,7 +132,7 @@ real, intent (in) :: t(n), y(n), dspec1, dspecn
 !!		Outputs
 !			dydt	Real array,	spline derivatives at knots.
 real, intent(out) :: dydt(n)
-
+logical,    intent(in)  :: from_gridgen
 !!		Other local variables
 integer :: i
 real :: d(n), ld(n), ud(n), dt(n-1), dy(n-1), r(n)
@@ -234,6 +175,12 @@ endif
 if (dspecn .eq. -999.0) then 
     d(n) = 1.; ld(n) = 1.; r(n) = 2.*dy(n-1)/dt(n-1)
 endif
+
+if (from_gridgen) then
+    do i = 1,n
+        print *, ld(i), d(i), ud(i), r(i)
+    end do
+end if
 
 call tridiag_solve(d,ld,ud,r,n)
 
@@ -449,6 +396,7 @@ real, intent (out) :: dydt(n)
 integer :: i, seg_start, seg_end, n0
 real,   parameter   :: tol = 10e-10
 character(:),   allocatable :: error_msg, dev_msg
+logical :: from_gridgen = .false.
 
 ! If t(1) = t(2)
 ! If t(n) = t(n - 1)
@@ -470,7 +418,7 @@ do i = 2, n-2
         n0 = i-seg_start+1
         seg_end = seg_start+n0-1
         ! Implementing zero second derivative segment end conditions
-        call spline(y(seg_start), dydt(seg_start), t(seg_start), n0, 999.0, 999.0)
+        call spline(y(seg_start), dydt(seg_start), t(seg_start), n0, 999.0, 999.0, from_gridgen)
         seg_start = i+1
     endif
 enddo
@@ -478,7 +426,7 @@ enddo
 n0 = n-seg_start+1
 ! Implementing zero second derivative segment and zero third derivative end conditions
 ! print*, 'seg_start, seg_end', seg_start, seg_end
-call spline(y(seg_start), dydt(seg_start), t(seg_start), n0, 999.0, -999.0)
+call spline(y(seg_start), dydt(seg_start), t(seg_start), n0, 999.0, -999.0, from_gridgen)
 
 return
 

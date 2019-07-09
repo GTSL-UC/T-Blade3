@@ -260,7 +260,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     character(256)              :: fname, temp, fname1, row_type, path
     character(:),   allocatable :: log_file, error_file, auxinput_filename, error_msg
     logical                     :: axial_LE, radial_LE, axial_TE, radial_TE, file_open, file_exist, &
-                                   initial, open_error
+                                   initial, open_error, from_gridgen = .false.
 
 
 
@@ -630,13 +630,13 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         
         ! Spline LE curve
         call arclength(xle(1), rle(1), sle(1), npoints)
-        call spline(xle(1), xles(1), sle(1), npoints, 999.0, -999.0)
-        call spline(rle(1), rles(1), sle(1), npoints, 999.0, -999.0)
+        call spline(xle(1), xles(1), sle(1), npoints, 999.0, -999.0, from_gridgen)
+        call spline(rle(1), rles(1), sle(1), npoints, 999.0, -999.0, from_gridgen)
         
         ! Spline TE curve
         call arclength(xte(1), rte(1), ste(1), npoints)
-        call spline(xte(1), xtes(1), ste(1), npoints, 999.0, -999.0)
-        call spline(rte(1), rtes(1), ste(1), npoints, 999.0, -999.0)
+        call spline(xte(1), xtes(1), ste(1), npoints, 999.0, -999.0, from_gridgen)
+        call spline(rte(1), rtes(1), ste(1), npoints, 999.0, -999.0, from_gridgen)
     
     enddo
     call close_log_file(nopen, file_open)
@@ -862,8 +862,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         ! close(12)
         
         ! splining:
-            call spline(xm_nonoffset_hub, xms_nonoffset_hub, mp_nonoffset_hub, nsp_interpolated_hub, 999.0, -999.0)
-            call spline(rm_nonoffset_hub, rms_nonoffset_hub, mp_nonoffset_hub, nsp_interpolated_hub, 999.0, -999.0)
+            call spline(xm_nonoffset_hub, xms_nonoffset_hub, mp_nonoffset_hub, nsp_interpolated_hub, 999.0, -999.0, from_gridgen)
+            call spline(rm_nonoffset_hub, rms_nonoffset_hub, mp_nonoffset_hub, nsp_interpolated_hub, 999.0, -999.0, from_gridgen)
             
         ! Offseting the interpolated hub spline:
             temp = 'interpolated'

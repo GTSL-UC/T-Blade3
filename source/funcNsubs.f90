@@ -223,7 +223,7 @@ subroutine huboffset(mphub,x,r,dxds,drds,hub,nphub,scf,casename)
                                                        rnorm(nphub,1),dxn(nphub,1),drn(nphub,1)
     character(80)                                   :: fname1
     character(:),   allocatable                     :: log_file
-    logical                                         :: file_open, isquiet_local
+    logical                                         :: file_open, isquiet_local, from_gridgen = .false.
 
 
     ! Calculating the normal and offset coordinates
@@ -270,8 +270,8 @@ subroutine huboffset(mphub,x,r,dxds,drds,hub,nphub,scf,casename)
     end do
 
     ! Splining the offset xhub, rhub:
-    call spline(xhub(1,1),xms_hub(1,1),mphub(1,1),nphub, 999.0, -999.0)
-    call spline(rhub(1,1),rms_hub(1,1),mphub(1,1),nphub, 999.0, -999.0)
+    call spline(xhub(1,1),xms_hub(1,1),mphub(1,1),nphub, 999.0, -999.0, from_gridgen)
+    call spline(rhub(1,1),rms_hub(1,1),mphub(1,1),nphub, 999.0, -999.0, from_gridgen)
     
     ! Over writing the xm, rm values with hub spline coefficients:
     x    = xhub
@@ -314,7 +314,7 @@ subroutine tipoffset(mptip,x,r,dxds,drds,tip,nptip,scf,nsl,casename)
                                                        dxn(nptip,1),drn(nptip,1),deltan
     character(80)                                   :: fname1
     character(:),   allocatable                     :: log_file
-    logical                                         :: file_open, isquiet_local
+    logical                                         :: file_open, isquiet_local, from_gridgen = .false.
     
 
     ! Calculating the normal and offset coordinates
@@ -361,8 +361,8 @@ subroutine tipoffset(mptip,x,r,dxds,drds,tip,nptip,scf,nsl,casename)
     end do
 
     ! Splining the offset xtip, rtip:
-    call spline(xtip(1,1),xms_tip(1,1),mptip(1,1),nptip, 999.0, -999.0)
-    call spline(rtip(1,1),rms_tip(1,1),mptip(1,1),nptip, 999.0, -999.0)
+    call spline(xtip(1,1),xms_tip(1,1),mptip(1,1),nptip, 999.0, -999.0, from_gridgen)
+    call spline(rtip(1,1),rms_tip(1,1),mptip(1,1),nptip, 999.0, -999.0, from_gridgen)
     
     ! Overwriting xm, rm with new tip spline coefficients:
     x = xtip
@@ -1597,7 +1597,7 @@ end subroutine constantslopemeanline3D
 
 
 !
-!
+! Get value of isdev from globvar
 !
 !------------------------------------------------------------------------------------------------------
 subroutine get_dev_status(isdev_local)
@@ -1618,7 +1618,7 @@ end subroutine get_dev_status
 
 
 !
-!
+! Get value of isquiet from globvar
 !
 !------------------------------------------------------------------------------------------------------
 subroutine get_quiet_status(isquiet_local)
@@ -1639,7 +1639,7 @@ end subroutine get_quiet_status
 
 
 !
-!
+! Get current section number from globvar
 !
 !------------------------------------------------------------------------------------------------------
 subroutine get_sec_number(js_local)
@@ -1652,6 +1652,65 @@ subroutine get_sec_number(js_local)
     js_local = js
 
 end subroutine get_sec_number
+!------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+!
+! Subroutine to solve a tridiagonal linear system
+!
+! Input parameters: n   - size of incoming square matrix
+!                   d   - elements along the diagonal
+!                   ld  - elements along the sub-diagonal
+!                   ud  - elements along the super diagonal
+!
+!------------------------------------------------------------------------------------------------------
+subroutine tridiag_solve(d, ld, ud, r, n)
+    use errors
+    implicit none
+
+    integer,                    intent(in)          :: n
+    real,                       intent(inout)       :: d(n), ld(n), ud(n), r(n)
+
+    ! Local variables
+    integer                                         :: k
+    real                                            :: m, tol = 10E-10
+    character(:),   allocatable                     :: error_msg, dev_msg
+
+
+    do k = 2,n
+
+        ! Check for zero diagonal elements
+        if (abs(d(k - 1)) .le. tol) then
+            error_msg   = 'tridiag_solve failed - zero diagonal element'
+            dev_msg     = 'Check subroutine tridiag_solve in spline.f90'
+            call fatal_error(error_msg, dev_msg = dev_msg)
+        end if
+
+        m       = ld(k)/d(k - 1)
+        d(k)    = d(k) - (m*ud(k - 1))
+        r(k)    = r(k) - (m*r(k - 1))
+
+    end do
+
+    ! Check for zero element along the diagonal
+    if (abs(d(n)) .le. tol) then
+        error_msg   = 'tridiag_solve failed - zero diagonal element'
+        dev_msg     = 'Check subroutine tridiag_solve in spline.f90'
+        call fatal_error(error_msg, dev_msg = dev_msg)
+    end if
+
+    r(n)    = r(n)/d(n)
+
+    do k = n - 1, 1, -1
+        r(k)    = (r(k) - (ud(k)*r(k + 1)))/d(k)
+    end do
+
+
+end subroutine tridiag_solve
 !------------------------------------------------------------------------------------------------------
 
 
