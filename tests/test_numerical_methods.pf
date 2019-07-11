@@ -70,3 +70,58 @@ subroutine test_gauss_jordan()
 
 end subroutine test_gauss_jordan
 !---------------------------------------------------------------------------
+
+
+
+
+
+
+!
+! Test subroutine tridiag_solve in funcNsubs.f90 
+!
+!---------------------------------------------------------------------------
+@test
+subroutine test_tridiag_solve()
+    use pfunit_mod
+    implicit none
+
+    integer                         :: n
+    real(kind = 8), allocatable     :: diag(:), sub_diag(:), super_diag(:), rhs(:)
+    real(kind = 8)                  :: tol = 10E-8
+
+
+    !
+    ! Test a 3x3 tridiagonal system
+    !
+    n               = 3
+
+    ! Allocate diagonals and RHS vector
+    if (allocated(diag)) deallocate(diag)
+    allocate(diag(n))
+    if (allocated(sub_diag)) deallocate(sub_diag)
+    allocate(sub_diag(n))
+    if (allocated(super_diag)) deallocate(super_diag)
+    allocate(super_diag(n))
+    if (allocated(rhs)) deallocate(rhs)
+    allocate(rhs(n))
+
+
+    !
+    ! Generate diagonals and rhs
+    !
+    diag            = [2.0, 4.0, 2.0]
+    sub_diag        = [0.0, 1.0, 1.0]
+    super_diag      = [1.0, 1.0, 0.0]
+    rhs             = [3.0, 9.0, 6.0]
+
+    ! Call subroutine
+    call tridiag_solve(diag, sub_diag, super_diag, rhs, n)
+
+    ! Test computed solution against reference values
+    @assertEqual(0.75, rhs(1), tol)
+    @assertEqual(1.5,  rhs(2), tol)
+    @assertEqual(2.25, rhs(3), tol)
+
+
+end subroutine test_tridiag_solve
+!---------------------------------------------------------------------------
