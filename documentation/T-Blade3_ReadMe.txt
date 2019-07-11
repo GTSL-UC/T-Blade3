@@ -25,8 +25,7 @@ Once T-Blade3 has been compiled, the code can be run from the terminal/command l
 
 The additional command line arguments are as follows:
 1) 'xyzstreamlines' - used to create 3D streamline files
-2) 'xygrid'         - used to output O-grids for 2D blade sections
-3) 'dev'            - used to print additional data files for debugging
+2) 'dev'            - used to print additional data files for debugging
 
 
 --------------------------------------------------
