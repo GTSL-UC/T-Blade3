@@ -1,0 +1,51 @@
+!
+! Test subroutine arclen in spline.f90
+!
+!-------------------------------------------------------------------------------
+@test
+subroutine test_arclen()
+    use pfunit_mod
+    implicit none
+
+    integer                         :: n
+    real(kind = 8),     allocatable :: x(:), y(:), arclen(:)
+    real(kind = 8)                  :: dist_1, dist_2, total_len, tol = 10E-8
+
+
+    !
+    ! Set number of points
+    !
+    n           = 3
+   
+    ! Allocate arrays 
+    if (allocated(x) .and. allocated(y)) deallocate(x,y)
+    allocate(x(n), y(n))
+    if (allocated(arclen)) deallocate(arclen)
+    allocate(arclen(n))
+
+
+    !
+    ! Set x and y coordinates
+    !
+    x           = [0.0, 1.0, 3.0]
+    y           = [0.0, 2.0, 1.5]
+
+    ! Call subroutine
+    call arclength(x,y,arclen,n)
+
+
+    !
+    ! Compute reference values
+    !
+    dist_1      = sqrt((1.0)**2 + (2.0)**2)
+    dist_2      = sqrt((2.0)**2 + (-0.5)**2)
+    total_len   = dist_1 + dist_2
+
+    ! Test computed values against reference values
+    @assertEqual(dist_1,    arclen(2) - arclen(1), tol)
+    @assertEqual(dist_2,    arclen(3) - arclen(2), tol)
+    @assertEqual(total_len, arclen(3),             tol)
+
+
+end subroutine test_arclen
+!-------------------------------------------------------------------------------
