@@ -1,9 +1,9 @@
 !
-! Test subroutine arclen in spline.f90
+! Test subroutine arclength in spline.f90
 !
 !-------------------------------------------------------------------------------
 @test
-subroutine test_arclen()
+subroutine test_arclength()
     use pfunit_mod
     implicit none
 
@@ -47,5 +47,64 @@ subroutine test_arclen()
     @assertEqual(total_len, arclen(3),             tol)
 
 
-end subroutine test_arclen
+end subroutine test_arclength
+!-------------------------------------------------------------------------------
+
+
+
+
+
+!
+! Test subroutine arclength_3D in spline.f90
+!
+!-------------------------------------------------------------------------------
+@test
+subroutine test_arclength3D()
+    use pfunit_mod
+    implicit none
+
+    integer                         :: n
+    real(kind = 8),     allocatable :: x(:), y(:), z(:), arclen(:)
+    real(kind = 8)                  :: dist_1, dist_2, dist_3, total_len, tol = 10E-4
+
+
+    !
+    ! Set number of points
+    !
+    n               = 4
+
+    ! Allocate arrays
+    if (allocated(x) .and. allocated(y) .and. allocated(z)) deallocate(x,y,z)
+    allocate(x(n), y(n), z(n))
+    if (allocated(arclen)) deallocate(arclen)
+    allocate(arclen(n))
+
+
+    !
+    ! Set x, y and z coordinates
+    !
+    x               = [0.0, 1.0, 4.0 , 2.97]
+    y               = [0.0, 3.0, 1.8 , 1.5 ]
+    z               = [0.0, 2.0, 3.92, 4.18]
+
+    ! Call subroutine
+    call arclength_3D(n,x,y,z,arclen)
+
+
+    !
+    ! Compute referenced values
+    !
+    dist_1          = sqrt((1.0)**2   + (3.0)**2  + (2.0)**2 )
+    dist_2          = sqrt((3.0)**2   + (-1.2)**2 + (1.92)**2)
+    dist_3          = sqrt((-1.03)**2 + (-0.3)**2 + (0.26)**2)
+    total_len       = dist_1 + dist_2 + dist_3
+
+    ! Test computed values against reference values
+    @assertEqual(dist_1   , arclen(2) - arclen(1), tol)
+    @assertEqual(dist_2   , arclen(3) - arclen(2), tol)
+    @assertEqual(dist_3   , arclen(4) - arclen(3), tol)
+    @assertEqual(total_len, arclen(4)            , tol)
+
+
+end subroutine test_arclength3D
 !-------------------------------------------------------------------------------
