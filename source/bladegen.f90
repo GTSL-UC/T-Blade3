@@ -42,7 +42,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     character(80)                                               :: file1, file7
     character(20)                                               :: sec
     character(:),           allocatable                         :: log_file, error_msg, dev_msg, stagger_file
-    logical                                                     :: ellip, file_open, isdev, isquiet, monotonic = .true., write_to_file = .true.
+    logical                                                     :: ellip, file_open, isdev, isquiet, monotonic = .true., write_to_file = .true., exist
     common / BladeSectionPoints /xxa(nxx, nax), yya(nxx, nax) 
 
 
@@ -864,10 +864,19 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         !
         stagger_file = 'stagger_angles.dat'
         if (isdev) then
-            if (js == 1) then
-                open(903, file = stagger_file, form = 'formatted', status = 'new', action = 'write')
+            inquire(file = stagger_file, exist=exist)
+            if (exist) then
+                if (js == 1) then
+                    open(903, file = stagger_file, form = 'formatted', status = 'old', action = 'write')
+                else
+                    open(903, file = stagger_file, form = 'formatted', status = 'old', position = 'append', action = 'write')
+                end if
             else
-                open(903, file = stagger_file, form = 'formatted', status = 'old', position = 'append', action = 'write')
+                if (js == 1) then
+                    open(903, file = stagger_file, form = 'formatted', status = 'new', action = 'write')
+                else
+                    open(903, file = stagger_file, form = 'formatted', status = 'old', position = 'append', action = 'write')
+                end if
             end if
         end if
         write(903,'(F20.16)') sang

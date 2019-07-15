@@ -668,3 +668,78 @@ subroutine spl_intersect(ia,tt1, tt2, x1, dxdt1, y1, dydt1, t1, n1, x2, dxdt2, y
 
 end subroutine spl_intersect
 !------------------------------------------------------------------------------------
+
+
+
+
+
+
+!
+! Subroutine for computing first derivatives of a parametric cubic spline 
+! for a set of 'y' points with uniform knots; works with natural boundary
+! conditions
+!
+! Input parameters: n               - number of spline points
+!                   from_gridgen    - flag for additional output when called from 
+!                                     grid_generator
+!                   y               - dependent variable values
+!
+!------------------------------------------------------------------------------------
+subroutine open_uniform_cubic_spline(n, from_gridgen, y, dy)
+    implicit none
+
+    integer,        intent(in)              :: n
+    logical,        intent(in)              :: from_gridgen
+    real,           intent(in)              :: y(n)
+    real,           intent(inout)           :: dy(n)
+
+    ! Local variables
+    integer                                 :: i
+    real                                    :: diag(n), sub_diag(n), super_diag(n), rhs(n)
+
+
+    ! Generate lower diagonal with zero first element
+    sub_diag(1)         = 0.0
+    do i = 2,n
+        sub_diag(i)     = 1.0
+    end do
+
+    ! Generate upper diagonal with zero last element
+    do i = 1,n - 1
+        super_diag(i)   = 1.0
+    end do
+    super_diag(n)       = 0.0
+
+    ! Generate main diagonal 
+    diag(1)             = 2.0
+    do i = 2,n - 1
+        diag(i)         = 4.0
+    end do
+    diag(n)             = 2.0
+
+    ! Generate RHS with segment boundary conditions
+    rhs(1)              = 3.0*(y(2) - y(1))
+    do i = 2,n - 1
+        rhs(i)          = 3.0*(y(i + 1) - y(i - 1))
+    end do
+    rhs(n)              = 3.0*(y(n) - y(n - 1))
+
+    
+    ! Solve tridiagonal system
+    ! tridiag_solve in funcNsubs.f90
+    call tridiag_solve(diag, sub_diag, super_diag, rhs, n)
+
+    ! Set knot first derivatives
+    dy                  = rhs
+
+
+    ! If gridgen switch is on, print additional output
+    if (from_gridgen) then
+        do i = 1,n
+            print *, dy(i)
+        end do
+    end if
+
+
+end subroutine open_uniform_cubic_spline
+!------------------------------------------------------------------------------------
