@@ -743,3 +743,76 @@ subroutine open_uniform_cubic_spline(n, from_gridgen, y, dy)
 
 end subroutine open_uniform_cubic_spline
 !------------------------------------------------------------------------------------
+
+
+
+
+
+
+!
+! Subroutine for computing the first derivatives of a parametric cubic spline for a
+! set of closed 'y' (y(1) = y(n)) points with uniform knots
+!
+! Input parameters: n               - number of spline points
+!                   from_gridgen    - flag for additionl output when called from
+!                                     grid_generator
+!                   y               - dependent variable values
+!
+!------------------------------------------------------------------------------------
+subroutine closed_uniform_cubic_spline(n, from_gridgen, y, dy)
+    implicit none
+
+    integer,        intent(in)              :: n
+    logical,        intent(in)              :: from_gridgen
+    real,           intent(in)              :: y(n)
+    real,           intent(inout)           :: dy(n)
+
+    ! Local variables
+    integer                                 :: i
+    real                                    :: A(n,n), rhs(n), aug_matrix(n,n + 1)
+    logical                                 :: fail_flag
+
+
+    ! Generate RHS
+    rhs(1)                  = 3.0*(y(2) - y(n))
+    do i = 2,n - 1
+        rhs(i)              = 3.0*(y(i + 1) -  y(i - 1))
+    end do
+    rhs(n)                  = 3.0*(y(1) - y(n - 1))
+
+    ! Generate matrix
+    ! Initialize matrix
+    A                       = 0.0
+
+    ! Main diagonal
+    do i = 1,n
+        A(i,i)              = 4.0
+    end do
+
+    ! Upper and lower diagonal
+    do i = 1,n - 1
+        A(i + 1,i)          = 1.0
+        A(i,i + 1)          = 1.0
+    end do
+
+    ! Closed curve endpoints
+    A(1,n)                  = 1.0
+    A(n,1)                  = 1.0
+
+    
+    ! Generate augmented matrix for the Gauss-Jordan solver
+    do i = 1,n
+        aug_matrix(i,1:n)   = A(i,:)
+        aug_matrix(i,n + 1) = rhs(i)
+    end do
+
+    ! Solve Gauss-Jordan system
+    ! TODO: Will be changed in the future
+    call gauss_jordan(n, 1, aug_matrix, fail_flag)
+
+    ! Set knot first derivatives
+    dy                      = aug_matrix(:,n + 1)
+
+
+end subroutine closed_uniform_cubic_spline
+!------------------------------------------------------------------------------------

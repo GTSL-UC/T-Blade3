@@ -255,7 +255,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
     ! Local variables
     integer                     :: nopen, nopen_error
-    real                        :: spl_eval, dspl_eval, xdiff, inBetaInci, outBetaDevn, xbi(500), ybi(500)
+    real                        :: spl_eval, dspl_eval, xdiff, inBetaInci, outBetaDevn
     real,           allocatable :: um_spl(:)
     character(256)              :: fname, temp, fname1, row_type, path
     character(:),   allocatable :: log_file, error_file, auxinput_filename, error_msg
@@ -1603,8 +1603,6 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
        call close_log_file(nopen, file_open)
        
        !----------------------------------------------------------------------
-       xbi    = 0.0
-       ybi    = 0.0
        call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js),stgr,stack,chord_switch,    &
                      stak_u,stak_v,xb_stk,yb_stk,stack_switch,clustering_switch,clustering_parameter,nsl,nbls,    &
                      curv,thick,LE,np,ncp_curv,ncp_thk,curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,      &
@@ -1612,44 +1610,44 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                      LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments,         &
                      sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index,n_normal_distance,casename, &
                      develop,mble,mbte,mles,mtes,i_slope,jcellblade_all,etawidth_all,BGgrid_all,thk_tm_c_spl,     &
-                     theta_offset,xbi,ybi)
+                     theta_offset)
 
        ! Allocate global grid variables (only allocate once)
-       if (js == 1) then
+       !if (js == 1) then
 
-            if (allocated(np_grid)) deallocate(np_grid)
-            allocate(np_grid(nspn))
-            if (allocated(xblade_grid)) deallocate(xblade_grid)
-            allocate(xblade_grid(nspn,np))
-            if (allocated(yblade_grid)) deallocate(yblade_grid)
-            allocate(yblade_grid(nspn,np))
-            if (allocated(chrdx_grid)) deallocate(chrdx_grid)
-            allocate(chrdx_grid(nspn))
-            if (allocated(thkc_grid)) deallocate(thkc_grid)
-            allocate(thkc_grid(nspn))
-            if (allocated(msle_grid)) deallocate(msle_grid)
-            allocate(msle_grid(nspn))
-            if (allocated(mste_grid)) deallocate(mste_grid)
-            allocate(mste_grid(nspn))
-            if (allocated(mble_grid)) deallocate(mble_grid)
-            allocate(mble_grid(nspn))
-            if (allocated(mbte_grid)) deallocate(mbte_grid)
-            allocate(mbte_grid(nspn))
+       !     if (allocated(np_grid)) deallocate(np_grid)
+       !     allocate(np_grid(nspn))
+       !     if (allocated(xblade_grid)) deallocate(xblade_grid)
+       !     allocate(xblade_grid(nspn,np))
+       !     if (allocated(yblade_grid)) deallocate(yblade_grid)
+       !     allocate(yblade_grid(nspn,np))
+       !     if (allocated(chrdx_grid)) deallocate(chrdx_grid)
+       !     allocate(chrdx_grid(nspn))
+       !     if (allocated(thkc_grid)) deallocate(thkc_grid)
+       !     allocate(thkc_grid(nspn))
+       !     if (allocated(msle_grid)) deallocate(msle_grid)
+       !     allocate(msle_grid(nspn))
+       !     if (allocated(mste_grid)) deallocate(mste_grid)
+       !     allocate(mste_grid(nspn))
+       !     if (allocated(mble_grid)) deallocate(mble_grid)
+       !     allocate(mble_grid(nspn))
+       !     if (allocated(mbte_grid)) deallocate(mbte_grid)
+       !     allocate(mbte_grid(nspn))
 
-       end if
+       !end if
 
         
        ! Store global grid variables
        ! TODO: Some variables are duplicates and need to be removed
-       np_grid(js)          = np
-       xblade_grid(js,:)    = xbi(1:np_grid(js))
-       yblade_grid(js,:)    = ybi(1:np_grid(js))
-       chrdx_grid(js)       = chrdx
-       thkc_grid(js)        = thkc
-       msle_grid(js)        = mles
-       mste_grid(js)        = mtes
-       mble_grid(js)        = mble
-       mbte_grid(js)        = mbte
+       !np_grid(js)          = np
+       !xblade_grid(js,:)    = xbi(1:np_grid(js))
+       !yblade_grid(js,:)    = ybi(1:np_grid(js))
+       !chrdx_grid(js)       = chrdx
+       !thkc_grid(js)        = thkc
+       !msle_grid(js)        = mles
+       !mste_grid(js)        = mtes
+       !mble_grid(js)        = mble
+       !mbte_grid(js)        = mbte
 
 
 
@@ -1676,6 +1674,16 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !**************************************************************************************
     !************stacking blade sections to create a 3d blade shape************************
     !**************************************************************************************
+    if (allocated(xblade_grid)) deallocate(xblade_grid)
+    allocate(xblade_grid(nspn,np))
+    if (allocated(yblade_grid)) deallocate(yblade_grid)
+    allocate(yblade_grid(nspn,np))
+    if (allocated(zblade_grid)) deallocate(zblade_grid)
+    allocate(zblade_grid(nspn,np))
+    xblade_grid = 0.0
+    yblade_grid = 0.0
+    zblade_grid = 0.0
+
     do js = 1, nrow ! called for each bladerow (only once since nrow = 1)
        nsec = nspn
        call bladestack(nspn, x_le, x_te, r_le, r_te, nsec, scf, xcg, ycg, msle, &
@@ -1684,7 +1692,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                        cpinbeta, spaninbeta, xcpinbeta, cpoutbeta, spanoutbeta, xcpoutbeta, &
                        hub, tip, xm, rm, xms, rms, mp, nsp, bladedata, amount_data, intersec_coord, &
                        throat_3D, mouth_3D, exit_3D, casename, nbls, LE, axchrd, mprime_ble, &
-                       mprime_bte, units, stagger, chrdsweep, chrdlean, axial_LE, radial_LE,thick_distr)
+                       mprime_bte, units, stagger, chrdsweep, chrdlean, axial_LE, radial_LE,thick_distr, &
+                       xblade_grid, yblade_grid, zblade_grid)
     enddo
 
     ! --------------------------------------------------------------------------------

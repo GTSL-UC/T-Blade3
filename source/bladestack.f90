@@ -1,10 +1,11 @@
-subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,xcg,ycg, &
-                    msle,stk_u,stk_v,xb_stack,yb_stack,np,iile,stack, &
-                    cpdeltam,spanmp,xcpdelm,cpdeltheta,spantheta,xcpdeltheta, &
-                    cpinbeta,spaninbeta,xcpinbeta,cpoutbeta,spanoutbeta,xcpoutbeta, &
-                    hub,tip,xm,rm,xms,rms,mp,nsp,bladedata,amount_data,intersec_coord, &
-                    throat_3D,mouth_3D,exit_3D,casename,nbls,LE,axchrd,mble, &
-                    mbte,units,stagger,chrdsweep,chrdlean,axial_LE,radial_LE,thick_distr)
+subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,xcg,ycg,                          &
+                    msle,stk_u,stk_v,xb_stack,yb_stack,np,iile,stack,                     &
+                    cpdeltam,spanmp,xcpdelm,cpdeltheta,spantheta,xcpdeltheta,             &
+                    cpinbeta,spaninbeta,xcpinbeta,cpoutbeta,spanoutbeta,xcpoutbeta,       &
+                    hub,tip,xm,rm,xms,rms,mp,nsp,bladedata,amount_data,intersec_coord,    &
+                    throat_3D,mouth_3D,exit_3D,casename,nbls,LE,axchrd,mble,              &
+                    mbte,units,stagger,chrdsweep,chrdlean,axial_LE,radial_LE,thick_distr, &
+                    xbi,ybi,zbi)
 
 !******************************************************************************************
 ! subroutine bladestack: Creates Mapping of streamlines to 2D airfoils and generates...
@@ -101,6 +102,8 @@ real*8 xc(nx),yc(nx)
 real hub,tip
 real*8, allocatable, dimension(:,:):: xposlean,yposlean,zposlean
 real*8, allocatable, dimension(:,:):: xneglean,yneglean,zneglean
+
+real,   intent(inout)                   :: xbi(nspn,np), ybi(nspn,np), zbi(nspn,np)
 
 integer np,nspline
 logical axial_LE,radial_LE
@@ -461,6 +464,12 @@ write(nopen,*) 'Writing 3D blade geometry ...'
 write(nopen,*) ''
 write(3,*) iap,nsec
 !scaled output
+
+! Store blade (x,y,z) coordinates
+xbi = scf*transpose(xb)
+ybi = scf*transpose(yb)
+zbi = scf*transpose(zb)
+
 do ia = 1,nsec
    do i = 1,iap
         write(3,10) scf*xb(i,ia),scf*yb(i,ia),scf*zb(i,ia)       
