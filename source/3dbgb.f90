@@ -1601,7 +1601,13 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
          thkc = thk_c(js)
        endif
        call close_log_file(nopen, file_open)
-       
+
+       if (js == 1) then
+            if (allocated(mblade_grid)) deallocate(mblade_grid)
+            allocate(mblade_grid(nspn,500))
+            if (allocated(thblade_grid)) deallocate(thblade_grid)
+            allocate(thblade_grid(nspn,500))
+       end if
        !----------------------------------------------------------------------
        call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js),stgr,stack,chord_switch,    &
                      stak_u,stak_v,xb_stk,yb_stk,stack_switch,clustering_switch,clustering_parameter,nsl,nbls,    &
@@ -1610,46 +1616,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                      LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments,         &
                      sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index,n_normal_distance,casename, &
                      develop,mble,mbte,mles,mtes,i_slope,jcellblade_all,etawidth_all,BGgrid_all,thk_tm_c_spl,     &
-                     theta_offset)
-
-       ! Allocate global grid variables (only allocate once)
-       !if (js == 1) then
-
-       !     if (allocated(np_grid)) deallocate(np_grid)
-       !     allocate(np_grid(nspn))
-       !     if (allocated(xblade_grid)) deallocate(xblade_grid)
-       !     allocate(xblade_grid(nspn,np))
-       !     if (allocated(yblade_grid)) deallocate(yblade_grid)
-       !     allocate(yblade_grid(nspn,np))
-       !     if (allocated(chrdx_grid)) deallocate(chrdx_grid)
-       !     allocate(chrdx_grid(nspn))
-       !     if (allocated(thkc_grid)) deallocate(thkc_grid)
-       !     allocate(thkc_grid(nspn))
-       !     if (allocated(msle_grid)) deallocate(msle_grid)
-       !     allocate(msle_grid(nspn))
-       !     if (allocated(mste_grid)) deallocate(mste_grid)
-       !     allocate(mste_grid(nspn))
-       !     if (allocated(mble_grid)) deallocate(mble_grid)
-       !     allocate(mble_grid(nspn))
-       !     if (allocated(mbte_grid)) deallocate(mbte_grid)
-       !     allocate(mbte_grid(nspn))
-
-       !end if
-
-        
-       ! Store global grid variables
-       ! TODO: Some variables are duplicates and need to be removed
-       !np_grid(js)          = np
-       !xblade_grid(js,:)    = xbi(1:np_grid(js))
-       !yblade_grid(js,:)    = ybi(1:np_grid(js))
-       !chrdx_grid(js)       = chrdx
-       !thkc_grid(js)        = thkc
-       !msle_grid(js)        = mles
-       !mste_grid(js)        = mtes
-       !mble_grid(js)        = mble
-       !mbte_grid(js)        = mbte
-
-
+                     theta_offset,mblade_grid(js,:),thblade_grid(js,:))
 
        mprime_ble(js) = mble
        mprime_bte(js) = mbte

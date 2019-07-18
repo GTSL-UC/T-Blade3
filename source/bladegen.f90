@@ -5,7 +5,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                     C_le_y_top_all,C_le_y_bot_all,LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,        &
                     sting_h_all,LEdegree,no_LE_segments,sec_radius,bladedata,amount_data,scf,             &
                     intersec_coord,throat_index, n_normal_distance,casename,develop,mble,mbte,msle, &
-                    mste,i_slope,jcellblade_all, etawidth_all,BGgrid_all,thk_tm_c_spl, theta_offset)
+                    mste,i_slope,jcellblade_all, etawidth_all,BGgrid_all,thk_tm_c_spl, theta_offset, m_prime, theta)
 
     use file_operations
     use errors
@@ -21,7 +21,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                                                                    C_le_y_bot_all(nsl), LE_vertex_ang_all(nsl), LE_vertex_dis_all(nsl), sting_l_all(nsl),          &
                                                                    sting_h_all(nsl), sec_radius(nsl,2), scf, intersec_coord(12,nsl), mble, mbte, msle, mste,       &
                                                                    jcellblade_all(nspn), etawidth_all(nspn), BGgrid_all(nspn), thk_tm_c_spl(nsl), theta_offset
-    real,                                   intent(inout)       :: sinl, sext, stagger, bladedata(amount_data,nsl)
+    real,                                   intent(inout)       :: sinl, sext, stagger, bladedata(amount_data,nsl), m_prime(500), theta(500)
     character(*),                           intent(in)          :: fext, airfoil, casename, develop
 
     ! Local variables
@@ -910,6 +910,8 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
     end if  ! if (trim(airfoil) == 'sect1')
 
+    m_prime(1:np) = xb
+    theta(1:np)   = yb
 
 
     !
