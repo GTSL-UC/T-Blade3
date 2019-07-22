@@ -22,7 +22,7 @@ ifeq ($(detected_OS),Darwin)
     MKDIR_P := mkdir -p
     EXEC_DIR := ../bin
     LIB_DIR := ../lib
-    TARGET_LIB = ../lib/tblade3.dylib
+    TARGET_LIB = ../lib/libTBlade3.dylib
 endif
 
 OBJS =  globvar.o file_operations.o errors.o spline.o readinput.o funcNsubs.o 3dbgb.o 3dbgb_driver.o bladegen.o bladestack.o bspline3.o lesting.o \
