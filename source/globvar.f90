@@ -35,7 +35,7 @@ integer cpdeltam,cpdeltheta,cpinbeta,cpoutbeta,cpchord,cptm_c
 integer, allocatable, dimension(:) :: ncp_curv,ncp_thk,throat_index,BGgrid_all
 integer n_inter_intervals,nsp_interpolated_hub, spline_switch
 !
-real*8, allocatable, dimension(:,:) :: bladedata,splinedata
+real*8, allocatable, dimension(:,:) :: bladedata, bladedata_before, splinedata
 real*8 sinl,sext,thkc ,chrdx,mr1,stak_u,stak_v, x1hub,x1tip,r1hub,r1tip
 real*8 xb(nx),yb(nx),mp(nx,nax),xstk,xstk1,abs_zero
 real*8 xa(nx,nax),ya(nx,nax),xms(nx,nax),rms(nx,nax)
@@ -107,6 +107,7 @@ real*8 xt(nx,1),rt(nx,1)
 !                                   mste_grid(:), mble_grid(:), mbte_grid(:)
 real,   allocatable             :: xblade_grid(:,:), yblade_grid(:,:), zblade_grid(:,:)
 real,   allocatable             :: mblade_grid(:,:), thblade_grid(:,:)
+real,   allocatable             :: uv_grid(:,:,:), uv_top_grid(:,:,:), uv_bot_grid(:,:,:)
 
 !-----------------------------------------------------------------------------------------------------
 real*8,dimension(:,:),allocatable::cp_chord_curv,bspline_chord_curv,cp_chord_thk,bspline_thk,cp_LE,bspline_LE
@@ -120,6 +121,7 @@ character*15::istr1,istr2,H(13)
 logical isdev, tm_c_spline, is_xyzstreamlines, spanwise_angle_spline,spanwise_inci_dev_spline, &
 is2d, isquiet!, isxygrid
 logical :: u_max_spline = .false.
+logical :: axial_LE, radial_LE
 
 common / bladesectionpoints /xxa(nx,nax),yya(nx,nax)
 !

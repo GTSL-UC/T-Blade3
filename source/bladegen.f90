@@ -4,8 +4,9 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                     tethk_all,s_all,ee_all,thick_distr, umxthk_all,C_le_x_top_all,C_le_x_bot_all,         &
                     C_le_y_top_all,C_le_y_bot_all,LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,        &
                     sting_h_all,LEdegree,no_LE_segments,sec_radius,bladedata,amount_data,scf,             &
-                    intersec_coord,throat_index, n_normal_distance,casename,develop,mble,mbte,msle, &
-                    mste,i_slope,jcellblade_all, etawidth_all,BGgrid_all,thk_tm_c_spl, theta_offset, m_prime, theta)
+                    intersec_coord,throat_index, n_normal_distance,casename,develop,mble,mbte,msle,       &
+                    mste,i_slope,jcellblade_all, etawidth_all,BGgrid_all,thk_tm_c_spl, theta_offset,      &
+                    from_gridgen,np_in,u_in,v_in,uv,uv_top,uv_bot,m_prime,theta)
 
     use file_operations
     use errors
@@ -13,7 +14,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
     integer,                                intent(in)          :: nspn, js, stack, stack_switch, chord_switch, clustering_switch, nsl, nbls, curv_camber,         &
                                                                    thick, LE, ncp_curv(nsl), ncp_thk(nsl), wing_flag, thick_distr, LEdegree, no_LE_segments,       &
-                                                                   amount_data, throat_index(nspn), n_normal_distance, i_slope
+                                                                   amount_data, throat_index(nspn), n_normal_distance, i_slope, np_in
     integer,                                intent(inout)       :: np
     real,                                   intent(in)          :: thkc, mr1, chrdx, xcen, ycen, stk_u(1), stk_v(1), xb_stk, yb_stk, clustering_parameter,         &
                                                                    curv_cp(20,2*nsl), thk_cp(20,2*nsl), lethk_all(nsl), tethk_all(nsl), s_all(nsl), ee_all(nsl),   &
@@ -21,8 +22,10 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                                                                    C_le_y_bot_all(nsl), LE_vertex_ang_all(nsl), LE_vertex_dis_all(nsl), sting_l_all(nsl),          &
                                                                    sting_h_all(nsl), sec_radius(nsl,2), scf, intersec_coord(12,nsl), mble, mbte, msle, mste,       &
                                                                    jcellblade_all(nspn), etawidth_all(nspn), BGgrid_all(nspn), thk_tm_c_spl(nsl), theta_offset
-    real,                                   intent(inout)       :: sinl, sext, stagger, bladedata(amount_data,nsl), m_prime(500), theta(500)
+    real,                                   intent(inout)       :: sinl, sext, stagger, bladedata(amount_data,nsl), u_in(np_in), v_in(np_in), &
+                                                                   uv(500,2), uv_top(500,2), uv_bot(500,2), m_prime(500), theta(500)
     character(*),                           intent(in)          :: fext, airfoil, casename, develop
+    logical                                                     :: from_gridgen
 
     ! Local variables
     integer                                                     :: np_side, i, k, naca, np_cluster, ncp, le_pos, i_le, i_te, oo, nopen
@@ -846,6 +849,13 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         !
         call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE)
 
+        uv(1:np,1)              = xb
+        uv(1:np,2)              = yb
+        uv_top(1:(np + 1)/2,1)  = xtop
+        uv_top(1:(np + 1)/2,2)  = ytop
+        uv_bot(1:(np + 1)/2,1)  = xbot
+        uv_bot(1:(np + 1)/2,2)  = ybot
+
         ! Write u,v section coordinates to a file in developer mode
         if(isdev) then
             file7 = 'uvblade.'//trim(fext)
@@ -857,6 +867,10 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         write(nopen,*) 'chrd bladegen: ', chrd
         call close_log_file(nopen, file_open)
 
+        if (from_gridgen) then
+            xb                  = u_in
+            yb                  = v_in
+        end if
 
         !
         ! Write stagger angles to a file

@@ -254,13 +254,13 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     character(*)                :: arg4
 
     ! Local variables
-    integer                     :: nopen, nopen_error
+    integer                     :: nopen, nopen_error, np_in
     real                        :: spl_eval, dspl_eval, xdiff, inBetaInci, outBetaDevn
-    real,           allocatable :: um_spl(:)
+    real,           allocatable :: um_spl(:), u_in(:), v_in(:)
     character(256)              :: fname, temp, fname1, row_type, path
     character(:),   allocatable :: log_file, error_file, auxinput_filename, error_msg
-    logical                     :: axial_LE, radial_LE, axial_TE, radial_TE, file_open, file_exist, &
-                                   initial, open_error, from_gridgen = .false.
+    logical                     :: axial_TE, radial_TE, file_open, file_exist, &
+                                   initial, open_error, from_gridgen = .false. !axial_LE, radial_LE
 
 
 
@@ -1484,6 +1484,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !!-------------------------------------------------------------
     !000000000000000000000000000000000000000000000000000000000000
     if (allocated(bladedata     )) deallocate(bladedata     )
+    if (allocated(bladedata_before)) deallocate(bladedata_before)
     if (allocated(intersec_coord)) deallocate(intersec_coord)
     if (allocated(throat_3D     )) deallocate(throat_3D     )
     if (allocated(mouth_3D      )) deallocate(mouth_3D      )
@@ -1491,6 +1492,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     if (allocated(throat_pos    )) deallocate(throat_pos    )
     if (allocated(throat_index  )) deallocate(throat_index  )
     Allocate(bladedata(amount_data, nsl))
+    allocate(bladedata_before(amount_data, nsl))
     Allocate(intersec_coord(12, nsl))
     Allocate(throat_3D(nsl))
     Allocate(mouth_3D(nsl))
@@ -1603,10 +1605,25 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
        call close_log_file(nopen, file_open)
 
        if (js == 1) then
+            
             if (allocated(mblade_grid)) deallocate(mblade_grid)
             allocate(mblade_grid(nspn,500))
             if (allocated(thblade_grid)) deallocate(thblade_grid)
             allocate(thblade_grid(nspn,500))
+            
+            if (allocated(uv_grid)) deallocate(uv_grid)
+            allocate(uv_grid(nspn,500,2))
+            if (allocated(uv_top_grid)) deallocate(uv_top_grid)
+            allocate(uv_top_grid(nspn,500,2))
+            if (allocated(uv_bot_grid)) deallocate(uv_bot_grid)
+            allocate(uv_bot_grid(nspn,500,2))
+
+            np_in   = 241
+            if (allocated(u_in)) deallocate(u_in)
+            allocate(u_in(np_in))
+            if (allocated(v_in)) deallocate(v_in)
+            allocate(v_in(np_in))
+
        end if
        !----------------------------------------------------------------------
        call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js),stgr,stack,chord_switch,    &
@@ -1616,7 +1633,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                      LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments,         &
                      sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index,n_normal_distance,casename, &
                      develop,mble,mbte,mles,mtes,i_slope,jcellblade_all,etawidth_all,BGgrid_all,thk_tm_c_spl,     &
-                     theta_offset,mblade_grid(js,:),thblade_grid(js,:))
+                     theta_offset,from_gridgen,np_in,u_in,v_in,uv_grid(js,:,:),uv_top_grid(js,:,:),               &
+                     uv_bot_grid(js,:,:),mblade_grid(js,:),thblade_grid(js,:))
 
        mprime_ble(js) = mble
        mprime_bte(js) = mbte
@@ -1634,7 +1652,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !35 close (1)
 
     if(is2d) then
-        goto 1001
+        !goto 1001
     endif
 
     !
@@ -1651,16 +1669,20 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     yblade_grid = 0.0
     zblade_grid = 0.0
 
+    bladedata_before = bladedata
+    do i = 1,nspn
+        print *, 'From bladestack - ', axchrd(i)
+    end do
     do js = 1, nrow ! called for each bladerow (only once since nrow = 1)
        nsec = nspn
-       call bladestack(nspn, x_le, x_te, r_le, r_te, nsec, scf, xcg, ycg, msle, &
-                       stk_u, stk_v, xb_stack, yb_stack, np, ile, stack, &
+       call bladestack(nspn, x_le, x_te, r_le, r_te, nsec, scf, msle, np, stack, &
                        cpdeltam, spanmp, xcpdelm, cpdeltheta, spantheta, xcpdeltheta, &
                        cpinbeta, spaninbeta, xcpinbeta, cpoutbeta, spanoutbeta, xcpoutbeta, &
-                       hub, tip, xm, rm, xms, rms, mp, nsp, bladedata, amount_data, intersec_coord, &
+                       xm, rm, xms, rms, mp, nsp, bladedata, amount_data, intersec_coord, &
                        throat_3D, mouth_3D, exit_3D, casename, nbls, LE, axchrd, mprime_ble, &
                        mprime_bte, units, stagger, chrdsweep, chrdlean, axial_LE, radial_LE,thick_distr, &
-                       xblade_grid, yblade_grid, zblade_grid)
+                       transpose(mblade_grid(:,1:np)), transpose(thblade_grid(:,1:np)), xblade_grid,     &
+                       yblade_grid, zblade_grid, from_gridgen)
     enddo
 
     ! --------------------------------------------------------------------------------
@@ -1728,9 +1750,9 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !**************************************************************************************
     ! Deallocation of variables
     !**************************************************************************************
-    1001 deallocate (x_le, x_te, r_le, r_te, in_beta, out_beta, mrel1, chord, thk_c, inci, devn, sec_flow_ang)
-    deallocate (phi_s_in, phi_s_out, stagger, chordm, msle, s1le, s2le, s1te)
-    deallocate (sang, stk_u, stk_v, total_camber, mprime_ble, mprime_bte, sec_radius)
+    !1001 deallocate (x_le, x_te, r_le, r_te, in_beta, out_beta, mrel1, chord, thk_c, inci, devn, sec_flow_ang)
+    !deallocate (phi_s_in, phi_s_out, stagger, chordm, msle, s1le, s2le, s1te)
+    !deallocate (sang, stk_u, stk_v, total_camber, mprime_ble, mprime_bte, sec_radius)
     !-------------------------------------------------------------------------------------
 
 end subroutine bgb3d_sub

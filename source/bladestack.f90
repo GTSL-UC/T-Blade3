@@ -1,11 +1,10 @@
-subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,xcg,ycg,                          &
-                    msle,stk_u,stk_v,xb_stack,yb_stack,np,iile,stack,                     &
+subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,               &
                     cpdeltam,spanmp,xcpdelm,cpdeltheta,spantheta,xcpdeltheta,             &
                     cpinbeta,spaninbeta,xcpinbeta,cpoutbeta,spanoutbeta,xcpoutbeta,       &
-                    hub,tip,xm,rm,xms,rms,mp,nsp,bladedata,amount_data,intersec_coord,    &
+                    xm,rm,xms,rms,mp,nsp,bladedata,amount_data,intersec_coord,    &
                     throat_3D,mouth_3D,exit_3D,casename,nbls,LE,axchrd,mble,              &
                     mbte,units,stagger,chrdsweep,chrdlean,axial_LE,radial_LE,thick_distr, &
-                    xbi,ybi,zbi)
+                    x_in,y_in,xbi,ybi,zbi,from_gridgen)
 
 !******************************************************************************************
 ! subroutine bladestack: Creates Mapping of streamlines to 2D airfoils and generates...
@@ -60,7 +59,7 @@ character*20 temp
 character*32 casename
 character(len=2) :: units
 
-integer na,i,ia,iap,stack,stk_u,stk_v
+integer na,i,ia,iap,stack
 integer k,ile
 integer nsec
 integer nspn,nrow,nspan,nbls
@@ -69,10 +68,10 @@ integer cpdeltam,cpdeltheta,cpinbeta,cpoutbeta,uplmt,thick_distr
 
 parameter (nspan=200,nx=500,nxx=1000,nax=50,nbx=500,nby=100,nrow=1)
 
-integer nap(nspan),nsp(nspan),i_slope,iile,ncp1
+integer nap(nspan),nsp(nspan),i_slope,ncp1
 integer amount_data,chrdsweep,chrdlean
 
-real xcg(nspan),ycg(nspan), chord_actual(100)
+real chord_actual(100)
 real mps(nxx,nax)
 real scf,demp
 real spl_eval,stagger(nspan)
@@ -82,7 +81,6 @@ real xms(nx,nax),rms(nx,nax)
 real xxa,yya,pi,dtor
 real X_le(nspan),X_te(nspan),msle(nspan),dmp(nspan)
 real R_le(nspan),R_te(nspan)
-real xb_stack(nspan),yb_stack(nspan)
 real mp_stack(nspan)
 real xm_slope,rm_slope
 real bladedata(amount_data,nspn)
@@ -99,14 +97,15 @@ real*8 xcpdelm(100),xcpdeltheta(100),xcpinbeta(100),xcpoutbeta(100)
 real*8 spanmp(100),spaninbeta(100),spanoutbeta(100)
 real*8 spantheta(100), xbs(nx), ybs(nx)
 real*8 xc(nx),yc(nx)
-real hub,tip
 real*8, allocatable, dimension(:,:):: xposlean,yposlean,zposlean
 real*8, allocatable, dimension(:,:):: xneglean,yneglean,zneglean
 
 real,   intent(inout)                   :: xbi(nspn,np), ybi(nspn,np), zbi(nspn,np)
+real,   intent(inout)                   :: x_in(np,nspn), y_in(np,nspn)
 
 integer np,nspline
 logical axial_LE,radial_LE
+logical,    intent(in)                  :: from_gridgen
 integer                                 :: nopen
 character(:),   allocatable             :: log_file
 logical                                 :: file_open, isquiet
@@ -165,10 +164,13 @@ do ia = 1, na
    nap(ia) = np!199
    iap = nap(ia)
    do i = 1, iap
-      xa(i,ia) = xxa(i,ia)! airfoil coordinates (m')
-      ya(i,ia) = yya(i,ia)! airfoil coordinates (theta)
+      xa(i,ia) = x_in(i,ia)!xxa(i,ia)! airfoil coordinates (m')
+      ya(i,ia) = y_in(i,ia)!yya(i,ia)! airfoil coordinates (theta)
    enddo         
 enddo
+!do i = 1,iap
+!    print *, xa(i,1), ya(i,1)
+!end do
 !
 if (.not. isquiet) then
     write(*,*)
@@ -339,9 +341,8 @@ call close_log_file(nopen, file_open)
 do ia = 1,na
    write(temp,*)ia
    ile = (iap+1)/2 ! blade LE index
-   !print*,'xb_stack',xb_stack(ia)
    mp_stack(ia) = msle(ia) !+ (real(stk_u)/100)*chord(ia)
-   dmp(ia) = mp_stack(ia) - xa(ile,ia)!- xb_stack(ia)
+   dmp(ia) = mp_stack(ia) - xa(ile,ia)
    !print*,'chord',chrd(ia)
    do i = 1,iap   
       demp = delmp(ia)
@@ -393,17 +394,17 @@ do ia = 1,na        ! number of stream lines
       else
         xb(i,ia) = xb(i,ia)
       endif
-      yb(i,ia) = rb(i,ia)*sin(ya(i,ia) + delta_theta(ia)) !+ (-yb_stack(ia)))
-      zb(i,ia) = rb(i,ia)*cos(ya(i,ia) + delta_theta(ia)) !+ (-yb_stack(ia)))
+      yb(i,ia) = rb(i,ia)*sin(ya(i,ia) + delta_theta(ia)) 
+      zb(i,ia) = rb(i,ia)*cos(ya(i,ia) + delta_theta(ia)) 
       ! Coordinates for the half pitch leaned blade for the periodic walls
       ! positive half pitch leaned coordinates 
       xposlean(i,ia) = xb(i,ia) 
-      yposlean(i,ia) = rb(i,ia)*sin(ya(i,ia) + (pi/nbls)) !+ (-yb_stack(ia)))
-      zposlean(i,ia) = rb(i,ia)*cos(ya(i,ia) + (pi/nbls)) !+ (-yb_stack(ia)))
+      yposlean(i,ia) = rb(i,ia)*sin(ya(i,ia) + (pi/nbls)) 
+      zposlean(i,ia) = rb(i,ia)*cos(ya(i,ia) + (pi/nbls)) 
       ! negative half pitch leaned coordinates 
       xneglean(i,ia) = xb(i,ia) 
-      yneglean(i,ia) = rb(i,ia)*sin(ya(i,ia) - (pi/nbls)) !+ (-yb_stack(ia)))
-      zneglean(i,ia) = rb(i,ia)*cos(ya(i,ia) - (pi/nbls)) !+ (-yb_stack(ia)))
+      yneglean(i,ia) = rb(i,ia)*sin(ya(i,ia) - (pi/nbls)) 
+      zneglean(i,ia) = rb(i,ia)*cos(ya(i,ia) - (pi/nbls)) 
    enddo
    ! get x-y-z for the intersection point: Nemnem 9 16 2013
    do k = 1 ,6      ! LE, TE ... values
@@ -453,7 +454,7 @@ write(nopen,*) 'Number of radial sections:', nsec
 !---- output ...
 ! TODO: Move to file_operations
 fname1 = 'blade3d.'//trim(casename)//'.dat'
-open(3,file=fname1,status='unknown')
+if (.not. from_gridgen) open(3,file=fname1,status='unknown')
 if (.not. isquiet) then
     write(*,*)
     write(*,*) 'Writing 3D blade geometry ...'
@@ -462,7 +463,7 @@ end if
 write(nopen,*) ''
 write(nopen,*) 'Writing 3D blade geometry ...'
 write(nopen,*) ''
-write(3,*) iap,nsec
+if (.not. from_gridgen) write(3,*) iap,nsec
 !scaled output
 
 ! Store blade (x,y,z) coordinates
@@ -472,14 +473,14 @@ zbi = scf*transpose(zb)
 
 do ia = 1,nsec
    do i = 1,iap
-        write(3,10) scf*xb(i,ia),scf*yb(i,ia),scf*zb(i,ia)       
+        if (.not. from_gridgen) write(3,10) scf*xb(i,ia),scf*yb(i,ia),scf*zb(i,ia)       
    enddo
    chord_actual(ia) = scf*sqrt((xb(ile,ia)-xb(iap,ia))**2 + (yb(ile,ia)-yb(iap,ia))**2 + (zb(ile,ia)-zb(iap,ia))**2)
    if (.not. isquiet) print*,'chord_actual(',units,'):',chord_actual(ia)
    write(nopen,*) 'chord_actual(',units,'):',chord_actual(ia)
    bladedata(6,ia)= chord_actual(ia) ! in input file units
 enddo
-close(3)
+if (.not. from_gridgen) close(3)
 
 !*******************************************************************************************
 ! Calculating the meanline by taking the average of PS and SS curves.
@@ -502,7 +503,8 @@ uplmt = ((iap+1)/2)-1 !uplmt+1 is 100 for 199 as iap.
 ! call meanline3DNperiodicwall(xb,yb,zb,xposlean,yposlean,zposlean, &
                                    ! xneglean,yneglean,zneglean,iap,nsec, &
                                    ! uplmt,scf,casename)
-call constantslopemeanline3D(xb,yb,zb,xposlean,yposlean,zposlean, &
+if (.not. from_gridgen) &
+    call constantslopemeanline3D(xb,yb,zb,xposlean,yposlean,zposlean, &
                                    xneglean,yneglean,zneglean,iap,nsec, &
                                    uplmt,scf,casename)
 
