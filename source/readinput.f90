@@ -2643,8 +2643,10 @@ subroutine read_spanwise_NACA_input(row_type,path)
         n_temp = index(trim(temps), 'dy_dx_TE')
         if (allocated(cp_chord_thk)) deallocate(cp_chord_thk)
         if (n_temp == 0) then
+            TE_der  = .false.
             allocate(cp_chord_thk(ncp_span_thk,5))
         else
+            TE_der  = .true.
             allocate(cp_chord_thk(ncp_span_thk,6))
         end if
 

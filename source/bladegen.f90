@@ -6,7 +6,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                     sting_h_all,LEdegree,no_LE_segments,sec_radius,bladedata,amount_data,scf,             &
                     intersec_coord,throat_index, n_normal_distance,casename,develop,mble,mbte,msle,       &
                     mste,i_slope,jcellblade_all, etawidth_all,BGgrid_all,thk_tm_c_spl, theta_offset,      &
-                    from_gridgen,np_in,u_in,v_in,uv,uv_top,uv_bot,m_prime,theta)
+                    TE_derivative,from_gridgen,np_in,u_in,v_in,uv,uv_top,uv_bot,m_prime,theta)
 
     use file_operations
     use errors
@@ -25,7 +25,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     real,                                   intent(inout)       :: sinl, sext, stagger, bladedata(amount_data,nsl), u_in(np_in), v_in(np_in), &
                                                                    uv(500,2), uv_top(500,2), uv_bot(500,2), m_prime(500), theta(500)
     character(*),                           intent(in)          :: fext, airfoil, casename, develop
-    logical                                                     :: from_gridgen
+    logical                                                     :: TE_derivative, from_gridgen
 
     ! Local variables
     integer                                                     :: np_side, i, k, naca, np_cluster, ncp, le_pos, i_le, i_te, oo, nopen
@@ -186,7 +186,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         LE_round = thk_cp(1,js)
         t_TE     = thk_cp(4,js)
 
-        if (abs(thk_cp(5,js)) .le. 10e-8) then
+        if (.not. TE_derivative) then
             call compute_te_angle(u_max,dy_dx_te)
             dy_dx_te    = -2.0*t_max*dy_dx_te
         else
@@ -601,7 +601,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             ! Compute TE angle value for u_max
             ! Display on screen and write to log file
             !
-            if (abs(thk_cp(5,js)) .le. 10e-8) then
+            if (.not. TE_derivative) then
                 if (.not. isquiet) print *, 'TE derivative for maximum thickness chordwise location = ', dy_dx_te
                 write(nopen,*) 'TE derivative for maximum thickness chordwise location = ', dy_dx_te
             else

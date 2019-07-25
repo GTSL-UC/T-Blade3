@@ -108,6 +108,7 @@ real*8 xt(nx,1),rt(nx,1)
 real,   allocatable             :: xblade_grid(:,:), yblade_grid(:,:), zblade_grid(:,:)
 real,   allocatable             :: mblade_grid(:,:), thblade_grid(:,:)
 real,   allocatable             :: uv_grid(:,:,:), uv_top_grid(:,:,:), uv_bot_grid(:,:,:)
+logical                         :: TE_der = .false.
 
 !-----------------------------------------------------------------------------------------------------
 real*8,dimension(:,:),allocatable::cp_chord_curv,bspline_chord_curv,cp_chord_thk,bspline_thk,cp_LE,bspline_LE
