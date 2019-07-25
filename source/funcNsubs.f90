@@ -22,7 +22,7 @@ subroutine displayMessage
         write(*,*)'************************************************************'
         write(*,*)'****  T-BLADE3:Turbomachinery BLADE 3D Geometry Builder ****'
         write(*,*)'****                                                    ****' 
-        write(*,*)'****  Master Version 1.13.1	                           ****' 
+        write(*,*)'****  Master Version 1.2	                               ****' 
         write(*,*)'****                                                    ****'
         write(*,*)'****  ...was also called as below till Aug 2016...      ****' 
         write(*,*)'****  3DBGB: 3 Dimensional Blade Geometry Builder       ****'

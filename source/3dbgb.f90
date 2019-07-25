@@ -1670,9 +1670,6 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     zblade_grid = 0.0
 
     bladedata_before = bladedata
-    do i = 1,nspn
-        print *, 'From bladestack - ', axchrd(i)
-    end do
     do js = 1, nrow ! called for each bladerow (only once since nrow = 1)
        nsec = nspn
        call bladestack(nspn, x_le, x_te, r_le, r_te, nsec, scf, msle, np, stack, &
