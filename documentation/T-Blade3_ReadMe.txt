@@ -6,7 +6,7 @@ sharmamm@mail.uc.edu
 
 
 
-Refer to the main documentation (T-Blade3_v1.13.1_ReadMe.pdf) on the T-Blade3 website (http://gtsl.ase.uc.edu/t-blade3/) to understand how to run T-Blade3 v1.13.1. To
+Refer to the main documentation (T-Blade3_v1.2_ReadMe.pdf) on the T-Blade3 website (http://gtsl.ase.uc.edu/t-blade3/) to understand how to run T-Blade3 v1.2. To
 generate updated documentation for T-Blade3 v1.2, use the file T-Blade3_v1.2_ReadMe.tex in this directory.
 
 This document details the changes made to T-Blade3 in v1.2

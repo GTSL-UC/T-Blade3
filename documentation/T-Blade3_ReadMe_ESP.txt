@@ -23,12 +23,8 @@ sharmamm@mail.uc.edu
 
     The latest ESP source code can be obtained here: https://acdl.mit.edu/ESP/ 
     
-    This document explains how to compile ESP 1.13 using T-Blade3 version 1.2 so that NACA 
+    This document explains how to compile ESP 1.15 using T-Blade3 version 1.2 so that NACA 
     thickness controls can be used. 
-
-    ESP 1.14 is the latest release with ESP but is not being used for geometry generation 
-    with T-Blade3 at this moment. Users are thus directed to the package ESP1.13.tgz at 
-    https://acdl.mit.edu/ESP/archive
     
 2.1 T-BLADE3 SOURCE DISTRIBUTION LAYOUT
     
