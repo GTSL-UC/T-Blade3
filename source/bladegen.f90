@@ -665,7 +665,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                 ui           = u(i)
 
                 if (thick == 0) then
-                    thkmultip   = thk_tm_c_spl(js)
+                    thkmultip    = thk_tm_c_spl(js)
                 else
                     thkmultip    = splthick(i)
                 end if
@@ -674,6 +674,20 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                 call thickellip(i, ui, thk, lethk, tethk, fmxthk, umxthk, rr1, rr2, thkmultip, u_le, uin_le, i_le, oo, i_te)
                 thickness(i) = thk
             end do
+
+            call log_file_exists(log_file, nopen, file_open)
+
+            ! Write thickness data to sectionwise files
+            ! write_Wennerstrom_thickness in file_operations
+            if (.not. isquiet) then
+                print *, 'Writing thickness data to file'
+                print *, ''
+            end if
+            write(nopen,*) 'Writing thickness data to file'
+            write(nopen,*) ''
+            call write_Wennerstrom_thickness(sec,casename,np,u,thickness)
+
+            call close_log_file(nopen, file_open)
 
         end if  ! thick_distr
 

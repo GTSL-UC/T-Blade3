@@ -1609,6 +1609,7 @@ subroutine get_dev_status(isdev_local)
 
     isdev_local = isdev
 
+
 end subroutine get_dev_status
 !------------------------------------------------------------------------------------------------------
 
@@ -1629,6 +1630,7 @@ subroutine get_quiet_status(isquiet_local)
 
 
     isquiet_local = isquiet
+
 
 end subroutine get_quiet_status
 !------------------------------------------------------------------------------------------------------
@@ -1651,7 +1653,30 @@ subroutine get_sec_number(js_local)
 
     js_local = js
 
+
 end subroutine get_sec_number
+!------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+!
+! Get thickness multiplier switch value from globvar
+!
+!------------------------------------------------------------------------------------------------------
+subroutine get_thick_status(thick_local)
+    use globvar
+    implicit none
+
+    integer,                    intent(inout)       :: thick_local
+
+
+    thick_local = thick
+
+
+end subroutine get_thick_status
 !------------------------------------------------------------------------------------------------------
 
 

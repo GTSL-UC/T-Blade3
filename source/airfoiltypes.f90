@@ -1562,8 +1562,11 @@ end subroutine datafile
 !-------Thickness multiplier added by Ahmed Nemnem.
       real lethk, tethk, mxthk, uscale, thkmultip
       real u_le,uin_le
-      integer i_le,oo,i,i_te
-!
+      integer i_le,oo,i,i_te, thick
+
+      ! Get thickness multiplier switch value
+      call get_thick_status(thick)
+
       !print*,'lethk =',lethk
       !print*,'tethk =',tethk
       !print*,'mxthk =',mxthk
@@ -1638,11 +1641,19 @@ end subroutine datafile
        end if   
 ! 0000000000000000000000000000000000000    
       if(u.le.0.0) then
-       thk = sqrt((ale**2-(u+x1-ale)**2)/rr1**2)
+          if (thick /= 0) then
+              thk = sqrt((ale**2-(u+x1-ale)**2)/rr1**2)
+          elseif (thick == 0) then
+              thk = sqrt((ale**2-(u+x1-ale)**2)/rr1**2)*(thkmultip + 1)
+          end if
       elseif(u .ge.(1.+x2)) then !  this is checked because of precision
-       thk = 0.
+          thk = 0.
       elseif(u.ge.1.0) then
-       thk = sqrt((ate**2-(u-(1.+x2)+ate)**2)/rr2**2)
+          if (thick /= 0) then
+              thk = sqrt((ate**2-(u-(1.+x2)+ate)**2)/rr2**2)
+          else if (thick == 0) then
+              thk = sqrt((ate**2-(u-(1.+x2)+ate)**2)/rr2**2)*(thkmultip + 1)
+          end if
       else
        if(ub.lt.umxth) then
         thk = (aa*ub**3 + bb*ub**2 + cc*ub + dd)*(thkmultip + 1)
