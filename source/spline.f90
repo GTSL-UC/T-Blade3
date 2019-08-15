@@ -733,14 +733,6 @@ subroutine open_uniform_cubic_spline(n, from_gridgen, y, dy)
     dy                  = rhs
 
 
-    ! If gridgen switch is on, print additional output
-    if (from_gridgen) then
-        do i = 1,n
-            print *, dy(i)
-        end do
-    end if
-
-
 end subroutine open_uniform_cubic_spline
 !------------------------------------------------------------------------------------
 
