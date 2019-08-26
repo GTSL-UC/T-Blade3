@@ -206,7 +206,7 @@
 
     end program bgb3d
 
-     ESP override subroutine templates
+    !ESP override subroutine templates
     subroutine     override_cur1(n, a)
        real*8 a(*)
     end subroutine override_cur1
