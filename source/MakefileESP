@@ -48,7 +48,7 @@ OBJS  =	$(ODIR)/globvar.o \
 ifeq ($(EFCOMP),ifort)
 FOPTX = -cpp -norecursive -save -noautomatic -module $(ODIR)
 else
-FOPTX =	-fdefault-real-8 -fbounds-check -fbacktrace -Wline-truncation -cpp \
+FOPTX =	-fdefault-real-8 -fbounds-check -fbacktrace -Wline-truncation -cpp -DFROM_ESP\
 	-fno-automatic -ffree-form -ffree-line-length-none -std=legacy -J $(ODIR)
 endif
 

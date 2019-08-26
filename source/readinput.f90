@@ -846,7 +846,7 @@ subroutine readinput(fname)
     ! Callback to override_span_del_m_ctrl_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
     !
     temp_in = spanmp(1:cpdeltam)
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
     call override_span_del_m_ctrl(cpdeltam, temp_in)
 #endif
     spanmp(1:cpdeltam) = temp_in
@@ -858,7 +858,7 @@ subroutine readinput(fname)
     if (allocated(temp_in)) deallocate(temp_in)
     allocate(temp_in(cpdeltam))
     temp_in = xcpdelm(1:cpdeltam)
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
     call override_span_del_m(cpdeltam, temp_in)
 #endif
     xcpdelm(1:cpdeltam) = temp_in
@@ -912,7 +912,7 @@ subroutine readinput(fname)
     ! Callback to override_span_del_theta_ctrl_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
     !
     temp_in = spantheta(1:cpdeltheta)
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
     call override_span_del_theta_ctrl(cpdeltheta, temp_in)
 #endif
     spantheta(1:cpdeltheta) = temp_in
@@ -924,7 +924,7 @@ subroutine readinput(fname)
     if (allocated(temp_in)) deallocate(temp_in)
     allocate(temp_in(cpdeltheta))
     temp_in = xcpdeltheta(1:cpdeltheta) 
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
     call override_span_del_theta(cpdeltheta, temp_in)
 #endif
     xcpdeltheta(1:cpdeltheta) = temp_in
@@ -957,7 +957,7 @@ subroutine readinput(fname)
     if (allocated(temp_in)) deallocate(temp_in)
     allocate(temp_in(cpinbeta))
     temp_in = spaninbeta(1:cpinbeta)
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
     call override_span_in_beta_ctrl(cpinbeta, temp_in)
 #endif
     spaninbeta(1:cpinbeta) = temp_in
@@ -969,7 +969,7 @@ subroutine readinput(fname)
     if (allocated(temp_in)) deallocate(temp_in)
     allocate(temp_in(cpinbeta))
     temp_in = xcpinbeta(1:cpinbeta)
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
     call override_span_in_beta(cpinbeta, temp_in)
 #endif
     xcpinbeta(1:cpinbeta) = temp_in
@@ -1002,7 +1002,7 @@ subroutine readinput(fname)
     if (allocated(temp_in)) deallocate(temp_in)
     allocate(temp_in(cpoutbeta))
     temp_in = spanoutbeta(1:cpoutbeta)
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
     call override_span_out_beta_ctrl(cpoutbeta, temp_in)
 #endif
     spanoutbeta(1:cpoutbeta) = temp_in
@@ -1014,7 +1014,7 @@ subroutine readinput(fname)
     if (allocated(temp_in)) deallocate(temp_in)
     allocate(temp_in(cpoutbeta))
     temp_in = xcpoutbeta(1:cpoutbeta)
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
     call override_span_out_beta(cpoutbeta, temp_in)
 #endif
     xcpoutbeta(1:cpoutbeta) = temp_in
@@ -1049,7 +1049,7 @@ subroutine readinput(fname)
     if (allocated(temp_in)) deallocate(temp_in)
     allocate(temp_in(cpchord))
     temp_in = spanchord(1:cpchord)
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
     call override_span_chord_ctrl(cpchord, temp_in)
 #endif
     spanchord(1:cpchord) = temp_in
@@ -1061,7 +1061,7 @@ subroutine readinput(fname)
     if (allocated(temp_in)) deallocate(temp_in)
     allocate(temp_in(cpchord))
     temp_in = xcpchord(1:cpchord)
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
     call override_span_chord(cpchord, temp_in)
 #endif
     
@@ -1163,7 +1163,7 @@ subroutine readinput(fname)
     if (allocated(temp_in)) deallocate(temp_in)
     allocate(temp_in(cptm_c))
     temp_in = spantm_c(1:cptm_c)
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
     call override_span_thk_c_ctrl(cptm_c, temp_in)
 #endif
     spantm_c(1:cptm_c) = temp_in
@@ -1175,7 +1175,7 @@ subroutine readinput(fname)
     if(allocated(temp_in)) deallocate(temp_in)
     allocate(temp_in(cptm_c))
     temp_in = xcptm_c(1:cptm_c)
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
     call override_span_thk_c(cptm_c, temp_in)
 #endif
     
@@ -1197,7 +1197,7 @@ subroutine readinput(fname)
     if (allocated(temp_in)) deallocate(temp_in)
     allocate(temp_in(cptm_c))
     temp_in = xcpumax(1:cptm_c)
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
     call override_span_u_max(cptm_c, temp_in)
 #endif
     xcpumax(1:cptm_c) = temp_in
@@ -1226,7 +1226,7 @@ subroutine readinput(fname)
     !
     temp_offsets(1) = hub
     temp_offsets(2) = tip
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
     call override_offsets(temp_offsets)
 #endif
     hub = temp_offsets(1)
@@ -1786,7 +1786,7 @@ subroutine read_spanwise_input(row_type, path)
         do i = 1, ncp_span_curv
            temp(i) = cp_chord_curv(i,jj)
         end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
         call override_span_curv_ctrl(ncp_span_curv, temp)
 #endif
         do i = 1, ncp_span_curv
@@ -1805,7 +1805,7 @@ subroutine read_spanwise_input(row_type, path)
             do i = 1,ncp_span_curv
                 temp(i) = cp_chord_curv(i,jj)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_cur1(ncp_span_curv, temp)
 #endif
             do i = 1,ncp_span_curv
@@ -1830,7 +1830,7 @@ subroutine read_spanwise_input(row_type, path)
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_cur2(ncp_span_curv, temp)
 #endif
             do i = 1, ncp_span_curv
@@ -1855,7 +1855,7 @@ subroutine read_spanwise_input(row_type, path)
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_cur3(ncp_span_curv, temp)
 #endif
             do i = 1, ncp_span_curv
@@ -1880,7 +1880,7 @@ subroutine read_spanwise_input(row_type, path)
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_cur4(ncp_span_curv, temp)
 #endif
             do i = 1, ncp_span_curv
@@ -1905,7 +1905,7 @@ subroutine read_spanwise_input(row_type, path)
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_cur5(ncp_span_curv, temp)
 #endif
             do i = 1, ncp_span_curv
@@ -1930,7 +1930,7 @@ subroutine read_spanwise_input(row_type, path)
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_cur6(ncp_span_curv, temp)
 #endif
             do i = 1, ncp_span_curv
@@ -1955,7 +1955,7 @@ subroutine read_spanwise_input(row_type, path)
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_cur7(ncp_span_curv, temp)
 #endif
             do i = 1, ncp_span_curv
@@ -1975,7 +1975,7 @@ subroutine read_spanwise_input(row_type, path)
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_u2(ncp_span_curv, temp)
 #endif
             do i = 1, ncp_span_curv
@@ -1995,7 +1995,7 @@ subroutine read_spanwise_input(row_type, path)
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_u3(ncp_span_curv, temp)
 #endif
             do i = 1, ncp_span_curv
@@ -2015,7 +2015,7 @@ subroutine read_spanwise_input(row_type, path)
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_u4(ncp_span_curv, temp)
 #endif
             do i = 1, ncp_span_curv
@@ -2035,7 +2035,7 @@ subroutine read_spanwise_input(row_type, path)
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_u5(ncp_span_curv, temp)
 #endif
             do i = 1, ncp_span_curv
@@ -2055,7 +2055,7 @@ subroutine read_spanwise_input(row_type, path)
             do i = 1, ncp_span_curv
                temp(i) = cp_chord_curv(i,jj)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_u6(ncp_span_curv, temp)
 #endif
             do i = 1, ncp_span_curv
@@ -2443,7 +2443,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
         do ii   = 1,ncp_span_curv
             temp(ii)                = cp_chord_curv(ii,kk)
         end do  
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
         call override_span_curv_ctrl(ncp_span_curv,temp)
 #endif
         do ii   = 1,ncp_span_curv
@@ -2461,7 +2461,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
             do ii = 1,ncp_span_curv
                 temp(ii)            = cp_chord_curv(ii,kk)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_u2(ncp_span_curv,temp)
 #endif
             do ii = 1,ncp_span_curv
@@ -2481,7 +2481,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
             do ii = 1,ncp_span_curv
                 temp(ii)            = cp_chord_curv(ii,kk)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_u3(ncp_span_curv,temp)
 #endif
             do ii = 1,ncp_span_curv
@@ -2501,7 +2501,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
             do ii = 1,ncp_span_curv
                 temp(ii)            = cp_chord_curv(ii,kk)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_u4(ncp_span_curv,temp)
 #endif
             do ii = 1,ncp_span_curv
@@ -2521,7 +2521,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
             do ii = 1,ncp_span_curv
                 temp(ii)            = cp_chord_curv(ii,kk)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_u5(ncp_span_curv,temp)
 #endif
             do ii = 1,ncp_span_curv
@@ -2541,7 +2541,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
             do ii = 1,ncp_span_curv
                 temp(ii)            = cp_chord_curv(ii,kk)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_u6(ncp_span_curv,temp)
 #endif
             do ii = 1,ncp_span_curv
@@ -2561,7 +2561,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
             do ii = 1,ncp_span_curv
                 temp(ii)            = cp_chord_curv(ii,kk)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_cur1(ncp_span_curv,temp)
 #endif
             do ii = 1,ncp_span_curv
@@ -2581,7 +2581,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
             do ii = 1,ncp_span_curv
                 temp(ii)            = cp_chord_curv(ii,kk)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_cur2(ncp_span_curv,temp)
 #endif
             do ii = 1,ncp_span_curv
@@ -2601,7 +2601,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
             do ii = 1,ncp_span_curv
                 temp(ii)            = cp_chord_curv(ii,kk)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_cur3(ncp_span_curv,temp)
 #endif
             do ii = 1,ncp_span_curv
@@ -2621,7 +2621,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
             do ii = 1,ncp_span_curv
                 temp(ii)            = cp_chord_curv(ii,kk)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_cur4(ncp_span_curv,temp)
 #endif
             do ii = 1,ncp_span_curv
@@ -2641,7 +2641,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
             do ii = 1,ncp_span_curv
                 temp(ii)            = cp_chord_curv(ii,kk)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_cur5(ncp_span_curv,temp)
 #endif
             do ii = 1,ncp_span_curv
@@ -2661,7 +2661,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
             do ii = 1,ncp_span_curv
                 temp(ii)            = cp_chord_curv(ii,kk)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_cur6(ncp_span_curv,temp)
 #endif
             do ii = 1,ncp_span_curv
@@ -2681,7 +2681,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
             do ii = 1,ncp_span_curv
                 temp(ii)            = cp_chord_curv(ii,kk)
             end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
             call override_cur6(ncp_span_curv,temp)
 #endif
             do ii = 1,ncp_span_curv
@@ -2771,7 +2771,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
         do ii = 1,ncp_span_thk
             temp(ii)            = cp_chord_thk(ii,kk)
         end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
         call override_span_thk_ctrl(ncp_span_thk,temp)
 #endif
         do ii = 1,ncp_span_thk
@@ -2787,7 +2787,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
         do ii = 1,ncp_span_thk
             temp(ii)            = cp_chord_thk(ii,kk)
         end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
         call override_naca_le_radius(ncp_span_thk,temp)
 #endif
         do ii = 1,ncp_span_thk
@@ -2803,7 +2803,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
         do ii = 1,ncp_span_thk
             temp(ii)            = cp_chord_thk(ii,kk)
         end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
         call override_naca_u_max(ncp_span_thk,temp)
 #endif
         do ii = 1,ncp_span_thk
@@ -2819,7 +2819,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
         do ii = 1,ncp_span_thk
             temp(ii)            = cp_chord_thk(ii,kk)
         end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
         call override_naca_t_max(ncp_span_thk,temp)
 #endif
         do ii = 1,ncp_span_thk
@@ -2835,7 +2835,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
         do ii = 1,ncp_span_thk
             temp(ii)            = cp_chord_thk(ii,kk)
         end do
-#ifndef STAND_ALONE
+#ifdef FROM_ESP
         call override_naca_t_te(ncp_span_thk,temp)
 #endif
         do ii = 1,ncp_span_thk
