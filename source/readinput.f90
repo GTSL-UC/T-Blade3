@@ -846,7 +846,9 @@ subroutine readinput(fname)
     ! Callback to override_span_del_m_ctrl_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
     !
     temp_in = spanmp(1:cpdeltam)
-    !call override_span_del_m_ctrl(cpdeltam, temp_in)
+#ifndef STAND_ALONE
+    call override_span_del_m_ctrl(cpdeltam, temp_in)
+#endif
     spanmp(1:cpdeltam) = temp_in
 
     !
@@ -856,7 +858,9 @@ subroutine readinput(fname)
     if (allocated(temp_in)) deallocate(temp_in)
     allocate(temp_in(cpdeltam))
     temp_in = xcpdelm(1:cpdeltam)
-    !call override_span_del_m(cpdeltam, temp_in)
+#ifndef STAND_ALONE
+    call override_span_del_m(cpdeltam, temp_in)
+#endif
     xcpdelm(1:cpdeltam) = temp_in
 
 
@@ -908,7 +912,9 @@ subroutine readinput(fname)
     ! Callback to override_span_del_theta_ctrl_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
     !
     temp_in = spantheta(1:cpdeltheta)
-    !call override_span_del_theta_ctrl(cpdeltheta, temp_in)
+#ifndef STAND_ALONE
+    call override_span_del_theta_ctrl(cpdeltheta, temp_in)
+#endif
     spantheta(1:cpdeltheta) = temp_in
      
     !
@@ -918,7 +924,9 @@ subroutine readinput(fname)
     if (allocated(temp_in)) deallocate(temp_in)
     allocate(temp_in(cpdeltheta))
     temp_in = xcpdeltheta(1:cpdeltheta) 
-    !call override_span_del_theta(cpdeltheta, temp_in)
+#ifndef STAND_ALONE
+    call override_span_del_theta(cpdeltheta, temp_in)
+#endif
     xcpdeltheta(1:cpdeltheta) = temp_in
 
 
