@@ -151,7 +151,7 @@
     !  real*8 a(*)
     !end subroutine override_naca_t_te
 
-#elif
+#else
     program bgb3d ! 3d blade geometry builder
         use globvar
         implicit none
