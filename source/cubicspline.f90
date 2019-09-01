@@ -102,6 +102,10 @@ real*8 xbs(nspline),ybs(nspline), xin(nspan), yout(nspan)
 real*8 min, max, xmax, xmin, xint
 character(:),   allocatable :: error_msg, warning_msg, warning_arg, dev_msg
 !print*,'xin:',xin
+
+! Initialize warning_arg
+warning_arg = ''
+
 do j = 1, nspan
  do ii = 1, nspline-1
   xint = xbs(ii+1) + (ybs(ii+1) - xin(j))*(((xbs(ii) - xbs(ii+1))/(ybs(ii+1) - ybs(ii))))

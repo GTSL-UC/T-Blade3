@@ -260,7 +260,7 @@ end subroutine bspline3
         end subroutine    
         
 !-----------------------------------------------------------------------
-        real function bspline_cp(cp,arclength,ncp,degree,s)  
+        function bspline_cp(cp,arclength,ncp,degree,s) result(temp) 
             implicit none
             real*8, dimension(ncp),  intent (in) :: cp
             real*8, dimension(ncp-2),intent (in) :: arclength
@@ -268,15 +268,19 @@ end subroutine bspline3
             real*8 ,intent (in) :: s
             integer :: j
             real*8 :: t, bspline, bspline4
-           
+            real    :: temp
+        
+            ! Initialize function result
+            temp    = 0.0
+
             call bspline_jt(j,t,arclength,ncp,degree,s)  
-            if( degree == 3) bspline_cp = bspline(cp(j:j+degree),t)
-            if( degree == 4) bspline_cp = bspline4(cp(j:j+degree),t)
+            if( degree == 3) temp = bspline(cp(j:j+degree),t)
+            if( degree == 4) temp = bspline4(cp(j:j+degree),t)
 
         end function    
     
 !-----------------------------------------------------------------------
-        real function d_bspline_cp(cp,arclength,ncp,degree,s)  
+        function d_bspline_cp(cp,arclength,ncp,degree,s) result(temp) 
             implicit none
             real*8, dimension(ncp), intent (in) :: cp
             real*8 , dimension(ncp-2) ,intent (in) :: arclength
@@ -284,15 +288,19 @@ end subroutine bspline3
             real*8 ,intent (in) :: s
             integer :: j
             real*8 :: t, d_bspline, d_bspline4
-            
+            real    :: temp
+           
+            ! Initialize function result
+            temp    = 0.0
+
             call bspline_jt(j,t,arclength,ncp,degree,s)  
-            if( degree == 3) d_bspline_cp = d_bspline(cp(j:j+degree),t)
-            if( degree == 4) d_bspline_cp = d_bspline4(cp(j:j+degree),t)
+            if( degree == 3) temp = d_bspline(cp(j:j+degree),t)
+            if( degree == 4) temp = d_bspline4(cp(j:j+degree),t)
 
         end function   
     
 !-----------------------------------------------------------------------
-        real function dd_bspline_cp(cp,arclength,ncp,degree,s)  
+        function dd_bspline_cp(cp,arclength,ncp,degree,s) result(temp)
             implicit none
             real*8, dimension(ncp), intent (in) :: cp
             real*8 , dimension(ncp-2) ,intent (in) :: arclength
@@ -300,15 +308,19 @@ end subroutine bspline3
             real*8 ,intent (in) :: s
             integer :: j
             real*8 :: t, dd_bspline, dd_bspline4
+            real    :: temp
+
+            ! Initialize function result
+            temp    = 0.0
             
             call bspline_jt(j,t,arclength,ncp,degree,s)  
-            if( degree == 3) dd_bspline_cp = dd_bspline(cp(j:j+degree),t)
-            if( degree == 4) dd_bspline_cp = dd_bspline4(cp(j:j+degree),t)
+            if( degree == 3) temp = dd_bspline(cp(j:j+degree),t)
+            if( degree == 4) temp = dd_bspline4(cp(j:j+degree),t)
 
         end function
     
 !-----------------------------------------------------------------------
-        real function d3_bspline_cp(cp,arclength,ncp,degree,s)  
+        function d3_bspline_cp(cp,arclength,ncp,degree,s) result(temp) 
             implicit none
             real*8, dimension(ncp), intent (in) :: cp
             real*8 , dimension(ncp-2) ,intent (in) :: arclength
@@ -316,10 +328,14 @@ end subroutine bspline3
             real*8 ,intent (in) :: s
             integer :: j
             real*8 :: t, d3_bspline, d3_bspline4
+            real    :: temp
+
+            ! Initialize function result
+            temp    = 0.0
             
             call bspline_jt(j,t,arclength,ncp,degree,s)  
-            if( degree == 3) d3_bspline_cp = d3_bspline(cp(j:j+degree),t)
-            if( degree == 4) d3_bspline_cp = d3_bspline4(cp(j:j+degree),t)
+            if( degree == 3) temp = d3_bspline(cp(j:j+degree),t)
+            if( degree == 4) temp = d3_bspline4(cp(j:j+degree),t)
 
         end function
         
@@ -517,6 +533,12 @@ real*8 function bspline_t_newton(cp,u)
     real*8 tt_0, xs_0,d1_xs_0
     character(:),   allocatable :: error_msg, error_arg_1, error_arg_2, &
                                    dev_msg
+
+
+    ! Initialization
+    error_arg_1     = ''
+    error_arg_2     = ''
+
     ! Newton's method       
 
     tt_0 = 0.5
@@ -653,6 +675,11 @@ real*8 function bspline4_t_newton(cp,u)
     real*8 tt_0, xs_0,d1_xs_0
     character(:),   allocatable :: error_msg, error_arg_1, error_arg_2, &
                                    dev_msg
+
+    ! Initialization
+    error_arg_1     = ''
+    error_arg_2     = ''
+
     ! Newton's method       
     tt_0 = 0.5
 

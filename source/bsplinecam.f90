@@ -205,6 +205,9 @@ call get_quiet_status(isquiet)
 ! Get section number
 call get_sec_number(js)
 
+! Initialize variables
+tot_cam     = 0.0
+
 call log_file_exists(log_file, nopen, file_open)
 if (.not. isquiet) then
     print*, 'xcp', xcp

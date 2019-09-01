@@ -969,9 +969,11 @@ subroutine throat_calc_pitch_line(xb,yb,np,camber,angle,sang,u,pi,pitch,throat_c
     call get_dev_status(isdev)
     call get_quiet_status(isquiet)
 
-    ! Initializing x_interup and y_interup
+    ! Initializing variables
     x_interup   = 0.0
     y_interup   = 0.0
+    x_interdwn  = 0.0
+    y_interdwn  = 0.0
 
     ! Number of points along bottom and top curves
     if (mod(np,2) == 0) then
