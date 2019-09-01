@@ -27,7 +27,7 @@ subroutine displayMessage
         write(*,*)'****  ...was also called as below till Aug 2016...      ****' 
         write(*,*)'****  3DBGB: 3 Dimensional Blade Geometry Builder       ****'
         write(*,*)'****                                                    ****'  
-        write(*,*)'****  Develop Version 1.2                               ****' 
+        write(*,*)'****  Develop Version 1.2.1                             ****' 
         write(*,*)'****                                                    ****'
         write(*,*)'****  This software comes with ABSOLUTELY NO WARRANTY   ****'
         write(*,*)'****                                                    ****'

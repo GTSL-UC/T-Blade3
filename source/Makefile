@@ -27,11 +27,6 @@ endif
 
 OBJS =  globvar.o file_operations.o errors.o spline.o readinput.o funcNsubs.o 3dbgb.o 3dbgb_driver.o bladegen.o bladestack.o bspline3.o lesting.o \
         cubicspline.o lespline.o bsplinecam.o splinethick.o airfoiltypes.o spanwise_variation.o \
-#OBJS =  globvar.o file_operations.o spline.o readinput.o funcNsubs.o 3dbgb.o bladegen.o b3d2sec.o bladestack.o bspline3.o lesting.o \
-#        cubicspline.o lespline.o bsplinecam.o splinethick.o gauss_jordan.o airfoiltypes.o bladegrid2D.o ellipgrid.o \
-#		spanwise_variation.o poly_solve_bisect.o quartic_poly_solve.o thk_ctr_gen_driver.o \
-#		thk_ctrl_gen_der.o thk_ctrl_gen_spl.o \
-#MYLIBS = $(HOME)/$(LIBDIR)/dtnurbsPIC_i.a
 
 # 'Make code' behavior
 ifeq ($(detected_OS),Windows)
