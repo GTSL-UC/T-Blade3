@@ -3904,10 +3904,19 @@ subroutine modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a,d,thk_da
     !
     ! Add circular TE thickness
     !
-    do i = counter + 1,np - 1
-        thk_data(i,1)       = sqrt(t_TE**2 - ((u(i) - u_TE)**2)) 
+    do i = counter + 1,np 
+        
+        if (i < np) then
+            thk_data(i,1)       = sqrt(t_TE**2 - ((u(i) - u_TE)**2)) 
+            !thk_data(i,2)       = -(u(i) - u_TE)/(sqrt(t_TE**2 - ((u(i) - u_TE)**2)))
+            !thk_data(i,3)       = -t_TE/((sqrt(t_TE**2 - ((u(i) - u_TE)**2)))**3)
+        else
+            if (t_TE**2 - ((u(np) - u_TE)**2) < tol) then
+                thk_data(i,1)   = 0.0
+            end if
+        end if
+
     end do
-    thk_data(np,1)          = 0.0
 
 
 
