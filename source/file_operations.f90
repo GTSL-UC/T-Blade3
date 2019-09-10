@@ -895,6 +895,46 @@ module file_operations
 
 
     !
+    ! Write Wennerstrom thickness distribution for a section to a file
+    !
+    !---------------------------------------------------------------------------
+    subroutine write_Wennerstrom_thickness_variation(casename,nspn,umxthk_all,spanwise_thk)
+        
+        character(*),               intent(in)          :: casename
+        integer,                    intent(in)          :: nspn
+        real,                       intent(in)          :: umxthk_all(nspn)
+        real,                       intent(in)          :: spanwise_thk(nspn)
+
+        ! Local variables
+        character(:),   allocatable                     :: thickness_file_name
+        integer                                         :: funit = 11, i
+        logical                                         :: file_exist
+
+
+        thickness_file_name     = 'thickness_span_variation.'//trim(casename)//'.dat'
+        inquire (file = thickness_file_name, exist = file_exist)
+        if (file_exist) then
+            open(funit, file = thickness_file_name, status = 'old', action = 'write', form = 'formatted')
+        else
+            open(funit, file = thickness_file_name, status = 'new', action = 'write', form = 'formatted')
+        end if
+        do i = 1, nspn
+            
+            write(funit, '(2F20.16)') umxthk_all(i), spanwise_thk(i)
+
+        end do
+        close(funit)
+
+
+    end subroutine write_Wennerstrom_thickness_variation
+    !---------------------------------------------------------------------------
+   
+
+
+
+
+
+    !
     ! Write meanline u,v data to a file
     !
     ! Input parameters: np      - number of points along the chord

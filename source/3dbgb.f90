@@ -95,7 +95,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     ! Local variables
     integer                     :: nopen, nopen_error, np_in
     real                        :: spl_eval, dspl_eval, xdiff, inBetaInci, outBetaDevn
-    real,           allocatable :: um_spl(:), u_in(:), v_in(:)
+    real,           allocatable :: um_spl(:), u_in(:), v_in(:), spanwise_thk(:)
     character(256)              :: fname, temp, fname1, row_type, path
     character(:),   allocatable :: log_file, error_file, auxinput_filename, error_msg
     logical                     :: axial_TE, radial_TE, file_open, file_exist, &
@@ -1343,6 +1343,10 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !-------------------------------------------------------------
     ! calling bladegen routine to create 2D airfoil shapes
     !!-------------------------------------------------------------
+    if (allocated(spanwise_thk)) deallocate(spanwise_thk)
+    allocate(spanwise_thk(nspn))
+    spanwise_thk    = 0.0
+
     do js = 1, nspn
        mles = msle(js)
        ! msle = msle(1)
@@ -1473,7 +1477,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                      sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index,n_normal_distance,casename, &
                      develop,mble,mbte,mles,mtes,i_slope,jcellblade_all,etawidth_all,BGgrid_all,thk_tm_c_spl,     &
                      theta_offset,TE_der,from_gridgen,np_in,u_in,v_in,uv_grid(js,:,:),uv_top_grid(js,:,:),        &
-                     uv_bot_grid(js,:,:),mblade_grid(js,:),thblade_grid(js,:))
+                     uv_bot_grid(js,:,:),mblade_grid(js,:),thblade_grid(js,:),spanwise_thk)
 
        mprime_ble(js) = mble
        mprime_bte(js) = mbte

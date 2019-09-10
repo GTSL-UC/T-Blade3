@@ -36,7 +36,7 @@ integer, allocatable, dimension(:) :: ncp_curv,ncp_thk,throat_index,BGgrid_all
 integer n_inter_intervals,nsp_interpolated_hub, spline_switch
 !
 real*8, allocatable, dimension(:,:) :: bladedata, bladedata_before, splinedata
-real*8 sinl,sext,thkc ,chrdx,mr1,stak_u,stak_v, x1hub,x1tip,r1hub,r1tip
+real*8 sinl,sext,thkc,chrdx,mr1,stak_u,stak_v, x1hub,x1tip,r1hub,r1tip
 real*8 xb(nx),yb(nx),mp(nx,nax),xstk,xstk1,abs_zero
 real*8 xa(nx,nax),ya(nx,nax),xms(nx,nax),rms(nx,nax)
 real*8 xxa,yya,scf,lref

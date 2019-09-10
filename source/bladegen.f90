@@ -6,7 +6,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                     sting_h_all,LEdegree,no_LE_segments,sec_radius,bladedata,amount_data,scf,             &
                     intersec_coord,throat_index, n_normal_distance,casename,develop,mble,mbte,msle,       &
                     mste,i_slope,jcellblade_all, etawidth_all,BGgrid_all,thk_tm_c_spl, theta_offset,      &
-                    TE_derivative,from_gridgen,np_in,u_in,v_in,uv,uv_top,uv_bot,m_prime,theta)
+                    TE_derivative,from_gridgen,np_in,u_in,v_in,uv,uv_top,uv_bot,m_prime,theta,spanwise_thk)
 
     use file_operations
     use errors
@@ -23,7 +23,8 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                                                                    sting_h_all(nsl), sec_radius(nsl,2), scf, intersec_coord(12,nsl), mble, mbte, msle, mste,       &
                                                                    jcellblade_all(nspn), etawidth_all(nspn), BGgrid_all(nspn), thk_tm_c_spl(nsl), theta_offset
     real,                                   intent(inout)       :: sinl, sext, stagger, bladedata(amount_data,nsl), u_in(np_in), v_in(np_in), &
-                                                                   uv(500,2), uv_top(500,2), uv_bot(500,2), m_prime(500), theta(500)
+                                                                   uv(500,2), uv_top(500,2), uv_bot(500,2), m_prime(500), theta(500),         &
+                                                                   spanwise_thk(nspn)
     character(*),                           intent(in)          :: fext, airfoil, casename, develop
     logical                                                     :: TE_derivative, from_gridgen
 
@@ -660,7 +661,8 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         ! Wennerstrom thickness distribution
         ! 
         else if (thick_distr == 0)then
-            
+        
+            spanwise_thk(js)     = fmxthk    
             do i = 1, np
                 ui           = u(i)
 
@@ -686,6 +688,11 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             write(nopen,*) 'Writing thickness data to file'
             write(nopen,*) ''
             call write_Wennerstrom_thickness(sec,casename,np,u,thickness)
+
+            ! Write spanwise thickness variation to file
+            ! write_Wennerstrom_thk_variation in file_operations.f90
+            if (js == 21) &
+                call write_Wennerstrom_thickness_variation(casename,nspn,umxthk_all,spanwise_thk)
 
             call close_log_file(nopen, file_open)
 
