@@ -50,6 +50,9 @@ source - Source code for T-Blade3 and ESP UDPs (also contains
 tests - Subdirectory which contains unit tests for T-Blade3 (also
         contains sub makefile for the test suite)
 
+scripts - Subdirectory which contains scripts for plotting various
+          T-Blade3 output
+
 inputs - Contains example cases for T-Blade3
 
 4. BUILDING T-BLADE3

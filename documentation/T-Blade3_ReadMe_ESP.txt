@@ -40,6 +40,8 @@ sharmamm@mail.uc.edu
                                 for T-Blade3 and ESP)
     tests                   -   subdirectory which contains unit tests for T-Blade3 (also
                                 contains sub makefile for the test suite)
+    scripts                 -   subdirectory containing various scripts for plotting T-Blade3
+                                output data
     documentation           -   subdirectory which contains additional documentation for 
                                 T-Blade3
     inputs                  -   directory containing various example input files 
