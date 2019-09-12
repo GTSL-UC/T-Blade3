@@ -109,7 +109,7 @@ subroutine test_modified_NACA_coefficients_2()
     implicit none
 
     real(kind = 8)  :: t_max, u_max, t_TE, TE_slope, LE_radius, a(4), d(4)
-    real(kind = 8)  :: thk_1, thk_2, thk_3, u_TE
+    real(kind = 8)  :: thk_1, thk_2, thk_3, u_TE, u_center
     real(kind = 8)  :: tol = 10E-8
 
 
@@ -126,7 +126,7 @@ subroutine test_modified_NACA_coefficients_2()
     LE_radius   = 5.5
 
     ! Call subroutine
-    call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,TE_slope,LE_radius,a,d)
+    call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,u_TE,t_TE,TE_slope,LE_radius,a,d)
 
 
 
@@ -249,6 +249,7 @@ subroutine test_modified_NACA_thickness_2()
     implicit none
 
     real(kind = 8)                  :: t_max, u_max, t_TE, TE_slope, LE_radius, a(4), d(4)
+    real(kind = 8)                  :: u_TE, u_center
     real(kind = 8)                  :: tol = 10E-8, tol1 = 10E-4
     integer                         :: np
     real(kind = 8), allocatable     :: u(:), thk_data(:,:)
@@ -262,11 +263,13 @@ subroutine test_modified_NACA_thickness_2()
     t_max       = real(0.065,8)
     u_max       = real(0.4,8)
     t_TE        = real(0.011,8)
+    u_TE        = real(1.0 - t_TE,8)
+    u_center    = u_TE
     TE_slope    = real(-0.20475,8)
     LE_radius   = real(5.5,8)
 
     ! Compute coefficients for the NACA thickness distribution
-    call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,TE_slope,LE_radius,a,d)
+    call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,u_TE,t_TE,TE_slope,LE_radius,a,d)
 
 
 
@@ -283,7 +286,7 @@ subroutine test_modified_NACA_thickness_2()
                   &real(1.0,8)]
 
     ! Call subroutine
-    call modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a,d,thk_data)
+    call modified_NACA_four_digit_thickness_2(np,u,u_max,u_TE,u_center,t_max,t_TE,a,d,thk_data)
 
 
 
