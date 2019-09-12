@@ -27,7 +27,7 @@ subroutine displayMessage
         write(*,*)'****  ...was also called as below till Aug 2016...      ****' 
         write(*,*)'****  3DBGB: 3 Dimensional Blade Geometry Builder       ****'
         write(*,*)'****                                                    ****'  
-        write(*,*)'****  Develop Version 1.2.1                             ****' 
+        write(*,*)'****  Develop Version 1.2.2                             ****' 
         write(*,*)'****                                                    ****'
         write(*,*)'****  This software comes with ABSOLUTELY NO WARRANTY   ****'
         write(*,*)'****                                                    ****'
@@ -3668,8 +3668,10 @@ end subroutine modified_NACA_four_digit_thickness_coeffs
 !
 ! Input parameters: t_max    - half max. thickness for the blade section in fraction chord
 !                   u_max    - chordwise location of max. thickness for the blade section
+!                   u_TE     - location of the intersection of the modified NACA four digit
+!                              thickness distribution and circular TE
 !                   t_TE     - half thickness for the blade section at the trailing edge
-!                   dy_dx_TE - trailing edige angle
+!                   dy_dx_TE - trailing edge angle
 !                   I        - integer parameter governing roundedness of the leading edge
 !                              (default = 6, sharp LE = 0)
 !
@@ -3677,11 +3679,12 @@ end subroutine modified_NACA_four_digit_thickness_coeffs
 !            Sections, Dover Publications, New York, 1999, pp. 116-118
 !
 !------------------------------------------------------------------------------------------------------
-subroutine modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,dy_dx_TE,I,a,d)
+subroutine modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,u_TE,t_TE,dy_dx_TE,I,a,d)
     implicit none
 
     real,                       intent(in)      :: t_max
     real,                       intent(in)      :: u_max
+    real,                       intent(in)      :: u_TE
     real,                       intent(in)      :: t_TE
     real,                       intent(in)      :: dy_dx_TE
     real,                       intent(in)      :: I
@@ -3690,13 +3693,9 @@ subroutine modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,dy_dx_TE
 
     ! Local variables
     integer                                     :: fail_flag
-    real                                        :: u_TE, temp
+    real                                        :: temp
     real,           allocatable                 :: aug_matrix(:,:)
 
-
-
-    ! Define near trailing edge chordwise location
-    u_TE            = 1.0 - (t_TE)
 
 
     !
@@ -3828,21 +3827,26 @@ end subroutine modified_NACA_four_digit_thickness
 !
 ! Obtain thickness distribution with the computed coefficients a_i and d_i
 !
-! Input parameters: np    - number of points along the blade section meanline
-!                   u     - points along chord
-!                   u_max - chordwise location of max. thickness for the blade section
-!                   t_max - half max. thickness for the blade section in fraction chord
-!                   a     - thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
-!                   d     - thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
+! Input parameters: np       - number of points along the blade section meanline
+!                   u        - points along chord
+!                   u_max    - chordwise location of max. thickness for the blade section
+!                   u_TE     - location of the intersection of the modified NACA four digit
+!                              thickness distribution and circular TE
+!                   u_center - location of the center of the circular TE
+!                   t_max    - half max. thickness for the blade section in fraction chord
+!                   a        - thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
+!                   d        - thickness coefficients obtained in modified_NACA_four_digit_thickness_coeffs
 !           
 !------------------------------------------------------------------------------------------------------
-subroutine modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a,d,thk_data)
+subroutine modified_NACA_four_digit_thickness_2(np,u,u_max,u_TE,u_center,t_max,t_TE,a,d,thk_data)
     use file_operations
     implicit none
 
     integer,                intent(in)      :: np
     real,                   intent(in)      :: u(np)
     real,                   intent(in)      :: u_max
+    real,                   intent(in)      :: u_TE
+    real,                   intent(in)      :: u_center
     real,                   intent(in)      :: t_max
     real,                   intent(in)      :: t_TE
     real,                   intent(in)      :: a(4)
@@ -3851,14 +3855,13 @@ subroutine modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a,d,thk_da
 
     ! Local variables
     integer                                 :: i, counter
-    real                                    :: u_TE, tol = 10E-8
+    real                                    :: tol = 10E-8, t
 
 
 
     !
     ! Find point closest to u_TE
     !
-    u_TE                = 1.0 - t_TE
     counter             = 0
     do i = 1,np
         
@@ -3907,7 +3910,8 @@ subroutine modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a,d,thk_da
     do i = counter + 1,np 
         
         if (i < np) then
-            thk_data(i,1)       = sqrt(t_TE**2 - ((u(i) - u_TE)**2)) 
+            t                   = acos((u(i) - u_center)/(1.0 - u_center))
+            thk_data(i,1)       = (1.0 - u_center)*sin(t)
             !thk_data(i,2)       = -(u(i) - u_TE)/(sqrt(t_TE**2 - ((u(i) - u_TE)**2)))
             !thk_data(i,3)       = -t_TE/((sqrt(t_TE**2 - ((u(i) - u_TE)**2)))**3)
         else
@@ -3933,8 +3937,22 @@ end subroutine modified_NACA_four_digit_thickness_2
 ! Collect modified NACA four digit thickness computation in one subroutine
 ! To enable calling in a loop for numerical runtime checks
 !
+! Input parameters: js            - spanwise section index
+!                   np            - number of points along non-dimensional chord
+!                   u             - points along non-dimensional chord
+!                   u_max         - chordwise location of the maximum thickness
+!                   u_TE          - location of the intersection of the modified NACA four digit
+!                                   thickness distribution and the circular TE
+!                   u_center      - location of the center of the circular TE
+!                   t_max         - maximum thickness
+!                   t_TE          - thickness at u_TE
+!                   a             - modified NACA four digit thickness distribution coefficients
+!                   d             - modified NACA four digit thickness distribution coefficients
+!                   write_to_file - logical argument for file I/O
+!
 !------------------------------------------------------------------------------------------------------
-subroutine modified_NACA_four_digit_thickness_all(js,np,u,u_max,t_max,t_TE,a,d,thk_data,monotonic,write_to_file)
+subroutine modified_NACA_four_digit_thickness_all(js,np,u,u_max,u_TE,u_center,t_max,t_TE,a,d,thk_data,&
+                                                  monotonic,write_to_file)
     use errors
     use file_operations
     implicit none
@@ -3943,6 +3961,8 @@ subroutine modified_NACA_four_digit_thickness_all(js,np,u,u_max,t_max,t_TE,a,d,t
     integer,                    intent(in)          :: np
     real,                       intent(in)          :: u(np)
     real,                       intent(in)          :: u_max
+    real,                       intent(in)          :: u_TE
+    real,                       intent(in)          :: u_center
     real,                       intent(in)          :: t_max
     real,                       intent(in)          :: t_TE
     real,                       intent(in)          :: a(4)
@@ -3961,7 +3981,7 @@ subroutine modified_NACA_four_digit_thickness_all(js,np,u,u_max,t_max,t_TE,a,d,t
     !
     ! Compute the thickness distribution
     !
-    call modified_NACA_four_digit_thickness_2(np,u,u_max,t_max,t_TE,a,d,thk_data)
+    call modified_NACA_four_digit_thickness_2(np,u,u_max,u_TE,u_center,t_max,t_TE,a,d,thk_data)
 
 
     !

@@ -37,7 +37,8 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                                                                    u_le, uin_le, camber_le(interval+1), camber_ang(interval+1), Zweifel(nsl), ucp_top(11),         &
                                                                    vcp_top(11), ucp_bot(11), vcp_bot(11), xcp_LE, ycp_LE,  xcp_TE, ycp_TE, cp_LE(4,2), cp_TE(4,2), &
                                                                    a_NACA(4), d_NACA(4), t_max, u_max, t_TE, dy_dx_TE, LE_round, min_throat_2D, u_translation,     &
-                                                                   camber_trans, scaled, u_rot, camber_rot
+                                                                   camber_trans, scaled, u_rot, camber_rot, u_TE_quadratic_a, u_TE_quadratic_b, u_TE_quadratic_c, u_TE, u_center, &
+                                                                   TE_radius
     real,                   allocatable                         :: xtop_refine(:), ytop_refine(:), xbot_refine(:), ybot_refine(:), init_angles(:), init_cambers(:),&
                                                                    x_spl_end_curv(:), cam_refine(:), u_refine(:), xcp_curv(:), ycp_curv(:), x_le_spl(:),           &
                                                                    y_le_spl(:), xcp_thk(:), ycp_thk(:), ueq(:), xmean(:), ymean(:), xtop(:), ytop(:), xbot(:),     &
@@ -193,8 +194,19 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         else
             dy_dx_te    = thk_cp(5,js)
         end if
-        
-        call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,t_TE,dy_dx_TE,LE_round,a_NACA,d_NACA)
+
+        ! Compute u_TE and u_center for the modified four digit NACA
+        ! thickness distribution circular TE
+        u_TE_quadratic_b    = -2.0*(1.0 - (t_TE*dy_dx_te))
+        u_TE_quadratic_a    = 1.0
+        u_TE_quadratic_c    = 1.0 - (t_TE**2) - (2.0*t_TE*dy_dx_te)
+        u_TE                = (-u_TE_quadratic_b - sqrt((u_TE_quadratic_b**2) - (4.0*u_TE_quadratic_a*u_TE_quadratic_c)))/ &
+                              (2.0*u_TE_quadratic_a)
+        u_center            = u_TE + (t_TE*dy_dx_te)
+        TE_radius           = sqrt((u_TE - u_center)**2 + (t_TE)**2)
+        u_center            = 1.0 - TE_radius
+
+        call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,u_TE,t_TE,dy_dx_TE,LE_round,a_NACA,d_NACA)
 
     end if
 
@@ -225,7 +237,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             cp_LE(:,2)  = [ycp_LE, -ycp_LE, 0.0, 0.0   ]
 
             ! TE ellipse control points
-            xcp_TE      = 1.0 - t_TE
+            xcp_TE      = u_TE!1.0 - t_TE
             ycp_TE      = d_NACA(1) + (d_NACA(2)*(1.0 -  xcp_TE)) + (d_NACA(3)*((1.0 - xcp_TE)**2)) + (d_NACA(4)*((1.0 - xcp_TE)**3))
             cp_TE(:,1)  = [xcp_TE, xcp_TE , 1.0, xcp_TE]
             cp_TE(:,2)  = [ycp_TE, -ycp_TE, 0.0, 0.0   ]
@@ -613,8 +625,8 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             !
             ! Apply modified NACA four digit thickness
             !
-            call modified_NACA_four_digit_thickness_all(js,np,u,u_max,t_max,t_TE,a_NACA,d_NACA,thickness_data, &
-                                                        monotonic,write_to_file)
+            call modified_NACA_four_digit_thickness_all(js,np,u,u_max,u_TE,u_center,t_max,t_TE,a_NACA,d_NACA, &
+                                                        thickness_data,monotonic,write_to_file)
             thickness       = thickness_data(:,1)
 
             ! Print coefficients to screen and write to log file
