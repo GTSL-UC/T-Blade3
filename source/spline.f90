@@ -743,68 +743,123 @@ end subroutine open_uniform_cubic_spline
 
 !
 ! Subroutine for computing the first derivatives of a parametric cubic spline for a
-! set of closed 'y' (y(1) = y(n)) points with uniform knots
+! set of closed 'x' (x(0) = x(n)) points with uniform knots
+! This subroutine is based on the subroutine PSPLINE in Reference 1
 !
 ! Input parameters: n               - number of spline points
 !                   from_gridgen    - flag for additionl output when called from
 !                                     grid_generator
-!                   y               - dependent variable values
+!                   x               - zero-indexed array containing dependent variable
+!                                     values, is passed in as an array of size n + 2
+!                                     with x(0) = x(n) and x(1) = x(n + 1)
+!
+! References: 1) Smith, D.A., "Parametric Cubic Spline-Fitting Programs for Open and
+!                Closed Curves", Computers in Physics, Vol. 6, no. 5, 1992, pp. 472 - 477
+!             2) Ahlberg, J.H., Nilson, E.N., Walsh, J.L., "The Theory of Splines and 
+!                Their Applications", Academic Press, London, UK, 1967, pp. 14, 15 and 51
 !
 !------------------------------------------------------------------------------------
-subroutine closed_uniform_cubic_spline(n, from_gridgen, y, dy)
+subroutine closed_uniform_cubic_spline(n, from_gridgen, x, dx)
+    use errors
     implicit none
 
     integer,        intent(in)              :: n
     logical,        intent(in)              :: from_gridgen
-    real,           intent(in)              :: y(n)
-    real,           intent(inout)           :: dy(n)
+    real,           intent(in)              :: x(0:n + 1)
+    real,           intent(inout)           :: dx(n + 1)
 
     ! Local variables
-    integer                                 :: i
-    real                                    :: A(n,n), rhs(n), aug_matrix(n,n + 1)
-    logical                                 :: fail_flag
+    integer                                 :: i, j
+    real                                    :: a(4,n), q(0:n), u(0:n), s(0:n), t(0:n), v(0:n), xdd(0:n), &
+                                               fxn
+    real                                    :: tol = 10E-8
+    character(:),   allocatable             :: error_msg, warning_msg, dev_msg
 
 
-    ! Generate RHS
-    rhs(1)                  = 3.0*(y(2) - y(n))
-    do i = 2,n - 1
-        rhs(i)              = 3.0*(y(i + 1) -  y(i - 1))
-    end do
-    rhs(n)                  = 3.0*(y(1) - y(n - 1))
+    !
+    ! Check if the incoming curve is periodic
+    ! If not periodic, raise error and stop execution
+    !
+    if (abs(x(0) - x(n)) > tol .or. abs(x(1) - x(n + 1)) > tol) then
+        error_msg                           = 'subroutine closed_uniform_cubic_spline requires closed curves as &
+                                               &inputs'
+        warning_msg                         = 'x(0) = x(n) and x(1) = x(n + 1)'
+        dev_msg                             = 'Check closed_uniform_cubic_spline in funcNsubs'
+        call fatal_error(error_msg, warning_msg, dev_msg)
+    end if
 
-    ! Generate matrix
-    ! Initialize matrix
-    A                       = 0.0
 
-    ! Main diagonal
-    do i = 1,n
-        A(i,i)              = 4.0
-    end do
+    ! Coefficients for computing x"
+    q(0)                                    = 0.0
+    u(0)                                    = 0.0
+    s(0)                                    = 1.0
 
-    ! Upper and lower diagonal
-    do i = 1,n - 1
-        A(i + 1,i)          = 1.0
-        A(i,i + 1)          = 1.0
-    end do
-
-    ! Closed curve endpoints
-    A(1,n)                  = 1.0
-    A(n,1)                  = 1.0
-
-    
-    ! Generate augmented matrix for the Gauss-Jordan solver
-    do i = 1,n
-        aug_matrix(i,1:n)   = A(i,:)
-        aug_matrix(i,n + 1) = rhs(i)
+    ! Forward substitution for q(j), u(j)
+    do j = 1, n
+        q(j)                                = -1.0/(4.0 + q(j - 1))
+        u(j)                                = q(j) * (u(j - 1) - ((6.0*real(n*n)) * (x(j + 1) - (2.0*x(j)) + x(j - 1))))
+        s(j)                                = q(j) * s(j - 1)
     end do
 
-    ! Solve Gauss-Jordan system
-    ! TODO: Will be changed in the future
-    call gauss_jordan(n, 1, aug_matrix, fail_flag)
+    t(n)                                    = 1.0
+    v(n)                                    = 0.0
 
-    ! Set knot first derivatives
-    dy                      = aug_matrix(:,n + 1)
+    ! Backward substitution for t(j), v(j)
+    do j = n - 1, 0, -1
+        t(j)                                = (q(j)*t(j + 1)) + s(j)
+        v(j)                                = (q(j)*v(j + 1)) + u(j)
+    end do
+
+    fxn                                     = (6.0 * real(n*n)) * (x(1) - (2.0*x(n)) + x(n - 1))
+    xdd(n)                                  = (fxn - v(1) - v(n - 1))/(4.0 + t(1) + t(n - 1)) 
+
+    ! Compute x"
+    do j = 0, n - 1
+        xdd(j)                              = t(j)*xdd(n) + v(j)
+    end do
+
+
+
+    !
+    ! Compute coefficients of all piecewise cubic polynomials
+    !
+    do j = 1, n
+        a(1,j)                              = x(j)
+        a(2,j)                              = n * (x(j) - x(j - 1)) + (xdd(j - 1) + 2.0*xdd(j))/(6.0*real(n))
+        a(3,j)                              = 0.5*xdd(j)
+        a(4,j)                              = (xdd(j) - xdd(j - 1))/(6.0/real(n))  
+    end do
+
+
+
+    !
+    ! Compute first derivative of closed curve using piecewise cubic polynomials
+    !
+    dx(1)                                   = a(2,1) + (2.0*a(3,1)*(-1.0/real(n))) + (3.0*a(4,1)*(1.0/real(n)**2))
+    do i = 1, n
+        dx(i + 1)                           = a(2,i) 
+    end do
 
 
 end subroutine closed_uniform_cubic_spline
 !------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
