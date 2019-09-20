@@ -31,7 +31,7 @@ subroutine test_arclength()
     y           = [0.0, 2.0, 1.5]
 
     ! Call subroutine
-    call arclength(x,y,arclen,n)
+    call arclength(n,x,y,arclen)
 
 
     !

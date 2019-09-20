@@ -468,14 +468,14 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen,*) xle(i), rle(i), xte(i), rte(i)
         
         ! Spline LE curve
-        call arclength(xle(1), rle(1), sle(1), npoints)
-        call spline(xle(1), xles(1), sle(1), npoints, 999.0, -999.0, from_gridgen)
-        call spline(rle(1), rles(1), sle(1), npoints, 999.0, -999.0, from_gridgen)
+        call arclength(npoints, xle(1), rle(1), sle(1))
+        call spline(npoints, xle(1), xles(1), sle(1), 999.0, -999.0)
+        call spline(npoints, rle(1), rles(1), sle(1), 999.0, -999.0)
         
         ! Spline TE curve
-        call arclength(xte(1), rte(1), ste(1), npoints)
-        call spline(xte(1), xtes(1), ste(1), npoints, 999.0, -999.0, from_gridgen)
-        call spline(rte(1), rtes(1), ste(1), npoints, 999.0, -999.0, from_gridgen)
+        call arclength(npoints, xte(1), rte(1), ste(1))
+        call spline(npoints, xte(1), xtes(1), ste(1), 999.0, -999.0)
+        call spline(npoints, rte(1), rtes(1), ste(1), 999.0, -999.0)
     
     enddo
     call close_log_file(nopen, file_open)
@@ -701,8 +701,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         ! close(12)
         
         ! splining:
-            call spline(xm_nonoffset_hub, xms_nonoffset_hub, mp_nonoffset_hub, nsp_interpolated_hub, 999.0, -999.0, from_gridgen)
-            call spline(rm_nonoffset_hub, rms_nonoffset_hub, mp_nonoffset_hub, nsp_interpolated_hub, 999.0, -999.0, from_gridgen)
+            call spline(nsp_interpolated_hub, xm_nonoffset_hub, xms_nonoffset_hub, mp_nonoffset_hub, 999.0, -999.0)
+            call spline(nsp_interpolated_hub, rm_nonoffset_hub, rms_nonoffset_hub, mp_nonoffset_hub, 999.0, -999.0)
             
         ! Offseting the interpolated hub spline:
             temp = 'interpolated'
@@ -853,8 +853,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
             call spl_intersect(ia,s1le(ia), s2le(ia), xm(1, ia), xms(1, ia), rm(1, ia), &
                        rms(1, ia), mp(1, ia), nsp(ia), xle(1), xles(1), rle(1), &
                        rles(1), sle(1), npoints)
-            x_le(ia) = spl_eval(s1le(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
-            r_le(ia) = spl_eval(s1le(ia), rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))
+            x_le(ia) = spl_eval(nsp(ia), s1le(ia), xm(1, ia), xms(1, ia), mp(1, ia))
+            r_le(ia) = spl_eval(nsp(ia), s1le(ia), rm(1, ia), rms(1, ia), mp(1, ia))
         ! endif   
     enddo
 
@@ -883,8 +883,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
             call spl_intersect(ia,s1te(ia), s2te(ia), xm(1, ia), xms(1, ia), rm(1, ia), &
                         rms(1, ia), mp(1, ia), nsp(ia), xte(1), xtes(1), rte(1), &
                         rtes(1), ste(1), npoints)
-            x_te(ia) = spl_eval(s1te(ia), xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))
-            r_te(ia) = spl_eval(s1te(ia), rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))
+            x_te(ia) = spl_eval(nsp(ia), s1te(ia), xm(1, ia), xms(1, ia), mp(1, ia))
+            r_te(ia) = spl_eval(nsp(ia), s1te(ia), rm(1, ia), rms(1, ia), mp(1, ia))
         ! endif
         ! write(*, *) 'Initial msle = ', s1le(ia), ' Initial mste = ', s1te(ia)
     enddo

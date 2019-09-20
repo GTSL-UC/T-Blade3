@@ -331,8 +331,8 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     !
     do ia = 1,na
         do i = 1,iap
-            xb(i,ia) = spl_eval(mps(i,ia),xm(1,ia),xms(1,ia),mp(1,ia),nsp(ia))      
-            rb(i,ia) = spl_eval(mps(i,ia),rm(1,ia),rms(1,ia),mp(1,ia),nsp(ia))
+            xb(i,ia) = spl_eval(nsp(ia),mps(i,ia),xm(1,ia),xms(1,ia),mp(1,ia))      
+            rb(i,ia) = spl_eval(nsp(ia),mps(i,ia),rm(1,ia),rms(1,ia),mp(1,ia))
         end do 
     end do
 
@@ -344,8 +344,8 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     do ia = 1,na
         do i = 1,6   
             mps_inter = intersec_coord(2*i-1,ia) + dmp(ia) + delmp(ia)
-            inter_xb(i,ia) = spl_eval(mps_inter,xm(1,ia),xms(1,ia),mp(1,ia),nsp(ia))
-            inter_rb(i,ia) = spl_eval(mps_inter,rm(1,ia),rms(1,ia),mp(1,ia),nsp(ia))
+            inter_xb(i,ia) = spl_eval(nsp(ia),mps_inter,xm(1,ia),xms(1,ia),mp(1,ia))
+            inter_rb(i,ia) = spl_eval(nsp(ia),mps_inter,rm(1,ia),rms(1,ia),mp(1,ia))
         end do
     end do
     if (.not. isquiet) print*,''

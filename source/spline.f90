@@ -6,7 +6,7 @@
 !                   y   - dependent variable values
 !                   n   - number of spline points
 !------------------------------------------------------------------------------------
-subroutine arclength(t,y,arcl,n) 
+subroutine arclength(n, t,y,arcl) 
     implicit none
 
     integer,    intent (in)                 :: n
@@ -136,13 +136,12 @@ end function find_knt
 !             8th Ed., John Wiley and Sons, 1999, pp. 861-866
 !
 !------------------------------------------------------------------------------------
-subroutine spline(y, dydt, t, n, dspec1, dspecn, from_gridgen) 
+subroutine spline(n, y, dydt, t, dspec1, dspecn) 
     implicit none
 
     integer,        intent(in)              :: n
     real,           intent(in)              :: t(n), y(n), dspec1, dspecn
     real,           intent(inout)           :: dydt(n)
-    logical,        intent(in)              :: from_gridgen
     
     ! Local variables
     integer                                 :: i
@@ -187,11 +186,6 @@ subroutine spline(y, dydt, t, n, dspec1, dspecn, from_gridgen)
         d(n) = 1.; ld(n) = 1.; r(n) = 2.*dy(n-1)/dt(n-1)
     end if
 
-    if (from_gridgen) then
-        do i = 1,n
-            print *, ld(i), d(i), ud(i), r(i)
-        end do
-    end if
 
     ! tridiag_solve in funcNsubs.f90
     call tridiag_solve(d,ld,ud,r,n)
@@ -220,7 +214,7 @@ end subroutine spline
 !             8th Ed., John Wiley and Sons, 1999, pp. 861-866
 !
 !------------------------------------------------------------------------------------
-function spl_eval(tt, y, dydt, t, n) 
+function spl_eval(n, tt, y, dydt, t) 
     use errors
     implicit none
     
@@ -377,7 +371,7 @@ subroutine spl_inv(tt,yy,y,dydt,t,n)
     
     do iter = 1, maxiter
         
-        y_newt  = spl_eval(tt, y, dydt, t, n) - yy
+        y_newt  = spl_eval(n, tt, y, dydt, t) - yy
         dy_newt = dspl_eval(tt, y, dydt, t, n)
         dt_newt = -y_newt/dy_newt
         tt      = tt + 0.8*dt_newt
@@ -427,7 +421,6 @@ subroutine spl_discjoint(y,dydt,t,n)
     integer                                 :: i, seg_start, seg_end, n0
     real,   parameter                       :: tol = 10e-10
     character(:),   allocatable             :: error_msg, dev_msg
-    logical                                 :: from_gridgen = .false.
 
 
     ! If t(1) = t(2)
@@ -452,7 +445,7 @@ subroutine spl_discjoint(y,dydt,t,n)
             seg_end = seg_start + n0 - 1
 
             ! Implementing zero second derivative segment end conditions
-            call spline(y(seg_start), dydt(seg_start), t(seg_start), n0, 999.0, 999.0, from_gridgen)
+            call spline(n0, y(seg_start), dydt(seg_start), t(seg_start), 999.0, 999.0)
             seg_start = i + 1
         end if
 
@@ -461,7 +454,7 @@ subroutine spl_discjoint(y,dydt,t,n)
     n0 = n - seg_start + 1
     
     ! Implementing zero second derivative segment and zero third derivative end conditions
-    call spline(y(seg_start), dydt(seg_start), t(seg_start), n0, 999.0, -999.0, from_gridgen)
+    call spline(n0, y(seg_start), dydt(seg_start), t(seg_start), 999.0, -999.0)
 
 
 end subroutine spl_discjoint
@@ -655,10 +648,10 @@ subroutine spl_intersect(ia,tt1, tt2, x1, dxdt1, y1, dydt1, t1, n1, x2, dxdt2, y
             if(tt2.gt.t2(n2)) then
                 tt2 = t2(n2); trunc2kntn = .true.
             end if
-            xx1 = spl_eval(tt1, x1, dxdt1, t1, n1)
-            xx2 = spl_eval(tt2, x2, dxdt2, t2, n2)
-            yy1 = spl_eval(tt1, y1, dydt1, t1, n1)
-            yy2 = spl_eval(tt2, y2, dydt2, t2, n2)
+            xx1 = spl_eval(n1, tt1, x1, dxdt1, t1)
+            xx2 = spl_eval(n2, tt2, x2, dxdt2, t2)
+            yy1 = spl_eval(n1, tt1, y1, dydt1, t1)
+            yy2 = spl_eval(n2, tt2, y2, dydt2, t2)
             F1  = xx2 - xx1
             F2  = yy2 - yy1
             F   = (F1**2)+(F2**2)
@@ -747,8 +740,6 @@ end subroutine open_uniform_cubic_spline
 ! This subroutine is based on the subroutine PSPLINE in Reference 1
 !
 ! Input parameters: n               - number of spline points
-!                   from_gridgen    - flag for additionl output when called from
-!                                     grid_generator
 !                   x               - zero-indexed array containing dependent variable
 !                                     values, is passed in as an array of size n + 2
 !                                     with x(0) = x(n) and x(1) = x(n + 1)
@@ -759,12 +750,11 @@ end subroutine open_uniform_cubic_spline
 !                Their Applications", Academic Press, London, UK, 1967, pp. 14, 15 and 51
 !
 !------------------------------------------------------------------------------------
-subroutine closed_uniform_cubic_spline(n, from_gridgen, x, dx)
+subroutine closed_uniform_cubic_spline(n, x, dx)
     use errors
     implicit none
 
     integer,        intent(in)              :: n
-    logical,        intent(in)              :: from_gridgen
     real,           intent(in)              :: x(0:n + 1)
     real,           intent(inout)           :: dx(n + 1)
 
@@ -809,6 +799,7 @@ subroutine closed_uniform_cubic_spline(n, from_gridgen, x, dx)
         t(j)                                = (q(j)*t(j + 1)) + s(j)
         v(j)                                = (q(j)*v(j + 1)) + u(j)
     end do
+
 
     fxn                                     = (6.0 * real(n*n)) * (x(1) - (2.0*x(n)) + x(n - 1))
     xdd(n)                                  = (fxn - v(1) - v(n - 1))/(4.0 + t(1) + t(n - 1)) 

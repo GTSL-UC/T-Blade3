@@ -106,7 +106,7 @@ real*8 xt(nx,1),rt(nx,1)
 !real,       allocatable         :: xblade_grid(:,:), yblade_grid(:,:), chrdx_grid(:), thkc_grid(:), msle_grid(:), &
 !                                   mste_grid(:), mble_grid(:), mbte_grid(:)
 real,   allocatable             :: xblade_grid(:,:), yblade_grid(:,:), zblade_grid(:,:)
-real,   allocatable             :: mblade_grid(:,:), thblade_grid(:,:)
+real,   allocatable,    target  :: mblade_grid(:,:), thblade_grid(:,:)
 real,   allocatable             :: uv_grid(:,:,:), uv_top_grid(:,:,:), uv_bot_grid(:,:,:)
 logical                         :: TE_der = .false.
 

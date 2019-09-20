@@ -223,7 +223,7 @@ subroutine huboffset(mphub,x,r,dxds,drds,hub,nphub,scf,casename)
                                                        rnorm(nphub,1),dxn(nphub,1),drn(nphub,1)
     character(80)                                   :: fname1
     character(:),   allocatable                     :: log_file
-    logical                                         :: file_open, isquiet_local, from_gridgen = .false.
+    logical                                         :: file_open, isquiet_local
 
 
     ! Calculating the normal and offset coordinates
@@ -270,8 +270,8 @@ subroutine huboffset(mphub,x,r,dxds,drds,hub,nphub,scf,casename)
     end do
 
     ! Splining the offset xhub, rhub:
-    call spline(xhub(1,1),xms_hub(1,1),mphub(1,1),nphub, 999.0, -999.0, from_gridgen)
-    call spline(rhub(1,1),rms_hub(1,1),mphub(1,1),nphub, 999.0, -999.0, from_gridgen)
+    call spline(nphub, xhub(1,1),xms_hub(1,1),mphub(1,1), 999.0, -999.0)
+    call spline(nphub, rhub(1,1),rms_hub(1,1),mphub(1,1), 999.0, -999.0)
     
     ! Over writing the xm, rm values with hub spline coefficients:
     x    = xhub
@@ -314,7 +314,7 @@ subroutine tipoffset(mptip,x,r,dxds,drds,tip,nptip,scf,nsl,casename)
                                                        dxn(nptip,1),drn(nptip,1),deltan
     character(80)                                   :: fname1
     character(:),   allocatable                     :: log_file
-    logical                                         :: file_open, isquiet_local, from_gridgen = .false.
+    logical                                         :: file_open, isquiet_local
     
 
     ! Calculating the normal and offset coordinates
@@ -361,8 +361,8 @@ subroutine tipoffset(mptip,x,r,dxds,drds,tip,nptip,scf,nsl,casename)
     end do
 
     ! Splining the offset xtip, rtip:
-    call spline(xtip(1,1),xms_tip(1,1),mptip(1,1),nptip, 999.0, -999.0, from_gridgen)
-    call spline(rtip(1,1),rms_tip(1,1),mptip(1,1),nptip, 999.0, -999.0, from_gridgen)
+    call spline(nptip,xtip(1,1),xms_tip(1,1),mptip(1,1), 999.0, -999.0)
+    call spline(nptip,rtip(1,1),rms_tip(1,1),mptip(1,1), 999.0, -999.0)
     
     ! Overwriting xm, rm with new tip spline coefficients:
     x = xtip
@@ -1686,6 +1686,77 @@ end subroutine get_thick_status
 
 
 
+!
+! Get number of streamlines from globvar
+!
+!------------------------------------------------------------------------------------------------------
+subroutine get_n_streamlines(nsl_local)
+    use globvar
+    implicit none
+
+    integer,                    intent(inout)       :: nsl_local
+
+    
+    nsl_local = nsl
+
+
+end subroutine get_n_streamlines
+!------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+!
+! Get number of points along the blade section surface
+!
+!-----------------------------------------------------------------------------------------------------
+subroutine get_n_section_points(np_local)
+    use globvar
+    implicit none
+
+    integer,                    intent(inout)       :: np_local
+
+
+    np_local = np
+
+
+end subroutine get_n_section_points
+!------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+!
+! Get all (m',theta) sections
+!
+!------------------------------------------------------------------------------------------------------
+subroutine get_mth_sections(nspan_local,np_local,m_local,theta_local)
+    use globvar
+    implicit none
+
+    integer,                    intent(in)          :: nspan_local
+    integer,                    intent(in)          :: np_local
+    real,                       intent(inout)       :: m_local(nspan_local,np_local)
+    real,                       intent(inout)       :: theta_local(nspan_local,np_local)
+
+
+    m_local         = mblade_grid(:,1:np_local)
+    theta_local     = thblade_grid(:,1:np_local)
+
+
+end subroutine get_mth_sections
+!------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+!
 !
 ! Subroutine to solve a tridiagonal linear system
 !
