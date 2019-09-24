@@ -1757,6 +1757,28 @@ end subroutine get_mth_sections
 
 
 !
+! Get pitch from globvar
+!
+!------------------------------------------------------------------------------------------------------
+subroutine get_pitch(pitch_local)
+    use globvar
+    implicit none
+
+    real,                       intent(inout)       :: pitch_local
+
+
+    pitch_local = pitch
+
+
+end subroutine get_pitch
+!------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+!
 !
 ! Subroutine to solve a tridiagonal linear system
 !

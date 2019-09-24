@@ -1233,6 +1233,8 @@ module file_operations
         ! Close combined section data file
         close(2)
 
+        if (.not. isquiet) write(*,*) '--- END ---'
+        write(nopen,*) '--- END ---'
         if (.not. isquiet) write(*,*) ''
         write(nopen,*) ''
         call close_log_file(nopen, file_open)
