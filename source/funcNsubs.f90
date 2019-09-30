@@ -3786,7 +3786,7 @@ subroutine modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,u_TE,t_TE,dy_
 
     ! Local variables
     integer                                     :: fail_flag
-    real                                        :: temp
+    real                                        :: temp, tol = 10E-16
     real,           allocatable                 :: aug_matrix(:,:)
 
 
@@ -3810,6 +3810,9 @@ subroutine modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,u_TE,t_TE,dy_
 
     ! Store d_0, d_1, d_2 and d_3
     d               = aug_matrix(:,5)
+
+    ! Set d_0 = 0 (if not 0) for a sharp TE
+    if (abs(u_TE - 1.0) < tol .and. abs(d(1)) < tol) d(1) = 0.0
 
 
     !
