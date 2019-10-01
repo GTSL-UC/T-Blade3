@@ -138,24 +138,16 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
 
 
-    !
-    ! Determine command line arguments
-    ! log_file_exists() in file_operations.f90
-    !
-    call log_file_exists(log_file, nopen, file_open)
 
     ! Types of 2nd argument
     if (trim(arg2).eq.'dev') then
-        write(nopen,*) '2nd Argument:', 'develop'
         isdev = .true.
     elseif (trim(arg2).eq.'xygrid') then 
         error_msg = 'Command line option "xygrid" is no longer available with T-Blade3'
         call fatal_error(error_msg)
     elseif (trim(arg2).eq.'xyzstreamlines') then 
-        write(nopen,*) '2nd Argument:', 'xyzstreamlines'
         is_xyzstreamlines = .true.
     elseif ((trim(arg2).eq.'2d') .or. (trim(arg2).eq.'2D')) then
-        write(nopen,*) '2nd Argument:', '2D'
         is2d = .True.
     elseif ((trim(arg2).eq.'v0') .or. (trim(arg2).eq.'V0')) then
         error_msg   = 'Command line option "v0" is no longer available with T-Blade3'
@@ -166,16 +158,13 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
     ! Types of 3rd argument
     if (trim(arg3).eq.'dev') then
-        write(nopen,*) '3rd Argument:', 'develop'
         isdev = .true.
     elseif (trim(arg3).eq.'xygrid') then 
         error_msg   = 'Command line option "xygrid" is no longer available with T-Blade3'
         call fatal_error(error_msg)
     elseif (trim(arg3).eq.'xyzstreamlines') then 
-        write(nopen,*) '3rd Argument:', 'xyzstreamlines'
         is_xyzstreamlines = .true.
     elseif ((trim(arg3).eq.'2d') .or. (trim(arg3).eq.'2D')) then
-        write(nopen,*) '3rd Argument:', '2D'
         is2d = .True.
     elseif ((trim(arg3).eq.'v0') .or. (trim(arg3).eq.'V0')) then
         error_msg   = 'Command line option "v0" is no longer available with T-Blade3'
@@ -185,16 +174,13 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
     ! Types of 4th argument
     if (trim(arg4).eq.'dev') then
-        write(nopen,*) '4th Argument:', 'develop'
         isdev = .true.
     elseif (trim(arg4).eq.'xygrid') then 
         error_msg   =  'Command line option "xygrid" is no longer available with T-Blade3'
         call fatal_error(error_msg)
     elseif (trim(arg4).eq.'xyzstreamlines') then 
-        write(nopen,*) '4th Argument:', 'xyzstreamlines'
         is_xyzstreamlines = .true.
     elseif ((trim(arg4).eq.'2d') .or. (trim(arg4).eq.'2D')) then
-        write(nopen,*) '4th Argument:', '2D'
         is2d = .True.
     elseif ((trim(arg4).eq.'v0') .or. (trim(arg4).eq.'V0')) then
         error_msg   = 'Command line option "v0" is no longer available with T-Blade3'
@@ -217,40 +203,55 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
 
     !
-    ! Print command-line argument related data to screen
+    ! Print command-line argument related data to screen and write to file
+    ! log_file_exists() in file_operations.f90
     !
-    if (.not. isquiet) then
+    call log_file_exists(log_file, nopen, file_open)
+    
+    ! Print 2nd argument
+    select case(trim(arg2))
+        case('dev')
+            if (.not. isquiet) print *, '2nd Argument: develop'
+            write(nopen,*) '2nd Argument: develop'
+        case('xyzstreamlines')
+            if (.not. isquiet) print *, '2nd Argument: xyzstreamlines'
+            write(nopen,*) '2nd Argument: xyzstreamlines'
+        case('2d','2D')
+            if (.not. isquiet) print *, '2nd Argument: 2D'
+            write(nopen,*) '2nd Argument: 2D'
+        case('quiet')
+            write(nopen,*) '2nd Argument: quiet'
+    end select
 
-        ! Print 2nd argument
-        select case(arg2)
-            case('dev')
-                print *, '2nd Argument: ', 'develop'
-            case('xyzstreamlines')
-                print *, '2nd Argument: ', 'xyzstreamlines'
-            case('2d','2D')
-                print *, '2nd Argument: ', '2D'
-        end select
-
-        ! Print 3rd argument
-        select case(arg3)
-            case('dev')
-                print *, '3rd Argument: ', 'develop'
-            case('xyzstreamlines')
-                print *, '3rd Argument: ', 'xyzstreamlines'
-            case('2d','2D')
-                print *, '3rd Argument: ', '2D'
-        end select
-       
-        ! Print 4th argument 
-        select case(arg4)
-            case('dev')
-                print *, '4th Argument: ', 'develop'
-            case('xyzstreamlines')
-                print *, '4th Argument: ', 'xyzstreamlines'
-            case('2d','2D')
-                print *, '4th Argument: ', '2D'
-        end select
-    end if  ! if (.not. isquiet)
+    ! Print 3rd argument
+    select case(trim(arg3))
+        case('dev')
+            if (.not. isquiet) print *, '3rd Argument: develop'
+            write(nopen,*) '3rd Argument: develop'
+        case('xyzstreamlines')
+            if (.not. isquiet) print *, '3rd Argument: xyzstreamlines'
+            write(nopen,*) '3rd Argument: xyzstreamlines'
+        case('2d','2D')
+            if (.not. isquiet) print *, '3rd Argument: 2D'
+            write(nopen,*) '3rd Argument: 2D'
+        case('quiet')
+            write(nopen,*) '3rd Argument: quiet'
+    end select
+   
+    ! Print 4th argument 
+    select case(trim(arg4))
+        case('dev')
+            if (.not. isquiet) print *, '4th Argument: develop'
+            write(nopen,*) '4th Argument: develop'
+        case('xyzstreamlines')
+            if (.not. isquiet) print *, '4th Argument: xyzstreamlines'
+            write(nopen,*) '4th Argument: xyzstreamlines'
+        case('2d','2D')
+            if (.not. isquiet) print *, '4th Argument: 2D'
+            write(nopen,*) '4th Argument: 2D'
+        case('quiet')
+            write(nopen,*) '4th Argument: quiet'
+    end select
 
 
     ! close_log_file() in file_operation.f90
