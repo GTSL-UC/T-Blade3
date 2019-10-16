@@ -94,7 +94,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
     ! Local variables
     integer                     :: nopen, nopen_error, np_in
-    real                        :: spl_eval, dspl_eval, xdiff, inBetaInci, outBetaDevn
+    real                        :: spl_eval, dspl_eval, xdiff, inBetaInci, outBetaDevn, &
+                                   temp_1, temp_2
     real,           allocatable :: um_spl(:), u_in(:), v_in(:), spanwise_thk(:)
     character(256)              :: fname, temp, fname1, row_type, path
     character(:),   allocatable :: log_file, error_file, auxinput_filename, error_msg
@@ -1179,9 +1180,11 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
       call cubicspline(xcpinbeta, spaninbeta, cpinbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
       call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, inci_s, na, xbs, ybs)
       do ia = 1, na
+         temp_1 = in_beta(ia)
+         temp_2 = inci_s(ia)
          in_beta(ia) = inBetaInci(in_beta(ia), inci_s(ia))
          if (.not. isquiet) print*, span(ia), in_beta(ia)
-         write(nopen,*) span(ia), in_beta(ia)
+         write(nopen,*) span(ia), temp_1, temp_2, in_beta(ia)
       enddo
     endif
     call close_log_file(nopen, file_open)
@@ -1220,9 +1223,11 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
       call cubicspline(xcpoutbeta, spanoutbeta, cpoutbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
       call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, dev_s, na, xbs, ybs)
       do ia = 1, na
+         temp_1 = out_beta(ia)
+         temp_2 = dev_s(ia)
          out_beta(ia) = outBetaDevn(in_beta(ia), out_beta(ia), dev_s(ia))
          if (.not. isquiet) print*, span(ia), out_beta(ia)
-         write(nopen,*) span(ia), out_beta(ia)
+         write(nopen,*) span(ia), temp_1, temp_2, out_beta(ia)
       enddo
     endif
     call close_log_file(nopen, file_open)
