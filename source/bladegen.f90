@@ -534,6 +534,20 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         camber = splinedata(2, :)
         slope  = splinedata(3, :)
 
+        ! TODO: Move to file_operations
+        ! TODO: Remove meanline_uv file and amend scripts
+        if (isdev) then
+            
+            open(173, file = 'curvature_data.'//trim(adjustl(sec))//'.'//trim(casename))
+
+                do i = 1, size(splinedata(1,:))
+                    write(173,'(4F22.16)') splinedata(1:4,i)
+                end do
+
+            close(173)
+
+        end if
+
     end if  ! curv_camber
 
 
