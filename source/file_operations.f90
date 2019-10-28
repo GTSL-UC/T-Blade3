@@ -937,23 +937,23 @@ module file_operations
     !
     ! Write meanline u,v data to a file
     !
-    ! Input parameters: np      - number of points along the chord
-    !                   sec     - string representing the section index
-    !                   u       - aarray of points along the chord
-    !                   camber  - array of the camber for the 'sec' blade section
-    !                   slope   - array of the camber slope for the 'sec' blade section
+    ! Input parameters: spline_data - number of camber line spline fields
+    !                   np_side     - number of points along chord line
+    !                   splinedata  - array containing camber line curvature data
+    !                   sec         - string representing the section index
+    !                   casename    - string representing casename 
     !
     !---------------------------------------------------------------------------
-    subroutine meanline_u_v_file(np,sec,u,camber,slope)
+    subroutine write_curvature_data(spline_data,np_side,splinedata,sec,casename)
 
-        integer,                intent(in)              :: np
+        integer,                intent(in)              :: spline_data
+        integer,                intent(in)              :: np_side
+        real,                   intent(in)              :: splinedata(spline_data,np_side)
         character(*),           intent(in)              :: sec
-        real,                   intent(in)              :: u(np)
-        real,                   intent(in)              :: camber(np)
-        real,                   intent(in)              :: slope(np)
+        character(*),           intent(in)              :: casename
 
         ! Logical
-        character(:),   allocatable                     :: meanline_file
+        character(:),   allocatable                     :: curvature_file
         integer                                         :: nopen = 831, i
         logical                                         :: exist
 
@@ -962,22 +962,22 @@ module file_operations
         ! Inquire if the meanline (u,v) file exists
         ! If it exists, overwrite 
         !
-        meanline_file   = 'meanline_uv.'//trim(adjustl(sec))//'.dat'
-        inquire(file = meanline_file, exist=exist)
+        curvature_file   = 'curvature_data.'//trim(adjustl(sec))//'.'//trim(casename)
+        inquire(file = curvature_file, exist=exist)
         if (exist) then
-            open(nopen, file = trim(meanline_file), status = 'old', action = 'write', form = 'formatted')
+            open(nopen, file = trim(curvature_file), status = 'old', action = 'write', form = 'formatted')
         else
-            open(nopen, file = trim(meanline_file), status = 'new', action = 'write', form = 'formatted')
+            open(nopen, file = trim(curvature_file), status = 'new', action = 'write', form = 'formatted')
         end if
         
-        do i = 1,np
-            write(nopen,'(3F30.16)') u(i), camber(i), slope(i)
+        do i = 1,np_side
+            write(nopen,'(4F22.16)') splinedata(1:4,i)
         end do
         
         close(nopen)
 
 
-    end subroutine meanline_u_v_file
+    end subroutine write_curvature_data
     !---------------------------------------------------------------------------
 
 

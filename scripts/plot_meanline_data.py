@@ -38,22 +38,27 @@ print ('')
 
 
 
+# Determine the name of the main T-Blade3 input filea
+current_dir                 = os.getcwd()
+files                       = os.listdir(current_dir)
+for file in files:
+    if "3dbgbinput" in file and "dat" in file:
+        input_file          = file.strip()
+        break
+
+# Read main T-Blade3 input file and store the input in a list
+f                           = open(input_file, 'r')
+lines                       = f.readlines()
+f.close()
+
+# Determine the casename
+casename                        = lines[1].strip()
+
+
+
 # If meanline data for all sections needs to be plotted
 if len(sys.argv) == 1:
     
-    # Determine the name of the main T-Blade3 input filea
-    current_dir                 = os.getcwd()
-    files                       = os.listdir(current_dir)
-    for file in files:
-        if "3dbgbinput" in file and "dat" in file:
-            input_file          = file.strip()
-            break
-
-    # Read main T-Blade3 input file and store the input in a list
-    f                           = open(input_file, 'r')
-    lines                       = f.readlines()
-    f.close()
-
     # Determine the number of spanwise section
     nspan                       = int(lines[9])
     sections                    = np.linspace(1,nspan,nspan)
@@ -89,8 +94,8 @@ with PdfPages('meanline_slope_vs_u.pdf') as pdf:
     # Read the file 
     for i_sec in sections:
         
-        filename                = 'meanline_uv.' + str(i_sec) + '.dat' 
-        u, camber, slope        = np.loadtxt(filename, unpack = True)
+        filename                = 'curvature_data.' + str(i_sec) + '.' + casename 
+        u, camber, slope, curv  = np.loadtxt(filename, unpack = True)
 
 
         # Compute angle in [-pi/2,pi/2] 
@@ -101,7 +106,7 @@ with PdfPages('meanline_slope_vs_u.pdf') as pdf:
         # Plot the blade angles
         plt.plot(u, angle*(180/np.pi))
         plt.xlabel(r'$u$', fontsize = 14)
-        plt.ylabel(r'$\arctan{\left(\frac{dv}{du} \right)}$', fontsize = 14)
+        plt.ylabel(r'${tan} ^{-1} \left(\frac{dv}{du} \right)$', fontsize = 14)
         plt.title(r'Blade angles in ($u,v$) plane', fontsize=14)
 
         # Generate legend labels for each section to be plotted

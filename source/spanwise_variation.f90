@@ -187,7 +187,8 @@ subroutine span_output_2()
     
     ! Write curvature control points to file
     ! write_curv_cp in file_operations
-    call write_curv_cp(na,curv_cp)
+    ! TODO: Determine if needed
+    !call write_curv_cp(na,curv_cp)
 
 
 end subroutine span_output_2
