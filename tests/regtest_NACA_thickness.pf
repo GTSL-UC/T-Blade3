@@ -42,7 +42,7 @@ subroutine regtest_modified_NACA_thickness()
     !
     ! Move all output files to the working directory
     !
-    command_1       = 'mv *Case6_4_Demo* curv_cp.dat *.log meanline_uv* stagger_angles.dat '//dir_path
+    command_1       = 'mv *Case6_4_Demo* *.log stagger_angles.dat '//dir_path
     call execute_command_line(command_1)
 
 
