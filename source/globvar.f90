@@ -123,7 +123,7 @@ logical isdev, tm_c_spline, is_xyzstreamlines, spanwise_angle_spline,spanwise_in
 is2d, isquiet!, isxygrid
 logical :: u_max_spline = .false.
 logical :: axial_LE, radial_LE
-
+logical :: using_cur1
 common / bladesectionpoints /xxa(nx,nax),yya(nx,nax)
 !
 

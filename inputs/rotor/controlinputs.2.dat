@@ -2,117 +2,117 @@ turbine
 Curvature sections control points:
 Section 1:
 Number of control points:
-		6
+        6
 u and v coordinates:
-	0		,2.5
-	0.02	,3
-	0.25	,3.15
-	0.55 	,2.75
-	0.7  	,2.6
-	1		,2.2
+    0       ,2.5
+    0.02    ,3
+    0.25    ,3.15
+    0.55    ,2.75
+    0.7     ,2.6
+    1       ,2.2
 Section 2:
 Number of control points:
-		6
+        6
 u and v coordinates:
-	0		,2.5
-	0.02	,3
-	0.25	,3.15
-	0.55 	,2.75
-	0.7  	,2.6
-	1		,2.2
+    0       ,2.5
+    0.02    ,3
+    0.25    ,3.15
+    0.55    ,2.75
+    0.7     ,2.6
+    1       ,2.2
 Section 3:
 Number of control points:
-		6
+        6
 u and v coordinates:
-	0		,2.5
-	0.02	,3
-	0.25	,3.15
-	0.55 	,2.75
-	0.7  	,2.6
-	1		,2.2
+    0       ,2.5
+    0.02    ,3
+    0.25    ,3.15
+    0.55    ,2.75
+    0.7     ,2.6
+    1       ,2.2
 Section 4:
 Number of control points:
-		6
+        6
 u and v coordinates:
-	0		,2.5
-	0.02	,3
-	0.25	,3.15
-	0.55 	,2.75
-	0.7  	,2.6
-	1		,2.2
+    0       ,2.5
+    0.02    ,3
+    0.25    ,3.15
+    0.55    ,2.75
+    0.7     ,2.6
+    1       ,2.2
 Section 5:
 Number of control points:
-		6
+        6
 u and v coordinates:
-	0		,2.5
-	0.02	,3
-	0.25	,3.15
-	0.55 	,2.75
-	0.7  	,2.6
-	1		,2.2
-	
+    0       ,2.5
+    0.02    ,3
+    0.25    ,3.15
+    0.55    ,2.75
+    0.7     ,2.6
+    1       ,2.2
+    
 Thickness multiplier control points:
 Section 1:
 Number of control points:
-	 5
+     5
 u and v coordinates:
-	0		,.0
-	0.1		,.15
-	0.3		,.55
-	0.5		,.55
-	1		,.0
+    0       ,.0
+    0.1     ,.15
+    0.3     ,.55
+    0.5     ,.55
+    1       ,.0
 Section 2:
 Number of control points:
-	 5
+     5
 u and v coordinates:
-	0		,.0
-	0.1		,.15
-	0.3		,.55
-	0.5		,.55
-	1		,.0
+    0       ,.0
+    0.1     ,.15
+    0.3     ,.55
+    0.5     ,.55
+    1       ,.0
 Section 3:
 Number of control points:
-	 5
+     5
 u and v coordinates:
-	0		,.0
-	0.1		,.15
-	0.3		,.55
-	0.5		,.55
-	1		,.0
+    0       ,.0
+    0.1     ,.15
+    0.3     ,.55
+    0.5     ,.55
+    1       ,.0
 Section 4:
 Number of control points:
-	 5
+     5
 u and v coordinates:
-	0		,.0
-	0.1		,.15
-	0.3		,.55
-	0.5		,.55
-	1		,.0
+    0       ,.0
+    0.1     ,.15
+    0.3     ,.55
+    0.5     ,.55
+    1       ,.0
 Section 5:
 Number of control points:
-	 5
+     5
 u and v coordinates:
-	0		,.0
-	0.1		,.15
-	0.3		,.55
-	0.5		,.55
-	1		,.0
-	
+    0       ,.0
+    0.1     ,.15
+    0.3     ,.55
+    0.5     ,.55
+    1       ,.0
+    
 Leading Edge control Parameters: all control point ratios are (0:1)
-	LE degree(3 or 4)	no_Le_segments(4 or 5)
-	4					5
+    LE degree(3 or 4)   no_Le_segments(4 or 5)
+    4                   5
 Section 1:
-	lethk	tethk	s (-1<defl.<1)	ee (elongation)		C_le_x_top(0:1)		C_le_x_bot		C_le_y_top		C_le_y_bot		xcp4_hat	xcp6_hat	ycp4_hat	ycp6_hat
-	0.028	0.02	0.00		 	1.05				0.50				0.50			0.60			0.60			0.40		0.40		0.70		0.70
+    lethk   tethk   s (-1<defl.<1)  ee (elongation)     C_le_x_top(0:1)     C_le_x_bot      C_le_y_top      C_le_y_bot      xcp4_hat    xcp6_hat    ycp4_hat    ycp6_hat
+    0.028   0.02    0.00            1.05                0.50                0.50            0.60            0.60            0.40        0.40        0.70        0.70
 Section 2:
-	lethk	tethk	s (-1<defl.<1)	ee (elongation)		C_le_x_top(0:1)		C_le_x_bot		C_le_y_top		C_le_y_bot		xcp4_hat	xcp6_hat	ycp4_hat	ycp6_hat
-	0.028	0.02	0.00		 	0.70				0.50				0.50			0.85			0.85			0.70		0.70		0.70		0.70
+    lethk   tethk   s (-1<defl.<1)  ee (elongation)     C_le_x_top(0:1)     C_le_x_bot      C_le_y_top      C_le_y_bot      xcp4_hat    xcp6_hat    ycp4_hat    ycp6_hat
+    0.028   0.02    0.00            0.70                0.50                0.50            0.85            0.85            0.70        0.70        0.70        0.70
 Section 3:
-	lethk	tethk	s (-1<defl.<1)	ee (elongation)		C_le_x_top(0:1)		C_le_x_bot		C_le_y_top		C_le_y_bot		xcp4_hat	xcp6_hat	ycp4_hat	ycp6_hat
-	0.028	0.02	0.00		 	0.70				0.50				0.50			0.85			0.85			0.70		0.70		0.70		0.70
+    lethk   tethk   s (-1<defl.<1)  ee (elongation)     C_le_x_top(0:1)     C_le_x_bot      C_le_y_top      C_le_y_bot      xcp4_hat    xcp6_hat    ycp4_hat    ycp6_hat
+    0.028   0.02    0.00            0.70                0.50                0.50            0.85            0.85            0.70        0.70        0.70        0.70
 Section 4:
-	lethk	tethk	s (-1<defl.<1)	ee (elongation)		C_le_x_top(0:1)		C_le_x_bot		C_le_y_top		C_le_y_bot		xcp4_hat	xcp6_hat	ycp4_hat	ycp6_hat
-	0.028	0.02	0.00		 	0.70				0.50				0.50			0.85			0.85			0.70		0.70		0.70		0.70
+    lethk   tethk   s (-1<defl.<1)  ee (elongation)     C_le_x_top(0:1)     C_le_x_bot      C_le_y_top      C_le_y_bot      xcp4_hat    xcp6_hat    ycp4_hat    ycp6_hat
+    0.028   0.02    0.00            0.70                0.50                0.50            0.85            0.85            0.70        0.70        0.70        0.70
 Section 5:
-	lethk	tethk	s (-1<defl.<1)	ee (elongation)		C_le_x_top(0:1)		C_le_x_bot		C_le_y_top		C_le_y_bot		xcp4_hat	xcp6_hat	ycp4_hat	ycp6_hat
-	0.028	0.02	0.00		 	0.70				0.50				0.50			0.85			0.85			0.70		0.70		0.70		0.70
+    lethk   tethk   s (-1<defl.<1)  ee (elongation)     C_le_x_top(0:1)     C_le_x_bot      C_le_y_top      C_le_y_bot      xcp4_hat    xcp6_hat    ycp4_hat    ycp6_hat
+    0.028   0.02    0.00            0.70                0.50                0.50            0.85            0.85            0.70        0.70        0.70        0.70

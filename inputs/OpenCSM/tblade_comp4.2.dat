@@ -9,9 +9,9 @@
  Number of streamlines:
           11
  Angles in the input file (0=Beta_z (default),1=Beta_r):
-           0	inci_dev_spline
+           0    inci_dev_spline
  Airfoil camber defined by curvature control (0=no,1=yes ;spanwise_spline= spancontrolinputs file):
-           1	spanwise_spline
+           1    spanwise_spline
  Airfoil Thickness distribution (0=Wennerstrom,1=Spline,2=Spline + sharp TE):
            1
  Airfoil Thickness multiplier (0=no,1=yes):
@@ -107,20 +107,20 @@
  Control points for in_beta*:
            5
         span                     in_beta*
-  0.000000000000000E+000	7.4438611043e+00
-  0.250000000000000		7.9587465599e+00
-  0.500000000000000		-6.0888848296e+00
-  0.750000000000000		2.7092372154e+00
-   1.00000000000000		-5.2035817668e-01
+  0.000000000000000E+000    7.4438611043e+00
+  0.250000000000000     7.9587465599e+00
+  0.500000000000000     -6.0888848296e+00
+  0.750000000000000     2.7092372154e+00
+   1.00000000000000     -5.2035817668e-01
  
  Control points for out_beta*:
            5
         span                     out_beta*
-  0.000000000000000E+000  	-1.692695134641926e+00
-  0.250000000000000        	-6.824459185276393e-01
-  0.500000000000000        	-3.447218924037748e+00
-  0.750000000000000        	6.498467765980617e+00
-   1.00000000000000        	-1.998202319721786e+00
+  0.000000000000000E+000    -1.692695134641926e+00
+  0.250000000000000         -6.824459185276393e-01
+  0.500000000000000         -3.447218924037748e+00
+  0.750000000000000         6.498467765980617e+00
+   1.00000000000000         -1.998202319721786e+00
  
  Control points for chord:
            5

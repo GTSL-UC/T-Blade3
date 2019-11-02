@@ -1684,7 +1684,7 @@ subroutine read_spanwise_input(row_type, path)
     allocate(ncp_curv(nsl))
     if (allocated(curv_cp )) deallocate(curv_cp )
     if(control_inp_flag .eq. 1) then
-        Allocate(curv_cp(20, 2*nsl))
+        allocate(curv_cp(20, 2*nsl))
     endif
     do i = 1, nsl
         ncp_curv(i) = ncp_curvature + 2
@@ -1705,10 +1705,12 @@ subroutine read_spanwise_input(row_type, path)
     !    dev_msg     = 'Check subroutine read_spanwise_input in readinput.f90'
     !    call fatal_error(error_msg, warning_msg, dev_msg)
         ncp_chord_curv = ncp_chord - 2 + ncp_curvature + 1
-        deprecated = .true.
+        deprecated  = .true.
+        using_cur1  = .true.
     else
         ncp_chord_curv = ncp_chord - 2 + ncp_curvature + 1 - 1
-        deprecated = .false.
+        deprecated  = .false.
+        using_cur1  = .false.
     end if
 
     !
@@ -2384,6 +2386,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
         dev_msg     = 'Check subroutine read_spanwise_NACA_input in readinput.f90'
         call fatal_error(error_msg, warning_msg, dev_msg)
     end if
+    using_cur1  = .true.
     write(nopen1,'(A)') trim(temps)
 
 

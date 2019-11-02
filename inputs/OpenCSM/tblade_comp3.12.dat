@@ -11,7 +11,7 @@ F
  Angles in the input file (0=Beta_z (default),1=Beta_r):
            0    inci_dev_spline
  Airfoil camber defined by curvature control (0=no,1=yes ;spanwise_spline= spancontrolinputs file):
-           1	spanwise_spline
+           1    spanwise_spline
  Airfoil Thickness distribution (0=Wennerstrom,1=Spline,2=Spline + sharp TE):
            1
  Airfoil Thickness multiplier (0=no,1=yes):
@@ -100,7 +100,7 @@ F
         span                    lean       
    0.0000000000000000        0.0000000000000000   
   0.25000000000000000        0.0000000000000000   
-  0.50000000000000000		 0.0000000000000000   
+  0.50000000000000000        0.0000000000000000   
   0.75000000000000000        0.0000000000000000   
    1.0000000000000000        0.0000000000000000    
 

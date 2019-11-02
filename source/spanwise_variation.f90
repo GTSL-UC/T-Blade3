@@ -39,7 +39,7 @@ subroutine span_output_2()
         curv_cp(ncp_chord + 2,2*k - 1) = 2*curv_cp(ncp_chord + 1,2*k - 1) - curv_cp(ncp_chord,2*k - 1)
         
         ! Defining fixed control points
-        if (control_inp_flag == 2) then
+        if (using_cur1) then
             cp_start                   = 2 
         else
             curv_cp(2,2*k)             = 0.0
