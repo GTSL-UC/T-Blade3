@@ -1186,15 +1186,17 @@ subroutine readinput(fname)
 #endif
     
     ! If xcptm_c values have been overridden, add 1
-    !do i = 1,cptm_c
-    !    equal = (abs(xcptm_c(i) - temp_in(i)) .le. tol)
-    !    if (.not. equal) exit
-    !end do
-    !if (.not. equal) then
-    !    xcptm_c(1:cptm_c) = temp_in + 1
-    !else
-    xcptm_c(1:cptm_c) = temp_in
-    !end if
+    if (thick_distr == 1 .or. thick_distr == 2) then
+        do i = 1,cptm_c
+            equal = (abs(xcptm_c(i) - temp_in(i)) .le. tol)
+            if (.not. equal) exit
+        end do
+        if (.not. equal) then
+            xcptm_c(1:cptm_c) = temp_in + 1
+        else
+        xcptm_c(1:cptm_c) = temp_in
+        end if
+    end if
 
     !
     ! override_span_u_max() in 3dbgb.f90
