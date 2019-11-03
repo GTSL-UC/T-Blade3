@@ -1196,6 +1196,8 @@ subroutine readinput(fname)
         else
         xcptm_c(1:cptm_c) = temp_in
         end if
+    else if (thick_distr == 0) then
+        xcptm_c(1:cptm_c) = temp_in
     end if
 
     !
