@@ -1116,12 +1116,18 @@ subroutine readinput(fname)
         if (read_tm_c_then_u_max) then
             read(1,*) spantm_c(i), xcptm_c(i), xcpumax(i)
             xcptm_c(i) = xcptm_c(i)! + 1.0
+            if (thick_distr == 1 .or. thick_distr == 2) &
+                xcptm_c(i) = xcptm_c(i) + 1.0
         else if (read_u_max_then_tm_c) then
             read(1,*) spantm_c(i), xcpumax(i), xcptm_c(i)
             xcptm_c(i) = xcptm_c(i)! + 1.0
+            if (thick_distr == 1 .or. thick_distr == 2) &
+                xcptm_c(i) = xcptm_c(i) + 1.0
         else if (read_tm_c_only) then
             read(1,*) spantm_c(i), xcptm_c(i)
             xcptm_c(i) = xcptm_c(i)! + 1.0
+            if (thick_distr == 1 .or. thick_distr == 2) &
+                xcptm_c(i) = xcptm_c(i) + 1.0
         else if (read_u_max_only) then
             read(1,*) spantm_c(i), xcpumax(i)
         end if
