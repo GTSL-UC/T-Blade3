@@ -136,7 +136,7 @@
       real*8 a(*)
     end subroutine override_span_thk_ctrl
     subroutine     override_offsets(a)
-      integer a(*)
+      real a(*)
     end subroutine override_offsets
     subroutine     override_naca_le_radius(n, a)
       real*8 a(*)

@@ -1251,6 +1251,104 @@ module file_operations
 
 
 
+    !
+    ! Write inflated (m',theta) blade section coordinates to a file
+    !
+    ! Input parameters: i_section   - blade section spanwise index
+    !                   m_inf       - m' coordinates of inflated section
+    !                   th_inf      - theta coordinates of inflated section
+    !
+    !---------------------------------------------------------------------------
+    subroutine write_2D_inflated_section(i_section, m_inf, th_inf)
+        use globvar
+
+        integer,                intent(in)          :: i_section
+        real,                   intent(in)          :: m_inf(np)
+        real,                   intent(in)          :: th_inf(np)
+
+        ! Local variables
+        integer                                     :: funit = 917
+        character(:),   allocatable                 :: inf_filename
+
+
+        !
+        ! Set filename for hub/tip sections
+        !
+        if (i_section == 1) &
+            inf_filename = 'hub_inflated_2D_section.dat'
+        if (i_section == nspn) &
+            inf_filename = 'tip_inflated_2D_section.dat'
+
+
+
+        !
+        ! Write inflated (m',theta) blade section coordinates to file
+        !
+        open(funit, file = inf_filename)
+        do i = 1, np
+            write(funit,'(2F22.16)') m_inf(i), th_inf(i)
+        end do
+        close(funit)
+
+
+    end subroutine write_2D_inflated_section
+    !---------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Write inflated (x,y,z) blade section coordinates to a file
+    !
+    ! Input parameters: i_section   - blade section spanwise index
+    !                   x_inf       - x coordinates of inflated section
+    !                   y_inf       - y coordinates of inflated section
+    !                   z_inf       - z coordinates of inflated section
+    !
+    !---------------------------------------------------------------------------
+    subroutine write_3D_inflated_section(i_section, x_inf, y_inf, z_inf)
+        use globvar
+
+        integer,                intent(in)          :: i_section
+        real,                   intent(in)          :: x_inf(np)
+        real,                   intent(in)          :: y_inf(np)
+        real,                   intent(in)          :: z_inf(np)
+
+        ! Local variables
+        integer                                     :: funit = 917
+        character(:),   allocatable                 :: inf_filename
+
+
+        !
+        ! Set filename for hub/tip sections
+        !
+        if (i_section == 1) &
+            inf_filename = 'hub_inflated_3D_section.dat'
+        if (i_section == nspn) &
+            inf_filename = 'tip_inflated_3D_section.dat'
+
+
+
+        !
+        ! Write inflated (m',theta) blade section coordinates to file
+        !
+        open(funit, file = inf_filename)
+        do i = 1, np
+            write(funit,'(3F22.16)') x_inf(i), y_inf(i), z_inf(i)
+        end do
+        close(funit)
+
+
+    end subroutine write_3D_inflated_section
+    !---------------------------------------------------------------------------
+
+
+
+
+
+
 
 
 

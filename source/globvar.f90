@@ -84,7 +84,8 @@ real*8 xcpdelm(100),xcpdeltheta(100),xcpinbeta(100),xcpoutbeta(100),staggspline
 real*8 spanmp(100),xcpdelmp(100),spaninbeta(100),spanoutbeta(100)
 real*8 spantheta(100),chords(nspan),inbeta_s(nspan),outbeta_s(nspan),thk_tm_c_spl(nspan),inci_s(nspan),intersec(nspan),dev_s(nspan)
 real*8 xcpchord(100),xcptm_c(100),xcpumax(100),spanchord(100),spantm_c(100)
-real*8 hub,tip, sweep1,radius_tolerance
+real*8 hub,tip, sweep1,radius_tolerance, hub_inf_offset, tip_inf_offset
+logical                 :: hub_inflate = .false., tip_inflate = .false.
 
 real*8 xle(nx),xte(nx),rle(nx),rte(nx),xles(nx),xtes(nx),rles(nx),rtes(nx),sle(nx),ste(nx)
 real*8 rrle,rrte,a,b,xii,xmm,rii,rmm,xxle,xxte,xx1,rr1,xx2,rr2

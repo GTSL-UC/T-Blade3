@@ -96,7 +96,9 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     integer                     :: nopen, nopen_error, np_in
     real                        :: spl_eval, dspl_eval, xdiff, inBetaInci, outBetaDevn, &
                                    temp_1, temp_2
-    real,           allocatable :: um_spl(:), u_in(:), v_in(:), spanwise_thk(:)
+    real,           allocatable :: um_spl(:), u_in(:), v_in(:), spanwise_thk(:), mhub_inf(:), &
+                                   thhub_inf(:), xhub_inf(:), yhub_inf(:), zhub_inf(:), mtip_inf(:), &
+                                   thtip_inf(:), xtip_inf(:), ytip_inf(:), ztip_inf(:)
     character(256)              :: fname, temp, fname1, row_type, path
     character(:),   allocatable :: log_file, error_file, auxinput_filename, error_msg
     logical                     :: axial_TE, radial_TE, file_open, file_exist, &
@@ -1530,6 +1532,34 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                        transpose(mblade_grid(:,1:np)), transpose(thblade_grid(:,1:np)), xblade_grid,     &
                        yblade_grid, zblade_grid, from_gridgen)
     enddo
+
+
+    ! Inflate hub and tip sections
+    if (hub_inflate) then
+        
+        if (allocated(mhub_inf) .and. allocated(thhub_inf)) &
+            deallocate(mhub_inf, thhub_inf)
+        allocate(mhub_inf(np), thhub_inf(np))
+        if (allocated(xhub_inf) .and. allocated(yhub_inf) .and. allocated(zhub_inf)) &
+            deallocate(xhub_inf, yhub_inf, zhub_inf)
+        allocate(xhub_inf(np), yhub_inf(np), zhub_inf(np))
+        call inflate_mprime_theta_section(1, mhub_inf, thhub_inf)
+        call get_inflated_3D_section(1, mhub_inf, thhub_inf, xhub_inf, yhub_inf, zhub_inf)
+
+    end if
+
+    if (tip_inflate) then
+        
+        if (allocated(mtip_inf) .and. allocated(thtip_inf)) &
+            deallocate(mtip_inf, thtip_inf)
+        allocate(mtip_inf(np), thtip_inf(np))
+        if (allocated(xtip_inf) .and. allocated(ytip_inf) .and. allocated(ztip_inf)) &
+            deallocate(xtip_inf, ytip_inf, ztip_inf)
+        allocate(xtip_inf(np), ytip_inf(np), ztip_inf(np))
+        call inflate_mprime_theta_section(21, mtip_inf, thtip_inf)
+        call get_inflated_3D_section(21, mtip_inf, thtip_inf, xtip_inf, ytip_inf, ztip_inf)
+
+    end if
 
     ! --------------------------------------------------------------------------------
 

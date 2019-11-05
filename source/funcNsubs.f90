@@ -241,7 +241,7 @@ subroutine huboffset(mphub,x,r,dxds,drds,hub,nphub,scf,casename)
     ! Get isquiet status
     call get_quiet_status(isquiet_local)
 
-    write(*,*) ''
+    if (.not. isquiet_local) write(*,*) ''
 
     ! Writing the offset coordinates to a file
     fname1 = 'hub-offset.'//trim(casename)//'.dat'
@@ -4124,6 +4124,172 @@ subroutine modified_NACA_four_digit_thickness_all(js,np,u,u_max,u_TE,u_center,t_
 
 
 end subroutine modified_NACA_four_digit_thickness_all
+!------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+!
+! Inflate hub or tip (m',theta) blade sections by moving along unit normals
+! Derivatives of blade section computed using a cubic spline fit
+!
+! Input parameters: i_section   - blade section spanwise index
+!
+!------------------------------------------------------------------------------------------------------
+subroutine inflate_mprime_theta_section(i_section, mprime_inf, theta_inf)
+    use globvar
+    use file_operations
+    implicit none
+    
+    integer,                    intent(in)          :: i_section
+    real,                       intent(inout)       :: mprime_inf(np) 
+    real,                       intent(inout)       :: theta_inf(np)
+
+    ! Local variables
+    real                                            :: mprime(np), mprime_periodic(np + 1), dmprime(np), &
+                                                       theta(np), theta_periodic(np + 1), dtheta(np)
+    real                                            :: magnitude(np), unit_normal(np,2)
+    real                                            :: inf_offset
+
+
+    ! 
+    ! Store (m',theta) sections in local arrays
+    !
+    mprime                          = mblade_grid(i_section,  1:np)
+    theta                           = thblade_grid(i_section, 1:np)
+
+
+
+    !
+    ! Compute (m',theta) periodic sections for cubic spline fit
+    !
+    mprime_periodic(1:np)           = mprime
+    mprime_periodic(np + 1)         = mprime(2)
+    theta_periodic(1:np)            = theta
+    theta_periodic(np + 1)          = theta(2)
+
+
+
+    !
+    ! Compute dm' and dtheta for (m',theta) section
+    !
+    call closed_uniform_cubic_spline(np - 1, mprime_periodic, dmprime)
+    call closed_uniform_cubic_spline(np - 1, theta_periodic,  dtheta )
+
+
+
+    !
+    ! Compute inflated (m',theta) sections
+    ! Get inflation offsets from globvar
+    !
+    inf_offset                      = 0.0
+    if (i_section == 1) &
+        inf_offset                  = hub_inf_offset
+    if (i_section == nspn) &
+        inf_offset                  = tip_inf_offset
+
+    do i = 1, np
+        magnitude(i)                = sqrt(dmprime(i)**2 + dtheta(i)**2)
+        unit_normal(i,1)            = -dtheta(i)/magnitude(i)
+        unit_normal(i,2)            = dmprime(i)/magnitude(i)
+        mprime_inf(i)               = mprime(i) - (inf_offset*unit_normal(i,1))
+        theta_inf(i)                = theta(i)  - (inf_offset*unit_normal(i,2))
+    end do
+
+
+
+    !
+    ! Write inflated blade section coordinates to a file
+    ! write_2D_inflated_section in file_operations.f90
+    !
+    call write_2D_inflated_section(i_section, mprime_inf, theta_inf)
+
+
+end subroutine inflate_mprime_theta_section
+!------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+!
+! Transform inflated (m',theta) blade sections to (x,y,z)
+!
+! Input parameters: i_section   - blade section spanwise index
+!                   mprime_inf  - m' coordinates of inflated blade section
+!                   theta_inf   - theta coordinates of inflated blade section
+!
+!------------------------------------------------------------------------------------------------------
+subroutine get_inflated_3D_section(i_section, mprime_inf, theta_inf, x_inf, y_inf, z_inf)
+    use globvar
+    use file_operations
+    implicit none
+
+    real,       external                            :: spl_eval
+
+    integer,                    intent(in)          :: i_section
+    real,                       intent(in)          :: mprime_inf(np)
+    real,                       intent(in)          :: theta_inf(np)
+    real,                       intent(inout)       :: x_inf(np)
+    real,                       intent(inout)       :: y_inf(np)
+    real,                       intent(inout)       :: z_inf(np)
+
+    ! Local variables
+    real                                            :: mprime(np), theta(np)
+    real                                            :: delta_mprime, mprime_s(np), xbinf(np), &
+                                                       rbinf(np)
+
+    
+    !
+    ! Store (m',theta) blade section coordinates in local arrays
+    !
+    mprime                      = mblade_grid(i_section,  1:np)
+    theta                       = thblade_grid(i_section, 1:np)
+
+
+    
+    !
+    ! Streamwise m' values for mapping airfoils
+    ! Offset delta_m' = m'_sLE - m'_bLE
+    ! m'_3D = m'_inf + offset + sweep
+    !
+    delta_mprime                = msle(i_section) - mprime((np + 1)/2)
+    mprime_s                    = mprime_inf + delta_mprime + bladedata(7,i_section)
+
+
+
+    !
+    ! Calculate streamwise x and r coordinates
+    ! Use m'_3D as spline parameter to evaluate spline
+    ! 
+    ! Convert cylindrical coordinates to cartesian coordinates:
+    ! x = x
+    ! y = r * sin(theta + lean)
+    ! z = r * cos(theta + lean)
+    !
+    do i = 1, np
+        xbinf(i)                = spl_eval(nsp(i_section), mprime_s(i), xm(1,i_section), xms(1,i_section), &
+                                           mp(1,i_section)) 
+        rbinf(i)                = spl_eval(nsp(i_section), mprime_s(i), rm(1,i_section), rms(1,i_section), &
+                                           mp(1,i_section)) 
+        x_inf(i)                = scf*xbinf(i)
+        y_inf(i)                = scf*rbinf(i)*sin(theta_inf(i) + bladedata(8,i_section))
+        z_inf(i)                = scf*rbinf(i)*cos(theta_inf(i) + bladedata(8,i_section))
+    end do
+
+
+
+    !
+    ! Write inflated (x,y,z) coordinates to a file
+    ! write_3D_inflated_section in file_operations.f90
+    !
+    call write_3D_inflated_section(i_section, x_inf, y_inf, z_inf)
+
+
+end subroutine get_inflated_3D_section
 !------------------------------------------------------------------------------------------------------
 
 

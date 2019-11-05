@@ -15,7 +15,7 @@ subroutine readinput(fname)
     
     ! Local variables
     character(256)                                      :: temp, temp1, temp2, beta_switch_2
-    character(:),   allocatable                         :: log_file, error_msg, warning_msg, warning_msg_1, dev_msg
+    character(:),   allocatable                         :: log_file, error_msg, warning_msg, warning_msg_1, dev_msg, temp_str
     integer                                             :: er, stat, n_temp1, n_temp2, &
                                                            nopen, nopen1, itm_c, iumax
     real                                                :: inBetaInci, outBetaDevn, temp_offsets(2)
@@ -1216,18 +1216,62 @@ subroutine readinput(fname)
 
     ! 
     ! Read hub and tip offsets and call ESP override subroutine
-    ! TODO: Negative hub offset?
     !
     read(1,'(A)') temp
     write(nopen1,'(A)') trim(temp)
     read(1,'(A)') temp 
     write(nopen1,'(A)') trim(temp)
-    read(1, *)hub
-    write(nopen1,*) hub
+
+    ! Read hub related offsets as a string
+    read(1,'(A)') temp
+
+    ! If only hub offset is present
+    if (index(trim(adjustl(temp)), ' ', back = .true.) == 0) then
+
+        n_temp1 = len(trim(adjustl(temp)))
+        temp_str    = trim(adjustl(temp))
+        read(temp_str(1:n_temp1), *) hub
+
+    ! If hub offset and hub inflation offset have been specified
+    else if (index(trim(adjustl(temp)), ' ', back = .true.) /= 0) then
+
+        hub_inflate = .true.
+        temp_str    = trim(adjustl(temp))
+        n_temp1     = index(temp_str, ' ')
+        n_temp2     = index(temp_str, ' ', back = .true.)
+        read(temp_str(1:n_temp1 - 1), *) hub
+        read(temp_str(n_temp2:), *) hub_inf_offset
+
+    end if  ! index(trim(adjustl(temp)))
+
+    write(nopen1, '(A)') temp
     read(1,'(A)') temp
     write(nopen1,'(A)') trim(temp)
-    read(1, *)tip
-    write(nopen1,*) tip
+
+    ! Read tip related offsets as a string
+    read(1,'(A)') temp
+
+    ! If only tip offset is present
+    if (index(trim(adjustl(temp)), ' ', back = .true.) == 0) then
+        
+        n_temp1     = len(trim(adjustl(temp)))
+        temp_str    = trim(adjustl(temp))
+        read(temp_str(1:n_temp1), *) tip
+        print *, tip
+
+    ! If tip offset and tip inflation offset have been specified
+    else if (index(trim(adjustl(temp)), ' ', back = .true.) /= 0) then
+        
+        tip_inflate = .true.
+        temp_str    = trim(adjustl(temp))
+        n_temp1     = index(temp_str, ' ')
+        n_temp2     = index(temp_str, ' ', back = .true.)
+        read(temp_str(1:n_temp1 - 1), *) tip
+        read(temp_str(n_temp2:), *) tip_inf_offset
+
+    end if  ! index(trim(adjustl(temp)))
+
+    write(nopen1, '(A)') temp
 
     !
     ! Call ESP offset override subroutines
