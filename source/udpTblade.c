@@ -28,7 +28,7 @@
  *     MA  02110-1301  USA
  */
 
-#define NUMUDPARGS 36
+#define NUMUDPARGS 38
 #include "udpUtilities.h"
 
 /* shorthands for accessing argument values and velocities */
@@ -70,10 +70,12 @@
 #define SPAN_CURV_CTRL(     IUDP,I) ((double *) (udps[IUDP].arg[29].val))[I]
 #define SPAN_THK_CTRL(      IUDP,I) ((double *) (udps[IUDP].arg[30].val))[I]
 #define OFFSETS(            IUDP,I) ((double *) (udps[IUDP].arg[31].val))[I]
-#define NACA_LE_RADIUS(     IUDP,I) ((double *) (udps[IUDP].arg[32].val))[I]
-#define NACA_U_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[33].val))[I]
-#define NACA_T_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[34].val))[I]
-#define NACA_T_TE(          IUDP,I) ((double *) (udps[IUDP].arg[35].val))[I]
+#define HUB_INF_OFFSET(     IUDP,I) ((double *) (udps[IUDP].arg[32].val))[I]
+#define TIP_INF_OFFSET(     IUDP,I) ((double *) (udps[IUDP].arg[33].val))[I]
+#define NACA_LE_RADIUS(     IUDP,I) ((double *) (udps[IUDP].arg[34].val))[I]
+#define NACA_U_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[35].val))[I]
+#define NACA_T_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[36].val))[I]
+#define NACA_T_TE(          IUDP,I) ((double *) (udps[IUDP].arg[37].val))[I]
 
 /* data about possible arguments */
 static char*  argNames[NUMUDPARGS] = {"ncp",                "filename",         "auxname",              "arg_2",
@@ -85,8 +87,8 @@ static char*  argNames[NUMUDPARGS] = {"ncp",                "filename",         
                                       "span_out_beta_ctrl", "span_chord_ctrl",  "span_thk_c_ctrl",      "span_del_m",   
                                       "span_del_theta",     "span_in_beta",     "span_out_beta",        "span_chord",   
                                       "span_thk_c",         "span_u_max",       "span_curv_ctrl",       "span_thk_ctrl",        
-                                      "offsets",            "naca_le_radius",   "naca_u_max",           "naca_t_max",           
-                                      "naca_t_te",          };
+                                      "offsets",            "hub_inf_offset",   "tip_inf_offset",       "naca_le_radius",   
+                                      "naca_u_max",         "naca_t_max",       "naca_t_te",            };
 static int    argTypes[NUMUDPARGS] = {ATTRINT,  ATTRSTRING, ATTRSTRING, ATTRSTRING, 
                                       /*ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,*/
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
@@ -97,7 +99,7 @@ static int    argTypes[NUMUDPARGS] = {ATTRINT,  ATTRSTRING, ATTRSTRING, ATTRSTRI
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL, 
-                                      ATTRREAL, };
+                                      ATTRREAL, ATTRREAL,   ATTRREAL,   };
 static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,
                                       /*0,        0,          0,          0,*/
                                       0,        0,          0,          0,
@@ -108,7 +110,7 @@ static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,        
-                                      0,        };
+                                      0,        0,          0,          };
 static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
                                       /*0.,       0.,         0.,         0.,*/
                                       0.,       0.,         0.,         0.,
@@ -119,7 +121,7 @@ static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,       
-                                      0.,       };
+                                      0.,       0.,         0.,         };
 
 /* get utility routines: udpErrorStr, udpInitialize, udpReset, udpSet,
                          udpGet, udpVel, udpClean, udpMesh */
@@ -193,6 +195,8 @@ static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
    void   OVERRIDE_SPAN_CURV_CTRL (     int *nspn, double span_curv_ctrl[       ]);
    void   OVERRIDE_SPAN_THK_CTRL (      int *nspn, double span_thk_ctrl[        ]);
    void   OVERRIDE_OFFSETS (                       double offsets[              ]);
+   void   OVERRIDE_HUB_INF_OFFSET (                double hub_inf_offset[       ]);
+   void   OVERRIDE_TIP_INF_OFFSET (                double tip_inf_offset[       ]);
    void   OVERRIDE_NACA_LE_RADIUS (     int *nspn, double naca_le_radius[       ]);
    void   OVERRIDE_NACA_U_MAX (         int *nspn, double naca_u_max[           ]);
    void   OVERRIDE_NACA_T_MAX (         int *nspn, double naca_t_max[           ]);
@@ -235,6 +239,8 @@ static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
    void   override_span_curv_ctrl_(     int *nspn, double span_curv_ctrl[       ]);
    void   override_span_thk_ctrl_(      int *nspn, double span_thk_ctrl[        ]);
    void   override_offsets_(                       double offsets[              ]);
+   void   override_hub_inf_offset_(                double hub_inf_offset[       ]);
+   void   override_tip_inf_offset_(                double tip_inf_offset[       ]);
    void   override_naca_le_radius_(     int *nspn, double naca_le_radius[       ]);
    void   override_naca_u_max_(         int *nspn, double naca_u_max[           ]);
    void   override_naca_t_max_(         int *nspn, double naca_t_max[           ]);
@@ -1781,7 +1787,6 @@ void override_span_thk_ctrl_(int *nspn, double span_thk_ctrl[])
     }
 }
 
-
 
 /*
  ************************************************************************
@@ -1816,6 +1821,66 @@ void override_offsets_(double offsets[])
 /*
  ************************************************************************
  *                                                                      *
+ *   override_hub_inf_offset - callback from Tblade3 to change          *
+ *                             hub_inf_offset                           *
+ *                                                                      *
+ ************************************************************************
+ */
+
+#ifdef WIN32
+void OVERRIDE_HUB_INF_OFFSET (double hub_inf_offset[])
+#else
+void override_hub_inf_offset_(double hub_inf_offset[])
+#endif
+{
+    int    ioffset, narg=32;
+
+    if (udps[numUdp].arg[narg].size == 1) {
+        printf(" ==> overriding hub_inf_offset\n");
+        for (ioffset = 0; ioffset < 1; ioffset++) {
+            hub_inf_offset[ioffset] = HUB_INF_OFFSET(numUdp,ioffset);
+            printf("     hub_inf_offset(%2d) = %12.5f\n", ioffset+1, hub_inf_offset[ioffset]);
+        }
+    } else {
+        printf(" ==> not overriding hub_inf_offset (noffset=1 but size=%d)\n",
+               udps[numUdp].arg[narg].size);
+    }
+}
+
+
+/*
+ ************************************************************************
+ *                                                                      *
+ *   override_tip_inf_offset - callback from Tblade3 to change          *
+ *                             tip_inf_offset                           *
+ *                                                                      *
+ ************************************************************************
+ */
+
+#ifdef WIN32
+void OVERRIDE_TIP_INF_OFFSET (double tip_inf_offset[])
+#else
+void override_tip_inf_offset_(double tip_inf_offset[])
+#endif
+{
+    int    ioffset, narg=33;
+
+    if (udps[numUdp].arg[narg].size == 1) {
+        printf(" ==> overriding tip_inf_offset\n");
+        for (ioffset = 0; ioffset < 1; ioffset++) {
+            tip_inf_offset[ioffset] = TIP_INF_OFFSET(numUdp,ioffset);
+            printf("     tip_inf_offset(%2d) = %12.5f\n", ioffset+1, tip_inf_offset[ioffset]);
+        }
+    } else {
+        printf(" ==> not overriding tip_inf_offset (noffset=1 but size=%d)\n",
+               udps[numUdp].arg[narg].size);
+    }
+}
+
+
+/*
+ ************************************************************************
+ *                                                                      *
  *   override_naca_le_radius - callback from Tblade3 to change          *
  *                             naca_le_radius array                     *
  *                                                                      *
@@ -1828,7 +1893,7 @@ void OVERRIDE_NACA_LE_RADIUS (int *nspn, double naca_le_radius[])
 void override_naca_le_radius_(int *nspn, double naca_le_radius[])
 #endif
 {
-    int    ispn, narg=32;
+    int    ispn, narg=34;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_le_radius\n");
@@ -1858,7 +1923,7 @@ void OVERRIDE_NACA_U_MAX (int *nspn, double naca_u_max[])
 void override_naca_u_max_(int *nspn, double naca_u_max[])
 #endif
 {
-    int    ispn, narg=33;
+    int    ispn, narg=35;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_u_max\n");
@@ -1888,7 +1953,7 @@ void OVERRIDE_NACA_T_MAX (int *nspn, double naca_t_max[])
 void override_naca_t_max_(int *nspn, double naca_t_max[])
 #endif
 {
-    int    ispn, narg=34;
+    int    ispn, narg=36;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_t_max\n");
@@ -1918,7 +1983,7 @@ void OVERRIDE_NACA_T_TE (int *nspn, double naca_t_te[])
 void override_naca_t_te_(int *nspn, double naca_t_te[])
 #endif
 {
-    int    ispn, narg=35;
+    int    ispn, narg=37;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_t_te\n");

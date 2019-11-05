@@ -18,7 +18,8 @@ subroutine readinput(fname)
     character(:),   allocatable                         :: log_file, error_msg, warning_msg, warning_msg_1, dev_msg, temp_str
     integer                                             :: er, stat, n_temp1, n_temp2, &
                                                            nopen, nopen1, itm_c, iumax
-    real                                                :: inBetaInci, outBetaDevn, temp_offsets(2)
+    real                                                :: inBetaInci, outBetaDevn, temp_offsets(2), temp_hub_offset, &
+                                                           temp_tip_offset
     real,           allocatable                         :: temp_in(:)
     real,           parameter                           :: tol = 1E-8
     logical                                             :: equal, beta_value(5), ang_spl_value(5), file_open, &
@@ -1285,6 +1286,29 @@ subroutine readinput(fname)
 #endif
     hub = temp_offsets(1)
     tip = temp_offsets(2)
+
+    !
+    ! Call ESP inflation offset overrride subroutines
+    ! override_hub_inf_offset and override_tip_inf_offset
+    ! in 3dbgb_driver.f90
+    ! Callback to override_hub_inf_offset_() and 
+    ! override_tip_inf_offset_() in udpTblade.c, udpHubWedge.c and udpBladeVolume.c
+    !
+    if (hub_inflate) then
+        temp_hub_offset     = hub_inf_offset
+#ifdef FROM_ESP
+        call override_hub_inf_offset(temp_hub_offset)
+#endif
+        hub_inf_offset      = temp_hub_offset
+    end if
+
+    if (tip_inflate) then
+        temp_tip_offset     = tip_inf_offset
+#ifdef FROM_ESP
+        call override_tip_inf_offset(temp_tip_offset)
+#endif
+        tip_inf_offset      = temp_tip_offset
+    end if
 
 
 

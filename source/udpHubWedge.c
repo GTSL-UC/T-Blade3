@@ -31,7 +31,7 @@
  *     MA  02110-1301  USA
  */
 
-#define NUMUDPARGS 37
+#define NUMUDPARGS 39
 #include "udpUtilities.h"
 
 /* shorthands for accessing argument values and velocities */
@@ -68,10 +68,12 @@
 #define SPAN_DEL_THETA(     IUDP,I) ((double *) (udps[IUDP].arg[30].val))[I]
 #define SPAN_THK_CTRL(      IUDP,I) ((double *) (udps[IUDP].arg[31].val))[I]
 #define OFFSETS(            IUDP,I) ((double *) (udps[IUDP].arg[32].val))[I] 
-#define NACA_LE_RADIUS(		IUDP,I) ((double *) (udps[IUDP].arg[33].val))[I]
-#define NACA_U_MAX(			IUDP,I) ((double *) (udps[IUDP].arg[34].val))[I]
-#define NACA_T_MAX(			IUDP,I) ((double *) (udps[IUDP].arg[35].val))[I]
-#define NACA_T_TE(			IUDP,I) ((double *) (udps[IUDP].arg[36].val))[I]
+#define HUB_INF_OFFSET(     IUDP,I) ((double *) (udps[iUDP].arg[33].val))[I]
+#define TIP_INF_OFFSET(     IUDP,I) ((double *) (udps[iUDP].arg[34].val))[I]
+#define NACA_LE_RADIUS(     IUDP,I) ((double *) (udps[IUDP].arg[35].val))[I]
+#define NACA_U_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[36].val))[I]
+#define NACA_T_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[37].val))[I]
+#define NACA_T_TE(          IUDP,I) ((double *) (udps[IUDP].arg[38].val))[I]
 
 /* data about possible arguments */
 static char*  argNames[NUMUDPARGS] = {"ncp",                    "filename",         "auxname",          "average",
@@ -82,38 +84,38 @@ static char*  argNames[NUMUDPARGS] = {"ncp",                    "filename",     
                                       "cur2",                   "cur3",             "cur4",             "cur5",             
                                       "cur6",                   "cur7",             "span_curv_ctrl",   "span_del_m_ctrl",  
                                       "span_del_theta_ctrl",    "span_del_m",       "span_del_theta",   "span_thk_ctrl",    
-                                      "offsets",                "naca_le_radius",	"naca_u_max",		"naca_t_max",       
-                                      "naca_t_te",			    };
+                                      "offsets",                "hub_inf_offset",   "tip_inf_offset",   "naca_le_radius",   
+                                      "naca_u_max",             "naca_t_max",       "naca_t_te",        };
 static int    argTypes[NUMUDPARGS] = {ATTRINT,      ATTRSTRING, ATTRSTRING, ATTRSTRING, 
                                       ATTRSTRING,   ATTRREAL,   ATTRREAL,   ATTRREAL,   
                                       ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
-                                      ATTRREAL,     ATTRREAL,   ATTRREAL, 	ATTRREAL,	
                                       ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
                                       ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
                                       ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
                                       ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
-                                      ATTRREAL,     ATTRREAL,	ATTRREAL,	ATTRREAL,		
-                                      ATTRREAL,     };
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,       
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   };
 static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,
-                                      0,        0, 			0, 	        0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,
-                                      0,        0,			0,			0,		
-                                      0,        };
+                                      0,        0,          0,          0,
+                                      0,        0,          0,          0,      
+                                      0,        0,          0,          };
 static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
-                                      0.,       0., 		0.,  		0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
-                                      0.,		0.,			0.,			0.,		
-                                      0.,       };
+                                      0.,       0.,         0.,         0.,
+                                      0.,       0.,         0.,         0.,     
+                                      0.,       0.,         0.,         };
 
 /* get utility routines: udpErrorStr, udpInitialize, udpReset, udpSet,
                          udpGet, udpVel, udpClean, udpMesh */
@@ -170,6 +172,8 @@ void   override_span_del_m_(         int *nspn, double span_del_m[          ]);
 void   override_span_del_theta_(     int *nspn, double span_del_theta[      ]);
 void   override_span_thk_ctrl_(      int *nspn, double span_thk_ctrl[       ]);
 void   override_offsets_(                       double offsets[             ]);
+void   override_hub_inf_offset_(                double hub_inf_offset[      ]);
+void   override_tip_inf_offset_(                double tip_inf_offset[      ]);
 void   override_naca_le_radius_(     int *nspn, double naca_le_radius[      ]);
 void   override_naca_u_max_(         int *nspn, double naca_u_max[          ]);
 void   override_naca_t_max_(         int *nspn, double naca_t_max[          ]);
@@ -262,8 +266,8 @@ udpExecute(ego  context,                /* (in)  EGADS context */
 
     (void) fgets(nextline, 257, fp);
     (void) fgets(nextline, 257, fp);
-	sscanf(nextline, "%lf", &nblades);
-	printf("Number of Blades in Row: %lf\n", nblades);
+    sscanf(nextline, "%lf", &nblades);
+    printf("Number of Blades in Row: %lf\n", nblades);
 
     (void) fgets(nextline, 257, fp);
     (void) fgets(nextline, 257, fp);
@@ -279,246 +283,246 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     printf("auxname  = %s\n", AUXNAME(numUdp));
     bgb3d_sub_(FILENAME(numUdp), AUXNAME(numUdp), ARG_2(numUdp), "", "",
                strlen(FILENAME(numUdp)), strlen(AUXNAME(numUdp)), (int)strlen(ARG_2(numUdp)), strlen(""), strlen(""));
-    /* Read Hub File */		   
+    /* Read Hub File */        
     sprintf(filename, "hub.%s.sldcrv", casename);
     printf("reading: %s\n", filename);
-	
+    
     hub = fopen(filename, "r");
     fp  = hub;      //Might need to remove
     if (fp == NULL) {
         printf("could not open \"%s\"\n", filename);
         status = -9999;
-    }		   
+    }          
 
-	/* Read Meanline Files and create curves */
-	for (isec = 1; isec <= 1; isec++) {
-	
-		sprintf(filename, "meanline.sec%d.%s.dat",isec,casename);
-		printf("reading: %s\n", filename);
-		meanline = fopen(filename, "r");
-		if (fp == NULL) {
-			printf("could not open \"%s\"\n", filename);
-			status = -9999;
-		}
-		
-		/*Filling xyz2 array with points in meanline file*/
-		npnt = 0;
-		while (1) {
-			nn = fscanf(meanline, "%lf %lf %lf\n", &(xyz2[3*npnt]), &(xyz2[3*npnt+1]), &(xyz2[3*npnt+2]));  
-			if (nn < 3) {
-				break;
-			}else if (npnt >= NPNT) {
-				printf("recompile with larger NPNT\n");
-				status = -9999;
-			} else {
-				npnt++;
-			}
-		}
-		
-		/*Finding xyz positions of the first and last points*/
-		xmax=xyz2[3*(npnt-1)];
-		ymax=xyz2[3*(npnt-1)+1];
-		zmax=xyz2[3*(npnt-1)+2];
-		xmin=xyz2[0];
-		ymin=xyz2[1];
-		zmin=xyz2[2];
-		
-		/*Creating a node at the first and last points*/		
-		node0[0]=xmin;//xyz2[0];
-		node0[1]=ymin;//xyz2[1];
-		node0[2]=zmin;//xyz2[2];
-	
-		node1[0]=xmax;//xyz2[3*(npnt-1)];
-		node1[1]=ymax;//xyz2[3*(npnt-1)+1];
-		node1[2]=zmax;//xyz2[3*(npnt-1)+2];
-	
-		status = EG_makeTopology(context, NULL, NODE, 0, node0, 0, NULL, NULL, &(enodes[0]));
-		#ifdef DEBUG
-			printf("EG_makeTopology(node0) -> status=%d\n", status);
-		#endif
+    /* Read Meanline Files and create curves */
+    for (isec = 1; isec <= 1; isec++) {
+    
+        sprintf(filename, "meanline.sec%d.%s.dat",isec,casename);
+        printf("reading: %s\n", filename);
+        meanline = fopen(filename, "r");
+        if (fp == NULL) {
+            printf("could not open \"%s\"\n", filename);
+            status = -9999;
+        }
+        
+        /*Filling xyz2 array with points in meanline file*/
+        npnt = 0;
+        while (1) {
+            nn = fscanf(meanline, "%lf %lf %lf\n", &(xyz2[3*npnt]), &(xyz2[3*npnt+1]), &(xyz2[3*npnt+2]));  
+            if (nn < 3) {
+                break;
+            }else if (npnt >= NPNT) {
+                printf("recompile with larger NPNT\n");
+                status = -9999;
+            } else {
+                npnt++;
+            }
+        }
+        
+        /*Finding xyz positions of the first and last points*/
+        xmax=xyz2[3*(npnt-1)];
+        ymax=xyz2[3*(npnt-1)+1];
+        zmax=xyz2[3*(npnt-1)+2];
+        xmin=xyz2[0];
+        ymin=xyz2[1];
+        zmin=xyz2[2];
+        
+        /*Creating a node at the first and last points*/        
+        node0[0]=xmin;//xyz2[0];
+        node0[1]=ymin;//xyz2[1];
+        node0[2]=zmin;//xyz2[2];
+    
+        node1[0]=xmax;//xyz2[3*(npnt-1)];
+        node1[1]=ymax;//xyz2[3*(npnt-1)+1];
+        node1[2]=zmax;//xyz2[3*(npnt-1)+2];
+    
+        status = EG_makeTopology(context, NULL, NODE, 0, node0, 0, NULL, NULL, &(enodes[0]));
+        #ifdef DEBUG
+            printf("EG_makeTopology(node0) -> status=%d\n", status);
+        #endif
 
-		status = EG_makeTopology(context, NULL, NODE, 0, node1, 0, NULL, NULL, &(enodes[1]));
-		#ifdef DEBUG
-			printf("EG_makeTopology(node1) -> status=%d\n", status);
-		#endif
-	
-		
-		/*Fit B-Spline to Points*/
-		sizes[0]=npnt;
-		sizes[1]=0;	
-		status=EG_approximate(context, 2, 1.0e-6,sizes, xyz2,&(ecurve[0]));
-		#ifdef DEBUG
-		printf("EG_approximate -> status=%d\n", status);
-		#endif
-		
-		/*Get Ranges for Edge*/
-		status = EG_invEvaluate(ecurve[0], node0, &(trange[0]), data);
-		#ifdef DEBUG	
-		printf("EG_invEvaluate -> status=%d\n", status);
-		#endif
-		status = EG_invEvaluate(ecurve[0], node1, &(trange[1]), data);	
-		#ifdef DEBUG
-		printf("EG_invEvaluate -> status=%d\n", status);
-		#endif
-		
-		/*Make the Meanline an Edge*/
-		status = EG_makeTopology(context, ecurve[0], EDGE, TWONODE, trange, 2, &(enodes[0]), NULL, &(eedges[0]));
-		#ifdef DEBUG		
-		printf("EG_makeTopology(edge) -> status=%d\n", status);	
-		#endif
+        status = EG_makeTopology(context, NULL, NODE, 0, node1, 0, NULL, NULL, &(enodes[1]));
+        #ifdef DEBUG
+            printf("EG_makeTopology(node1) -> status=%d\n", status);
+        #endif
+    
+        
+        /*Fit B-Spline to Points*/
+        sizes[0]=npnt;
+        sizes[1]=0; 
+        status=EG_approximate(context, 2, 1.0e-6,sizes, xyz2,&(ecurve[0]));
+        #ifdef DEBUG
+        printf("EG_approximate -> status=%d\n", status);
+        #endif
+        
+        /*Get Ranges for Edge*/
+        status = EG_invEvaluate(ecurve[0], node0, &(trange[0]), data);
+        #ifdef DEBUG    
+        printf("EG_invEvaluate -> status=%d\n", status);
+        #endif
+        status = EG_invEvaluate(ecurve[0], node1, &(trange[1]), data);  
+        #ifdef DEBUG
+        printf("EG_invEvaluate -> status=%d\n", status);
+        #endif
+        
+        /*Make the Meanline an Edge*/
+        status = EG_makeTopology(context, ecurve[0], EDGE, TWONODE, trange, 2, &(enodes[0]), NULL, &(eedges[0]));
+        #ifdef DEBUG        
+        printf("EG_makeTopology(edge) -> status=%d\n", status); 
+        #endif
 
-		/* make Loop from this Edge */
-		sense[0] = SFORWARD;
-		sense[1] = SFORWARD;
-		status = EG_makeTopology(context, NULL, LOOP, OPEN, NULL, 1, eedges, sense, &(eloops[0]));
-		#ifdef DEBUG		
-		printf("EG_makeTopology(loop) -> status=%d\n", status);	
-		#endif
+        /* make Loop from this Edge */
+        sense[0] = SFORWARD;
+        sense[1] = SFORWARD;
+        status = EG_makeTopology(context, NULL, LOOP, OPEN, NULL, 1, eedges, sense, &(eloops[0]));
+        #ifdef DEBUG        
+        printf("EG_makeTopology(loop) -> status=%d\n", status); 
+        #endif
 
-        fclose(meanline);	
-	}
-	
-	/*Making the Nodes for the Line along the X-axis-the .0001 is because ESP 
-	runs into an error when I use 0 */
-	node0[0]=xmin;
-	node0[1]=0;
-	node0[2]=.0001;
+        fclose(meanline);   
+    }
+    
+    /*Making the Nodes for the Line along the X-axis-the .0001 is because ESP 
+    runs into an error when I use 0 */
+    node0[0]=xmin;
+    node0[1]=0;
+    node0[2]=.0001;
 
-	node1[0]=xmax;
-	node1[1]=0;
-	node1[2]=.0001;
-	
-	status = EG_makeTopology(context, NULL, NODE, 0, node0, 0, NULL, NULL, &(enodes[0]));
-	#ifdef DEBUG
-		printf("EG_makeTopology(node0) -> status=%d\n", status);
-	#endif
-	
-	status = EG_makeTopology(context, NULL, NODE, 0, node1, 0, NULL, NULL, &(enodes[1]));
-	#ifdef DEBUG
-		printf("EG_makeTopology(node1) -> status=%d\n", status);
-	#endif
-	
-	/*Making the Straight curve along the x-axis*/
-	data[0] = node0[0];
-	data[1] = node0[1];
-	data[2] = node0[2];
-	data[3] = node1[0] - node0[0];
-	data[4] = node1[1] - node0[1];
-	data[5] = node1[2] - node0[2];
+    node1[0]=xmax;
+    node1[1]=0;
+    node1[2]=.0001;
+    
+    status = EG_makeTopology(context, NULL, NODE, 0, node0, 0, NULL, NULL, &(enodes[0]));
+    #ifdef DEBUG
+        printf("EG_makeTopology(node0) -> status=%d\n", status);
+    #endif
+    
+    status = EG_makeTopology(context, NULL, NODE, 0, node1, 0, NULL, NULL, &(enodes[1]));
+    #ifdef DEBUG
+        printf("EG_makeTopology(node1) -> status=%d\n", status);
+    #endif
+    
+    /*Making the Straight curve along the x-axis*/
+    data[0] = node0[0];
+    data[1] = node0[1];
+    data[2] = node0[2];
+    data[3] = node1[0] - node0[0];
+    data[4] = node1[1] - node0[1];
+    data[5] = node1[2] - node0[2];
 
-	status = EG_makeGeometry(context, CURVE, LINE, NULL, NULL, data, &(ecurve[0]));
-	#ifdef DEBUG
-		printf("EG_makeGeometry(curve) -> status=%d\n", status);
-	#endif
+    status = EG_makeGeometry(context, CURVE, LINE, NULL, NULL, data, &(ecurve[0]));
+    #ifdef DEBUG
+        printf("EG_makeGeometry(curve) -> status=%d\n", status);
+    #endif
 
-	/*Finding the range between the nodes*/	
- 	status = EG_invEvaluate(ecurve[0], node0, &(trange[0]), data);
-	#ifdef DEBUG
-		printf("invEvaluate -> status=%d\n", status);
-	#endif
-  	status = EG_invEvaluate(ecurve[0], node1, &(trange[1]), data);	
-	#ifdef DEBUG
-		printf("EG_invEvaluate -> status=%d\n", status);
-	#endif
-	
-	/*Make the Edge*/
-	status = EG_makeTopology(context, ecurve[0], EDGE, TWONODE, trange, 2, &(enodes[0]), NULL, &(eedges[0]));	
-	#ifdef DEBUG
-		printf("EG_makeTopology(edge) -> status=%d\n", status);
-	#endif
+    /*Finding the range between the nodes*/ 
+    status = EG_invEvaluate(ecurve[0], node0, &(trange[0]), data);
+    #ifdef DEBUG
+        printf("invEvaluate -> status=%d\n", status);
+    #endif
+    status = EG_invEvaluate(ecurve[0], node1, &(trange[1]), data);  
+    #ifdef DEBUG
+        printf("EG_invEvaluate -> status=%d\n", status);
+    #endif
+    
+    /*Make the Edge*/
+    status = EG_makeTopology(context, ecurve[0], EDGE, TWONODE, trange, 2, &(enodes[0]), NULL, &(eedges[0]));   
+    #ifdef DEBUG
+        printf("EG_makeTopology(edge) -> status=%d\n", status);
+    #endif
 
-	/* make Loop from this Edge */
-	sense[0] = SFORWARD;
-	sense[1] = SFORWARD;
-	status = EG_makeTopology(context, NULL, LOOP, OPEN, NULL, 1, eedges, sense, &(eloops[1]));
-	#ifdef DEBUG
-		printf("EG_makeTopology(loop) -> status=%d\n", status);
-	#endif
+    /* make Loop from this Edge */
+    sense[0] = SFORWARD;
+    sense[1] = SFORWARD;
+    status = EG_makeTopology(context, NULL, LOOP, OPEN, NULL, 1, eedges, sense, &(eloops[1]));
+    #ifdef DEBUG
+        printf("EG_makeTopology(loop) -> status=%d\n", status);
+    #endif
 
-	/*Blend the meanline edge with the edge along the x-axis*/
-	status=EG_blend(2,eloops,NULL,NULL,&body);
-	#ifdef DEBUG
-		printf("EG_blend -> status=%d\n", status);
-	#endif
-	
-	/*Get the from the sheet body so that it can be revolved*/
-	status=EG_getTopology(body, &eref,&oclass,&mtype,data,&nchild,&children,&senses);
-	#ifdef DEBUG
-		printf("EG_getTopology -> status=%d\n", status);
-	#endif
-	status=EG_getTopology(children[0], &eref,&oclass,&mtype,data,&nchild,&children,&senses);
-	#ifdef DEBUG
-		printf("EG_getTopology -> status=%d\n", status);
-	#endif
-	
-	/*Create another instance of the face*/
-	status=EG_copyObject(children[0], NULL,&(efaces[0]));
-	#ifdef DEBUG
-		printf("EG_copyObject -> status=%d\n", status);
-	#endif
-	
-	/*Determine the spacing between blades*/
-	bladespace=360/nblades;
-	angle=bladespace/2;
-	#ifdef DEBUG
-	printf("Bladespace = %lf\n", bladespace);
-	printf("nblades = %lf\n", nblades);
-	#endif
-	
-	/*Revolve Face around x-axis to Get half of Solid Body*/
-	data[0]=-1;
-	data[1]=0;
-	data[2]=0;
-	data[3]=1;
-	data[4]=0;
-	data[5]=0;
-	
-	
-	status=EG_rotate(children[0],angle,data, &(ebody2[1]));
-	#ifdef DEBUG
-		printf("EG_rotate -> status=%d\n", status);
-	#endif
-	
-	/*Rotate the other face instance the other way to get other half*/
-	data[0]=100;
-	data[1]=0;
-	data[2]=0;
-	data[3]=-100;
-	data[4]=0;
-	data[5]=0;
-	status=EG_rotate(efaces[0],angle,data, &(ebody2[0]));
-	#ifdef DEBUG
-		printf("EG_rotate -> status=%d\n", status);
-	#endif
-	
-	/*Fuse the two halfs together*/
-	status=EG_solidBoolean(ebody2[0],ebody2[1],FUSION,&emodel);
-	#ifdef DEBUG
-		printf("EG_solidBoolean -> status=%d\n", status);
-	#endif
-	
-	/*Extract the one body from the model created*/
-	status=EG_getTopology(emodel, &eref,&oclass,&mtype,data,&nchild,&echilds2,&senses);
+    /*Blend the meanline edge with the edge along the x-axis*/
+    status=EG_blend(2,eloops,NULL,NULL,&body);
+    #ifdef DEBUG
+        printf("EG_blend -> status=%d\n", status);
+    #endif
+    
+    /*Get the from the sheet body so that it can be revolved*/
+    status=EG_getTopology(body, &eref,&oclass,&mtype,data,&nchild,&children,&senses);
+    #ifdef DEBUG
+        printf("EG_getTopology -> status=%d\n", status);
+    #endif
+    status=EG_getTopology(children[0], &eref,&oclass,&mtype,data,&nchild,&children,&senses);
+    #ifdef DEBUG
+        printf("EG_getTopology -> status=%d\n", status);
+    #endif
+    
+    /*Create another instance of the face*/
+    status=EG_copyObject(children[0], NULL,&(efaces[0]));
+    #ifdef DEBUG
+        printf("EG_copyObject -> status=%d\n", status);
+    #endif
+    
+    /*Determine the spacing between blades*/
+    bladespace=360/nblades;
+    angle=bladespace/2;
+    #ifdef DEBUG
+    printf("Bladespace = %lf\n", bladespace);
+    printf("nblades = %lf\n", nblades);
+    #endif
+    
+    /*Revolve Face around x-axis to Get half of Solid Body*/
+    data[0]=-1;
+    data[1]=0;
+    data[2]=0;
+    data[3]=1;
+    data[4]=0;
+    data[5]=0;
+    
+    
+    status=EG_rotate(children[0],angle,data, &(ebody2[1]));
+    #ifdef DEBUG
+        printf("EG_rotate -> status=%d\n", status);
+    #endif
+    
+    /*Rotate the other face instance the other way to get other half*/
+    data[0]=100;
+    data[1]=0;
+    data[2]=0;
+    data[3]=-100;
+    data[4]=0;
+    data[5]=0;
+    status=EG_rotate(efaces[0],angle,data, &(ebody2[0]));
+    #ifdef DEBUG
+        printf("EG_rotate -> status=%d\n", status);
+    #endif
+    
+    /*Fuse the two halfs together*/
+    status=EG_solidBoolean(ebody2[0],ebody2[1],FUSION,&emodel);
+    #ifdef DEBUG
+        printf("EG_solidBoolean -> status=%d\n", status);
+    #endif
+    
+    /*Extract the one body from the model created*/
+    status=EG_getTopology(emodel, &eref,&oclass,&mtype,data,&nchild,&echilds2,&senses);
 
-	#ifdef DEBUG
-		printf("EG_getTopology -> status=%d\n", status);
-	#endif
-	status=EG_copyObject(echilds2[0], NULL,ebody);
-	#ifdef DEBUG
-		printf("EG_copyObject-> status=%d\n", status);
-	#endif
+    #ifdef DEBUG
+        printf("EG_getTopology -> status=%d\n", status);
+    #endif
+    status=EG_copyObject(echilds2[0], NULL,ebody);
+    #ifdef DEBUG
+        printf("EG_copyObject-> status=%d\n", status);
+    #endif
 
-	/*Remembder the body*/
-	udps[numUdp].ebody = *ebody;
+    /*Remembder the body*/
+    udps[numUdp].ebody = *ebody;
 /*
  *************************************************************************/
 
 /*cleanup:
     if (status != EGADS_SUCCESS) {
         *string = udpErrorStr(status);
-    }*/	
-	
-	return status;
+    }*/ 
+    
+    return status;
 }
 
 /*
@@ -1275,6 +1279,58 @@ void override_offsets_(double offsets[])
     }
 }
 
+
+/*
+ ************************************************************************
+ *                                                                      *
+ *   override_hub_inf_offset - callback from Tblade3 to change          *
+ *                             hub_inf_offset                           *
+ *                                                                      *
+ ************************************************************************
+ */
+
+void override_hub_inf_offset_(double hub_inf_offset[])
+{
+    int    ioffset, narg=33;
+
+    if (udps[numUdp].arg[narg].size == 1) {
+        printf(" ==> overriding hub_inf_offset\n");
+        for (ioffset = 0; ioffset < 1; ioffset++) {
+            hub_inf_offset[ioffset] = HUB_INF_OFFSET(numUdp,ioffset);
+            printf("     hub_inf_offset(%2d) = %12.5f\n", ioffset+1, hub_inf_offset[ioffset]);
+        }
+    } else {
+        printf(" ==> not overriding hub_inf_offset (noffset=1 but size=%d)\n",
+               udps[numUdp].arg[narg].size);
+    }
+}
+
+
+/*
+ ************************************************************************
+ *                                                                      *
+ *   override_tip_inf_offset - callback from Tblade3 to change          *
+ *                             tip_inf_offset                           *
+ *                                                                      *
+ ************************************************************************
+ */
+
+void override_tip_inf_offset_(double tip_inf_offset[])
+{
+    int    ioffset, narg=34;
+
+    if (udps[numUdp].arg[narg].size == 1) {
+        printf(" ==> overriding tip_inf_offset\n");
+        for (ioffset = 0; ioffset < 1; ioffset++) {
+            tip_inf_offset[ioffset] = TIP_INF_OFFSET(numUdp,ioffset);
+            printf("     tip_inf_offset(%2d) = %12.5f\n", ioffset+1, tip_inf_offset[ioffset]);
+        }
+    } else {
+        printf(" ==> not overriding tip_inf_offset (noffset=1 but size=%d)\n",
+               udps[numUdp].arg[narg].size);
+    }
+}
+
 /*
  ************************************************************************
  *                                                                      *
@@ -1286,7 +1342,7 @@ void override_offsets_(double offsets[])
 
 void override_naca_le_radius_(int *nspn, double naca_le_radius[])
 {
-    int    ispn, narg=33;
+    int    ispn, narg=35;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_le_radius\n");
@@ -1312,7 +1368,7 @@ void override_naca_le_radius_(int *nspn, double naca_le_radius[])
 
 void override_naca_u_max_(int *nspn, double naca_u_max[])
 {
-    int    ispn, narg=34;
+    int    ispn, narg=36;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_u_max\n");
@@ -1338,7 +1394,7 @@ void override_naca_u_max_(int *nspn, double naca_u_max[])
 
 void override_naca_t_max_(int *nspn, double naca_t_max[])
 {
-    int    ispn, narg=35;
+    int    ispn, narg=37;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_t_max\n");
@@ -1364,7 +1420,7 @@ void override_naca_t_max_(int *nspn, double naca_t_max[])
 
 void override_naca_t_te_(int *nspn, double naca_t_te[])
 {
-    int    ispn, narg=36;
+    int    ispn, narg=38;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_t_te\n");
