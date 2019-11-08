@@ -1258,7 +1258,6 @@ subroutine readinput(fname)
         n_temp1     = len(trim(adjustl(temp)))
         temp_str    = trim(adjustl(temp))
         read(temp_str(1:n_temp1), *) tip
-        print *, tip
 
     ! If tip offset and tip inflation offset have been specified
     else if (index(trim(adjustl(temp)), ' ', back = .true.) /= 0) then
