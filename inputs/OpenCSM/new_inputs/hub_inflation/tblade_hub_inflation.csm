@@ -1,0 +1,151 @@
+# tbladewedge
+# written by Simon Livingston
+# modified by Mayank Sharma
+
+#DIMENSION cur1                 1 8 1
+#DIMENSION cur2	                1 8 1
+#DIMENSION cur3	                1 8 1
+#DIMENSION cur4	                1 8 1
+#DIMENSION cur5	                1 8 1
+#DIMENSION cur6	                1 8 1
+#DIMENSION cur7                 1 8 1
+#DIMENSION u2	                1 8 1
+#DIMENSION u3	                1 8 1
+#DIMENSION u4	                1 8 1
+#DIMENSION u5	                1 8 1
+#DIMENSION u6	                1 8 1
+#DIMENSION span_del_m_ctrl      1 4 1
+#DIMENSION span_del_theta_ctrl  1 4 1
+#DIMENSION span_in_beta_ctrl    1 8 1
+#DIMENSION span_out_beta_ctrl   1 7 1
+#DIMENSION span_chord_ctrl      1 4 1
+#DIMENSION span_thk_c_ctrl      1 4 1
+#DIMENSION span_del_m           1 4 1
+#DIMENSION span_del_theta       1 4 1
+#DIMENSION span_in_beta         1 8 1
+#DIMENSION span_out_beta        1 7 1
+#DIMENSION span_chord           1 4 1
+#DIMENSION span_thk_c           1 4 1
+#DIMENSION span_curv_ctrl       1 8 1
+#DIMENSION span_thk_ctrl        1 5 1
+DIMENSION offsets              1 2 1
+DIMENSION hub_inf_offset       1 1 1
+#DIMENSION naca_le_radius       1 5 1
+#DIMENSION naca_u_max           1 5 1
+#DIMENSION naca_t_max           1 5 1
+#DIMENSION naca_t_te            1 5 1
+
+#DESPMTR   cur1	                " 0.00000000; -0.02017699; 0.57710284; -0.15333193;  0.00000000; -0.37617972;  0.61945678;  0.64481023;"
+#DESPMTR   cur2	                " 0.16085621;  0.35578826; 0.25063294; -0.23260387;  0.12192505;  0.49656805; -0.55762917;  0.57248087;"
+#DESPMTR   cur3	                " 0.36734053;  0.11976735; 0.35837041;  0.60964587;  0.40513258; -0.57844538; -0.07558126; -0.64664321;"
+#DESPMTR   cur4	                " 0.06069225;  0.09145122; 0.35165335;  0.53708042; -0.01901009;  0.17107015;  0.54503198; -0.21442183;"
+#DESPMTR   cur5	                " 0.39217871;  0.60806732; 0.43938827;  0.11411030;  0.02838869;  0.11528892;  0.47540606;  0.47540606;"
+#DESPMTR   cur6	                "-0.07385240;  0.04883586; 0.53221826;  0.46669626; -0.18308617;  0.32108165;  0.06407186;  0.06407186;"
+#DESPMTR   cur7                 " 0.00000000; -0.33377929; 0.41888982; -0.17814770;  0.00000000; -0.23223811;  0.07228972;  0.07228972;"
+#DESPMTR   u2	                " 0.150; 0.150; 0.150; 0.150; 0.150; 0.150; 0.150; 0.150;"
+#DESPMTR   u3	                " 0.250; 0.250; 0.250; 0.250; 0.250; 0.250; 0.250; 0.250;"
+#DESPMTR   u4	                " 0.500; 0.500; 0.500; 0.500; 0.500; 0.500; 0.500; 0.500;"
+#DESPMTR   u5	                " 0.750; 0.750; 0.750; 0.750; 0.750; 0.750; 0.750; 0.750;"
+#DESPMTR   u6	                " 0.950; 0.950; 0.950; 0.950; 0.950; 0.950; 0.950; 0.950;"
+#DESPMTR   span_del_m_ctrl      " 0.000; 0.250; 0.500; 0.100;"
+#DESPMTR   span_del_theta_ctrl  " 0.000; 0.250; 0.500; 0.100;"
+#DESPMTR   span_in_beta_ctrl    " 0.000; 0.100; 0.250; 0.350; 0.500; 0.750; 0.900; 1.000;"
+#DESPMTR   span_out_beta_ctrl   " 0.000; 0.100; 0.250; 0.350; 0.500; 0.700; 1.000;"
+#DESPMTR   span_chord_ctrl      " 0.000; 0.400; 0.667; 1.000;"
+#DESPMTR   span_thk_c_ctrl      " 0.000; 0.333; 0.667; 1.000;"
+#DESPMTR   span_del_m           " 0.019;   0.000; 0.000; 0.000;"
+#DESPMTR   span_del_theta       " 0.05125; 0.000; 0.000; 0.000;"
+#DESPMTR   span_in_beta         " 4.39458173; -5.56919976; 5.20411481; 2.71651880;  4.93166327; 3.8368869;  -2.35614980; -0.47086003;"
+#DESPMTR   span_out_beta        " 5.98414032;  8.58992715; 8.10359792; 6.33023741; -4.42067985; 5.35297922; -9.03948070;"
+#DESPMTR   span_chord           " 0.050; 0.010; 0.000; 0.000"
+#DESPMTR   span_thk_c           " 0.000; 0.000; 0.000; 0.000;"
+#DESPMTR   span_curv_ctrl       " 0.000; 0.100; 0.250; 0.350; 0.650; 0.750; 0.900; 1.000;"
+#DESPMTR   span_thk_ctrl        " 0.000; 0.250; 0.500; 0.750; 1.000;"
+DESPMTR   offsets              "-0.015; 0.000;"
+DESPMTR   hub_inf_offset       " 0.030;"
+#DESPMTR   naca_le_radius       " 5.500; 5.500; 5.500; 5.500; 5.500;"
+#DESPMTR   naca_u_max           " 0.400; 0.410; 0.430; 0.480; 0.600;"
+#DESPMTR   naca_t_max           " 0.12546; 0.0867; 0.04794; 0.02639; 0.020;"
+#DESPMTR   naca_t_te            " 0.02448; 0.0153; 0.008415; 0.00364; 0.001;"
+
+UDPARG      hubwedge    ncp                     33
+#UDPARG      hubwedge    cur1                    cur1
+#UDPARG      hubwedge    cur2                    cur2
+#UDPARG      hubwedge    cur3                    cur3
+#UDPARG      hubwedge    cur4                    cur4
+#UDPARG      hubwedge    cur5                    cur5
+#UDPARG      hubwedge    cur6                    cur6
+#UDPARG      hubwedge    cur7                    cur7
+#UDPARG      hubwedge    u2                      u2
+#UDPARG      hubwedge    u3                      u3
+#UDPARG      hubwedge    u4                      u4
+#UDPARG      hubwedge    u5                      u5
+#UDPARG      hubwedge    u6                      u6
+#UDPARG      hubwedge    span_del_m_ctrl         span_del_m_ctrl
+#UDPARG      hubwedge    span_del_theta_ctrl     span_del_theta_ctrl
+#UDPARG      hubwedge    span_in_beta_ctrl       span_in_beta_ctrl
+#UDPARG      hubwedge    span_out_beta_ctrl      span_out_beta_ctrl
+#UDPARG      hubwedge    span_chord_ctrl         span_chord_ctrl
+#UDPARG      hubwedge    span_thk_c_ctrl         span_thk_c_ctrl
+#UDPARG      hubwedge    span_del_m              span_del_m
+#UDPARG      hubwedge    span_del_theta          span_del_theta
+#UDPARG      hubwedge    span_in_beta            span_in_beta
+#UDPARG      hubwedge    span_out_beta           span_out_beta
+#UDPARG      hubwedge    span_chord              span_chord
+#UDPARG      hubwedge    span_thk_c              span_thk_c
+#UDPARG      hubwedge    span_curv_ctrl          span_curv_ctrl
+#UDPARG      hubwedge    span_thk_ctrl           span_thk_ctrl
+#UDPARG      hubwedge    offsets                 offsets
+UDPARG      hubwedge    hub_inf_offset          hub_inf_offset
+#UDPARG      hubwedge    naca_le_radius          naca_le_radius
+#UDPARG      hubwedge    naca_u_max              naca_u_max
+#UDPARG      hubwedge    naca_t_max              naca_t_max
+#UDPARG      hubwedge    naca_t_te               naca_t_te
+UDPRIM      hubwedge    filename                $$/3dbgbinput.2.dat \
+                        auxname                 $$/spancontrolinputs.2.dat
+
+UDPARG      tblade      ncp                     33
+#UDPARG      tblade      cur1                    cur1
+#UDPARG      tblade      cur2                    cur2
+#UDPARG      tblade      cur3                    cur3
+#UDPARG      tblade      cur4                    cur4
+#UDPARG      tblade      cur5                    cur5
+#UDPARG      tblade      cur6                    cur6
+#UDPARG      tblade      cur7                    cur7
+#UDPARG      tblade      u2                      u2
+#UDPARG      tblade      u3                      u3
+#UDPARG      tblade      u4                      u4
+#UDPARG      tblade      u5                      u5
+#UDPARG      tblade      u6                      u6
+#UDPARG      tblade      span_del_m_ctrl         span_del_m_ctrl
+#UDPARG      tblade      span_del_theta_ctrl     span_del_theta_ctrl
+#UDPARG      tblade      span_in_beta_ctrl       span_in_beta_ctrl
+#UDPARG      tblade      span_out_beta_ctrl      span_out_beta_ctrl
+#UDPARG      tblade      span_chord_ctrl         span_chord_ctrl
+#UDPARG      tblade      span_thk_c_ctrl         span_thk_c_ctrl
+#UDPARG      tblade      span_del_m              span_del_m
+#UDPARG      tblade      span_del_theta          span_del_theta
+#UDPARG      tblade      span_in_beta            span_in_beta
+#UDPARG      tblade      span_out_beta           span_out_beta
+#UDPARG      tblade      span_chord              span_chord
+#UDPARG      tblade      span_thk_c              span_thk_c
+#UDPARG      tblade      span_curv_ctrl          span_curv_ctrl
+#UDPARG      tblade      span_thk_ctrl           span_thk_ctrl
+UDPARG      tblade      offsets                 offsets
+#UDPARG      tblade      hub_inf_offset          hub_inf_offset
+#UDPARG      tblade      naca_le_radius          naca_le_radius
+#UDPARG      tblade      naca_u_max              naca_u_max
+#UDPARG      tblade      naca_t_max              naca_t_max
+#UDPARG      tblade      naca_t_te               naca_t_te
+UDPRIM      tblade      filename                $$/3dbgbinput.2.dat \
+                        auxname                 $$/spancontrolinputs.2.dat
+
+#UNION
+#
+#CYLINDER -100.0 0.00 0.00 1000.0 0.00 0.00 12.7
+#SUBTRACT
+
+#dump /ESPfull_6_4_3_hot.step
+#dump ../ESPfull_6_4_3_hot.stl
+
+end
