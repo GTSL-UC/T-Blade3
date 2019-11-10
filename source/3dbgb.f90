@@ -1535,7 +1535,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
 
     ! Inflate hub and tip sections
-    if (hub_inflate) then
+    if (hub_inflate .and. hub_inf_offset > 10E-8) then
         
         if (allocated(mhub_inf) .and. allocated(thhub_inf)) &
             deallocate(mhub_inf, thhub_inf)
@@ -1548,7 +1548,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
     end if
 
-    if (tip_inflate) then
+    if (tip_inflate .and. tip_inf_offset > 10E-8) then
         
         if (allocated(mtip_inf) .and. allocated(thtip_inf)) &
             deallocate(mtip_inf, thtip_inf)

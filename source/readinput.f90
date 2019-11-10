@@ -1236,6 +1236,7 @@ subroutine readinput(fname)
     ! If hub offset and hub inflation offset have been specified
     else if (index(trim(adjustl(temp)), ' ', back = .true.) /= 0) then
 
+        hub_inflate = .true.
         temp_str    = trim(adjustl(temp))
         n_temp1     = index(temp_str, ' ')
         n_temp2     = index(temp_str, ' ', back = .true.)
@@ -1263,15 +1264,13 @@ subroutine readinput(fname)
 
     ! If tip offset and tip inflation offset have been specified
     else if (index(trim(adjustl(temp)), ' ', back = .true.) /= 0) then
-        
+
+        tip_inflate = .true.        
         temp_str    = trim(adjustl(temp))
         n_temp1     = index(temp_str, ' ')
         n_temp2     = index(temp_str, ' ', back = .true.)
         read(temp_str(1:n_temp1 - 1), *) tip
         read(temp_str(n_temp2:), *) tip_inf_offset
-
-        ! Check for zero inflation offset
-        if (tip_inf_offset > 10E-8) tip_inflate = .true.
 
     end if  ! index(trim(adjustl(temp)))
 
