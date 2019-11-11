@@ -1275,9 +1275,9 @@ module file_operations
         ! Set filename for hub/tip sections
         !
         if (i_section == 1) &
-            inf_filename = 'hub_inflated_2D_section.dat'
+            inf_filename = '2D_inflated_hub_section.dat'
         if (i_section == nspn) &
-            inf_filename = 'tip_inflated_2D_section.dat'
+            inf_filename = '2D_inflated_tip_section.dat'
 
 
 
@@ -1325,9 +1325,9 @@ module file_operations
         ! Set filename for hub/tip sections
         !
         if (i_section == 1) &
-            inf_filename = 'hub_inflated_3D_section.dat'
+            inf_filename = '3D_inflated_hub_section.dat'
         if (i_section == nspn) &
-            inf_filename = 'tip_inflated_3D_section.dat'
+            inf_filename = '3D_inflated_tip_section.dat'
 
 
 
