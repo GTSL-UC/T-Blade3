@@ -1,0 +1,9 @@
+1 2 5 6
+1 4 3 18
+ 0.20 0.97 .5662480909978671 -0.05                | M1  P1/Po1  S1  X1  
+ .38 .9 0. .1                                | M2  P2/Po1  S2  X2  
+ 0  0  1994.54  1.32237  53.3229              | MFRIN
+ 1.763E6  4                                 | RE    NCRIT
+ 1  1                                         | XTRS  XTRP
+ 4  0.98  1.5                                  | ISMOM  MCRIT  MUCON
+                                              | BVR1IN  BVR2IN
