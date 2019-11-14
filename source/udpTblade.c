@@ -299,11 +299,11 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     int     oclass, mtype, nbody, *senses2;
     double  xyz[3*NPNT], rms, xyzNode[18], *xr0=NULL;
     double  trange[3], data[18], swap;
+    double  toler = 1e-4;
     char    filename[257], auxname[257], *auxptr, nextline[257], casename[257];
     FILE    *fp, *fpSrc=NULL, *fpTgt=NULL;
     ego     enodes[5], eedges[4], eloop, *ecurves=NULL;
     ego     ecurve, epcurve, esurface, esurf, eref, efaces[4], emodel, *ebodys;
-
 
 #ifdef DEBUG
     printf("udpExecute(context=%llx)\n", (long long)context);
@@ -669,7 +669,7 @@ udpExecute(ego  context,                /* (in)  EGADS context */
             if (status != EGADS_SUCCESS) goto cleanup;
 
             /* create the Loop for this section */
-            status = EG_otherCurve(esurface, ecurves[isec-1], 0, &epcurve);
+            status = EG_otherCurve(esurface, ecurves[isec-1], toler, &epcurve);
 #ifdef DEBUG
             printf("EG_otherCurve -> status=%d\n", status);
 #endif
@@ -712,7 +712,7 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     printf("EG_skinning -> status=%d\n", status);
 
     printf("esurf:\n");
-    printEgo(esurf);
+    ocsmPrintEgo(esurf);
 #endif
     if (status != EGADS_SUCCESS) goto cleanup;
         
@@ -738,13 +738,16 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     if (status != EGADS_SUCCESS) goto cleanup;
 
     /* sew the Faces into a SolidBody */
-    status = EG_sewFaces(4, efaces, 0, 0, &emodel);
+    status = EG_sewFaces(4, efaces, toler, 0, &emodel);
+#ifdef DEBUG
     printf("EG_sewFaces -> status=%d\n", status);
+#endif
+    if (status != EGADS_SUCCESS) goto cleanup;
 
     status = EG_getTopology(emodel, &eref, &oclass, &mtype,
                             data, &nbody, &ebodys, &senses2);
 #ifdef DEBUG
-    printf("EG_getTopology(model) -> status=%d\n", status);
+    printf("EG_getTopology(model) -> status=%d, nbody=%d\n", status, nbody);
 #endif
     if (status != EGADS_SUCCESS) goto cleanup;
 
@@ -819,7 +822,7 @@ udpSensitivity(ego    ebody,            /* (in)  Body pointer */
 /*
  ************************************************************************
  *                                                                      *
- *   override_chord - callback from Tblade3 to change chord array       *
+ *   override_chord - callback from T-Blade3 to change chord array      *
  *                                                                      *
  ************************************************************************
  */
@@ -848,7 +851,7 @@ void override_chord_(int *nspn, double chord[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_thk_c - callback from Tblade3 to change thk_c array       *
+ *   override_thk_c - callback from T-Blade3 to change thk_c array      *
  *                                                                      *
  ************************************************************************
  */
@@ -877,7 +880,7 @@ void override_thk_c_(int *nspn, double thk_c[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_inci - callback from Tblade3 to change inci array         *
+ *   override_inci - callback from T-Blade3 to change inci array        *
  *                                                                      *
  ************************************************************************
  */
@@ -906,7 +909,7 @@ void override_inci_(int *nspn, double inci[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_devn - callback from Tblade3 to change devn array         *
+ *   override_devn - callback from T-Blade3 to change devn array        *
  *                                                                      *
  ************************************************************************
  */
@@ -935,7 +938,7 @@ void override_devn_(int *nspn, double devn[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_cur1 - callback from Tblade3 to change cur1 array         *
+ *   override_cur1 - callback from T-Blade3 to change cur1 array        *
  *                                                                      *
  ************************************************************************
  */
@@ -964,7 +967,7 @@ void override_cur1_(int *nspn, double cur1[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_cur2 - callback from Tblade3 to change cur2 array         *
+ *   override_cur2 - callback from T-Blade3 to change cur2 array        *
  *                                                                      *
  ************************************************************************
  */
@@ -993,7 +996,7 @@ void override_cur2_(int *nspn, double cur2[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_cur3 - callback from Tblade3 to change cur3 array         *
+ *   override_cur3 - callback from T-Blade3 to change cur3 array        *
  *                                                                      *
  ************************************************************************
  */
@@ -1022,7 +1025,7 @@ void override_cur3_(int *nspn, double cur3[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_cur4 - callback from Tblade3 to change cur4 array         *
+ *   override_cur4 - callback from T-Blade3 to change cur4 array        *
  *                                                                      *
  ************************************************************************
  */
@@ -1051,7 +1054,7 @@ void override_cur4_(int *nspn, double cur4[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_cur5 - callback from Tblade3 to change cur5 array         *
+ *   override_cur5 - callback from T-Blade3 to change cur5 array        *
  *                                                                      *
  ************************************************************************
  */
@@ -1080,7 +1083,7 @@ void override_cur5_(int *nspn, double cur5[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_cur6 - callback from Tblade3 to change cur6 array         *
+ *   override_cur6 - callback from T-Blade3 to change cur6 array        *
  *                                                                      *
  ************************************************************************
  */
@@ -1109,7 +1112,7 @@ void override_cur6_(int *nspn, double cur6[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_cur7 - callback from Tblade3 to change cur7 array         *
+ *   override_cur7 - callback from T-Blade3 to change cur7 array        *
  *                                                                      *
  ************************************************************************
  */
@@ -1138,7 +1141,7 @@ void override_cur7_(int *nspn, double cur7[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_in_beta - callback from Tblade3 to change in_beta array   *
+ *   override_in_beta - callback from T-Blade3 to change in_beta array  *
  *                                                                      *
  ************************************************************************
  */
@@ -1167,7 +1170,7 @@ void override_in_beta_(int *nspn, double in_beta[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_out_beta - callback from Tblade3 to change out_beta array *
+ *   override_out_beta - callback from T-Blade3 to change out_beta array*
  *                                                                      *
  ************************************************************************
  */
@@ -1196,7 +1199,7 @@ void override_out_beta_(int *nspn, double out_beta[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_u2 - callback from Tblade3 to change u2 array             *
+ *   override_u2 - callback from T-Blade3 to change u2 array            *
  *                                                                      *
  ************************************************************************
  */
@@ -1225,7 +1228,7 @@ void override_u2_(int *nspn, double u2[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_u3 - callback from Tblade3 to change u3 array             *
+ *   override_u3 - callback from T-Blade3 to change u3 array            *
  *                                                                      *
  ************************************************************************
  */
@@ -1254,7 +1257,7 @@ void override_u3_(int *nspn, double u3[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_u4 - callback from Tblade3 to change u4 array             *
+ *   override_u4 - callback from T-Blade3 to change u4 array            *
  *                                                                      *
  ************************************************************************
  */
@@ -1283,7 +1286,7 @@ void override_u4_(int *nspn, double u4[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_u5 - callback from Tblade3 to change u5 array             *
+ *   override_u5 - callback from T-Blade3 to change u5 array            *
  *                                                                      *
  ************************************************************************
  */
@@ -1312,7 +1315,7 @@ void override_u5_(int *nspn, double u5[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_u6 - callback from Tblade3 to change u6 array             *
+ *   override_u6 - callback from T-Blade3 to change u6 array            *
  *                                                                      *
  ************************************************************************
  */
@@ -1341,7 +1344,7 @@ void override_u6_(int *nspn, double u6[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_span_del_m_ctrl - callback from Tblade3 to change         *
+ *   override_span_del_m_ctrl - callback from T-Blade3 to change        *
  *                              span_del_m_ctrl array                   *
  *                                                                      *
  ************************************************************************
@@ -1371,7 +1374,7 @@ void override_span_del_m_ctrl_(int *nspn, double span_del_m_ctrl[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_span_del_theta_ctrl - callback from Tblade3 to change     *
+ *   override_span_del_theta_ctrl - callback from T-Blade3 to change    *
  *                                  span_del_theta_ctrl array           *
  *                                                                      *
  ************************************************************************
@@ -1401,7 +1404,7 @@ void override_span_del_theta_ctrl_(int *nspn, double span_del_theta_ctrl[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_span_in_beta_ctrl - callback from Tblade3 to change       *
+ *   override_span_in_beta_ctrl - callback from T-Blade3 to change      *
  *                                span_in_beta_ctrl array               *
  *                                                                      *
  ************************************************************************
@@ -1431,7 +1434,7 @@ void override_span_in_beta_ctrl_(int *nspn, double span_in_beta_ctrl[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_span_out_beta_ctrl - callback from Tblade3 to change      *
+ *   override_span_out_beta_ctrl - callback from T-Blade3 to change     *
  *                                 span_out_beta_ctrl array             *
  *                                                                      *
  ************************************************************************
@@ -1461,7 +1464,7 @@ void override_span_out_beta_ctrl_(int *nspn, double span_out_beta_ctrl[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_span_chord_ctrl - callback from Tblade3 to change         *
+ *   override_span_chord_ctrl - callback from T-Blade3 to change        *
  *                              span_chord_ctrl array                   *
  *                                                                      *
  ************************************************************************
@@ -1491,7 +1494,7 @@ void override_span_chord_ctrl_(int *nspn, double span_chord_ctrl[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_span_thk_c_ctrl - callback from Tblade3 to change         *
+ *   override_span_thk_c_ctrl - callback from T-Blade3 to change        *
  *                              span_thk_c_ctrl array                   *
  *                                                                      *
  ************************************************************************
@@ -1521,7 +1524,7 @@ void override_span_thk_c_ctrl_(int *nspn, double span_thk_c_ctrl[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_span_del_m - callback from Tblade3 to change              *
+ *   override_span_del_m - callback from T-Blade3 to change             *
  *                         span_del_m array                             *
  *                                                                      *
  ************************************************************************
@@ -1551,7 +1554,7 @@ void override_span_del_m_(int *nspn, double span_del_m[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_span_del_theta - callback from Tblade3 to change          *
+ *   override_span_del_theta - callback from T-Blade3 to change         *
  *                             span_del_theta array                     *
  *                                                                      *
  ************************************************************************
@@ -1581,7 +1584,7 @@ void override_span_del_theta_(int *nspn, double span_del_theta[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_span_in_beta - callback from Tblade3 to change            *
+ *   override_span_in_beta - callback from T-Blade3 to change           *
  *                           span_in_beta array                         *
  *                                                                      *
  ************************************************************************
@@ -1611,7 +1614,7 @@ void override_span_in_beta_(int *nspn, double span_in_beta[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_span_out_beta - callback from Tblade3 to change           *
+ *   override_span_out_beta - callback from T-Blade3 to change          *
  *                            span_out_beta array                       *
  *                                                                      *
  ************************************************************************
@@ -1641,7 +1644,7 @@ void override_span_out_beta_(int *nspn, double span_out_beta[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_span_chord - callback from Tblade3 to change              *
+ *   override_span_chord - callback from T-Blade3 to change             *
  *                         span_chord array                             *
  *                                                                      *
  ************************************************************************
@@ -1671,7 +1674,7 @@ void override_span_chord_(int *nspn, double span_chord[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_span_thk_c - callback from Tblade3 to change              *
+ *   override_span_thk_c - callback from T-Blade3 to change             *
  *                         span_thk_c array                             *
  *                                                                      *
  ************************************************************************
@@ -1701,7 +1704,7 @@ void override_span_thk_c_(int *nspn, double span_thk_c[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_span_u_max - callback from Tblade3 to change              *
+ *   override_span_u_max - callback from T-Blade3 to change             *
  *                         span_u_max array                             *
  *                                                                      *
  ************************************************************************
@@ -1731,7 +1734,7 @@ void override_span_u_max_(int *nspn, double span_u_max[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_span_curv_ctrl - callback from Tblade3 to change          *
+ *   override_span_curv_ctrl - callback from T-Blade3 to change         *
  *                             span_curv_ctrl array                     *
  *                                                                      *
  ************************************************************************
@@ -1761,7 +1764,7 @@ void override_span_curv_ctrl_(int *nspn, double span_curv_ctrl[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_span_thk_ctrl - callback from Tblade3 to change           *
+ *   override_span_thk_ctrl - callback from T-Blade3 to change          *
  *                            span_thk_ctrl array                       *
  *                                                                      *
  ************************************************************************
@@ -1791,7 +1794,7 @@ void override_span_thk_ctrl_(int *nspn, double span_thk_ctrl[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_offsets - callback from Tblade3 to change                 *
+ *   override_offsets - callback from T-Blade3 to change                *
  *                      offsets array                                   *
  *                                                                      *
  ************************************************************************
@@ -1821,7 +1824,7 @@ void override_offsets_(double offsets[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_hub_inf_offset - callback from Tblade3 to change          *
+ *   override_hub_inf_offset - callback from T-Blade3 to change         *
  *                             hub_inf_offset                           *
  *                                                                      *
  ************************************************************************
@@ -1833,14 +1836,12 @@ void OVERRIDE_HUB_INF_OFFSET (double hub_inf_offset[])
 void override_hub_inf_offset_(double hub_inf_offset[])
 #endif
 {
-    int    ioffset, narg=32;
+    int    narg = 32;
 
     if (udps[numUdp].arg[narg].size == 1) {
         printf(" ==> overriding hub_inf_offset\n");
-        for (ioffset = 0; ioffset < 1; ioffset++) {
-            hub_inf_offset[ioffset] = HUB_INF_OFFSET(numUdp,ioffset);
-            printf("     hub_inf_offset(%2d) = %12.5f\n", ioffset+1, hub_inf_offset[ioffset]);
-        }
+        hub_inf_offset[0] = HUB_INF_OFFSET(numUdp,0);
+        printf("      hub_inf_offset(%2d) = %12.5f\n", 1, hub_inf_offset[0]);
     } else {
         printf(" ==> not overriding hub_inf_offset (noffset=1 but size=%d)\n",
                udps[numUdp].arg[narg].size);
@@ -1851,7 +1852,7 @@ void override_hub_inf_offset_(double hub_inf_offset[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_tip_inf_offset - callback from Tblade3 to change          *
+ *   override_tip_inf_offset - callback from T-Blade3 to change         *
  *                             tip_inf_offset                           *
  *                                                                      *
  ************************************************************************
@@ -1863,14 +1864,12 @@ void OVERRIDE_TIP_INF_OFFSET (double tip_inf_offset[])
 void override_tip_inf_offset_(double tip_inf_offset[])
 #endif
 {
-    int    ioffset, narg=33;
+    int    narg = 33;
 
     if (udps[numUdp].arg[narg].size == 1) {
         printf(" ==> overriding tip_inf_offset\n");
-        for (ioffset = 0; ioffset < 1; ioffset++) {
-            tip_inf_offset[ioffset] = TIP_INF_OFFSET(numUdp,ioffset);
-            printf("     tip_inf_offset(%2d) = %12.5f\n", ioffset+1, tip_inf_offset[ioffset]);
-        }
+        tip_inf_offset[0] = TIP_INF_OFFSET(numUdp,0);
+        printf("      tip_inf_offset(%2d) = %12.5f\n", 1, tip_inf_offset[0]);
     } else {
         printf(" ==> not overriding tip_inf_offset (noffset=1 but size=%d)\n",
                udps[numUdp].arg[narg].size);
@@ -1881,7 +1880,7 @@ void override_tip_inf_offset_(double tip_inf_offset[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_naca_le_radius - callback from Tblade3 to change          *
+ *   override_naca_le_radius - callback from T-Blade3 to change         *
  *                             naca_le_radius array                     *
  *                                                                      *
  ************************************************************************
@@ -1911,7 +1910,7 @@ void override_naca_le_radius_(int *nspn, double naca_le_radius[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_naca_u_max - callback from Tblade3 to change              *
+ *   override_naca_u_max - callback from T-Blade3 to change             *
  *                         naca_u_max array                             *
  *                                                                      *
  ************************************************************************
@@ -1941,7 +1940,7 @@ void override_naca_u_max_(int *nspn, double naca_u_max[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_naca_t_max - callback from Tblade3 to change              *
+ *   override_naca_t_max - callback from T-Blade3 to change             *
  *                         naca_t_max array                             *
  *                                                                      *
  ************************************************************************
@@ -1971,7 +1970,7 @@ void override_naca_t_max_(int *nspn, double naca_t_max[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_naca_t_te - callback from Tblade3 to change               *
+ *   override_naca_t_te - callback from T-Blade3 to change              *
  *                        naca_t_te array                               *
  *                                                                      *
  ************************************************************************
