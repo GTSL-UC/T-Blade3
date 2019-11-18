@@ -296,7 +296,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         !
         if (trim(airfoil) == 'crcle') then
 
-            call circle(xb, yb, np)
+            call circle(np, xb, yb)
             call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE)
             
             ! Add stagger and scale the airfoil using the non-dimensional actual chord input
@@ -317,7 +317,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
             stagger = stagger*dtor
             chrd    = chrdx/abs(cos(stagger))
-            call s809m(xb, yb, np)
+            call s809m(np, xb, yb)
             call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE)
             
             ! Add stagger and scale the airfoil using the non-dimensional actual chord input
@@ -341,7 +341,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
             stagger = stagger*dtor
             chrd    = chrdx/abs(cos(stagger))
-            call clarky(xb, yb, np)
+            call clarky(np, xb, yb)
             call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE)
             
             ! Add stagger and scale the airfoil using the non-dimensional actual chord input
@@ -365,7 +365,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             
             stagger = stagger*dtor
             chrd    = chrdx/abs(cos(stagger))
-            call negclarky(xb, yb, np)
+            call negclarky(np, xb, yb)
             call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE)
             
             ! Add stagger and scale the airfoil using the non-dimensional actual chord input
@@ -389,8 +389,8 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             
             stagger = stagger*dtor
             chrd    = chrdx/abs(cos(stagger))
-            call MakeFoil(naca, xbot, ybot, xtop, ytop, np, u)
-            call circularTE(xbot, ybot, xtop, ytop, np)
+            call MakeFoil(naca, np, u, xbot, ybot, xtop, ytop)
+            call circularTE(np, xbot, ybot, xtop, ytop)
             
             do i = 1, np
                 xb(i) = xtop(np-i+1)
@@ -475,7 +475,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
             stagger = stagger*dtor
             chrd    = chrdx/abs(cos(stagger))
-            call datafile(airfoil, xb, yb, np)
+            call datafile(airfoil, np, xb, yb)
 
             ! Write airfoil u,v data before stacking to a file
             if(js == 1)then
