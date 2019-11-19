@@ -20,7 +20,7 @@
 \begin{document}
 
 \begin{center}
-\textbf{\large T-Blade3 v1.2 ReadMe}\\
+\textbf{\large T-Blade3 v1.2.2 ReadMe}\\
 by\\
 Mayank Sharma\\
 Department of Aerospace Engineering\\
@@ -34,7 +34,7 @@ University of Cincinnati\\
 T-Blade3 is a general parametric 3D blade geometry builder\cite{KiranPaper}. The tool can create a variety of 3D blade geometries based on a few basic parameters. The geometric and aerodynamic parameters are used to create 2D airfoils which are then stacked on the desired stacking axis\cite{KiranThesis}. The geometry modeler can also be  used for generating 3D blades with special features like bent tip or a split tip\cite{AbhayThesis} which can be explored with minimum changes to the blade geometry. The use of control points for the definition of spanwise splines makes it easy to modify the blade shapes quickly and smoothly to obtain the desired blade model\cite{SyedPaper}. The second derivative of the mean-line (related to the curvature) is controlled using B-splines to create the airfoils. This is then analytically integrated twice to obtain the mean-line\cite{AhmedPaper}. A smooth thickness distribution is then added to the airfoil. This can either be a Wennerstrom thickness distribution\cite{WennerstromBook}, a smooth quartic thickness distribution or a new modified NACA four-digit thickness distribution\cite{AbbottText}. B-splines have also been implemented to achieve customized airfoil leading and trailing edges.\\
 
 \noindent
-New in version 1.2:
+New in version 1.2.2:
 
 \begin{enumerate}[leftmargin=*]
     \item Smooth curvature control based on specifications of normalized meanline second derivatives which ensures curvature and slope of curvature continuity on the airfoil surface
@@ -48,7 +48,7 @@ This document contains instructions on how to install T-Blade3, run the code and
 
 \section{Obtaining T-Blade3}
 \noindent 
-There are two ways of obtaining T-Blade3 version 1.2:
+There are two ways of obtaining T-Blade3 version 1.2.2:
  
 \begin{enumerate}[leftmargin=*]
     \item Linux and Windows 64-bit executables can be found on \url{http://gtsl.ase.uc.edu/t-blade3}
@@ -60,7 +60,7 @@ The latter is recommended. There are two branches in use currently: {\fontfamily
 
 \section{Compiling T-Blade3}\label{compilesec}
 \noindent
-With T-Blade3 version 1.2, static builds for Linux, Unix and MacOS are no longer supported. The recommended method is to clone or download the T-Blade3 source code and compile it locally. Below are instructions to compile the code. Here, \$TBLADEROOT refers to the T-Blade3 source code directory. 
+With T-Blade3 version 1.2.2, static builds for Linux, Unix and MacOS are no longer supported. The recommended method is to clone or download the T-Blade3 source code and compile it locally. Below are instructions to compile the code. Here, \$TBLADEROOT refers to the T-Blade3 source code directory. 
 
 \begin{enumerate}[leftmargin=*]
     \item \textit{Prerequisites}: Make and gfortran (gfortran-6 and above recommended)
@@ -129,13 +129,13 @@ The auxiliary input file \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat
 \end{itemize}
 
 \noindent
-The auxiliary input file \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} (old format) is an older file which is still supported in version 1.2. Also see \textbf{\ref{auxinput1}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
+The auxiliary input file \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} (old format) is an older file which is still supported in version 1.2.2. Also see \textbf{\ref{auxinput1}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
 \begin{itemize}
     \item Airfoil defined by curvature control (set to "\textbf{spanwise\_spline}")
 \end{itemize}
 
 \noindent 
-The auxiliary input file \textit{\textcolor{blue}{controlinputs.bladerow.dat}} is an older file which is still supported in version 1.2. Also see \textbf{\ref{auxinput2}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
+The auxiliary input file \textit{\textcolor{blue}{controlinputs.bladerow.dat}} is an older file which is still supported in version 1.2.2. Also see \textbf{\ref{auxinput2}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
 \begin{itemize}
     \item Airfoil defined by curvature control 
 \end{itemize}
@@ -291,11 +291,11 @@ This is the main input file for T-Blade3. It contains all the geometric and aero
         \item If the input angle switch (line 12) has been switched to "\textbf{inoutspline}", second column specifies control points which generate \textit{out\_beta*} interpreted as the exit angle. Refer to the example case \textit{spanwise\_beta\_spline} on \url{http://gtsl.ase.uc.edu/t-blade3}
         \item If the input angle switch (line 12) has been switched to "\textbf{inci\_dev\_spline}", second column specifies control points which generate \textit{out\_beta*} interpreted as the deviation. Refer to the example case \textit{spanwise\_inci\_dev\_spline} on \url{http://gtsl.ase.uc.edu/t-blade3}
     \end{enumerate}
-    \item Control table for the chord multiplier:
+    \item Control table for the chord multiplier (\textit{chord}):
     \begin{enumerate}[label=\alph*]
         \item Above the table is the number of control points which determines the size of the table
-        \item First column specifies spanwise cations ranging from $0$ to $1$
-        \item Second column specifies control points which generate \textit{chord\_multiplier}
+        \item First column specifies spanwise locations ranging from $0$ to $1$
+        \item Second column specifies control points which generate the chord multiplier. These control should be specified as $\textit{chord} > -1$ since the chord multiplier values are computed as $\textit{chord} + 1$ 
     \end{enumerate}
     \item Control table for the thickness multiplier (\textit{tm/c}) and/or maximum thickness location (\textit{u\_max}):
     \begin{enumerate}[label=\alph*]
@@ -309,10 +309,10 @@ This is the main input file for T-Blade3. It contains all the geometric and aero
             \item The second column can specify control points to generate \textit{u\_max} and no third column is defined
         \end{itemize}
         \item The column specifying control points for \textit{tm/c} should \textbf{always} be defined with a header "$tm/c$" and the column specifying control points for \textit{u\_max} should \textbf{always} be defined with a header "$u\_max$"
-        \item If the thickness multiplier switch (line 18) has been switched to "$\mathbf{0}$", the control points for \textit{tm/c} describe a thickness multiplier spline for Wennerstrom thickness too (added in T-Blade3 v1.2) without the need for an auxiliary input file
+        \item If the thickness multiplier switch (line 18) has been switched to "$\mathbf{0}$": the control points for \textit{tm/c} describe a thickness multiplier spline for the Wennerstrom and quartic spline thickness distributions without the need to use an auxiliary input file. In this case, $\textit{tm/c} > -1$ since the thickness multiplier is computed as $\textit{tm/c} + 1$.
         \item If control points for \textit{u\_max} are not defined, the maximum thickness location values for Wennerstrom thickness or quartic spline thickness are set equal to the \textit{umxthk} values specified earlier in this file
     \end{enumerate}
-    \item Hub and tip offsets: Offset values as a fraction to determine the hub and tip offset percentage
+    \item Hub and tip offsets represent offset values as a fraction to determine the hub and tip offset percentage. Optional hub and tip section inflation offsets can also be specified here as the distance between the $(m',\theta)$ original and inflated sections. Refer to the example cases \textit{hub\_inflation}, \textit{hub\_tip\_inflation} and \textit{tip\_inflation} on \url{https://github.com/GTSL-UC/T-Blade3/tree/develop/inputs/OpenCSM/new\_inputs}.
     \item Streamline data: $(x,r)$ coordinates of the specified number of streamlines
 \end{itemize}
 
@@ -350,7 +350,7 @@ This is an auxiliary input file for T-Blade3. This file is used when the camber 
 
 \subsection{spancontrolinputs.bladerow.dat (old format)}\label{auxinput1}
 \noindent
-This is an auxiliary input file for T-Blade3. This section describes the old format of the \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} file. While this file is still supported in T-Blade3 version 1.2 (refer \textbf{\ref{cmdargs}} for information on how to run T-Blade3 with this file), it is recommended that the modified NACA four-digit thickness distribution is used with the current format of \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} file (refer to \textbf{\ref{auxinput_NACA}}). The file in this format is used when the camber definition switch (line 14) is set to "\textbf{spanwise\_spline}" and the thickness distribution switch (line 16) is set to "$\mathbf{1}$" and "$\mathbf{2}$". Following are the details of the file:
+This is an auxiliary input file for T-Blade3. This section describes the old format of the \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} file. While this file is still supported in T-Blade3 version 1.2.2 (refer \textbf{\ref{cmdargs}} for information on how to run T-Blade3 with this file), it is recommended that the modified NACA four-digit thickness distribution is used with the current format of \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} file (refer to \textbf{\ref{auxinput_NACA}}). The file in this format is used when the camber definition switch (line 14) is set to "\textbf{spanwise\_spline}" and the thickness distribution switch (line 16) is set to "$\mathbf{1}$" and "$\mathbf{2}$". Following are the details of the file:
 
 \noindent
 \begin{itemize}[leftmargin=*]
@@ -386,7 +386,7 @@ This is an auxiliary input file for T-Blade3. This section describes the old for
 
 \subsection{controlinputs.bladerow.dat}\label{auxinput2}
 \noindent
-This is an auxiliary input file for T-Blade3. This is an older file, which is still supported in T-Blade3 version 1.2 (refer \textbf{\ref{cmdargs}} for information on how to run T-Blade3 with this file) but it is recommended that the modified NACA four-digit thickness distribution is used with the current format of \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}}. This file is used when the thickness distribution switch (line 16) is set to "$\mathbf{1}$" and "$\mathbf{2}$". Following are the details of the file:
+This is an auxiliary input file for T-Blade3. This is an older file, which is still supported in T-Blade3 version 1.2.2 (refer \textbf{\ref{cmdargs}} for information on how to run T-Blade3 with this file) but it is recommended that the modified NACA four-digit thickness distribution is used with the current format of \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}}. This file is used when the thickness distribution switch (line 16) is set to "$\mathbf{1}$" and "$\mathbf{2}$". Following are the details of the file:
 
 \noindent
 \begin{itemize}[leftmargin=*]
@@ -422,7 +422,7 @@ This is an auxiliary input file for T-Blade3. This is an older file, which is st
     \bibitem{KiranPaper}
     Siddappaji, K., Turner, M., Merchant, A., "General Capability of Parametric 3D Blade Design Tool for Turbomachinery", 
     \textit{Proceeedings of ASME Turbo Expo 2012, Turbomachinery: Design Methods and CFD Modeling for Turbomachinery}, ASME,
-    2012, pp. 2331-2344
+    2012, pp. 2331,2344
 
     \bibitem{KiranThesis}
     Siddappaji, K., "Parametric 3D Blade Geometry Modeling Tool for Turbomachinery Systems", MS Thesis,
