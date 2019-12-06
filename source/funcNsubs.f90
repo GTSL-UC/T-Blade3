@@ -3950,8 +3950,15 @@ subroutine modified_NACA_four_digit_thickness_2(np,u,u_max,u_TE,u_center,t_max,t
     real,                   intent(inout)   :: thk_data(np,3)
 
     ! Local variables
-    integer                                 :: i, counter
+    integer                                 :: i, counter, i_sec
     real                                    :: tol = 10E-8, t
+
+
+
+    !
+    ! Get spanwise section index
+    !
+    call get_sec_number(i_sec)
 
 
 
@@ -3971,6 +3978,7 @@ subroutine modified_NACA_four_digit_thickness_2(np,u,u_max,u_TE,u_center,t_max,t
 
     ! Initialize thickness array as zero-valued
     thk_data            = 0.0
+
 
 
     ! 
