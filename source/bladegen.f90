@@ -529,7 +529,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         allocate(init_angles(ncp - 2),init_cambers(ncp - 2),x_spl_end_curv(ncp - 2))
         
         ! Get camber line from the spline curvature:
-        call camline(casename, isdev, xcp_curv, ycp_curv, ncp, u, np, ainl, aext, chrdx, wing_flag, &
+        call camline(casename, isdev, ncp, np, xcp_curv, ycp_curv, u, ainl, aext, chrdx, wing_flag, &
         sang, chrd, init_angles, init_cambers, x_spl_end_curv, splinedata)
         camber = splinedata(2, :)
         slope  = splinedata(3, :)
