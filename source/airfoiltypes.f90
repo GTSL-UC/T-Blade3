@@ -1,16 +1,3 @@
-!************************************************************
-!*****Various types of airfoil definitions used in 3DBGB ****
-!************************************************************
-!The following airfoil types are included:
-! circular
-! s809m
-! clarky
-! NACA 4 digit series
-! User input airfoil definition: User can bring in any type of shape in the given format.
-! sect1 - The default airfoil type
-!************************************************************
-
-
 !
 ! Circular airfoil section
 ! Constructed using a parametric circle definition: x = 0.5 * (1 + cos(t))
