@@ -425,7 +425,7 @@ endif
 ucp_top = Ax(ncp_side:1:-1, xrhs)
 vcp_top = Ay(ncp_side:1:-1, yrhs)
 
-call bspline_y_of_x( top_thickness, u, np, ucp_top, vcp_top, ncp_side, degree ) 
+call bspline_y_of_x(ncp_side, degree, ucp_top, vcp_top, np, u, top_thickness) 
 
 ucp_bot = Ax(ncp-ncp_side+1:ncp, xrhs)
 vcp_bot = Ay(ncp-ncp_side+1:ncp, yrhs)
@@ -433,14 +433,14 @@ vcp_bot = Ay(ncp-ncp_side+1:ncp, yrhs)
 !print*, "ucp_bot", ucp_bot 
 !print*, "Ax(:, xrhs)", Ax(:, xrhs)  
 
-call bspline_y_of_x( bot_thickness, u, np, ucp_bot, vcp_bot, ncp_side, degree ) 
+call bspline_y_of_x(ncp_side, degree, ucp_bot, vcp_bot, np, u,  bot_thickness) 
 
 
 thickness = top_thickness - bot_thickness
  ! to get half the blade thickness (not full blade thickness)
     thickness = thickness/2.
 
-call bspline_arclength(arclength, ucp_bot, vcp_bot, ncp_side, degree)
+call bspline_arclength(ncp_side, degree, ucp_bot, vcp_bot, arclength)
 
 do i = 1, np     
     ! write results in a file:

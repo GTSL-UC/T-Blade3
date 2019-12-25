@@ -571,7 +571,7 @@ endif
 !print*,'camber......',camber   
 !=====================================================================               
 if(thick.eq.1)then     
-   call bspline_y_of_x_refine( splthick, u, (interval+1), xcp_thk, ycp_thk, ncp_thk, 4 )
+   call bspline_y_of_x_refine(ncp_thk, 4, xcp_thk, ycp_thk, (interval + 1), u, splthick)
 else
    splthick = 0
 endif
@@ -672,9 +672,9 @@ integer, parameter :: ncp_side = 11, degree = 4
 real*8, dimension(ncp_side) :: ucp_top,vcp_top,ucp_bot,vcp_bot
 real*8, dimension(np) :: top_thickness, bot_thickness
 
-call bspline_y_of_x_refine( top_thickness, u, np, ucp_top, vcp_top, ncp_side, degree )
+call bspline_y_of_x_refine(ncp_side, degree, ucp_top, vcp_top, np, u, top_thickness)
 
-call bspline_y_of_x_refine( bot_thickness, u, np, ucp_bot, vcp_bot, ncp_side, degree ) 
+call bspline_y_of_x_refine(ncp_side, degree, ucp_bot, vcp_bot, np, u, bot_thickness) 
 
 thickness = top_thickness - bot_thickness
 thickness = thickness/2.
@@ -1050,7 +1050,7 @@ subroutine le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,C_le_y
            endif
        enddo
 
-       call bspline_arclength(arclength,xcp,ycp,ncp,degree)
+       call bspline_arclength(ncp,degree,xcp,ycp,arclength)
        ! print*, 'arclength', arclength
  ! xs = x1(control point)*B1+x2(control point)*B2+x3(control point)
  !                                         *B3+x4(control point)*B4
@@ -1065,8 +1065,8 @@ subroutine le_matrix_sol(x_le_spl,y_le_spl,x_spl_end,y_spl_end,C_le_y_top,C_le_y
             endif
             !s = u !Uniform spacing
             !print*, "u, s", u, s
-            x_le_spl(j) = bspline_cp(xcp,arclength,ncp,degree,s)
-            y_le_spl(j) = bspline_cp(ycp,arclength,ncp,degree,s)
+            x_le_spl(j) = bspline_cp(ncp,degree,xcp,s,arclength)
+            y_le_spl(j) = bspline_cp(ncp,degree,ycp,s,arclength)
         enddo   
 
 endsubroutine le_matrix_sol

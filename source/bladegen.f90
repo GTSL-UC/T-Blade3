@@ -563,7 +563,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             end do
 
             ! Fourth order thickness multiplier
-            call bspline_y_of_x(splthick, u, np, xcp_thk, ycp_thk, ncp, 4 )
+            call bspline_y_of_x(ncp, 4, xcp_thk, ycp_thk, np, u, splthick)
             do i = 1, np
                 splinedata(6, i) = splthick(i)
             end do

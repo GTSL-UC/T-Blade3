@@ -391,7 +391,7 @@
            endif
        enddo
 
-       call bspline_arclength(arclength,xcp_top,ycp_top,ncp,degree)
+       call bspline_arclength(ncp,degree,xcp_top,ycp_top,arclength)
        if (.not. isquiet) print*, 'arclength', arclength
  ! xs = x1(control point)*B1+x2(control point)*B2+x3(control point)
  !                                         *B3+x4(control point)*B4
@@ -406,8 +406,8 @@
             endif
             !s = u !Uniform spacing
             !print*, "u, s", u, s
-            x_le_spl_top(j) = bspline_cp(xcp_top,arclength,ncp,degree,s)
-            y_le_spl_top(j) = bspline_cp(ycp_top,arclength,ncp,degree,s)
+            x_le_spl_top(j) = bspline_cp(ncp,degree,xcp_top,s,arclength)
+            y_le_spl_top(j) = bspline_cp(ncp,degree,ycp_top,s,arclength)
         enddo
      
          if (allocated(theta)) deallocate(theta)
@@ -449,7 +449,7 @@
            endif
        enddo
          
-       call bspline_arclength(arclength,xcp_bot,ycp_bot,ncp,degree)
+       call bspline_arclength(ncp,degree,xcp_bot,ycp_bot,arclength)
        if (.not. isquiet) print*, 'arclength', arclength
     ! xs = x1(control point)*B1+x2(control point)*B2+x3(control point)
     !                                         *B3+x4(control point)*B4
@@ -464,8 +464,8 @@
             endif
             !s = u !Uniform spacing
             !print*, "u, s", u, s
-            x_le_spl_bot(j) = bspline_cp(xcp_bot,arclength,ncp,degree,s)
-            y_le_spl_bot(j) = bspline_cp(ycp_bot,arclength,ncp,degree,s)
+            x_le_spl_bot(j) = bspline_cp(ncp,degree,xcp_bot,s,arclength)
+            y_le_spl_bot(j) = bspline_cp(ncp,degree,ycp_bot,s,arclength)
         enddo
      
          if (allocated(theta)) deallocate(theta)
