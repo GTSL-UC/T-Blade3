@@ -294,8 +294,8 @@ subroutine span_variation()
     ! Spanwise distribution of "u" and "cur" control points
     do i = 2,ncp_chord_curv
 
-        call cubicspline(cp_chord_curv(:,i),cp_chord_curv(:,1),ncp_span_curv,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
-        call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,intersec,na,xbs,ybs)
+        call cubicspline(ncp_span_curv,cp_chord_curv(:,i),cp_chord_curv(:,1),xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
+        call cubicbspline_intersec(ncp1,xc,yc,na,span,intersec,xbs,ybs,y_spl_end)
 
         do j = 1,na
             bspline_chord_curv(j,i) = intersec(j)
@@ -332,9 +332,9 @@ subroutine span_variation()
         ! Spanwise distribution of "u" and "thk" control points
         do i = 2,ncp_chord_thk
 
-            call cubicspline(cp_chord_thk(:,i),cp_chord_thk(:,1),ncp_span_thk,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
-            call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,intersec,na,xbs,ybs)
-            
+            call cubicspline(ncp_span_thk,cp_chord_thk(:,i),cp_chord_thk(:,1),xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
+            call cubicbspline_intersec(ncp1,xc,yc,na,span,intersec,xbs,ybs,y_spl_end)
+
             do j = 1,na
                 bspline_thk(j,i) = intersec(j)
             end do
@@ -355,8 +355,8 @@ subroutine span_variation()
         ! Spanwise distribution of "LE_radius", "u_max", "t_max" and "t_TE"
         do i = 2,size(cp_chord_thk,2)
 
-            call cubicspline(cp_chord_thk(:,i),cp_chord_thk(:,1),ncp_span_thk,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
-            call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,intersec_u,na,xbs,ybs)
+            call cubicspline(ncp_span_thk,cp_chord_thk(:,i),cp_chord_thk(:,1),xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
+            call cubicbspline_intersec(ncp1,xc,yc,na,span,intersec_u,xbs,ybs,y_spl_end)
 
             ! For "t_max" and "t_TE", store as half thickness
             if (i == 4 .or. i == 5) then
@@ -410,7 +410,7 @@ subroutine span_variation()
         !
         do i = 2,ncp_LE
 
-            call cubicspline(cp_LE(:,i),cp_LE(:,1),ncp_span_LE,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
+            call cubicspline(ncp_span_LE,cp_LE(:,i),cp_LE(:,1),xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
             call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,intersec,na,xbs,ybs)
 
             do j = 1,na

@@ -189,8 +189,8 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     ! Cubic spline for sweep control points
     ! cubicspline and cubicbspline_intersec in cubicspline.f90
     !
-    call cubicspline(xcpdelm,spanmp,cpdeltam,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
-    call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,delmp,na,xbs,ybs)
+    call cubicspline(cpdeltam,xcpdelm,spanmp,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
+    call cubicbspline_intersec(ncp1,xc,yc,na,span,delmp,xbs,ybs,y_spl_end)
 
 
 
@@ -198,8 +198,8 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     ! Cubic spline for lean control points
     ! cubicspline and cubicbspline_intersec in cubicspline.f90
     !
-    call cubicspline(xcpdeltheta,spantheta,cpdeltheta,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
-    call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,delta_theta,na,xbs,ybs)
+    call cubicspline(cpdeltheta,xcpdeltheta,spantheta,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
+    call cubicbspline_intersec(ncp1,xc,yc,na,span,delta_theta,xbs,ybs,y_spl_end)
 
 
     

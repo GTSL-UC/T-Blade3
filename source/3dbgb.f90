@@ -1162,8 +1162,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen,*) ' Inlet Beta defined spanwise by a cubic B-spline using control points.'
         write(nopen,*) '   span         in_Beta (spline)'
 
-      call cubicspline(xcpinbeta, spaninbeta, cpinbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
-      call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, inbeta_s, na, xbs, ybs)
+      call cubicspline(cpinbeta, xcpinbeta, spaninbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
+      call cubicbspline_intersec(ncp1, xc, yc, na, span, inbeta_s, xbs, ybs, y_spl_end)
       do ia = 1, na
          if (.not. isquiet) print*, span(ia), inbeta_s(ia)
          write(nopen,*) span(ia), inbeta_s(ia)
@@ -1179,8 +1179,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen, *)' Inlet Beta incidence defined spanwise by a cubic B-spline using control points.'
         write(nopen, *)'   span         in_Beta (spline)'
 
-      call cubicspline(xcpinbeta, spaninbeta, cpinbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
-      call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, inci_s, na, xbs, ybs)
+      call cubicspline(cpinbeta, xcpinbeta, spaninbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
+      call cubicbspline_intersec(ncp1, xc, yc, na, span, inci_s, xbs, ybs, y_spl_end)
       do ia = 1, na
          temp_1 = in_beta(ia)
          temp_2 = inci_s(ia)
@@ -1204,8 +1204,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen, *)' Outlet Beta defined spanwise by a cubic B-spline using control points.'
         write(nopen, *)'   span        out_Beta (spline)'
 
-      call cubicspline(xcpoutbeta, spanoutbeta, cpoutbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
-      call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, outbeta_s, na, xbs, ybs)
+      call cubicspline(cpoutbeta, xcpoutbeta, spanoutbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
+      call cubicbspline_intersec(ncp1, xc, yc, na, span, outbeta_s, xbs, ybs, y_spl_end)
       do ia = 1, na
          if (.not. isquiet) print*, span(ia), outbeta_s(ia)
          write(nopen,*) span(ia),  outbeta_s(ia)
@@ -1222,8 +1222,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen, *)' Outlet Beta deviation defined spanwise by a cubic B-spline using control points.'
         write(nopen, *)'   span        out_Beta (spline)'
 
-      call cubicspline(xcpoutbeta, spanoutbeta, cpoutbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
-      call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, dev_s, na, xbs, ybs)
+      call cubicspline(cpoutbeta, xcpoutbeta, spanoutbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
+      call cubicbspline_intersec(ncp1, xc, yc, na, span, dev_s, xbs, ybs, y_spl_end)
       do ia = 1, na
          temp_1 = out_beta(ia)
          temp_2 = dev_s(ia)
@@ -1246,8 +1246,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
       write(nopen,*) ''
       write(nopen,*) '   span        chord_multipliers'
 
-      call cubicspline(xcpchord, spanchord, cpchord, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
-      call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, chords, na, xbs, ybs)
+      call cubicspline(cpchord, xcpchord, spanchord, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
+      call cubicbspline_intersec(ncp1, xc, yc, na, span, chords, xbs, ybs, y_spl_end)
       do ia = 1, na
          if (.not.isquiet) print*, span(ia), chords(ia)
          write(nopen,*) span(ia), chords(ia)
@@ -1270,8 +1270,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
       write(nopen, *)' Stagger defined spanwise by a cubic B-spline using control points.'
       write(nopen, *)'   span        stagger'
 
-      call cubicspline(xcpinbeta, spaninbeta, cpinbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
-      call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, inbeta_s, na, xbs, ybs)
+      call cubicspline(cpinbeta, xcpinbeta, spaninbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
+      call cubicbspline_intersec(ncp1, xc, yc, na, span, inbeta_s, xbs, ybs, y_spl_end)
       do ia = 1, na
          if (.not. isquiet) print*, span(ia), inbeta_s(ia)
          write(nopen,*) span(ia), inbeta_s(ia)
@@ -1289,8 +1289,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
       end if
       write(nopen,*) ''
       write(nopen,*) 'tm/c thickness ratio defined radially with 2D spline using control points.'
-      call cubicspline(xcptm_c, spantm_c, cptm_c, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
-      call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, thk_tm_c_spl, na, xbs, ybs)
+      call cubicspline(cptm_c, xcptm_c, spantm_c, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
+      call cubicbspline_intersec(ncp1, xc, yc, na, span, thk_tm_c_spl, xbs, ybs, y_spl_end)
       do ia = 1, na
          if (.not. isquiet) print*, span(ia), thk_tm_c_spl(ia)
          write(nopen,*) span(ia), thk_tm_c_spl(ia)
@@ -1313,8 +1313,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen,*) ''
         write(nopen,*) 'Max thickness location defined spanwise by a cubic B-spline using control points'
 
-        call cubicspline(xcpumax, spantm_c, cptm_c, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
-        call cubicbspline_intersec(y_spl_end, xc, yc, ncp1, span, um_spl, na, xbs, ybs)
+        call cubicspline(cptm_c, xcpumax, spantm_c, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
+        call cubicbspline_intersec(ncp1, xc, yc, na, span, um_spl, xbs, ybs, y_spl_end)
         umxthk_all = um_spl
 
         do ia = 1, na
