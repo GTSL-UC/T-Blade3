@@ -572,7 +572,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         xt(i, 1) = xm(i, nsl)
         rt(i, 1) = rm(i, nsl)
     enddo
-    call hubTipStreamline(xm(1, 1), rm(1, 1), nsp(1), xt, rt, nsp(nsl), nsl, scf, casename)
+    call hubTipStreamline(nsp(1), xm(1, 1), rm(1, 1), nsp(nsl), xt, rt, nsl, scf, casename)
 
 
     
@@ -661,7 +661,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         call close_log_file(nopen, file_open)
         if (is_xyzstreamlines) then
             if ((ia .ge. 1).and.(ia .le. nsl)) then
-                call streamlines(xm(:, ia), rm(:, ia), nsp(ia), scf, casename, ia) ! Ahmed nemnem 4 23 2014 extracting streamlines
+                call streamlines(nsp(ia), xm(:, ia), rm(:, ia), scf, casename, ia) ! Ahmed nemnem 4 23 2014 extracting streamlines
             endif
         endif
         !print*, 'mp(:, ia)', mp(1:nsp(ia), ia)
@@ -1612,7 +1612,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !**************************************************************************************
     pitch = 2*pi/nbls
 
-    call cascade_nondim_file(msle, mste, mprime_ble, mprime_bte, chordm, pitch, nsl, ibrow, casename)
+    call cascade_nondim_file(nsl, ibrow, msle, mste, mprime_ble, mprime_bte, chordm, pitch, casename)
 
     !----------------------------------------------------------------------------
 

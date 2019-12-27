@@ -28,6 +28,11 @@ module file_operations
         log_file    = 'T-Blade3_run.log'
         nopen       = 101
 
+
+
+        !
+        ! Determine if log file exists or not and open accordingly
+        ! 
         inquire(file = log_file, exist=exist)
         if (exist) then
             if (present(initial) .and. initial .eqv. .true.) then
@@ -39,6 +44,11 @@ module file_operations
             open(nopen, file = log_file, status = 'new', iostat = ierr, action = 'write')
         end if
 
+
+        
+        ! 
+        ! Set logical argument 
+        !
         if (ierr == 0) then
             file_open = .true.  
         else
@@ -101,6 +111,11 @@ module file_operations
         index1              = index(input_file, 'dat')
         maininput_log_file  = input_file(:index1 - 1)//'log'
 
+
+        
+        !
+        ! Determine if input log file exists or not and open accordingly
+        !
         inquire(file = trim(maininput_log_file), exist=exist)
         if (exist) then
             open(nopen, file = trim(maininput_log_file), status = 'old', iostat = ierr, action = 'write')
@@ -108,6 +123,11 @@ module file_operations
             open(nopen, file = trim(maininput_log_file), status = 'new', iostat = ierr, action = 'write')
         end if
 
+
+
+        !
+        ! Set logical argument
+        !
         if (ierr == 0) then
             file_open = .true.
         else
@@ -134,6 +154,7 @@ module file_operations
 
         integer,                    intent(in)              :: nopen
         logical,                    intent(in)              :: file_open
+
 
         ! If the file is open, close it
         if (file_open) close(nopen)
@@ -168,7 +189,12 @@ module file_operations
         nopen               = 102
         index1              = index(input_file, 'dat')
         auxinput_log_file   = input_file(:index1 - 1)//'log'
-        
+
+
+
+        !
+        ! Determine if auxiliary input file exists or not and open accordingly
+        !        
         inquire(file = trim(auxinput_log_file), exist=exist)
         if (exist) then
             open(nopen, file = trim(auxinput_log_file), status = 'old', iostat = ierr, action = 'write')
@@ -176,6 +202,11 @@ module file_operations
             open(nopen, file = trim(auxinput_log_file), status = 'new', iostat = ierr, action = 'write')
         end if
 
+
+
+        !
+        ! Set logical argument
+        !
         if (ierr == 0) then
             file_open = .true.
         else
@@ -237,6 +268,11 @@ module file_operations
         error_file  = 'error.log'
         nopen       = 953
 
+
+        
+        ! 
+        ! Determine if error log file exists or not and open accordingly
+        !
         inquire(file = error_file, exist=exist)
         if (exist) then
             if (present(initial) .and. initial .eqv. .true.) then
@@ -248,6 +284,11 @@ module file_operations
             open(nopen, file =  error_file, status = 'new', iostat = ierr, action = 'write')
         end if
 
+
+
+        !
+        ! Set logical argument
+        !
         if (ierr == 0) then
             file_open = .true.
         else
@@ -320,14 +361,14 @@ module file_operations
         
         ! Write x coordinates
         write(funit,*) 'X coordinates'
-        do i = 1,nx
+        do i = 1, nx
             write(funit,*) X(i,:)
         end do
         write(funit,*) ''
 
         ! Write y coordinates
         write(funit,*) 'Y coordinates'
-        do i = 1,nx
+        do i = 1, nx
             write(funit,*) Y(i,:)
         end do
         
@@ -366,7 +407,7 @@ module file_operations
         ! Open specified file and start writing to file
         !
         open(funit, file = fname, status = 'unknown')
-        do i = 1,nx
+        do i = 1, nx
             write(funit,'(2F20.16)') X(i), Y(i)
         end do
         close(funit)
@@ -383,8 +424,19 @@ module file_operations
     !
     ! Write the dimensional hub and casing streamline data to a file
     !
+    ! Input parameters: nphub       - number of points in hub streamline
+    !                   xhub        - x coordinates of hub streamline
+    !                   rhub        - r coordinates of hub streamline
+    !                   nptip       - number of points in tip streamline
+    !                   xtip        - x coordinates of tip streamline
+    !                   rtip        - r coordinates of tip streamline
+    !                   nsl         - number of streamlines
+    !                   scf         - blade scaling factor
+    !                   casename    - name of the current case prescribed in
+    !                                 3dbgbinput file
+    !
     !---------------------------------------------------------------------------
-    subroutine hubTipStreamline(xhub,rhub,nphub,xtip,rtip,nptip,nsl,scf,casename)
+    subroutine hubTipStreamline(nphub,xhub,rhub,nptip,xtip,rtip,nsl,scf,casename)
 
         integer,                intent(in)              :: nphub, nptip
         real,                   intent(in)              :: xhub(nphub,1), rhub(nphub,1), &
@@ -413,7 +465,7 @@ module file_operations
         ! Write hub streamline data
         fname1  = 'hub.'//trim(casename)//'.sldcrv'
         open(1, file = fname1, status = 'unknown')
-        do i = 1,nphub
+        do i = 1, nphub
             write(1,*) scf*xhub(i,1), 0.0, scf*rhub(i,1)
         end do
         close(1)
@@ -421,7 +473,7 @@ module file_operations
         ! Write casing streamline data
         fname2  = 'casing.'//trim(casename)//'.sldcrv'
         open(2, file = fname2, status = 'unknown')
-        do i = 1,nptip
+        do i = 1, nptip
             write(2,*) scf*xtip(i,1), 0.0, scf*rtip(i,1)
         end do
         close(2)
@@ -438,8 +490,16 @@ module file_operations
     !
     ! Write dimensional streamline data (without hub or casing) to a file
     !
+    ! Input parameters: np          - number of points along streamline
+    !                   xml         - x coordinates of streamline
+    !                   rml         - r coordinates of streamline
+    !                   scf         - blade scaling factor
+    !                   casename    - name of the current case prescribed in
+    !                                 3dbgbinput file
+    !                   ia          - spanwise section index
+    !
     !---------------------------------------------------------------------------
-    subroutine streamlines(xml,rml,np,scf,casename,ia)
+    subroutine streamlines(np,xml,rml,scf,casename,ia)
 
         integer,                    intent(in)          :: np
         real,                       intent(in)          :: xml(np), rml(np)
@@ -464,10 +524,14 @@ module file_operations
         write(nopen,*) 'Writing dimensional streamline '//trim(adjustl(temp))
         call close_log_file(nopen, file_open)
 
+
+
+        !
         ! Write data to file
+        !
         fname   = 'streamlines'//trim(adjustl(temp))//'.'//trim(casename)//'.sldcrv'
         open(1, file = fname, status = 'unknown')
-        do i = 1,np
+        do i = 1, np
             write(1,*) scf*xml(i), 0.0, scf*rml(i)
         end do
         close(1)
@@ -483,6 +547,14 @@ module file_operations
 
     !
     ! Write section properties to a file
+    !
+    ! Input parameters: nsl             - number of streamlines
+    !                   amount_data     - number of rows in the blade data array
+    !                   bladedata       - array containing blade geometry data
+    !                   throat_pos      - array with spanwise throat positions
+    !                   casename        - name of the current case prescribed in 
+    !                                     3dbgbinput file
+    !                   units           - units for the current case
     !
     !---------------------------------------------------------------------------
     subroutine outputfiledata(bladedata,nsl,amount_data,throat_pos,casename,units)
@@ -582,9 +654,20 @@ module file_operations
     !
     ! Write non-dimensional cascade file
     !
+    ! Input parameters: nsl         - number of streamlines
+    !                   ibrow       - bladerow number
+    !                   msle        - spanwise m'_{s} parameter at the LE
+    !                   mste        - spanwise m'_{s} parameter at the TE
+    !                   mprime_ble  - spanwise m'_{b} parameter at the LE
+    !                   mprime_bte  - spanwise m'_{b} parameter at the TE
+    !                   chordm      - m' chord length
+    !                   pitch       - blade pitch
+    !                   casename    - name of the current case prescribed in
+    !                                 3dbgbinput file
+    !
     !---------------------------------------------------------------------------
-    subroutine cascade_nondim_file(msle,mste,mprime_ble,mprime_bte,chordm,pitch, &
-                                   nsl,ibrow,casename)
+    subroutine cascade_nondim_file(nsl,ibrow,msle,mste,mprime_ble,mprime_bte,&
+                                   chordm,pitch,casename)
 
         integer,                    intent(in)      :: nsl, ibrow
         real,                       intent(in)      :: msle(nsl), mste(nsl), mprime_ble(nsl), &
@@ -624,6 +707,17 @@ module file_operations
     !
     ! Write (m',theta) blade section coordinates to a file
     !
+    ! Input parameters: np      - number of points along blade section
+    !                   nx      - constant array size (= 1000)
+    !                   ii      - number of points to be chopped at the TE
+    !                   fext    - string describing file name extension
+    !                   sinls   - slope of blade inlet angle
+    !                   sexts   - slope of blade exit angle
+    !                   chrdd   - non-dimensional chord
+    !                   pitch   - blade pitch
+    !                   xb      - m' coordinates of blade section
+    !                   yb      - theta coordinates of blade section
+    !
     !---------------------------------------------------------------------------
     subroutine write_blade_files(np,nx,ii,fext,sinls,sexts,chrdd,pitch,xb,yb)
 
@@ -657,7 +751,7 @@ module file_operations
 
     !
     ! Write 2D throat data to a file
-    !
+    !                   
     !---------------------------------------------------------------------------
     subroutine write_2D_throat_data(js,np,np_sidee,n_normal_distance,casename,u,camber,  &
                                     camber_upper,pitch_line,u1_top,v1_top,u2_bot,v2_bot, &
@@ -715,8 +809,19 @@ module file_operations
     !
     ! Write 3D meanline coordinates to a file
     !
+    ! Input parameters: ia          - spanwise section index
+    !                   uplmt       - number of points along blade section 
+    !                                 suction and pressure side
+    !                   casename    - name of current case prescribed in
+    !                                 3dbgbinput file
+    !                   nx          - constant for declaring array sizes (= 1000)
+    !                   nax         - constant for declaring array sizes (= 1000)
+    !                   xmeanline   - x coordinates of blade section meanline
+    !                   ymeanline   - y coordinates of blade section meanline
+    !                   zmeanline   - z coordinates of blade section meanline
+    !
     !---------------------------------------------------------------------------
-    subroutine write_3D_meanline(ia,uplmt,casename,nx,nax,xmeanline,ymeanline,zmeanline)
+    subroutine write_3D_meanline(ia,uplmt,nx,nax,casename,xmeanline,ymeanline,zmeanline)
 
         integer,                    intent(in)      :: ia, uplmt, nx, nax
         character(32),              intent(in)      :: casename
@@ -749,8 +854,20 @@ module file_operations
     !
     ! Write constant slope meanline coordinates to a file
     !
+    ! Input parameters: ia          - spanwise section index
+    !                   uplmt       - number of points along blade section
+    !                                 suction and pressure sides
+    !                   npts        - number of points along meanline
+    !                   casename    - name of the current case prescribed in
+    !                                 3dbgbinput file
+    !                   nx          - constant for declaring array sizes (= 1000)
+    !                   nax         - constant for declaring array sizes (= 1000)
+    !                   xmeanline   - x coordinates of section meanline
+    !                   ymeanline   - y coordinates of section meanline
+    !                   zmeanline   - z coordinates of section meanline
+    !
     !---------------------------------------------------------------------------
-    subroutine write_constantslope_meanline(ia,uplmt,npts,casename,nx,nax,xmeanline,ymeanline, &
+    subroutine write_constantslope_meanline(ia,uplmt,npts,nx,nax,casename,xmeanline,ymeanline, &
                                             zmeanline)
 
         integer,                    intent(in)      :: ia, uplmt, npts, nx, nax
@@ -784,6 +901,15 @@ module file_operations
     !
     ! Write thickness multiplier control points to a file
     !
+    ! Input parameters: sec         - MISES style blade section descriptor
+    !                   casename    - name of the current case prescribed in
+    !                                 3dbgbinput file
+    !                   ncp         - number of thickness multiplier control
+    !                                 points
+    !                   xcp_thk     - spanwise location in spline control points
+    !                   ycp_thk     - thickness multiplier in spline control 
+    !                                 points
+    !
     !---------------------------------------------------------------------------
     subroutine write_thick_multi_cp(sec,casename,ncp,xcp_thk,ycp_thk)
 
@@ -816,6 +942,14 @@ module file_operations
 
     !
     ! Write NACA thickness distribution for a section to a file
+    !
+    ! Input parameters: sec             - MISES style blade section descriptor
+    !                   casename        - name of current case prescribed in
+    !                                     3dbgbinput file
+    !                   np              - number of points along the chord
+    !                   u               - points along chord-line
+    !                   thickness_data  - 2D array containing values of thickness,
+    !                                     first and second thickness derivatives
     !
     !---------------------------------------------------------------------------
     subroutine write_NACA_thickness(sec,casename,np,u,thickness_data)
@@ -857,6 +991,13 @@ module file_operations
     !
     ! Write Wennerstrom thickness distribution for a section to a file
     !
+    ! Input parameters: sec             - MISES style blade section descriptor
+    !                   casename        - name of current case prescribed in
+    !                                     3dbgbinput file
+    !                   np              - number of points along the chord
+    !                   u               - points along chord-line
+    !                   thickness_data  - array containing values of thickness
+    !
     !---------------------------------------------------------------------------
     subroutine write_Wennerstrom_thickness(sec,casename,np,u,thickness)
         
@@ -895,7 +1036,13 @@ module file_operations
 
 
     !
-    ! Write Wennerstrom thickness distribution for a section to a file
+    ! Write Wennerstrom thickness distribution spanwise variation to a file
+    !
+    ! Input parameters: casename        - name of the current case prescribed in
+    !                                     3dbgbinput file
+    !                   nspn            - number of spanwise sections
+    !                   umxthk_all      - spanwise maximum thickness locations
+    !                   spanwise_thk    - spanwise maximum thickness values
     !
     !---------------------------------------------------------------------------
     subroutine write_Wennerstrom_thickness_variation(casename,nspn,umxthk_all,spanwise_thk)
@@ -988,6 +1135,14 @@ module file_operations
     !
     ! Write curvature spanwise spline data to a file, if using isdev
     !
+    ! Input parameters: nsl                 - number of streamlines
+    !                   ncp_chord_curv      - number of control points for 
+    !                                         sectionwise curvature
+    !                   casename            - name of the current case prescribed 
+    !                                         in 3dbgbinput file
+    !                   bspline_chord_curv  - 2D array containing all curvature
+    !                                         spline control points
+    !
     !---------------------------------------------------------------------------
     subroutine write_span_curv(nsl,ncp_chord_curv,casename,bspline_chord_curv)
 
@@ -1026,6 +1181,15 @@ module file_operations
 
     !
     ! Write thickness spanwise spline data to a file, if using isdev
+    !
+    ! Input parameters: nsl             - number of streamlines
+    !                   ncp_chord_thk   - number of control points for thickness
+    !                   casename        - name of the current case prescribed in
+    !                                     3dbgbinput file
+    !                   bspline_thk     - 2D array containing thickness spline
+    !                                     control points
+    !                   thick_distr     - integer argument signifying the current
+    !                                     thickness distribution
     !
     !---------------------------------------------------------------------------
     subroutine write_span_thk(nsl,ncp_chord_thk,casename,bspline_thk,thick_distr)
@@ -1075,6 +1239,12 @@ module file_operations
     !
     ! Write thickness spanwise spline data to a file, if using isdev
     !
+    ! Input parameters: nsl         - number of streamlines
+    !                   ncp_LE      - number of LE spline control points
+    !                   casename    - name of the current case prescribed in
+    !                                 3dbgbinput file
+    !                   bspline_LE  - 2D array containing LE spline control points
+    !
     !---------------------------------------------------------------------------
     subroutine write_span_LE(nsl,ncp_LE,casename,bspline_LE)
 
@@ -1114,6 +1284,10 @@ module file_operations
     !
     ! Write curvature control points to a file
     !
+    ! Input parameters: na      - number of spanwise sections
+    !                   curv_cp - curvature second derivative spline control
+    !                             points
+    !
     !---------------------------------------------------------------------------
     subroutine write_curv_cp(na,curv_cp)
 
@@ -1144,6 +1318,13 @@ module file_operations
     !
     ! Write 3D section files (x,y,z)
     ! Moved from b3d2sec.f90
+    !
+    ! Input parameters: scf         - dimensional blade scaling factor
+    !                   fext        - string describing filename extension
+    !                   ibrowc      - bladerow number
+    !                   nbls        - number of blades in current bladerow
+    !                   casename    - name of current case prescribed in
+    !                                 3dbgbinput file
     !
     !---------------------------------------------------------------------------
     subroutine write_3D_section_files(scf,fext,ibrowc,nbls,casename)

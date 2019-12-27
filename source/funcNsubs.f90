@@ -1431,7 +1431,7 @@ subroutine meanline3DNperiodicwall(xb,yb,zb,xposlean,yposlean,zposlean,xneglean,
         ! Writing meanline coordinates to a file
         ! write_3D_meanline in file_operations
         !
-        call write_3D_meanline(ia,uplmt,casename,nx,nax,xmeanline,ymeanline,zmeanline)
+        call write_3D_meanline(ia,uplmt,nx,nax,casename,xmeanline,ymeanline,zmeanline)
     
     end do  ! do ia = 1,nsec
 
@@ -1583,7 +1583,7 @@ subroutine constantslopemeanline3D(xb,yb,zb,xposlean,yposlean,zposlean,xneglean,
        
         ! Write meanline coordinates to a file
         ! write_constantslope_meanline in file_operations
-        call write_constantslope_meanline(ia,uplmt,npts,casename,nx,nax,xmeanline,ymeanline,zmeanline)
+        call write_constantslope_meanline(ia,uplmt,npts,nx,nax,casename,xmeanline,ymeanline,zmeanline)
 
     end do  ! do ia = 1,nsec
 

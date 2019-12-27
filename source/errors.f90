@@ -32,7 +32,11 @@ module errors
         call get_dev_status(isdev_local)
         call get_quiet_status(isquiet)
 
+
+
+        !
         ! Print the messages to the screen and stop execution
+        !
         if (.not. isquiet) then
             print *, ''
             print *, 'FATAL ERROR: '//error_msg
@@ -42,7 +46,9 @@ module errors
         if (isdev_local .and. present(dev_msg) .and. .not. isquiet) &
             print *, 'For developers: '//dev_msg
         if (.not. isquiet) print *, ''
-        
+       
+
+
         !
         ! Write the error messages to the error log file
         ! error_file_exists and close_error_file in file_operations.f90
@@ -62,6 +68,9 @@ module errors
 
     end subroutine fatal_error
     !--------------------------------------------------------------------------------------------------
+
+
+
 
 
 
@@ -87,7 +96,11 @@ module errors
         call get_dev_status(isdev_local)
         call get_quiet_status(isquiet)
 
+
+
+        !
         ! Print the error message to the screen and exit
+        !
         if (.not. isquiet) then
             print *, ''
             print *, 'ERROR: '//error_msg
@@ -95,6 +108,8 @@ module errors
         if (isdev_local .and. present(dev_msg) .and. .not. isquiet) &
             print *, 'For developers: '//dev_msg
         if (.not. isquiet) print *, ''
+
+
 
         !
         ! Write the error messages to the error log file
@@ -111,7 +126,10 @@ module errors
 
     end subroutine error
     !--------------------------------------------------------------------------------------------------
-    
+
+
+
+
     
     
     !
@@ -137,7 +155,11 @@ module errors
         call get_dev_status(isdev_local)
         call get_quiet_status(isquiet)
 
+
+        
+        !
         ! Print the warning message to the screen
+        !
         if (.not. isquiet) then
             print *, ''
             print *, 'WARNING: '// warning_msg
@@ -147,6 +169,8 @@ module errors
         if (isdev_local .and. present(dev_msg) .and. .not. isquiet) &
             print *, 'For developers: '//dev_msg
         if (.not. isquiet) print *, ''
+
+
 
         !
         ! Write the error messages to the error log file
