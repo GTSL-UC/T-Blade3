@@ -668,9 +668,9 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             call close_log_file(nopen, file_open)
             
             ! splinethick in splinethick.f90
-            call splinethick(thickness, u, np, lethk, umxthk, fmxthk, tethk, i_le, i_te, uin_le, thick_distr, &
-                             ucp_top, vcp_top, ucp_bot, vcp_bot, casename, js, develop, isdev, np_side,       &
-                             spline_data, splinedata)
+            call splinethick(js, np, np_side, i_le, i_te, thickness, u, lethk, umxthk, fmxthk, tethk,    &
+                             uin_le, thick_distr, ucp_top, vcp_top, ucp_bot, vcp_bot, casename, develop, &
+                             isdev, spline_data, splinedata)
             thickness = thickness*(1 + splthick)
            
         !

@@ -1082,6 +1082,58 @@ module file_operations
 
 
     !
+    ! Write quartic spline thickness distribution to a file
+    !
+    ! Input parameters: isdev           - logical argument associated with command
+    !                                     line 'dev'
+    !                   sec             - MISES style blade section identifier
+    !                   casename        - name of the current case prescribed in
+    !                                     3dbgbinput file
+    !                   np              - number of points along chord-line
+    !                   u               - points along chord-line
+    !
+    !---------------------------------------------------------------------------
+    subroutine write_quartic_spline_thickness(isdev,sec,casename,np,u,top_thickness,bot_thickness)
+       
+        logical,                    intent(in)          :: isdev 
+        character(*),               intent(in)          :: sec
+        character(*),               intent(in)          :: casename
+        integer,                    intent(in)          :: np
+        real,                       intent(in)          :: u(np)
+        real,                       intent(in)          :: top_thickness(np)
+        real,                       intent(in)          :: bot_thickness(np)
+
+        ! Local variables
+        integer                                         :: i, funit = 16
+        character(:),   allocatable                     :: thickness_file_name
+        logical                                         :: file_exist
+
+
+        thickness_file_name = 'thickness_data.'//trim(adjustl(sec))//'.'//trim(casename)
+        inquire(file = thickness_file_name, exist=file_exist)
+        if (file_exist) then
+            open(funit, file = thickness_file_name, status = 'old', action = 'write', form = 'formatted')
+        else
+            open(funit, file = thickness_file_name, status = 'new', action = 'write', form = 'formatted')
+        end if
+    
+        write(funit, *) 'u                          top_thickness                           bot_thickness'
+        do i = 1, np
+            write(funit, *) u(i), top_thickness(i), bot_thickness(i)
+        end do
+
+        close(funit)
+
+
+    end subroutine write_quartic_spline_thickness
+    !---------------------------------------------------------------------------
+
+
+
+
+
+
+    !
     ! Write meanline u,v data to a file
     !
     ! Input parameters: spline_data - number of camber line spline fields
