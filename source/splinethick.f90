@@ -925,3 +925,24 @@ end subroutine splinethick
 !thk = thk*thkc/2./maxval(thk)
 !
 !end subroutine splinethickcontrol
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

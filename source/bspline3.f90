@@ -1136,3 +1136,24 @@ end function bspline4_t_newton
 !    if( degree == 4) d4_bspline_cp = d4_bspline4(cp(j:j+degree),t)
 !
 !end function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
