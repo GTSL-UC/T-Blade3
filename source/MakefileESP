@@ -37,9 +37,7 @@ OBJS  =	$(ODIR)/globvar.o \
     $(ODIR)/3dbgb_driver.o \
 	$(ODIR)/bladestack.o \
 	$(ODIR)/bspline3.o \
-	$(ODIR)/lesting.o \
 	$(ODIR)/cubicspline.o \
-	$(ODIR)/lespline.o \
 	$(ODIR)/bsplinecam.o \
 	$(ODIR)/splinethick.o \
 	$(ODIR)/airfoiltypes.o \
@@ -81,12 +79,8 @@ $(ODIR)/bladestack.o:	bladestack.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) bladestack.f90         -o $(ODIR)/bladestack.o
 $(ODIR)/bspline3.o:	bspline3.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) bspline3.f90           -o $(ODIR)/bspline3.o
-$(ODIR)/lesting.o:	lesting.f90
-	$(FCOMP) -c $(FOPTS) $(FOPTX) lesting.f90            -o $(ODIR)/lesting.o
 $(ODIR)/cubicspline.o:	cubicspline.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) cubicspline.f90        -o $(ODIR)/cubicspline.o
-$(ODIR)/lespline.o:	lespline.f90
-	$(FCOMP) -c $(FOPTS) $(FOPTX) lespline.f90           -o $(ODIR)/lespline.o
 $(ODIR)/bsplinecam.o:	bsplinecam.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) bsplinecam.f90         -o $(ODIR)/bsplinecam.o
 $(ODIR)/splinethick.o:	splinethick.f90
