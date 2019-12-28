@@ -540,6 +540,36 @@ module file_operations
     end subroutine streamlines
     !---------------------------------------------------------------------------
     
+    
+
+
+
+
+    !
+    ! Write LE and TE intersection with streamline curves to file
+    ! Uses global variables na, ia, x_le, r_le, x_te and r_te
+    !
+    !---------------------------------------------------------------------------
+    subroutine write_LE_TE_intersection
+        use globvar
+
+        ! Local variables
+        integer                                         :: funit = 3
+        character(:),   allocatable                     :: fname1
+
+
+        fname1          = 'LE_TE_intersection.'//trim(casename)//'.dat'
+
+        open(funit, file = fname1, form = 'formatted')
+        do ia = 1, na
+            write(funit,*) x_le(ia), r_le(ia), x_te(ia), r_te(ia)
+        end do
+        close(funit)
+
+
+    end subroutine write_LE_TE_intersection
+    !---------------------------------------------------------------------------
+
 
 
 

@@ -755,128 +755,128 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         ! 
         ! Definition of the LE if the LE spline switch is on
         ! 
-        le_pos = 1000 
-        if (LE /= 0) then
-            
-            le_pos = i_le
-            call log_file_exists(log_file, nopen, file_open)
-            if (.not. isquiet) then
-                print*, 'uin_le bladgen = ', uin_le
-                print*, 'le_pos bladgen = ', le_pos
-            end if
-            write(nopen,*) 'uin_le bladegen = ', uin_le
-            write(nopen,*) 'le_pos_bladegen = ', le_pos
-            
-            ! Allocate arrays
-            if (allocated(x_le_spl   )) deallocate(x_le_spl   )
-            if (allocated(y_le_spl   )) deallocate(y_le_spl   )
-            allocate(x_le_spl(2*le_pos - 1), y_le_spl(2*le_pos - 1))
+        !le_pos = 1000 
+        !if (LE /= 0) then
+        !    
+        !    le_pos = i_le
+        !    call log_file_exists(log_file, nopen, file_open)
+        !    if (.not. isquiet) then
+        !        print*, 'uin_le bladgen = ', uin_le
+        !        print*, 'le_pos bladgen = ', le_pos
+        !    end if
+        !    write(nopen,*) 'uin_le bladegen = ', uin_le
+        !    write(nopen,*) 'le_pos_bladegen = ', le_pos
+        !    
+        !    ! Allocate arrays
+        !    if (allocated(x_le_spl   )) deallocate(x_le_spl   )
+        !    if (allocated(y_le_spl   )) deallocate(y_le_spl   )
+        !    allocate(x_le_spl(2*le_pos - 1), y_le_spl(2*le_pos - 1))
 
-            ! Arrays required for spline leading edge
-            if (allocated(xtop_refine)) deallocate(xtop_refine)
-            if (allocated(ytop_refine)) deallocate(ytop_refine)
-            if (allocated(xbot_refine)) deallocate(xbot_refine)
-            if (allocated(ybot_refine)) deallocate(ybot_refine)
-            if (allocated(cam_refine )) deallocate(cam_refine )
-            if (allocated(u_refine   )) deallocate(u_refine   )
-            allocate(xtop_refine(interval + 1), ytop_refine(interval + 1), &
-                     xbot_refine(interval + 1), ybot_refine(interval + 1), &
-                     cam_refine(interval + 1), u_refine(interval + 1))
+        !    ! Arrays required for spline leading edge
+        !    if (allocated(xtop_refine)) deallocate(xtop_refine)
+        !    if (allocated(ytop_refine)) deallocate(ytop_refine)
+        !    if (allocated(xbot_refine)) deallocate(xbot_refine)
+        !    if (allocated(ybot_refine)) deallocate(ybot_refine)
+        !    if (allocated(cam_refine )) deallocate(cam_refine )
+        !    if (allocated(u_refine   )) deallocate(u_refine   )
+        !    allocate(xtop_refine(interval + 1), ytop_refine(interval + 1), &
+        !             xbot_refine(interval + 1), ybot_refine(interval + 1), &
+        !             cam_refine(interval + 1), u_refine(interval + 1))
 
-            if (.not. isquiet) print*, 'KB reached fini_diff_refine in bladegen'
-            write(nopen,*) 'KB reached fini_diff_refine in bladegen'
-            call close_log_file(nopen ,file_open)
+        !    if (.not. isquiet) print*, 'KB reached fini_diff_refine in bladegen'
+        !    write(nopen,*) 'KB reached fini_diff_refine in bladegen'
+        !    call close_log_file(nopen ,file_open)
 
-            ! fini_diff_refine in lespline.f90
-            call fini_diff_refine(curv_camber, thick, thick_distr, xcp_curv, ycp_curv, ncp_curv(js), xcp_thk,     &
-                                  ycp_thk, ncp_thk(js), u(le_pos), interval, ucp_top, vcp_top, ucp_bot, vcp_bot,  &
-                                  sinl, sext, flin, flex, fmxthk, umxthk, lethk, tethk, rr1, rr2, x_spl_end_curv, &
-                                  init_angles, init_cambers, cam_refine, u_refine, xtop_refine, ytop_refine,      &
-                                  xbot_refine, ybot_refine)
+        !    ! fini_diff_refine in lespline.f90
+        !    call fini_diff_refine(curv_camber, thick, thick_distr, xcp_curv, ycp_curv, ncp_curv(js), xcp_thk,     &
+        !                          ycp_thk, ncp_thk(js), u(le_pos), interval, ucp_top, vcp_top, ucp_bot, vcp_bot,  &
+        !                          sinl, sext, flin, flex, fmxthk, umxthk, lethk, tethk, rr1, rr2, x_spl_end_curv, &
+        !                          init_angles, init_cambers, cam_refine, u_refine, xtop_refine, ytop_refine,      &
+        !                          xbot_refine, ybot_refine)
 
-            do k = 1, interval + 1
-                camber_ang(k) = atan(cam_refine(1)/u_refine(1))
-            end do
-            camber_le = cam_refine
-            
-            ! 
-            ! LE spline definition
-            ! 
-            if (LE == 1) then
+        !    do k = 1, interval + 1
+        !        camber_ang(k) = atan(cam_refine(1)/u_refine(1))
+        !    end do
+        !    camber_le = cam_refine
+        !    
+        !    ! 
+        !    ! LE spline definition
+        !    ! 
+        !    if (LE == 1) then
 
-                ncp = LEdegree + no_LE_segments
-                call lespline(xtop_refine,ytop_refine,xbot_refine,ybot_refine,interval + 1,camber_ang,camber_le,uin_le, &
-                               le_pos,pi,x_le_spl,y_le_spl,js,nsl,s_all,ee_all,C_le_x_top_all,C_le_x_bot_all,           &
-                               C_le_y_top_all,C_le_y_bot_all,LE_vertex_ang_all,LE_vertex_dis_all,ncp,LEdegree,          &
-                               no_LE_segments,casename,develop,isdev)
+        !        ncp = LEdegree + no_LE_segments
+        !        call lespline(xtop_refine,ytop_refine,xbot_refine,ybot_refine,interval + 1,camber_ang,camber_le,uin_le, &
+        !                       le_pos,pi,x_le_spl,y_le_spl,js,nsl,s_all,ee_all,C_le_x_top_all,C_le_x_bot_all,           &
+        !                       C_le_y_top_all,C_le_y_bot_all,LE_vertex_ang_all,LE_vertex_dis_all,ncp,LEdegree,          &
+        !                       no_LE_segments,casename,develop,isdev)
 
-            !
-            ! LE sting definition
-            !
-            else if (LE == 2) then
-                
-                ncp = LEdegree + 2
-                call log_file_exists(log_file, nopen, file_open)
-                if (.not. isquiet) print*, 'ncp_sting', ncp
-                write(nopen,*) 'ncp_sting', ncp
-                call close_log_file(nopen, file_open)
-                call lesting(xtop_refine,ytop_refine,xbot_refine,ybot_refine,interval + 1,camber_ang,camber_le,uin_le,     &
-                             le_pos,pi,x_le_spl,y_le_spl,js,nsl,s_all,ee_all,C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all, &
-                             C_le_y_bot_all,sang,LE_vertex_ang_all,LE_vertex_dis_all,ncp,LEdegree,casename, develop,       &
-                             sting_l_all,sting_h_all)
+        !    !
+        !    ! LE sting definition
+        !    !
+        !    else if (LE == 2) then
+        !        
+        !        ncp = LEdegree + 2
+        !        call log_file_exists(log_file, nopen, file_open)
+        !        if (.not. isquiet) print*, 'ncp_sting', ncp
+        !        write(nopen,*) 'ncp_sting', ncp
+        !        call close_log_file(nopen, file_open)
+        !        call lesting(xtop_refine,ytop_refine,xbot_refine,ybot_refine,interval + 1,camber_ang,camber_le,uin_le,     &
+        !                     le_pos,pi,x_le_spl,y_le_spl,js,nsl,s_all,ee_all,C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all, &
+        !                     C_le_y_bot_all,sang,LE_vertex_ang_all,LE_vertex_dis_all,ncp,LEdegree,casename, develop,       &
+        !                     sting_l_all,sting_h_all)
 
-            end if  ! if (LE == 1)
+        !    end if  ! if (LE == 1)
 
-            !
-            ! Populate blade coordinate arrays
-            !
-            do i = 1, np
-                
-                if (i >= (np - le_pos + 1)) then
-                    xb(i) = x_le_spl(i - (np - le_pos))
-                    yb(i) = y_le_spl(i - (np - le_pos))
-                else  
-                    xb(i) = xtop(np - i + 1)
-                    yb(i) = ytop(np - i + 1)
-                end if
-            end do
-            do i = 2, np
+        !    !
+        !    ! Populate blade coordinate arrays
+        !    !
+        !    do i = 1, np
+        !        
+        !        if (i >= (np - le_pos + 1)) then
+        !            xb(i) = x_le_spl(i - (np - le_pos))
+        !            yb(i) = y_le_spl(i - (np - le_pos))
+        !        else  
+        !            xb(i) = xtop(np - i + 1)
+        !            yb(i) = ytop(np - i + 1)
+        !        end if
+        !    end do
+        !    do i = 2, np
 
-                if (i <= le_pos) then
-                    xb(i + np - 1) = x_le_spl(i + le_pos - 1)
-                    yb(i + np - 1) = y_le_spl(i + le_pos - 1)
-                else
-                    xb(i + np - 1) = xbot(i)
-                    yb(i + np - 1) = ybot(i)
-                end if
-            end do     
-            
-            ! New number of points for the entire blade section
-            np = 2*np-1
+        !        if (i <= le_pos) then
+        !            xb(i + np - 1) = x_le_spl(i + le_pos - 1)
+        !            yb(i + np - 1) = y_le_spl(i + le_pos - 1)
+        !        else
+        !            xb(i + np - 1) = xbot(i)
+        !            yb(i + np - 1) = ybot(i)
+        !        end if
+        !    end do     
+        !    
+        !    ! New number of points for the entire blade section
+        !    np = 2*np-1
 
         ! 
         ! If spline LE is not required
         !
-        else 
+        !else 
             
-            call log_file_exists(log_file, nopen, file_open)
-            if (.not. isquiet) print*, np
-            write(nopen,*) np
-            call close_log_file(nopen, file_open)
-            
-            ! Populate blade coordinate arrays
-            do i = 1, np
-                xb(i) = xtop(np - i + 1)
-                yb(i) = ytop(np - i + 1)
-            end do
-            do i = 2, np
-                xb(i + np - 1) = xbot(i)
-                yb(i + np - 1) = ybot(i)
-            end do
+        call log_file_exists(log_file, nopen, file_open)
+        if (.not. isquiet) print*, np
+        write(nopen,*) np
+        call close_log_file(nopen, file_open)
+        
+        ! Populate blade coordinate arrays
+        do i = 1, np
+            xb(i) = xtop(np - i + 1)
+            yb(i) = ytop(np - i + 1)
+        end do
+        do i = 2, np
+            xb(i + np - 1) = xbot(i)
+            yb(i + np - 1) = ybot(i)
+        end do
 
-            ! New number of points for the entire blade section
-            np = 2*np-1
-        end if  ! LE
+        ! New number of points for the entire blade section
+        np = 2*np-1
+        !end if  ! LE
 
         !
         ! Stacking of airfoils
