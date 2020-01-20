@@ -6,7 +6,31 @@ module auxiliary_routines
     contains
 
 
+    
+    !
+    ! Set version string associated with master and develop branches
+    !
+    !------------------------------------------------------------------------------------------------------
+    subroutine current_version(master_ID, develop_ID)
 
+        character(:),   allocatable,    optional,   intent(inout)   :: master_ID
+        character(:),   allocatable,    optional,   intent(inout)   :: develop_ID
+
+
+        ! Set version IDs for both GitHub branches
+        if (present(master_ID)) master_ID   = '1.2.2'
+        if (present(develop_ID)) develop_ID = '1.2.3'
+
+
+    end subroutine current_version
+    !------------------------------------------------------------------------------------------------------
+   
+
+
+
+
+
+    !
     !
     ! Subroutine to display the welcome message 
     !
@@ -14,8 +38,10 @@ module auxiliary_routines
     subroutine displayMessage
         use file_operations
 
-        character(len = :), allocatable :: log_file
-        integer                         :: nopen
+        ! Local variables
+        character(len = :), allocatable :: log_file, master_ID, develop_ID
+        character(60)                   :: string_1, string_2
+        integer                         :: nopen, n
         logical                         :: file_open, initial, isquiet_local
 
 
@@ -24,48 +50,80 @@ module auxiliary_routines
         !
         call get_quiet_status(isquiet_local)
 
+        ! Get current versions for both GitHub branches
+        call current_version(master_ID, develop_ID)
 
+
+
+        !
+        ! Assemble string containg current master branch version for
+        ! displaying message
+        !
+        n                       = len(master_ID)
+        string_1                = ''
+        string_1(1:21)          = '****  Master Version '
+        string_1(22:22 + n - 1) = master_ID
+        string_1(57:60)         = '****'
+
+
+
+        !
+        ! Assemble string containing current develop branch version for
+        ! displaying message
+        !
+        n                       = len(develop_ID)
+        string_2                = ''
+        string_2(1:22)          = '****  Develop Version '
+        string_2(23:23 + n - 1) = develop_ID
+        string_2(57:60)         = '****'
+
+
+
+        !
+        ! Print start up message to if command line argument quiet is not being used
+        !
         if (.not. isquiet_local) then
             write(*,*)
-            write(*,*)'************************************************************'
-            write(*,*)'************************************************************'
-            write(*,*)'****  T-BLADE3:Turbomachinery BLADE 3D Geometry Builder ****'
-            write(*,*)'****                                                    ****' 
-            write(*,*)'****  Master Version 1.2	                               ****' 
-            write(*,*)'****                                                    ****'
-            write(*,*)'****  ...was also called as below till Aug 2016...      ****' 
-            write(*,*)'****  3DBGB: 3 Dimensional Blade Geometry Builder       ****'
-            write(*,*)'****                                                    ****'  
-            write(*,*)'****  Develop Version 1.2.2                             ****' 
-            write(*,*)'****                                                    ****'
-            write(*,*)'****  This software comes with ABSOLUTELY NO WARRANTY   ****'
-            write(*,*)'****                                                    ****'
-            write(*,*)'****  This is a program which generates a 3D blade...   ****' 
-            write(*,*)'****  ...shape and outputs 3D blade section files.      ****'
-            write(*,*)'****                                                    ****'
-            write(*,*)'****  Inputs: LE and TE curve(x,r), inlet angle,        ****' 
-            write(*,*)'****          exit angle, chord, tm/c, incidence,       ****'
-            write(*,*)'****          deviation, secondary flow angles,         ****'
-            write(*,*)'****          streamline coordinates:(x,r)              ****'   
-            write(*,*)'****          control points for sweep, lean,           ****'
-            write(*,*)'****          blade scaling factor.                     ****'
-            write(*,*)'****                                                    ****'
-            write(*,*)'****  Outputs: 3D blade sections (x,y,z),               ****'
-            write(*,*)'****           2D airfoils (mprime,theta).              ****'
-            write(*,*)'****                                                    ****'
-            write(*,*)'****  ---------------by Kiran Siddappaji         ----   ****'
-            write(*,*)'****  ---------------by Mark G. Turner           ----   ****'
-            write(*,*)'****  ------------------- turnermr@ucmail.uc.edu ----   ****'
-            write(*,*)'****  ---------------by Karthik Balasubramanian  ----   ****'
-            write(*,*)'****  ---------------by Syed Moez Hussain Mahmood----   ****'
-            write(*,*)'****  ---------------by Ahmed Nemnem             ----   ****'
-            write(*,*)'****  ---------------by Marshall C. Galbraith    ----   ****'
-            write(*,*)'************************************************************'
-            write(*,*)'************************************************************'
+            write(*,*) '************************************************************'
+            write(*,*) '************************************************************'
+            write(*,*) '****  T-BLADE3:Turbomachinery BLADE 3D Geometry Builder ****'
+            write(*,*) '****                                                    ****' 
+            write(*,*) string_1
+            write(*,*) '****                                                    ****'
+            write(*,*) '****  ...was also called as below till Aug 2016...      ****' 
+            write(*,*) '****  3DBGB: 3 Dimensional Blade Geometry Builder       ****'
+            write(*,*) '****                                                    ****'  
+            write(*,*) string_2
+            write(*,*) '****                                                    ****'
+            write(*,*) '****  This software comes with ABSOLUTELY NO WARRANTY   ****'
+            write(*,*) '****                                                    ****'
+            write(*,*) '****  This is a program which generates a 3D blade...   ****' 
+            write(*,*) '****  ...shape and outputs 3D blade section files.      ****'
+            write(*,*) '****                                                    ****'
+            write(*,*) '****  Inputs: LE and TE curve(x,r), inlet angle,        ****' 
+            write(*,*) '****          exit angle, chord, tm/c, incidence,       ****'
+            write(*,*) '****          deviation, secondary flow angles,         ****'
+            write(*,*) '****          streamline coordinates:(x,r)              ****'   
+            write(*,*) '****          control points for sweep, lean,           ****'
+            write(*,*) '****          blade scaling factor.                     ****'
+            write(*,*) '****                                                    ****'
+            write(*,*) '****  Outputs: 3D blade sections (x,y,z),               ****'
+            write(*,*) '****           2D airfoils (mprime,theta).              ****'
+            write(*,*) '****                                                    ****'
+            write(*,*) '****  ---------------by Kiran Siddappaji         ----   ****'
+            write(*,*) '****  ---------------by Mark G. Turner           ----   ****'
+            write(*,*) '****  ------------------- turnermr@ucmail.uc.edu ----   ****'
+            write(*,*) '****  ---------------by Mayank Sharma            ----   ****'
+            write(*,*) '****  ---------------by Karthik Balasubramanian  ----   ****'
+            write(*,*) '****  ---------------by Syed Moez Hussain Mahmood----   ****'
+            write(*,*) '****  ---------------by Ahmed Nemnem             ----   ****'
+            write(*,*) '****  ---------------by Marshall C. Galbraith    ----   ****'
+            write(*,*) '************************************************************'
+            write(*,*) '************************************************************'
             write(*,*)
             write(*,*) 'T-Blade3 Copyright (C) 2017 University of Cincinnati, developed by Kiran Siddappaji,' 
-            write(*,*) 'Dr. Mark G. Turner, Karthik  Balasubramanian, Syed Moez Hussain, Ahmed Farid Nemnem '
-            write(*,*) ' and Marshall C. Galbraith.'
+            write(*,*) 'Dr. Mark G. Turner, Mayank Sharma, Karthik Balasubramanian, Syed Moez Hussain,' 
+            write(*,*) 'Ahmed Farid Nemnem and Marshall C. Galbraith.'
             write(*,*)
             write(*,*) 'This program is free software; you can redistribute it and/or modify it under the '
             write(*,*) 'terms of the GNU General Public License as published by the Free Software Foundation; '
@@ -76,7 +134,7 @@ module auxiliary_routines
             write(*,*) 'See the GNU General Public License for more details.  For the complete terms of the '
             write(*,*) 'GNU General Public License, please see this URL: http://www.gnu.org/licenses/gpl-2.0.html'
             write(*,*)
-            write(*,*)'************************************************************'
+            write(*,*) '************************************************************'
             write(*,*)
         end if
 
@@ -90,45 +148,46 @@ module auxiliary_routines
         call log_file_exists(log_file, nopen, file_open, initial)
 
         write(nopen,*)
-        write(nopen,*)'************************************************************'
-        write(nopen,*)'************************************************************'
-        write(nopen,*)'****  T-BLADE3:Turbomachinery BLADE 3D Geometry Builder ****'
-        write(nopen,*)'****                                                    ****' 
-        write(nopen,*)'****  Master Version 1.13                               ****' 
-        write(nopen,*)'****                                                    ****'
-        write(nopen,*)'****  ...was also called as below till Aug 2016...      ****' 
-        write(nopen,*)'****  3DBGB: 3 Dimensional Blade Geometry Builder       ****'
-        write(nopen,*)'****                                                    ****'  
-        write(nopen,*)'****  Develop Version 1.2                               ****' 
-        write(nopen,*)'****                                                    ****'
-        write(nopen,*)'****  This software comes with ABSOLUTELY NO WARRANTY   ****'
-        write(nopen,*)'****                                                    ****'
-        write(nopen,*)'****  This is a program which generates a 3D blade...   ****' 
-        write(nopen,*)'****  ...shape and outputs 3D blade section files.      ****'
-        write(nopen,*)'****                                                    ****'
-        write(nopen,*)'****  Inputs: LE and TE curve(x,r), inlet angle,        ****' 
-        write(nopen,*)'****          exit angle, chord, tm/c, incidence,       ****'
-        write(nopen,*)'****          deviation, secondary flow angles,         ****'
-        write(nopen,*)'****          streamline coordinates:(x,r)              ****'   
-        write(nopen,*)'****          control points for sweep, lean,           ****'
-        write(nopen,*)'****          blade scaling factor.                     ****'
-        write(nopen,*)'****                                                    ****'
-        write(nopen,*)'****  Outputs: 3D blade sections (x,y,z),               ****'
-        write(nopen,*)'****           2D airfoils (mprime,theta).              ****'
-        write(nopen,*)'****                                                    ****'
-        write(nopen,*)'****  ---------------by Kiran Siddappaji         ----   ****'
-        write(nopen,*)'****  ---------------by Mark G. Turner           ----   ****'
-        write(nopen,*)'****  ------------------- turnermr@ucmail.uc.edu ----   ****'
-        write(nopen,*)'****  ---------------by Karthik Balasubramanian  ----   ****'
-        write(nopen,*)'****  ---------------by Syed Moez Hussain Mahmood----   ****'
-        write(nopen,*)'****  ---------------by Ahmed Nemnem             ----   ****'
-        write(nopen,*)'****  ---------------by Marshall C. Galbraith    ----   ****'
-        write(nopen,*)'************************************************************'
-        write(nopen,*)'************************************************************'
+        write(nopen,*) '************************************************************'
+        write(nopen,*) '************************************************************'
+        write(nopen,*) '****  T-BLADE3:Turbomachinery BLADE 3D Geometry Builder ****'
+        write(nopen,*) '****                                                    ****' 
+        write(nopen,*) string_1
+        write(nopen,*) '****                                                    ****'
+        write(nopen,*) '****  ...was also called as below till Aug 2016...      ****' 
+        write(nopen,*) '****  3DBGB: 3 Dimensional Blade Geometry Builder       ****'
+        write(nopen,*) '****                                                    ****'  
+        write(nopen,*) string_2
+        write(nopen,*) '****                                                    ****'
+        write(nopen,*) '****  This software comes with ABSOLUTELY NO WARRANTY   ****'
+        write(nopen,*) '****                                                    ****'
+        write(nopen,*) '****  This is a program which generates a 3D blade...   ****' 
+        write(nopen,*) '****  ...shape and outputs 3D blade section files.      ****'
+        write(nopen,*) '****                                                    ****'
+        write(nopen,*) '****  Inputs: LE and TE curve(x,r), inlet angle,        ****' 
+        write(nopen,*) '****          exit angle, chord, tm/c, incidence,       ****'
+        write(nopen,*) '****          deviation, secondary flow angles,         ****'
+        write(nopen,*) '****          streamline coordinates:(x,r)              ****'   
+        write(nopen,*) '****          control points for sweep, lean,           ****'
+        write(nopen,*) '****          blade scaling factor.                     ****'
+        write(nopen,*) '****                                                    ****'
+        write(nopen,*) '****  Outputs: 3D blade sections (x,y,z),               ****'
+        write(nopen,*) '****           2D airfoils (mprime,theta).              ****'
+        write(nopen,*) '****                                                    ****'
+        write(nopen,*) '****  ---------------by Kiran Siddappaji         ----   ****'
+        write(nopen,*) '****  ---------------by Mark G. Turner           ----   ****'
+        write(nopen,*) '****  ------------------- turnermr@ucmail.uc.edu ----   ****'
+        write(nopen,*) '****  ---------------by Mayank Sharma            ----   ****'
+        write(nopen,*) '****  ---------------by Karthik Balasubramanian  ----   ****'
+        write(nopen,*) '****  ---------------by Syed Moez Hussain Mahmood----   ****'
+        write(nopen,*) '****  ---------------by Ahmed Nemnem             ----   ****'
+        write(nopen,*) '****  ---------------by Marshall C. Galbraith    ----   ****'
+        write(nopen,*) '************************************************************'
+        write(nopen,*) '************************************************************'
         write(nopen,*)
         write(nopen,*) 'T-Blade3 Copyright (C) 2017 University of Cincinnati, developed by Kiran Siddappaji,' 
-        write(nopen,*) 'Dr. Mark G. Turner, Karthik  Balasubramanian, Syed Moez Hussain, Ahmed Farid Nemnem '
-        write(nopen,*) ' and Marshall C. Galbraith.'
+        write(nopen,*) 'Dr. Mark G. Turner, Mayank Sharma, Karthik Balasubramanian, Syed Moez Hussain'
+        write(nopen,*) 'Ahmed Farid Nemnem and Marshall C. Galbraith.'
         write(nopen,*)
         write(nopen,*) 'This program is free software; you can redistribute it and/or modify it under the '
         write(nopen,*) 'terms of the GNU General Public License as published by the Free Software Foundation; '
@@ -139,7 +198,7 @@ module auxiliary_routines
         write(nopen,*) 'See the GNU General Public License for more details.  For the complete terms of the '
         write(nopen,*) 'GNU General Public License, please see this URL: http://www.gnu.org/licenses/gpl-2.0.html'
         write(nopen,*)
-        write(nopen,*)'************************************************************'
+        write(nopen,*) '************************************************************'
         write(nopen,*)
 
         ! Close the log file if it is open
