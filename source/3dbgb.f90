@@ -11,7 +11,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     use globvar
     use file_operations
     use errors
-    use auxiliary_routines
+    use funcNsubs
     implicit none
     
     character(*)                :: fname_in

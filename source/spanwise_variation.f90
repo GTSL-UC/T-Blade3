@@ -211,7 +211,7 @@ end subroutine span_output_2
 subroutine span_variation()
     use file_operations
     use globvar
-    use auxiliary_routines
+    use funcNsubs
     implicit none
 
     ! Local variables

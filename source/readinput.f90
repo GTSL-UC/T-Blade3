@@ -9,7 +9,7 @@ subroutine readinput(fname)
     use globvar
     use file_operations
     use errors
-    use auxiliary_routines
+    use funcNsubs
     implicit none
 
     character(256),                 intent(in)          :: fname
@@ -1384,7 +1384,7 @@ end subroutine readinput
 subroutine readcontrolinput(row_type, path)
     use globvar
     use file_operations
-    use auxiliary_routines
+    use funcNsubs
     implicit none
 
     character(256),                 intent(in)      :: row_type
@@ -1686,7 +1686,7 @@ subroutine read_spanwise_input(row_type, path)
     use globvar
     use file_operations
     use errors
-    use auxiliary_routines
+    use funcNsubs
     implicit none
     
     character(256),                 intent(in)      :: row_type
@@ -2383,7 +2383,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
     use globvar
     use file_operations
     use errors
-    use auxiliary_routines
+    use funcNsubs
     implicit none
 
     character(256),                 intent(in)      :: row_type

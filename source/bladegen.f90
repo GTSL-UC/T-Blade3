@@ -10,7 +10,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
     use file_operations
     use errors
-    use auxiliary_routines
+    use funcNsubs
     implicit none
 
     integer,                                intent(in)          :: nspn, js, stack, stack_switch, chord_switch, clustering_switch, nsl, nbls, curv_camber,         &

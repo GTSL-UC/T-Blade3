@@ -1,4 +1,4 @@
-module auxiliary_routines
+module funcNsubs
     implicit none
 
 
@@ -4298,4 +4298,4 @@ module auxiliary_routines
 
 
 
-end module auxiliary_routines
+end module funcNsubs
