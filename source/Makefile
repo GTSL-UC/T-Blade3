@@ -25,7 +25,7 @@ ifeq ($(detected_OS),Darwin)
     TARGET_LIB = ../lib/libTBlade3.dylib
 endif
 
-OBJS =  globvar.o file_operations.o errors.o spline.o readinput.o funcNsubs.o 3dbgb.o 3dbgb_driver.o bladegen.o bladestack.o bspline3.o \
+OBJS =  globvar.o file_operations.o errors.o funcNsubs.o spline.o readinput.o 3dbgb.o 3dbgb_driver.o bladegen.o bladestack.o bspline3.o \
         cubicspline.o bsplinecam.o splinethick.o airfoiltypes.o spanwise_variation.o \
 
 # 'Make code' behavior

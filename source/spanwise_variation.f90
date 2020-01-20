@@ -210,6 +210,7 @@ end subroutine span_output_2
 subroutine span_variation()
     use file_operations
     use globvar
+    use auxiliary_routines
     implicit none
 
     ! Local variables

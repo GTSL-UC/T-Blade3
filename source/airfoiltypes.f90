@@ -1433,6 +1433,7 @@ end subroutine negclarky
 !
 !--------------------------------------------------------------------------------
 subroutine MakeFoil(naca, np, x, xbot, ybot, xtop, ytop)
+    use auxiliary_routines
     implicit none
 
     integer,                intent(in)      :: naca
@@ -1551,7 +1552,8 @@ end subroutine MakeFoil
 ! of fixed size 500
 !
 !--------------------------------------------------------------------------------
-subroutine datafile(airfoil, np, xb, yb)
+subroutine datafile(airfoil, np, xb, yb)    
+    use auxiliary_routines
     implicit none
 
     ! Constant parameters
@@ -1700,6 +1702,7 @@ end subroutine thicknaca
 !--------------------------------------------------------------------------------
 subroutine thickellip(i, uin, thk, lethk, tethk, mxthk, umxthin, rr1, rr2, thkmultip, u_le,  &
                       uin_le, i_le, oo, i_te)
+    use auxiliary_routines
     implicit none
 
     integer,                intent(in)      :: i
@@ -1972,6 +1975,7 @@ end subroutine cambmix
 !
 !--------------------------------------------------------------------------------
 subroutine circularTE(np, xbot, ybot, xtop, ytop)
+    use auxiliary_routines
     implicit none
 
     integer,                    intent(in)      :: np

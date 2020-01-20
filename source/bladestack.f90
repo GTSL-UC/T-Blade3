@@ -5,6 +5,7 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
                       thick_distr,x_in,y_in,xbi,ybi,zbi,from_gridgen)
 
     use file_operations
+    use auxiliary_routines
     implicit none
 
     ! Integer parameters

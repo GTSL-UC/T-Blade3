@@ -7,6 +7,7 @@
 @test
 subroutine test_TE_angle()
     use pfunit_mod
+    use auxiliary_routines
     implicit none
 
     real(kind = 8)  :: u_max(5), TE_slope(5)
@@ -53,6 +54,7 @@ end subroutine test_TE_angle
 @test
 subroutine test_modified_NACA_coefficients()
     use pfunit_mod
+    use auxiliary_routines
     implicit none
 
     real(kind = 8)  :: t_max, u_max, t_TE, TE_slope, LE_radius, a(4), d(4)
@@ -106,6 +108,7 @@ end subroutine test_modified_NACA_coefficients
 @test
 subroutine test_modified_NACA_coefficients_2()
     use pfunit_mod
+    use auxiliary_routines
     implicit none
 
     real(kind = 8)  :: t_max, u_max, t_TE, TE_slope, LE_radius, a(4), d(4)
@@ -171,6 +174,7 @@ end subroutine test_modified_NACA_coefficients_2
 @test
 subroutine test_modified_NACA_thickness()
     use pfunit_mod
+    use auxiliary_routines
     implicit none
 
     real(kind = 8)                  :: t_max, u_max, t_TE, TE_slope, LE_radius, a(4), d(4)
@@ -246,6 +250,7 @@ end subroutine test_modified_NACA_thickness
 @test
 subroutine test_modified_NACA_thickness_2()
     use pfunit_mod
+    use auxiliary_routines
     implicit none
 
     real(kind = 8)                  :: t_max, u_max, t_TE, TE_slope, LE_radius, a(4), d(4)

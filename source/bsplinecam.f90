@@ -157,6 +157,7 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
                    sang, chrd, init_angles, init_cams, u_end, splinedata)
     use file_operations
     use errors
+    use auxiliary_routines
     implicit none
 
     ! Constant parameters

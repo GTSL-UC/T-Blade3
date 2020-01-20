@@ -9,6 +9,7 @@ subroutine readinput(fname)
     use globvar
     use file_operations
     use errors
+    use auxiliary_routines
     implicit none
 
     character(256),                 intent(in)          :: fname
@@ -18,7 +19,7 @@ subroutine readinput(fname)
     character(:),   allocatable                         :: log_file, error_msg, warning_msg, warning_msg_1, dev_msg, temp_str
     integer                                             :: er, stat, n_temp1, n_temp2, &
                                                            nopen, nopen1, itm_c, iumax
-    real                                                :: inBetaInci, outBetaDevn, temp_offsets(2), temp_hub_offset, &
+    real                                                :: temp_offsets(2), temp_hub_offset, &
                                                            temp_tip_offset
     real,           allocatable                         :: temp_in(:)
     real,           parameter                           :: tol = 1E-8
@@ -1383,6 +1384,7 @@ end subroutine readinput
 subroutine readcontrolinput(row_type, path)
     use globvar
     use file_operations
+    use auxiliary_routines
     implicit none
 
     character(256),                 intent(in)      :: row_type
@@ -1683,6 +1685,7 @@ subroutine read_spanwise_input(row_type, path)
     use globvar
     use file_operations
     use errors
+    use auxiliary_routines
     implicit none
     
     character(256),                 intent(in)      :: row_type
@@ -2378,6 +2381,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
     use globvar
     use file_operations
     use errors
+    use auxiliary_routines
     implicit none
 
     character(256),                 intent(in)      :: row_type

@@ -10,21 +10,22 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
     use file_operations
     use errors
+    use auxiliary_routines
     implicit none
 
     integer,                                intent(in)          :: nspn, js, stack, stack_switch, chord_switch, clustering_switch, nsl, nbls, curv_camber,         &
                                                                    thick, LE, ncp_curv(nsl), ncp_thk(nsl), wing_flag, thick_distr, LEdegree, no_LE_segments,       &
-                                                                   amount_data, throat_index(nspn), n_normal_distance, i_slope, np_in
-    integer,                                intent(inout)       :: np
+                                                                   amount_data, i_slope, np_in
+    integer,                                intent(inout)       :: np, throat_index(nspn), n_normal_distance
     real,                                   intent(in)          :: thkc, mr1, chrdx, xcen, ycen, stk_u(1), stk_v(1), xb_stk, yb_stk, clustering_parameter,         &
                                                                    curv_cp(20,2*nsl), thk_cp(20,2*nsl), lethk_all(nsl), tethk_all(nsl), s_all(nsl), ee_all(nsl),   &
                                                                    umxthk_all(nsl), C_le_x_top_all(nsl), C_le_x_bot_all(nsl), C_le_y_top_all(nsl),                 &
                                                                    C_le_y_bot_all(nsl), LE_vertex_ang_all(nsl), LE_vertex_dis_all(nsl), sting_l_all(nsl),          &
-                                                                   sting_h_all(nsl), sec_radius(nsl,2), scf, intersec_coord(12,nsl), mble, mbte, msle, mste,       &
+                                                                   sting_h_all(nsl), sec_radius(nsl,2), scf, msle, mste,       &
                                                                    jcellblade_all(nspn), etawidth_all(nspn), BGgrid_all(nspn), thk_tm_c_spl(nsl), theta_offset
     real,                                   intent(inout)       :: sinl, sext, stagger, bladedata(amount_data,nsl), u_in(np_in), v_in(np_in), &
                                                                    uv(500,2), uv_top(500,2), uv_bot(500,2), m_prime(500), theta(500),         &
-                                                                   spanwise_thk(nspn)
+                                                                   spanwise_thk(nspn), mble, mbte, intersec_coord(12,nsl)
     character(*),                           intent(in)          :: fext, airfoil, casename, develop
     logical                                                     :: TE_derivative, from_gridgen
 
@@ -37,7 +38,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                                                                    u_le, uin_le, Zweifel(nsl), ucp_top(11),         &
                                                                    vcp_top(11), ucp_bot(11), vcp_bot(11), xcp_LE, ycp_LE,  xcp_TE, ycp_TE, cp_LE(4,2), cp_TE(4,2), &
                                                                    a_NACA(4), d_NACA(4), t_max, u_max, t_TE, dy_dx_TE, LE_round, min_throat_2D, u_translation,     &
-                                                                   camber_trans, scaled, u_rot, camber_rot, u_TE_quadratic_a, u_TE_quadratic_b, u_TE_quadratic_c, u_TE, u_center, &
+                                                                   camber_trans, u_rot, camber_rot, u_TE_quadratic_a, u_TE_quadratic_b, u_TE_quadratic_c, u_TE, u_center, &
                                                                    TE_radius
     real,                   allocatable                         :: init_angles(:), init_cambers(:), x_spl_end_curv(:), xcp_curv(:), ycp_curv(:), xcp_thk(:), &
                                                                    ycp_thk(:), ueq(:), xmean(:), ymean(:), xtop(:), ytop(:), xbot(:), ybot(:), u(:), xb(:),  &
@@ -219,12 +220,12 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     if (clustering_switch == 0) then
         call uniform_clustering(np,u)
     else if (clustering_switch == 1) then
-        call sine_clustering(np,u,clustering_parameter)
+        call sine_clustering(np,clustering_parameter,u)
         u = u/u(np)
     else if (clustering_switch == 2) then
-        call exponential_clustering(np,u,clustering_parameter)
+        call exponential_clustering(np,clustering_parameter,u)
     else if (clustering_switch == 3) then
-        call hyperbolic_tan_clustering(np,u,clustering_parameter)
+        call hyperbolic_tan_clustering(np,clustering_parameter,u)
     else if (clustering_switch == 4) then
         if (thick_distr == 5) then
             np_cluster  = int(clustering_parameter)

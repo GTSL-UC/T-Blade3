@@ -5,6 +5,7 @@
 @test
 subroutine test_gauss_jordan()
     use pfunit_mod
+    use auxiliary_routines
     implicit none
 
     integer                         :: n, nrhs, fail_flag
@@ -83,6 +84,7 @@ end subroutine test_gauss_jordan
 @test
 subroutine test_tridiag_solve()
     use pfunit_mod
+    use auxiliary_routines
     implicit none
 
     integer                         :: n

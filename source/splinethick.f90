@@ -6,6 +6,7 @@ subroutine splinethick(js, np, np_side, i_le, i_te, thickness, u, lethk, umxthk,
                        ucp_top, vcp_top, ucp_bot, vcp_bot, casename, develop, isdev, spline_data, splinedata)
     use errors 
     use file_operations
+    use auxiliary_routines
     implicit none
 
     ! Local constants

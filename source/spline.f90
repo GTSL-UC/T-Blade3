@@ -137,6 +137,7 @@ end function find_knt
 !
 !------------------------------------------------------------------------------------
 subroutine spline(n, y, dydt, t, dspec1, dspecn) 
+    use auxiliary_routines
     implicit none
 
     integer,        intent(in)              :: n
@@ -482,6 +483,7 @@ end subroutine spl_discjoint
 subroutine spl_intersect(ia,tt1, tt2, x1, dxdt1, y1, dydt1, t1, n1, x2, dxdt2, y2, dydt2, t2, n2) 
     use errors  
     use file_operations
+    use auxiliary_routines
     implicit none
 
     integer,        intent(in)              :: ia
@@ -679,6 +681,7 @@ end subroutine spl_intersect
 !
 !------------------------------------------------------------------------------------
 subroutine open_uniform_cubic_spline(n, from_gridgen, y, dy)
+    use auxiliary_routines
     implicit none
 
     integer,        intent(in)              :: n

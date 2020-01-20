@@ -436,29 +436,25 @@ module file_operations
     !                                 3dbgbinput file
     !
     !---------------------------------------------------------------------------
-    subroutine hubTipStreamline(nphub,xhub,rhub,nptip,xtip,rtip,nsl,scf,casename)
+    subroutine hubTipStreamline(nphub,nptip,xhub_local,rhub_local,xtip_local,rtip_local)
+        use globvar
 
         integer,                intent(in)              :: nphub, nptip
-        real,                   intent(in)              :: xhub(nphub,1), rhub(nphub,1), &
-                                                           xtip(nptip,1), rtip(nptip,1)
-        integer,                intent(in)              :: nsl
-        real,                   intent(in)              :: scf
-        character(32),          intent(in)              :: casename
+        real,                   intent(in)              :: xhub_local(nphub,1), rhub_local(nphub,1), &
+                                                           xtip_local(nptip,1), rtip_local(nptip,1)
+        !integer,                intent(in)              :: nsl
+        !real,                   intent(in)              :: scf
+        !character(32),          intent(in)              :: casename
 
         ! Local variables
-        integer                                         :: i, nopen
+        integer                                         :: nopen
         character(80)                                   :: fname1, fname2
         character(:),   allocatable                     :: log_file
-        logical                                         :: file_open, isquiet_local
+        logical                                         :: file_open
 
-
-        !
-        ! Determine if command line argument 'isquiet' is being used
-        !
-        call get_quiet_status(isquiet_local)
 
         call log_file_exists(log_file, nopen, file_open)
-        if (.not. isquiet_local) print *, 'Writing dimensional hub and casing streamlines'
+        if (.not. isquiet) print *, 'Writing dimensional hub and casing streamlines'
         write(nopen,*) 'Writing dimensional hub and casing streamlines'
         call close_log_file(nopen, file_open)
 
@@ -466,7 +462,7 @@ module file_operations
         fname1  = 'hub.'//trim(casename)//'.sldcrv'
         open(1, file = fname1, status = 'unknown')
         do i = 1, nphub
-            write(1,*) scf*xhub(i,1), 0.0, scf*rhub(i,1)
+            write(1,*) scf*xhub_local(i,1), 0.0, scf*rhub_local(i,1)
         end do
         close(1)
 
@@ -474,7 +470,7 @@ module file_operations
         fname2  = 'casing.'//trim(casename)//'.sldcrv'
         open(2, file = fname2, status = 'unknown')
         do i = 1, nptip
-            write(2,*) scf*xtip(i,1), 0.0, scf*rtip(i,1)
+            write(2,*) scf*xtip_local(i,1), 0.0, scf*rtip_local(i,1)
         end do
         close(2)
 
@@ -499,28 +495,26 @@ module file_operations
     !                   ia          - spanwise section index
     !
     !---------------------------------------------------------------------------
-    subroutine streamlines(np,xml,rml,scf,casename,ia)
+    subroutine streamlines(np_local,xml,rml,ia_local)
+        use globvar
 
-        integer,                    intent(in)          :: np
+        integer,                    intent(in)          :: np_local
         real,                       intent(in)          :: xml(np), rml(np)
-        real,                       intent(in)          :: scf
-        character(32),              intent(in)          :: casename
-        integer,                    intent(in)          :: ia
+        !real,                       intent(in)          :: scf
+        !character(32),              intent(in)          :: casename
+        integer,                    intent(in)          :: ia_local
 
         ! Local variables
-        integer                                         :: i, nopen
+        integer                                         :: nopen
         character(32)                                   :: temp
         character(80)                                   :: fname
         character(:),   allocatable                     :: log_file
-        logical                                         :: file_open, isquiet_local
+        logical                                         :: file_open
 
-
-        ! Get isquiet status
-        call get_quiet_status(isquiet_local)
 
         write(temp,*) ia
         call log_file_exists(log_file, nopen, file_open)
-        if (.not. isquiet_local) print *, 'Writing dimensional streamline '//trim(adjustl(temp))
+        if (.not. isquiet) print *, 'Writing dimensional streamline '//trim(adjustl(temp))
         write(nopen,*) 'Writing dimensional streamline '//trim(adjustl(temp))
         call close_log_file(nopen, file_open)
 
@@ -1409,24 +1403,22 @@ module file_operations
     !                                 3dbgbinput file
     !
     !---------------------------------------------------------------------------
-    subroutine write_3D_section_files(scf,fext,ibrowc,nbls,casename)
+    subroutine write_3D_section_files()!(scf,fext,ibrowc,nbls,casename)
+        use globvar
 
-        real,                   intent(in)              :: scf
-        character(32),          intent(in)              :: fext
-        character(10),          intent(in)              :: ibrowc
-        integer,                intent(in)              :: nbls
-        character(32),          intent(in)              :: casename
+        !real,                   intent(in)              :: scf
+        !character(32),          intent(in)              :: fext
+        !character(10),          intent(in)              :: ibrowc
+        !integer,                intent(in)              :: nbls
+        !character(32),          intent(in)              :: casename
 
         ! Local variables
         real                                            :: xs,ys,zs,xsav,ysav,zsav
         character(80)                                   :: fname,fname1,temp
-        integer                                         :: i,j,np,ns,nopen
+        integer                                         :: np_local,ns,nopen
         character(:),   allocatable                     :: log_file
-        logical                                         :: file_open, isquiet
+        logical                                         :: file_open
 
-
-        ! Get the value of isquiet
-        call get_quiet_status(isquiet)
 
         call log_file_exists(log_file, nopen, file_open)
         if (.not. isquiet) then
@@ -1452,10 +1444,10 @@ module file_operations
 
         ! Open  combined section data file
         open(2, file = fname, status = 'unknown')
-        read(2,*) np,  ns
+        read(2,*) np_local,  ns
         if (.not. isquiet) then
             write(*,*) ''
-            write(*,*) 'Number of points: ', np
+            write(*,*) 'Number of points: ', np_local
             write(*,*) ''
             write(*,*) 'Number of sections: ', ns
             write(*,*) ''
@@ -1464,7 +1456,7 @@ module file_operations
             write(*,*)
         end if
         write(nopen,*) ''
-        write(nopen,*) 'Number of points: ', np
+        write(nopen,*) 'Number of points: ', np_local
         write(nopen,*) ''
         write(nopen,*) 'Number of sections: ', ns
         write(nopen,*) ''
@@ -1479,7 +1471,7 @@ module file_operations
             open(1, file = fname1, form = 'formatted')
             
             ! Write section data
-            do i = 1,np
+            do i = 1,np_local
                 read(2,*) xs, ys, zs
                 if (i == 1) then
                     xsav    = xs
@@ -1487,7 +1479,7 @@ module file_operations
                     zsav    = zs
                 end if
                 write(1,12) xs, ys, zs
-            end do  ! i = 1,np
+            end do  ! i = 1,np_local
 
             close(1)
 

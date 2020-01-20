@@ -11,6 +11,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     use globvar
     use file_operations
     use errors
+    use auxiliary_routines
     implicit none
     
     character(*)                :: fname_in
@@ -21,8 +22,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
     ! Local variables
     integer                     :: nopen, nopen_error, np_in
-    real                        :: spl_eval, dspl_eval, xdiff, inBetaInci, outBetaDevn, &
-                                   temp_1, temp_2
+    real                        :: spl_eval, dspl_eval, xdiff, temp_1, temp_2
     real,           allocatable :: um_spl(:), u_in(:), v_in(:), spanwise_thk(:), mhub_inf(:), &
                                    thhub_inf(:), xhub_inf(:), yhub_inf(:), zhub_inf(:), mtip_inf(:), &
                                    thtip_inf(:), xtip_inf(:), ytip_inf(:), ztip_inf(:)
@@ -504,7 +504,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         xt(i, 1)                            = xm(i, nsl)
         rt(i, 1)                            = rm(i, nsl)
     end do
-    call hubTipStreamline(nsp(1), xm(1, 1), rm(1, 1), nsp(nsl), xt, rt, nsl, scf, casename)
+    call hubTipStreamline(nsp(1), nsp(nsl), xm(1, 1), rm(1, 1), xt, rt)
 
 
     
@@ -609,7 +609,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         if (is_xyzstreamlines) then
 
             if ((ia >= 1) .and. (ia <= nsl)) then
-                call streamlines(nsp(ia), xm(:, ia), rm(:, ia), scf, casename, ia) 
+                call streamlines(nsp(ia), xm(:, ia), rm(:, ia), ia) 
             end if
 
         end if  ! is_xyzstreamlines
@@ -1725,7 +1725,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     ! Write dimensional 3D blade coordinates to separate files
     ! write_3D_section_files in file_operations.f90
     !
-    call write_3D_section_files(scf, fext, ibrowc, nbls, casename)
+    call write_3D_section_files()!(scf, fext, ibrowc, nbls, casename)
 
 
 

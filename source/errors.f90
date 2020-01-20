@@ -17,6 +17,7 @@ module errors
     !
     !--------------------------------------------------------------------------------------------------
     subroutine fatal_error(error_msg, warning_msg, dev_msg)
+        use globvar
        
         character(:),   allocatable,                intent(in)  :: error_msg
         character(:),   allocatable,    optional,   intent(in)  :: warning_msg
@@ -25,15 +26,9 @@ module errors
         ! Local variables
         character(:),   allocatable                             :: error_file
         integer                                                 :: nopen
-        logical                                                 :: file_open, isdev_local, isquiet
+        logical                                                 :: file_open
 
-
-        ! Get the value of isdev and isquiet
-        call get_dev_status(isdev_local)
-        call get_quiet_status(isquiet)
-
-
-
+        
         !
         ! Print the messages to the screen and stop execution
         !
@@ -43,7 +38,7 @@ module errors
         end if
         if (present(warning_msg) .and. .not. isquiet) &
             print *, warning_msg
-        if (isdev_local .and. present(dev_msg) .and. .not. isquiet) &
+        if (isdev .and. present(dev_msg) .and. .not. isquiet) &
             print *, 'For developers: '//dev_msg
         if (.not. isquiet) print *, ''
        
@@ -58,7 +53,7 @@ module errors
         write(nopen,*) 'FATAL ERROR: '//error_msg
         if (present(warning_msg)) &
             write(nopen,*) warning_msg
-        if (isdev_local .and. present(dev_msg)) &
+        if (isdev .and. present(dev_msg)) &
             write(nopen,*) 'For developers: '//dev_msg
         write(nopen,*) ''
         call close_error_file(nopen, file_open)
@@ -81,6 +76,7 @@ module errors
     !
     !--------------------------------------------------------------------------------------------------
     subroutine error(error_msg, dev_msg)
+        use globvar
         use file_operations
 
         character(:),   allocatable,                intent(in)  :: error_msg
@@ -89,13 +85,7 @@ module errors
         ! Local variables
         character(:),   allocatable                             :: error_file
         integer                                                 :: nopen
-        logical                                                 :: file_open, isdev_local, isquiet
-
-
-        ! Get the value of isdev and isquiet
-        call get_dev_status(isdev_local)
-        call get_quiet_status(isquiet)
-
+        logical                                                 :: file_open
 
 
         !
@@ -105,7 +95,7 @@ module errors
             print *, ''
             print *, 'ERROR: '//error_msg
         end if
-        if (isdev_local .and. present(dev_msg) .and. .not. isquiet) &
+        if (isdev .and. present(dev_msg) .and. .not. isquiet) &
             print *, 'For developers: '//dev_msg
         if (.not. isquiet) print *, ''
 
@@ -118,7 +108,7 @@ module errors
         call error_file_exists(error_file, nopen, file_open)
         write(nopen,*) ''
         write(nopen,*) 'ERROR: '//error_msg
-        if (isdev_local .and. present(dev_msg)) &
+        if (isdev .and. present(dev_msg)) &
             write(nopen,*) 'For developers: '//dev_msg
         write(nopen,*) ''
         call close_error_file(nopen, file_open)
@@ -139,6 +129,7 @@ module errors
     !                   warning_msg_1   - optional warning message 
     !--------------------------------------------------------------------------------------------------
     subroutine warning(warning_msg, warning_msg_1, dev_msg)
+        use globvar
         use file_operations
 
         character(:),   allocatable,                intent(in)  :: warning_msg
@@ -148,15 +139,9 @@ module errors
         ! Local variables
         character(:),   allocatable                             :: error_file
         integer                                                 :: nopen
-        logical                                                 :: file_open, isdev_local, isquiet
+        logical                                                 :: file_open
 
 
-        ! Get the value of isdev and isquiet
-        call get_dev_status(isdev_local)
-        call get_quiet_status(isquiet)
-
-
-        
         !
         ! Print the warning message to the screen
         !
@@ -166,7 +151,7 @@ module errors
         end if
         if (present(warning_msg_1) .and. .not. isquiet) &
             print *, 'WARNING: '//warning_msg_1
-        if (isdev_local .and. present(dev_msg) .and. .not. isquiet) &
+        if (isdev .and. present(dev_msg) .and. .not. isquiet) &
             print *, 'For developers: '//dev_msg
         if (.not. isquiet) print *, ''
 
@@ -181,7 +166,7 @@ module errors
         write(nopen,*) 'WARNING: '//warning_msg
         if (present(warning_msg_1)) &
             write(nopen,*) 'WARNING: '//warning_msg_1
-        if (isdev_local .and. present(dev_msg)) &
+        if (isdev .and. present(dev_msg)) &
             write(nopen,*) 'For developers: '//dev_msg
         write(nopen,*) ''
         call close_error_file(nopen, file_open)
