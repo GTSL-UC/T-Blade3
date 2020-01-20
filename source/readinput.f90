@@ -16,7 +16,8 @@ subroutine readinput(fname)
     
     ! Local variables
     character(256)                                      :: temp, temp1, temp2, beta_switch_2
-    character(:),   allocatable                         :: log_file, error_msg, warning_msg, warning_msg_1, dev_msg, temp_str
+    character(:),   allocatable                         :: log_file, error_msg, warning_msg, warning_msg_1, dev_msg, temp_str, &
+                                                           master_ID, develop_ID
     integer                                             :: er, stat, n_temp1, n_temp2, &
                                                            nopen, nopen1, itm_c, iumax
     real                                                :: temp_offsets(2), temp_hub_offset, &
@@ -186,7 +187,7 @@ subroutine readinput(fname)
     units = temp(24:25)
 
     ! Invalid unit for the blade scaling factor
-    if (units .ne. 'mm' .and. units .ne. 'cm' .and. units .ne. 'm)' .and. units .ne. 'm ') then
+    if (units /= 'mm' .and. units /= 'cm' .and. units /= 'm)' .and. units /= 'm ') then
         error_msg   = 'Incorrect units for blade scaling factor'
         warning_msg = 'Only mm, cm or m can be specified'
         dev_msg     = 'Check subroutine readinput in readinput.f90'
@@ -202,7 +203,7 @@ subroutine readinput(fname)
     write(nopen1,*) scf
     temp = adjustl(trim(temp))
     read(temp, *, iostat = er) theta_offset
-    if (er .ne. 0) then
+    if (er /= 0) then
         theta_offset = 0.
         rewind(1)
         do i = 1, 8
@@ -241,8 +242,8 @@ subroutine readinput(fname)
     !
     ! All possible valid inputs are stored as logical variables in an array
     !
-    beta_value  = [index(beta_switch_2, '0') .ne. 0, index(beta_switch_2, '1') .ne. 0, index(beta_switch_2, '2') .ne. 0, &
-                   index(beta_switch_2, '3') .ne. 0, index(beta_switch_2, '4') .ne. 0]
+    beta_value  = [index(beta_switch_2, '0') /= 0, index(beta_switch_2, '1') /= 0, index(beta_switch_2, '2') /= 0, &
+                   index(beta_switch_2, '3') /= 0, index(beta_switch_2, '4') /= 0]
 
     !
     ! Check for all possible valid inputs of the input angle switch
@@ -287,9 +288,9 @@ subroutine readinput(fname)
     !
     ! All possible valid secondary inputs are stored as logical variables in an array
     !
-    ang_spl_value   = [len(beta_switch_2(:n_temp1)) .eq. len(trim(beta_switch_2)), &
-                       index(beta_switch_2, 'inletspline') .ne. 0, index(beta_switch_2, 'outletspline') .ne. 0, &
-                       index(beta_switch_2, 'inoutspline') .ne. 0, index(beta_switch_2, 'inci_dev_spline') .ne. 0]
+    ang_spl_value   = [len(beta_switch_2(:n_temp1)) == len(trim(beta_switch_2)), &
+                       index(beta_switch_2, 'inletspline') /= 0, index(beta_switch_2, 'outletspline') /= 0, &
+                       index(beta_switch_2, 'inoutspline') /= 0, index(beta_switch_2, 'inci_dev_spline') /= 0]
 
 
     call log_file_exists(log_file, nopen, file_open)
@@ -404,7 +405,7 @@ subroutine readinput(fname)
     ! Read curvature control switch
     !
     read(1,*)curv, spanwise_spline  
-    if (trim(spanwise_spline) .eq. 'spanwise_spline') then
+    if (trim(spanwise_spline) == 'spanwise_spline') then
         backspace(1)
         read(1,'(A)') temp
         write(nopen1, '(A)') trim(temp)
@@ -419,7 +420,7 @@ subroutine readinput(fname)
 
     ! Invalid input for the camber definition switch
     ! Warn user and stop execution 
-    if (curv .ne. 0 .and. curv .ne. 1) then
+    if (curv /= 0 .and. curv /= 1) then
 
         error_msg   = 'Invalid argument for camber definition switch'
         warning_msg = 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
@@ -430,7 +431,7 @@ subroutine readinput(fname)
 
     ! Invalid input for curvature control switch
     ! Warn user and stop execution
-    if (trim(spanwise_spline) .ne. 'spanwise_spline' .and. trim(spanwise_spline) .ne. 'Airfoil') then
+    if (trim(spanwise_spline) /= 'spanwise_spline' .and. trim(spanwise_spline) /= 'Airfoil') then
 
         error_msg   = 'Invalid argument for curvature control switch'
         warning_msg = 'Valid argument for using spancontrolinputs is "spanwise_spline" (refer to T-Blade3 documentation)'
@@ -444,7 +445,7 @@ subroutine readinput(fname)
     !
     ! Read next line in the input file if spanwise_spline has been specified
     !
-    if (trim(spanwise_spline).eq.'spanwise_spline')then
+    if (trim(spanwise_spline)=='spanwise_spline')then
         read(1,'(A)')temp
         write(nopen1,'(A)') trim(temp)
     endif
@@ -462,14 +463,14 @@ subroutine readinput(fname)
     
     ! If there is an invalid input for the thickness distribution switch
     ! Warn user and stop execution
-    if (thick_distr .eq. 3 .or. thick_distr .eq. 4) then
+    if (thick_distr == 3 .or. thick_distr == 4) then
 
         error_msg   = 'Invalid argument for thickness distribution switch'
         warning_msg = 'Direct and Exact thickness distributions are no longer available with T-Blade3'
         dev_msg     = 'Check subroutine readinput in readinput.f90'
         call fatal_error(error_msg, warning_msg, dev_msg)
 
-    else if (thick_distr .ne. 0 .and. thick_distr .ne. 1 .and. thick_distr .ne. 2 .and. thick_distr .ne. 5) then
+    else if (thick_distr /= 0 .and. thick_distr /= 1 .and. thick_distr /= 2 .and. thick_distr /= 5) then
 
         error_msg   = 'Invalid argument for thickness distribution switch'
         warning_msg = 'Valid arguments are 0, 1, 2, 3, 4 or 5 (refer to T-Blade3 documentation)'
@@ -488,7 +489,7 @@ subroutine readinput(fname)
     
     ! If there is an invalid input for the thickness multiplier switch
     ! Warn user and stop execution
-    if (thick .ne. 0 .and. thick .ne. 1) then
+    if (thick /= 0 .and. thick /= 1) then
 
         error_msg   = 'Invalid argument for thickness multiplier switch'
         warning_msg = 'Valid arguments are 0 or 1 (refer to T-Blade3 documentation)'
@@ -506,15 +507,14 @@ subroutine readinput(fname)
     read(1, *)LE         
     write(nopen1,'(A)') trim(temp)
     write(nopen1,*) LE
-    
-    ! If there is an invalid input for the LE spline control switch
-    ! Warn user and stop execution
-    if (LE .ne. 0 .and. LE .ne. 1) then
-
-        error_msg   = 'Invalid argument for LE spline control switch'
-        warning_msg = 'Valaid arguments are 0 or 1 (refer to T-Blade3 documentation)'
+   
+    ! Raise fatal error for activating LE spline control switch
+    if (LE /= 0) then
+        
+        call current_version(master_ID, develop_ID)
+        error_msg   = 'LE spline control is not available in T-Blade3 version '//develop_ID
         dev_msg     = 'Check subroutine readinput in readinput.f90'
-        call fatal_error(error_msg, warning_msg, dev_msg)
+        call fatal_error(error_msg, dev_msg = dev_msg)
 
     end if
 
@@ -530,7 +530,7 @@ subroutine readinput(fname)
     
     ! If there is an invalid input for the non-dimensional actual chord switch
     ! Warn user and stop execution
-    if (chord_switch .ne. 0 .and. chord_switch .ne. 1 .and. chord_switch .ne. 2) then
+    if (chord_switch /= 0 .and. chord_switch /= 1 .and. chord_switch /= 2) then
 
         error_msg   = 'Invalid argument for non-dimensional actual chord switch'
         warning_msg = 'Valid arguments are 0, 1 or 2 (refer to T-Blade3 documentation)'
@@ -551,9 +551,9 @@ subroutine readinput(fname)
     
     ! If there is an invalid input for the true lean and sweep switch
     ! Warn user and stop execution
-    if (leansweep_switch .eq. 0) then
+    if (leansweep_switch == 0) then
         trueleansweep = ''
-    else if (leansweep_switch .eq. 1) then
+    else if (leansweep_switch == 1) then
         trueleansweep = '1'
     else
         error_msg   = 'Invalid argument for leansweep_switch'
@@ -576,8 +576,8 @@ subroutine readinput(fname)
     
     ! If there is an invalid input for the clustering distribution switch
     ! Warn user and stop execution
-    if (clustering_switch .ne. 0 .and. clustering_switch .ne. 1 .and. clustering_switch .ne. 2 .and. &
-        clustering_switch .ne. 3 .and. clustering_switch .ne. 4) then
+    if (clustering_switch /= 0 .and. clustering_switch /= 1 .and. clustering_switch /= 2 .and. &
+        clustering_switch /= 3 .and. clustering_switch /= 4) then
 
         error_msg   = 'Invalid argument for clustering_switch'
         warning_msg = 'Valid arguments are 0, 1, 2 or 3 (refer to T-Blade3 documentation)'
@@ -719,7 +719,7 @@ subroutine readinput(fname)
 
     ! If spline LE is being used, don't store LE and TE thickness
     ! TODO: grid_gen_present will be removed in future commits
-    if (LE.ne.0) then
+    if (LE/=0) then
 
         do js = 1, nspn
             if (grid_gen_present) then
@@ -811,7 +811,7 @@ subroutine readinput(fname)
     read(temp(12:12), *)cpdeltam
 
     ! True sweep
-    if(trim(trueleansweep).ne.'')then
+    if(trim(trueleansweep)/='')then
         
         chrdsweep = 1
         read(1,'(A)')temp
@@ -879,7 +879,7 @@ subroutine readinput(fname)
     read(temp(12:12), *)cpdeltheta
 
     ! True lean
-    if(trim(trueleansweep).ne.'')then
+    if(trim(trueleansweep)/='')then
         
         chrdlean = 1
         read(1,'(A)')temp
@@ -1322,7 +1322,7 @@ subroutine readinput(fname)
     write(nopen1,'(A)') trim(temp)
     read(1,'(A)')temp
     write(nopen1,'(A)') trim(temp)
-    do while(temp.ne.'x_s')
+    do while(temp/='x_s')
         read(1, *)temp
         backspace(1)
         read(1,'(A)') temp1
@@ -1345,7 +1345,7 @@ subroutine readinput(fname)
             read(1,'(A)') temp
             write(nopen1,'(A)') trim(temp)
             
-            if (trarray(2).ne.0)then
+            if (trarray(2)/=0)then
                 nsp(ia) = nsp(ia) + 1
                 xm(nsp(ia), ia) = trarray(1)
                 rm(nsp(ia), ia) = trarray(2)
@@ -1594,66 +1594,67 @@ subroutine readcontrolinput(row_type, path)
     allocate(sting_l_all(nsl))
     
     ! Allocate LE control parameters arrays for spline LE
-    if(LE /= 0) then
+    ! TODO: To be removed
+    !if(LE /= 0) then
 
-        if (allocated(lethk_all)) deallocate(lethk_all)
-        allocate(lethk_all(nsl))
-        if (allocated(tethk_all)) deallocate(tethk_all)
-        allocate(tethk_all(nsl))
-        if (allocated(s_all)) deallocate(s_all)
-        allocate(s_all(nsl))
-        if (allocated(ee_all)) deallocate(ee_all)
-        allocate(ee_all(nsl))
-        if (allocated(C_le_x_top_all)) deallocate(C_le_x_top_all)
-        allocate(C_le_x_top_all(nsl))
-        if (allocated(C_le_x_bot_all)) deallocate(C_le_x_bot_all)
-        allocate(C_le_x_bot_all(nsl))
-        if (allocated(C_le_y_top_all)) deallocate(C_le_y_top_all)
-        allocate(C_le_y_top_all(nsl))
-        if (allocated(C_le_y_bot_all)) deallocate(C_le_y_bot_all)
-        allocate(C_le_y_bot_all(nsl))
-        if (allocated(LE_vertex_ang_all)) deallocate(LE_vertex_ang_all)
-        allocate(LE_vertex_ang_all(nsl))
-        if (allocated(LE_vertex_dis_all)) deallocate(LE_vertex_dis_all)
-        allocate(LE_vertex_dis_all(nsl))
-        if (allocated(sting_h_all)) deallocate(sting_h_all)
-        allocate(sting_h_all(nsl,2))
-       
-        ! Read descriptor lines 
-        read (11,'(A)') temp
-        write(nopen1,'(A)') trim(temp)
-        read (11,'(A)') temp
-        write(nopen1,'(A)') trim(temp)
-        read (11,'(A)') temp
-        write(nopen1,'(A)') trim(temp)
+    !    if (allocated(lethk_all)) deallocate(lethk_all)
+    !    allocate(lethk_all(nsl))
+    !    if (allocated(tethk_all)) deallocate(tethk_all)
+    !    allocate(tethk_all(nsl))
+    !    if (allocated(s_all)) deallocate(s_all)
+    !    allocate(s_all(nsl))
+    !    if (allocated(ee_all)) deallocate(ee_all)
+    !    allocate(ee_all(nsl))
+    !    if (allocated(C_le_x_top_all)) deallocate(C_le_x_top_all)
+    !    allocate(C_le_x_top_all(nsl))
+    !    if (allocated(C_le_x_bot_all)) deallocate(C_le_x_bot_all)
+    !    allocate(C_le_x_bot_all(nsl))
+    !    if (allocated(C_le_y_top_all)) deallocate(C_le_y_top_all)
+    !    allocate(C_le_y_top_all(nsl))
+    !    if (allocated(C_le_y_bot_all)) deallocate(C_le_y_bot_all)
+    !    allocate(C_le_y_bot_all(nsl))
+    !    if (allocated(LE_vertex_ang_all)) deallocate(LE_vertex_ang_all)
+    !    allocate(LE_vertex_ang_all(nsl))
+    !    if (allocated(LE_vertex_dis_all)) deallocate(LE_vertex_dis_all)
+    !    allocate(LE_vertex_dis_all(nsl))
+    !    if (allocated(sting_h_all)) deallocate(sting_h_all)
+    !    allocate(sting_h_all(nsl,2))
+    !   
+    !    ! Read descriptor lines 
+    !    read (11,'(A)') temp
+    !    write(nopen1,'(A)') trim(temp)
+    !    read (11,'(A)') temp
+    !    write(nopen1,'(A)') trim(temp)
+    !    read (11,'(A)') temp
+    !    write(nopen1,'(A)') trim(temp)
 
-        ! Read LE spline degree and no. of LE spline segments
-        read (11, *) LEdegree, no_LE_segments
-        backspace(11)
-        read (11,'(A)') temp
-        write(nopen1,'(A)') trim(temp)
+    !    ! Read LE spline degree and no. of LE spline segments
+    !    read (11, *) LEdegree, no_LE_segments
+    !    backspace(11)
+    !    read (11,'(A)') temp
+    !    write(nopen1,'(A)') trim(temp)
 
-        call log_file_exists(log_file, nopen, file_open)
-        if (.not. isquiet_local) print*, 'LEdegree = ', LEdegree, 'no_LE_segments = ', no_LE_segments
-        write(nopen,*) 'LEdegree = ', LEdegree, 'no_LE_segments = ', no_LE_segments
-        call close_log_file(nopen, file_open)
-        
-        ! Read LE control parameters
-        do i = 1, nsl
-            read (11,'(A)') temp
-            write(nopen1,'(A)') trim(temp)
-            read (11,'(A)') temp
-            write(nopen1,'(A)') trim(temp)
-            read (11, *) lethk_all(i), tethk_all(i), s_all(i), ee_all(i), C_le_x_top_all(i), C_le_x_bot_all(i), &
-            C_le_y_top_all(i), C_le_y_bot_all(i), LE_vertex_ang_all(i), LE_vertex_dis_all(i), &
-            sting_l_all(i), sting_h_all(i, 1), sting_h_all(i, 2)
-            backspace(11)
-            read (11,'(A)') temp
-            write(nopen1,'(A)') trim(temp)
-        
-        end do
-    
-    end if  ! LE
+    !    call log_file_exists(log_file, nopen, file_open)
+    !    if (.not. isquiet_local) print*, 'LEdegree = ', LEdegree, 'no_LE_segments = ', no_LE_segments
+    !    write(nopen,*) 'LEdegree = ', LEdegree, 'no_LE_segments = ', no_LE_segments
+    !    call close_log_file(nopen, file_open)
+    !    
+    !    ! Read LE control parameters
+    !    do i = 1, nsl
+    !        read (11,'(A)') temp
+    !        write(nopen1,'(A)') trim(temp)
+    !        read (11,'(A)') temp
+    !        write(nopen1,'(A)') trim(temp)
+    !        read (11, *) lethk_all(i), tethk_all(i), s_all(i), ee_all(i), C_le_x_top_all(i), C_le_x_bot_all(i), &
+    !        C_le_y_top_all(i), C_le_y_bot_all(i), LE_vertex_ang_all(i), LE_vertex_dis_all(i), &
+    !        sting_l_all(i), sting_h_all(i, 1), sting_h_all(i, 2)
+    !        backspace(11)
+    !        read (11,'(A)') temp
+    !        write(nopen1,'(A)') trim(temp)
+    !    
+    !    end do
+    !
+    !end if  ! LE
    
     
     
@@ -1746,7 +1747,7 @@ subroutine read_spanwise_input(row_type, path)
     backspace(10)
     read(10,'(A)') temps
     write(nopen1,'(A)') trim(temps)
-    if(control_inp_flag .eq. 1 .and. ncp_span_curv .ne. nsl) then
+    if(control_inp_flag == 1 .and. ncp_span_curv /= nsl) then
         error_msg   = ' In auxiliary file inputs, number of spanwise curvature specifications'//&
                       ' must equal number of streamlines if spanwise spline is not used.'
         dev_msg     = 'Check subroutine read_spanwise_input in readinput.f90'
@@ -1766,7 +1767,7 @@ subroutine read_spanwise_input(row_type, path)
     if (allocated(ncp_curv)) deallocate(ncp_curv)
     allocate(ncp_curv(nsl))
     if (allocated(curv_cp )) deallocate(curv_cp )
-    if(control_inp_flag .eq. 1) then
+    if(control_inp_flag == 1) then
         allocate(curv_cp(20, 2*nsl))
     endif
     do i = 1, nsl
@@ -1822,7 +1823,7 @@ subroutine read_spanwise_input(row_type, path)
         ! Spanwise splines are constructed in spanwise_variation.f90 and
         ! spanwise_output.f90
         !
-        if(control_inp_flag .eq. 1) then
+        if(control_inp_flag == 1) then
             
             ! Allocate 1D control points arrays
             if (allocated(xcp)) deallocate(xcp)
@@ -1857,7 +1858,7 @@ subroutine read_spanwise_input(row_type, path)
     !
     ! ESP curvature override subroutines if spanwise splining is required
     !
-    if (control_inp_flag .eq. 2) then
+    if (control_inp_flag == 2) then
         
         if (allocated(temp)) deallocate(temp)
         allocate(temp(ncp_span_curv))
@@ -2175,7 +2176,7 @@ subroutine read_spanwise_input(row_type, path)
 
         !end if
         
-        if(control_inp_flag .eq. 1 .and. ncp_span_thk .ne. nsl) then
+        if(control_inp_flag == 1 .and. ncp_span_thk /= nsl) then
             error_msg   = 'In auxiliary file inputs, number of spanwise thickness specifications'//&
                           ' must equal number of streamlines if spanwise spline is not used.'
             dev_msg     = 'Check subroutine read_spanwise_input in readinput.f90'
@@ -2254,7 +2255,7 @@ subroutine read_spanwise_input(row_type, path)
             write(nopen1,'(A)') temps
             
             ! If spanwise splining is not required, store in 1D arrays
-            if(control_inp_flag .eq. 1) then
+            if(control_inp_flag == 1) then
 
                 xcp(1) = 2*xcp(3)-xcp(5)
                 ycp(1) = 2*ycp(3)-ycp(5)
@@ -2279,59 +2280,60 @@ subroutine read_spanwise_input(row_type, path)
         
         !
         ! Read LE control parameters if spline LE is being used
+        ! TODO: To be removed
         !
-        if (LE /= 0) then
+        !if (LE /= 0) then
 
-            ! Read descriptor lines
-            read(10,'(A)') temps
-            write(nopen1,'(A)') temps
-            read(10,'(A)') temps
-            write(nopen1,'(A)') temps
-            read(10,'(A)') temps
-            write(nopen1,'(A)') temps
+        !    ! Read descriptor lines
+        !    read(10,'(A)') temps
+        !    write(nopen1,'(A)') temps
+        !    read(10,'(A)') temps
+        !    write(nopen1,'(A)') temps
+        !    read(10,'(A)') temps
+        !    write(nopen1,'(A)') temps
 
-            ! Read LE spline degree and no. of LE spline segments
-            read(10, *)LE_deg, LE_seg
-            backspace(10)
-            read(10,'(A)') temps
+        !    ! Read LE spline degree and no. of LE spline segments
+        !    read(10, *)LE_deg, LE_seg
+        !    backspace(10)
+        !    read(10,'(A)') temps
 
-            ! Read descriptor lines
-            write(nopen1,'(A)') temps
-            read(10,'(A)') temps
-            write(nopen1,'(A)') temps
+        !    ! Read descriptor lines
+        !    write(nopen1,'(A)') temps
+        !    read(10,'(A)') temps
+        !    write(nopen1,'(A)') temps
 
-            ! Read number of spanwise spline LE control points
-            read(10, *)ncp_span_LE
-            backspace(10)
-            read(10,'(A)') temps
-            write(nopen1,'(A)') temps
+        !    ! Read number of spanwise spline LE control points
+        !    read(10, *)ncp_span_LE
+        !    backspace(10)
+        !    read(10,'(A)') temps
+        !    write(nopen1,'(A)') temps
 
-            ! Number of spline LE parameters = 13
-            ncp_LE = 13 
-            
-            ! Giving the same variable name as in controlinputs
-            LEdegree       = LE_deg
-            no_LE_segments = LE_seg
+        !    ! Number of spline LE parameters = 13
+        !    ncp_LE = 13 
+        !    
+        !    ! Giving the same variable name as in controlinputs
+        !    LEdegree       = LE_deg
+        !    no_LE_segments = LE_seg
 
-            ! Account for phantom points
-            ncp_span_LE1 = ncp_span_LE + 2
+        !    ! Account for phantom points
+        !    ncp_span_LE1 = ncp_span_LE + 2
 
-            ! Allocate array to store spline LE control points read from auxiliary input file
-            if (allocated(cp_LE)) deallocate(cp_LE)
-            allocate(cp_LE(ncp_span_LE, ncp_LE+1))
+        !    ! Allocate array to store spline LE control points read from auxiliary input file
+        !    if (allocated(cp_LE)) deallocate(cp_LE)
+        !    allocate(cp_LE(ncp_span_LE, ncp_LE+1))
 
-            ! Read spline LE control points table
-            read(10,'(A)') temps
-            write(nopen1,'(A)') temps
-            do i = 1, ncp_span_LE
+        !    ! Read spline LE control points table
+        !    read(10,'(A)') temps
+        !    write(nopen1,'(A)') temps
+        !    do i = 1, ncp_span_LE
 
-                read(10, *)cp_LE(i, 1:ncp_LE+1)
-                backspace(10)
-                read(10,'(A)') temps
-                write(nopen1,'(A)') temps
+        !        read(10, *)cp_LE(i, 1:ncp_LE+1)
+        !        backspace(10)
+        !        read(10,'(A)') temps
+        !        write(nopen1,'(A)') temps
 
-            end do
-        end if  ! if (LE /= 0)
+        !    end do
+        !end if  ! if (LE /= 0)
     
     end if  ! if (thick /= 0 .or. LE /= 0)
 
@@ -2785,7 +2787,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
     ! Read the thickness part of the auxiliary input file
     ! Only applies for the modified NACA thickness distribution
     !
-    if (thick_distr .ne. 5) then
+    if (thick_distr /= 5) then
         error_msg   = "Incorrect auxiliary file format"
         warning_msg = "Refer to T-Blade3 documentation"
         dev_msg     = 'Check read_spanwise_NACA_input in readinput.f90'

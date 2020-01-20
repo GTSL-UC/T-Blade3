@@ -129,60 +129,61 @@ subroutine span_output_2()
 
 
     ! Populate spline LE control points array
-    if(LE .ne. 0) then
-        
-        ! Allocate necessary control points arrays
-        if (allocated(sting_l_all)) deallocate(sting_l_all)
-        allocate(sting_l_all(na))
-        if (allocated(lethk_all)) deallocate(lethk_all)
-        allocate(lethk_all(na))
-        if (allocated(tethk_all)) deallocate(tethk_all)
-        allocate(tethk_all(na))
-        if (allocated(s_all)) deallocate(s_all)
-        allocate(s_all(na))
-        if (allocated(ee_all)) deallocate(ee_all)
-        allocate(ee_all(na))
-        if (allocated(C_le_x_top_all)) deallocate(C_le_x_top_all)
-        allocate(C_le_x_top_all(na))
-        if (allocated(C_le_x_bot_all)) deallocate(C_le_x_bot_all)
-        allocate(C_le_x_bot_all(na))
-        if (allocated(C_le_y_top_all)) deallocate(C_le_y_top_all)
-        allocate(C_le_y_top_all(na))
-        if (allocated(C_le_y_bot_all)) deallocate(C_le_y_bot_all)
-        allocate(C_le_y_bot_all(na))
-        if (allocated(LE_vertex_ang_all)) deallocate(LE_vertex_ang_all)
-        allocate(LE_vertex_ang_all(na))
-        if (allocated(LE_vertex_dis_all)) deallocate(LE_vertex_dis_all)
-        allocate(LE_vertex_dis_all(na))
-        if (allocated(sting_h_all)) deallocate(sting_h_all)
-        allocate(sting_h_all(na,2))
-            
-        ! Store spanwise spline LE control points from spanwise_variation()
-        k = 1
+    ! TODO: To be removed
+    !if(LE .ne. 0) then
+    !    
+    !    ! Allocate necessary control points arrays
+    !    if (allocated(sting_l_all)) deallocate(sting_l_all)
+    !    allocate(sting_l_all(na))
+    !    if (allocated(lethk_all)) deallocate(lethk_all)
+    !    allocate(lethk_all(na))
+    !    if (allocated(tethk_all)) deallocate(tethk_all)
+    !    allocate(tethk_all(na))
+    !    if (allocated(s_all)) deallocate(s_all)
+    !    allocate(s_all(na))
+    !    if (allocated(ee_all)) deallocate(ee_all)
+    !    allocate(ee_all(na))
+    !    if (allocated(C_le_x_top_all)) deallocate(C_le_x_top_all)
+    !    allocate(C_le_x_top_all(na))
+    !    if (allocated(C_le_x_bot_all)) deallocate(C_le_x_bot_all)
+    !    allocate(C_le_x_bot_all(na))
+    !    if (allocated(C_le_y_top_all)) deallocate(C_le_y_top_all)
+    !    allocate(C_le_y_top_all(na))
+    !    if (allocated(C_le_y_bot_all)) deallocate(C_le_y_bot_all)
+    !    allocate(C_le_y_bot_all(na))
+    !    if (allocated(LE_vertex_ang_all)) deallocate(LE_vertex_ang_all)
+    !    allocate(LE_vertex_ang_all(na))
+    !    if (allocated(LE_vertex_dis_all)) deallocate(LE_vertex_dis_all)
+    !    allocate(LE_vertex_dis_all(na))
+    !    if (allocated(sting_h_all)) deallocate(sting_h_all)
+    !    allocate(sting_h_all(na,2))
+    !        
+    !    ! Store spanwise spline LE control points from spanwise_variation()
+    !    k = 1
 
-        do i = 1,na
-            if (k <= na) then
-                
-                lethk_all(k)         = bspline_LE(i,2)
-                tethk_all(k)         = bspline_LE(i,3)
-                s_all(k)             = bspline_LE(i,4)
-                ee_all(k)            = bspline_LE(i,5)
-                C_le_x_top_all(k)    = bspline_LE(i,6)
-                C_le_x_bot_all(k)    = bspline_LE(i,7)
-                C_le_y_top_all(k)    = bspline_LE(i,8)
-                C_le_y_bot_all(k)    = bspline_LE(i,9)
-                LE_vertex_ang_all(k) = bspline_LE(i,10)
-                LE_vertex_dis_all(k) = bspline_LE(i,11)
-                sting_l_all(k)       = bspline_LE(i,12)
-                sting_h_all(k,1)     = bspline_LE(i,13)
-                sting_h_all(k,2)     = bspline_LE(i,14)
-            
-                k = k + 1
+    !    do i = 1,na
+    !        if (k <= na) then
+    !            
+    !            lethk_all(k)         = bspline_LE(i,2)
+    !            tethk_all(k)         = bspline_LE(i,3)
+    !            s_all(k)             = bspline_LE(i,4)
+    !            ee_all(k)            = bspline_LE(i,5)
+    !            C_le_x_top_all(k)    = bspline_LE(i,6)
+    !            C_le_x_bot_all(k)    = bspline_LE(i,7)
+    !            C_le_y_top_all(k)    = bspline_LE(i,8)
+    !            C_le_y_bot_all(k)    = bspline_LE(i,9)
+    !            LE_vertex_ang_all(k) = bspline_LE(i,10)
+    !            LE_vertex_dis_all(k) = bspline_LE(i,11)
+    !            sting_l_all(k)       = bspline_LE(i,12)
+    !            sting_h_all(k,1)     = bspline_LE(i,13)
+    !            sting_h_all(k,2)     = bspline_LE(i,14)
+    !        
+    !            k = k + 1
 
-            end if  ! if (k <= na)
-        end do  ! if i = 1,na
-        !end if
-    endif
+    !        end if  ! if (k <= na)
+    !    end do  ! if i = 1,na
+    !    !end if
+    !endif
     
     
     ! Write curvature control points to file
@@ -247,8 +248,8 @@ subroutine span_variation()
     !
     ! Allocate spanwise LE spline arrays
     !
-    if (allocated(bspline_LE)) deallocate(bspline_LE)
-    allocate(bspline_LE(nsl, ncp_LE + 1))
+    !if (allocated(bspline_LE)) deallocate(bspline_LE)
+    !allocate(bspline_LE(nsl, ncp_LE + 1))
 
 
     
@@ -396,44 +397,45 @@ subroutine span_variation()
 
     !
     ! Create spanwise cubic splines for LE 
+    ! TODO: To be removed
     !
-    if(LE .ne. 0) then
+    !if(LE .ne. 0) then
 
-        ! Spanwise distribution of "Span"
-        do j = 1,na
-            bspline_LE(j,1)=span(j)
-        end do
+    !    ! Spanwise distribution of "Span"
+    !    do j = 1,na
+    !        bspline_LE(j,1)=span(j)
+    !    end do
 
-        !
-        ! Spanwise distributions of: 
-        ! "lethk", "tethk", "s", "ee", "C_le_x_top", "C_le_x_bot", "C_le_y_top", "C_le_y_bot", 
-        ! "LE_vertex_ang", "LE_vertex_dis", "sting_l", "sting_h_top", "sting_h_bot"
-        !
-        do i = 2,ncp_LE
+    !    !
+    !    ! Spanwise distributions of: 
+    !    ! "lethk", "tethk", "s", "ee", "C_le_x_top", "C_le_x_bot", "C_le_y_top", "C_le_y_bot", 
+    !    ! "LE_vertex_ang", "LE_vertex_dis", "sting_l", "sting_h_top", "sting_h_bot"
+    !    !
+    !    do i = 2,ncp_LE
 
-            call cubicspline(ncp_span_LE,cp_LE(:,i),cp_LE(:,1),xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
-            call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,intersec,na,xbs,ybs)
+    !        call cubicspline(ncp_span_LE,cp_LE(:,i),cp_LE(:,1),xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
+    !        call cubicbspline_intersec(y_spl_end,xc,yc,ncp1,span,intersec,na,xbs,ybs)
 
-            do j = 1,na
-                bspline_LE(j,i)=intersec(j)
-            end do
+    !        do j = 1,na
+    !            bspline_LE(j,i)=intersec(j)
+    !        end do
 
-        end do  ! i = 2,ncp_LE
+    !    end do  ! i = 2,ncp_LE
 
-        ! Write LE spanwise spline data to a file, if command line option "dev" is used
-        if (isdev) then
+    !    ! Write LE spanwise spline data to a file, if command line option "dev" is used
+    !    if (isdev) then
 
-            if (.not. isquiet_local) print *, 'Writing spanwise LE variation data to file'
-            call log_file_exists(log_file, nopen, file_open)
-            write(nopen,*) 'Writing spanwise LE variation data to file'
-            call close_log_file(nopen, file_open)
+    !        if (.not. isquiet_local) print *, 'Writing spanwise LE variation data to file'
+    !        call log_file_exists(log_file, nopen, file_open)
+    !        write(nopen,*) 'Writing spanwise LE variation data to file'
+    !        call close_log_file(nopen, file_open)
 
-            ! write_span_LE in file_operations
-            call write_span_LE(nsl,ncp_LE,casename,bspline_LE)
+    !        ! write_span_LE in file_operations
+    !        call write_span_LE(nsl,ncp_LE,casename,bspline_LE)
 
-        end if  ! isdev
+    !    end if  ! isdev
 
-    endif   ! LE
+    !endif   ! LE
 
 
 

@@ -34,8 +34,8 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
                                                            xneglean(:,:), yneglean(:,:), zneglean(:,:)
     real                                                :: chord_actual(100), mps(nxx,nax), demp, spl_eval, xxa, yya, pi, dtor, dmp(nspan), mp_stack(nspan),      &
                                                            xm_slope, rm_slope, mps_inter, inter_xb(6,nspn), inter_rb(6,nspn), inter_yb(6,nspn), inter_zb(6,nspn), &
-                                                           lref, delmp(nspan), span(nspan), stingl(nspan), mpxc(nspan), delta_theta(nspan), y_spl_end(nx),        &
-                                                           xbs(nx), ybs(nx), xc(nx), yc(nx)
+                                                           lref, delmp(nspan), span(nspan), mpxc(nspan), delta_theta(nspan), y_spl_end(nx),        &
+                                                           xbs(nx), ybs(nx), xc(nx), yc(nx)!stingl(nspan)
     character(:),   allocatable                         :: log_file
     logical                                             :: file_open, isquiet
     common / BladeSectionPoints /xxa(nxx,nax),yya(nxx,nax)
@@ -82,11 +82,11 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     ! Subtracted from the m' coordinates for this option.
     ! TODO: Will be removed
     !
-    if (LE == 2) then
-        do ia = 1, nspn
-            stingl(ia) = mbte(ia) - mble(ia) - axchrd(ia)
-        end do
-    end if
+    !if (LE == 2) then
+    !    do ia = 1, nspn
+    !        stingl(ia) = mbte(ia) - mble(ia) - axchrd(ia)
+    !    end do
+    !end if
 
 
 
@@ -380,11 +380,11 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
 
         do i = 1,iap     
             
-            if (LE == 2) then
-                xb(i,ia)     = xb(i,ia) - stingl(ia)
-            else
-                xb(i,ia)     = xb(i,ia)
-            end if
+            !if (LE == 2) then
+            !    xb(i,ia)     = xb(i,ia) - stingl(ia)
+            !else
+            xb(i,ia)     = xb(i,ia)
+            !end if
             yb(i,ia)         = rb(i,ia)*sin(ya(i,ia) + delta_theta(ia)) 
             zb(i,ia)         = rb(i,ia)*cos(ya(i,ia) + delta_theta(ia)) 
             
@@ -403,11 +403,11 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
         ! Get (x,y,z) for the intersection point
         do k = 1, 6      
             
-            if (LE == 2) then
-                inter_xb(k,ia) = inter_xb(k,ia) - stingl(ia)
-            else
-                inter_xb(k,ia) = inter_xb(k,ia)
-            end if
+            !if (LE == 2) then
+            !    inter_xb(k,ia) = inter_xb(k,ia) - stingl(ia)
+            !else
+            inter_xb(k,ia) = inter_xb(k,ia)
+            !end if
             inter_yb(k,ia)   = inter_rb(k,ia)*sin(intersec_coord(2*k,ia) + delta_theta(ia))
             inter_zb(k,ia)   = inter_rb(k,ia)*cos(intersec_coord(2*k,ia) + delta_theta(ia))
 
