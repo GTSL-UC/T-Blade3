@@ -28,7 +28,7 @@ endif
 DEFINE = 
 FCOMP  = gfortran
 FOPTS  = -fdefault-real-8 -g -fbounds-check -fbacktrace -O2 -Wline-truncation -Wall -Wno-unused-dummy-argument -cpp
-F90OPTS = -ffree-form -ffree-line-length-none -fPIC
+F90OPTS = -ffree-form -ffree-line-length-none -fno-automatic -fPIC
 ifdef MEMCHECK
 FOPTS += -fsanitize=address -fno-omit-frame-pointer
 endif
