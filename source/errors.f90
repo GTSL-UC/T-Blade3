@@ -75,12 +75,13 @@ module errors
     ! Input paramaters: error_msg   - mandatory message showing where the error has occurred
     !
     !--------------------------------------------------------------------------------------------------
-    subroutine error(error_msg, dev_msg)
+    subroutine error(error_msg, dev_msg, write_to_file)
         use globvar
         use file_operations
 
         character(:),   allocatable,                intent(in)  :: error_msg
         character(:),   allocatable,    optional,   intent(in)  :: dev_msg
+        integer,                        optional,   intent(in)  :: write_to_file
 
         ! Local variables
         character(:),   allocatable                             :: error_file
@@ -105,13 +106,17 @@ module errors
         ! Write the error messages to the error log file
         ! error_file_exists and close_error_file in file_operations.f90
         !
-        call error_file_exists(error_file, nopen, file_open)
-        write(nopen,*) ''
-        write(nopen,*) 'ERROR: '//error_msg
-        if (isdev .and. present(dev_msg)) &
-            write(nopen,*) 'For developers: '//dev_msg
-        write(nopen,*) ''
-        call close_error_file(nopen, file_open)
+        if (present(write_to_file) .and. write_to_file == 0) then
+
+            call error_file_exists(error_file, nopen, file_open)
+            write(nopen,*) ''
+            write(nopen,*) 'ERROR: '//error_msg
+            if (isdev .and. present(dev_msg)) &
+                write(nopen,*) 'For developers: '//dev_msg
+            write(nopen,*) ''
+            call close_error_file(nopen, file_open)
+
+        end if
 
 
     end subroutine error

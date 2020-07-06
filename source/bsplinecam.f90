@@ -295,7 +295,7 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
         error_msg                       = 'All possible scaling factors for curvature control points &
                                           &are complex for section '//trim(adjustl(error_arg))
         dev_msg                         = 'Check subroutine camline in bsplinecam.f90'
-        call error(error_msg, dev_msg)
+        call error(error_msg, dev_msg, write_to_file = 0)
         call exit
 
     end if

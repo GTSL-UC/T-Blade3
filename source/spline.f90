@@ -394,7 +394,7 @@ subroutine spl_inv(tt,yy,y,dydt,t,n)
 
     error_msg   = 'spl_inv - spline parameter not determined. Maximum iteration reached.'
     dev_msg     = 'Check subroutine spl_inv in spline.f90'
-    call error(error_msg, dev_msg)
+    call error(error_msg, dev_msg, write_to_file = 0)
 
 
 end subroutine spl_inv

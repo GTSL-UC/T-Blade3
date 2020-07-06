@@ -1892,7 +1892,7 @@ module funcNsubs
             if (abs(pvt) < eps) then
                 error_msg   = 'gauss_jordan - zero pivot term'
                 dev_msg     = 'Check subroutine gauss_jordan in funcNsubs.f90'
-                call error(error_msg, dev_msg)
+                call error(error_msg, dev_msg, write_to_file = 0)
                 fail_flag           = 1
                 return
             end if

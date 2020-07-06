@@ -123,7 +123,8 @@ UNION
 #CYLINDER -100.0 0.00 0.00 1000.0 0.00 0.00 12.7
 #SUBTRACT
 
-#dump /ESPfull_6_4_3_hot.step
-#dump ../ESPfull_6_4_3_hot.stl
+#dump ESPfull_7-28-8_hot.step
+#dump ESPfull_7-28-8_hot.stl
+#dump ESPfull_7-28-8_hot.iges
 
 end

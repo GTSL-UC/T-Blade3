@@ -1,0 +1,263 @@
+!
+! Regression test for udpTblade.c which creates a solid model of the blade
+! created by T-Blade3
+!
+! TODO: ESP version check?
+!
+!-------------------------------------------------------------------------------
+@test
+subroutine regtest_udpTblade ()
+    use pfunit_mod
+    implicit none
+
+    character(255)              :: shell, serveCSM, cwd, test_file
+    character(1000)             :: read_line
+    character(:),   allocatable :: ESPROOT, error_msg, srcESP, dir_path, filename, &
+                                   command_1
+
+    integer                     :: funit = 10, ios, n_temp, status, i, j, k, &
+                                   nspan, npoints, iread, nline_ref, nline_test, &
+                                   ibody_ref, ibody_test
+    real,           allocatable :: ref_sections(:,:), test_sections(:,:,:)
+    real                        :: tol1 = 10E-8, mass_props_ref(11), mass_props_test(11)
+
+
+    !
+    ! Locate serveCSM executable and store location in a temporary file
+    ! Assumes a ESP/T-Blade3 build rather than a basic ESP build
+    !
+    call execute_command_line ('which serveCSM > temp.dat')
+
+    ! Read temporary file
+    open (funit, file = 'temp.dat')
+    read (funit, fmt = '(a)', iostat = ios) serveCSM
+    close (funit)
+
+    ! Delete temporary file
+    call execute_command_line ('rm temp.dat')
+
+
+
+    !
+    ! Next steps depending on the value of the I/O status specifier
+    ! Indicates whether serveCSM was located or not
+    !
+    if (ios < 0) then
+
+        ! If serveCSM was not found, raise an error and exit
+        print *, 'ERROR: serveCSM not found on the system'
+        call exit
+
+    else if (ios == 0) then
+
+        ! If serveCSM was found, extract the location of the ESP
+        ! root directory
+        ! Assumes that the serveCSM executable pointed to on the
+        ! system exists in $ESPROOT/bin/
+        n_temp                          = index (trim(serveCSM), 'bin/serveCSM')
+        ESPROOT                         = serveCSM (1:n_temp - 1)
+
+    end if
+
+
+
+    !
+    ! Working directory relative path and input file name
+    !
+    dir_path                            = 'inputs/OpenCSM/new_inputs/Case7-28-8/Rotor/'
+    filename                            = dir_path//'tblade_rotor.csm'
+
+
+
+    !
+    ! Determine which shell we are working with and source
+    ! ESP accordingly
+    !
+    call get_environment_variable ('SHELL', shell)
+
+    ! If running bash/zsh
+    if ( index (trim(shell), 'bash') /= 0 .or. &
+         index (trim(shell), 'zsh')  /= 0 ) then
+
+        srcESP                          = 'source '//ESPROOT//'ESPenv.sh'
+
+    ! If running csh/tcsh
+    else if ( index (trim(shell), 'csh')  /= 0 .or. &
+              index (trim(shell), 'tcsh') /= 0 ) then
+
+        srcESP                          = 'source '//ESPROOT//'ESPenv.csh'
+
+    ! If running fish
+    else if ( index (trim(shell), 'fish') /= 0 ) then
+
+        srcESP                          = 'exec bash -c "source '//ESPROOT//'ESPenv.sh; exec fish"'
+
+    ! Any other shell is not supported
+    else
+
+        print *, 'ERROR: Unable to identify shell'
+        call exit
+
+    end if
+
+    ! Source either ESPenv.sh/ESPenv.csh before running ESP
+    ! TODO: If using fish, as of now, the source command needs to
+    !       be run before runnning test suite
+    if ( index (trim(shell), 'fish') == 0 ) &
+        call execute_command_line (srcESP)
+
+
+
+    !
+    ! Run ESP using example Case7-28-8/Rotor
+    !
+    command_1                           = 'serveCSM -batch '//filename//' > run.dat'
+    call execute_command_line (command_1)
+
+
+
+    !
+    ! Read reference (x,y,z) sections
+    !
+    open (funit, file = dir_path//'regtest_files/blade3d.Case7-28-8.dat')
+
+    ! Read number of points along a blade section and number of
+    ! spanwise sections
+    read (funit, *) npoints, nspan
+
+    ! Allocate memory for 2D array to store reference (x,y,z) sections
+    if (allocated (ref_sections)) deallocate (ref_sections)
+    allocate (ref_sections (3, nspan * npoints))
+
+    ! Read all spanwise (x,y,z) section coordinates
+    do j = 1, nspan * npoints
+
+        read (funit, *) ref_sections(1, j), ref_sections(2, j), ref_sections(3, j)
+
+    end do
+
+    close(funit)
+
+
+
+    !
+    ! Test all spanwise (x,y,z) sections
+    !
+    ! Allocate 3D array to store test (x,y,z) sections
+    if (allocated (test_sections)) deallocate (test_sections)
+    allocate (test_sections (3, nspan, npoints))
+
+    ! Loop through all spanwise locations
+    do i = 1, nspan
+
+        ! Spanwise section file name
+        write (test_file, "('Tblade3_temp/sec',i0,'.Case7-28-8.dat')") i
+
+        ! Read all (x,y,z) section files created by test
+        open (funit, file = trim(test_file))
+
+        do j = 1, npoints
+
+            ! Read (x,y,z) section coordinates
+            read (funit, *) test_sections(1,i,j), test_sections(2,i,j), test_sections(3,i,j)
+
+            ! Index to loop through reference section array
+            k                           = (npoints * (i - 1)) + j
+
+            ! Test sections
+            @assertEqual (ref_sections (1,k), test_sections(1,i,j), tol1)
+            @assertEqual (ref_sections (2,k), test_sections(2,i,j), tol1)
+            @assertEqual (ref_sections (3,k), test_sections(3,i,j), tol1)
+
+        end do  ! j = 1, npoints
+
+        close (funit)
+
+    end do  ! i = 1, nspan
+
+
+
+    !
+    ! Read reference log file and determine location of the
+    ! maass properties in the file
+    !
+    open (funit, file = dir_path//'regtest_files/ESP_run.log')
+
+    ! Line number counter
+    iread                               = 0
+
+    ! Read file line by line
+    do
+
+        read (funit, '(a)', iostat = ios) read_line
+        if (ios /= 0) exit  ! EOF
+
+        ! Advance line number counter
+        iread = iread + 1
+
+        ! Mass properties of location in file
+        if (index (trim(read_line), 'Mass properties of Bodys on stack') /= 0) &
+            nline_ref = iread + 2
+
+        ! Read mass properties from reference log file
+        if (iread == nline_ref) then
+            backspace (funit)
+            read (funit, *) ibody_ref, mass_props_ref
+        end if
+
+    end do
+
+    close (funit)
+
+
+
+    !
+    ! Read log file created by the test and determine location of the
+    ! maass properties in the file
+    !
+    open (funit, file = 'run.dat')
+
+    ! Line number counter
+    iread                               = 0
+
+    ! Read file line by line
+    do
+
+        read (funit, '(a)', iostat = ios) read_line
+        if (ios /= 0) exit  ! EOF
+
+        ! Advance line number counter
+        iread = iread + 1
+
+        ! Mass properties of location in file
+        if (index (trim(read_line), 'Mass properties of Bodys on stack') /= 0) &
+            nline_test                  = iread + 2
+
+        ! Read mass properties from reference log file
+        if (iread == nline_test) then
+            backspace (funit)
+            read (funit, *) ibody_test, mass_props_test
+        end if
+
+    end do
+
+    close (funit)
+
+
+
+    ! Test mass properties
+    do i = 1, 11
+        @assertEqual (mass_props_ref(i), mass_props_test(i), tol1)
+    end do
+
+
+
+    ! Deletion commands
+    call execute_command_line ('rm run.dat')
+    call execute_command_line ('rm *.jrnl')
+    call execute_command_line ('rm *.stl')
+    call execute_command_line ('rm -rf Tblade3_temp')
+
+
+end subroutine regtest_udpTblade
+!-------------------------------------------------------------------------------
