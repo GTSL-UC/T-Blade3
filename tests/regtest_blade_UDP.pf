@@ -250,8 +250,6 @@ subroutine regtest_udpTblade ()
         @assertEqual (mass_props_ref(i), mass_props_test(i), tol1)
     end do
 
-
-
     ! Deletion commands
     call execute_command_line ('rm run.dat')
     call execute_command_line ('rm *.jrnl')
