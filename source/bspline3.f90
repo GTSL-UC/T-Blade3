@@ -568,13 +568,13 @@ real function bspline_t_newton(cp,u)
     integer                                 :: k
     real                                    :: B1, B2, B3, B4, d1_B1, d1_B2, &
                                                d1_B3,d1_B4, tt_0, xs_0,d1_xs_0
-    character(:),   allocatable             :: error_msg, error_arg_1, error_arg_2, &
-                                               dev_msg
+    character(256)                          :: error_arg_1, error_arg_2
+    character(:),   allocatable             :: error_msg, dev_msg
 
 
     ! Initialize error string arguments
-    error_arg_1             = ''
-    error_arg_2             = ''
+    !error_arg_1             = ''
+    !error_arg_2             = ''
 
 
 
@@ -628,8 +628,8 @@ real function bspline_t_newton(cp,u)
     !
     write(error_arg_1, '(f20.16)') abs(u - xs_0)
     write(error_arg_2, '(f20.16)') bspline_t_newton
-    error_msg               = "Cubic abs(u - xs_0) not converged - "//error_arg_1&
-                             &//' '//error_arg_2
+    error_msg               = "Cubic abs(u - xs_0) not converged - "//trim(error_arg_1) &
+                             &//' '//trim(error_arg_2)
     dev_msg                 = 'Check function bspline_t_newton in bspline3.f90'
 
     ! fatal_error in errors.f90
@@ -851,8 +851,8 @@ real function bspline4_t_newton(cp,u)
     integer                                 :: k
     real                                    :: bspline4, d_bspline4, tt_0, &
                                                xs_0, d1_xs_0
-    character(:),   allocatable             :: error_msg, error_arg_1, error_arg_2, &
-                                               dev_msg
+    character(256)                          :: error_arg_1, error_arg_2
+    character(:),   allocatable             :: error_msg, dev_msg
 
 
     ! Initializing error message string arguments
@@ -900,7 +900,7 @@ real function bspline4_t_newton(cp,u)
     write(error_arg_1, '(f20.16)') abs(u - xs_0)
     write(error_arg_2, '(f20.16)') bspline4_t_newton
     error_msg               = "Quartic abs(u-xs_0) not converged - "//&
-                              &error_arg_1//" "//error_arg_2
+                              & trim(error_arg_1)//" "//trim(error_arg_2)
     dev_msg                 = 'Check function bspline4_t_newton in bspline3.f90'
 
     ! fatal_error in errors.f90

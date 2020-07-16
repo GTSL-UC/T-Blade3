@@ -2336,7 +2336,8 @@ module funcNsubs
                                                            x1, x2, x3, b, c, d, e, temp(4)
         complex(kind = dp)                              :: w
         integer                                         :: i, j
-        character(:),   allocatable                     :: counter, warning_msg, dev_msg
+        character(10)                                   :: counter
+        character(:),   allocatable                     :: warning_msg, dev_msg
 
 
         ! Initialize counter
@@ -2365,8 +2366,8 @@ module funcNsubs
         call cubic_roots(temp, root)
         do i = 1, 3
             if (root(i) /= root(i)) then
-                write(counter, '(i2)') i
-                warning_msg = 'cubic_roots subroutine failed: '//counter//'th root undefined'
+                write(counter, '(i0)') i
+                warning_msg = 'cubic_roots subroutine failed: '//trim(counter)//'th root undefined'
                 dev_msg     = 'Check subroutine quartic_roots in funcNsubs.f90'
                 call warning(warning_msg, dev_msg = dev_msg)
             end if
