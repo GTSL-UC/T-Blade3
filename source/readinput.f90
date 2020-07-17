@@ -2391,7 +2391,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
 
     ! Local variables
     character(:),   allocatable                     :: file_name, log_file, error_msg, warning_msg, dev_msg
-    character(256)                                  :: temps
+    character(256)                                  :: temps, warning_arg_1, warning_arg_2, warning_arg_3
     integer                                         :: nopen_aux = 10, nopen, nopen1, kk, n_temp
     real                                            :: span_dum
     real,           allocatable                     :: temp(:)
@@ -2486,6 +2486,32 @@ subroutine read_spanwise_NACA_input(row_type,path)
         backspace(nopen_aux)
         read(nopen_aux,'(A)') temps
         write(nopen1,'(A)') temps
+
+        ! Check for monotonicity of curvature control points
+        do j = 2, ncp_chord - 2
+
+            if (cp_chord_curv(i, j + 1) < cp_chord_curv(i, j)) then
+
+                ! Error message
+                error_msg       = 'Non-monotonic distribution of control points for &
+                                  &mean-line second derivative in spancontrolinputs file'
+
+                ! Warning message showing where non-monotonicity was encountered
+                write (warning_arg_1, '(i0)') j + 1
+                write (warning_arg_2, '(i0)') j
+                write (warning_arg_3, '(i0)') i
+                warning_msg     = 'u'//trim(warning_arg_1)//' < u'//trim(warning_arg_2)//&
+                                 &' for spanwise location '//trim(warning_arg_3)
+
+                ! Developer message
+                dev_msg         = 'Check subroutine read_spanwise_NACA_input in readinput.f90'
+
+                ! Raise fatal error if control points are non-monotonic
+                call fatal_error (error_msg, warning_msg, dev_msg)
+
+            end if
+
+        end do
 
         ! If spanwise splining is not required, store in arrays
         if (control_inp_flag == 1) then
