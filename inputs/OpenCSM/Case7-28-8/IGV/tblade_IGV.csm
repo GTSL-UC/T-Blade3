@@ -1,0 +1,99 @@
+# tbladewedge
+# written by Simon Livingston
+# modified by Mayank Sharma
+
+#This file will generate a hub and blade, and fuse them and fillet them. 
+#Change the filename and auxname to the blade input file you want to generate. 
+#Right now there has to be two input files. One with the blade offset at the hub, and one without.
+#The one with the blade offset is used for generating the blade, and the other is used for 
+#generating the hub wedge. The fillet might not work, so remove it if it isn't working. 
+
+#DIMENSION span_chord        1 4 1
+#DIMENSION span_thk_c        1 4 1
+#DIMENSION span_in_beta      1 4 1
+#DIMENSION span_out_beta     1 4 1
+#DIMENSION u2	             1 4 1
+#DIMENSION u3	             1 4 1
+#DIMENSION u4	             1 4 1
+#DIMENSION u5	             1 4 1
+#DIMENSION u6	             1 4 1
+#DIMENSION cur1              1 4 1
+#DIMENSION cur2	             1 4 1
+#DIMENSION cur3	             1 4 1
+#DIMENSION cur4	             1 4 1
+#DIMENSION cur5	             1 4 1
+#DIMENSION cur6	             1 4 1
+#DIMENSION cur7              1 4 1
+#DIMENSION span_curv_ctrl    1 4 1
+#DIMENSION span_del_m        1 4 1
+#DIMENSION span_del_theta    1 4 1
+#DIMENSION span_thk_ctrl     1 5 1
+#DIMENSION offsets           1 2 1
+#DIMENSION naca_le_radius    1 5 1
+#DIMENSION naca_u_max        1 5 1
+#DIMENSION naca_t_max        1 5 1
+#DIMENSION naca_t_te         1 5 1
+
+#DESPMTR   span_chord        "1.000; 1.000; 1.000; 1.000"
+#DESPMTR   span_thk_c        "0.105; 0.105; 0.085; 0.105;"
+#DESPMTR   span_in_beta      "0.000; 0.000; 0.000; 0.000;"
+#DESPMTR   span_out_beta     "0.000; 0.000; 0.000; 0.000;"
+#DESPMTR   u2	             "0.150; 0.150; 0.150; 0.150;"
+#DESPMTR   u3	             "0.250; 0.250; 0.250; 0.250;"
+#DESPMTR   u4	             "0.712; 0.597; 0.395; 0.624;"
+#DESPMTR   u5	             "0.750; 0.750; 0.750; 0.750;"
+#DESPMTR   u6	             "0.950; 0.950; 0.950; 0.950;"
+#DESPMTR   cur2	             "0.000; 0.000; 0.000; 0.000;"
+#DESPMTR   cur2	             "0.000; 0.000; 0.000; 0.000;"
+#DESPMTR   cur3	             "0.500; 0.600; -0.020; -0.051;"
+#DESPMTR   cur4	             "0.333; 0.222; 0.523; 0.169;"
+#DESPMTR   cur5	             "0.070; 0.226; 0.503; 0.533;"
+#DESPMTR   cur6	             "0.000; 0.000; 0.000; 0.000;"
+#DESPMTR   cur7              "0.000; 0.000; 0.000; 0.000;"
+#DESPMTR   span_curv_ctrl    "0.000; 0.350; 0.650; 1.000;"
+#DESPMTR   span_del_m        "0.000; 0.000; 0.000; 0.000;"
+#DESPMTR   span_del_theta    "0.000; 0.000; 0.000; 0.000;"
+#DESPMTR   span_thk_ctrl     "0.000; 0.250; 0.500; 0.750; 1.000;"
+#DESPMTR   offsets           "0.002; 0.010;"
+#DESPMTR   naca_le_radius    "5.500; 5.500; 5.500; 5.500; 5.500;"
+#DESPMTR   naca_u_max        "0.400; 0.410; 0.430; 0.480; 0.600;"
+#DESPMTR   naca_t_max        "0.120; 0.0852; 0.0462; 0.0285; 0.020;"
+#DESPMTR   naca_t_te         "0.0272; 0.018; 0.00825; 0.006; 0.001;"
+
+UDPARG    tblade      ncp               33
+#UDPARG    tblade      span_chord        span_chord
+#UDPARG    tblade      span_thk_c        span_thk_c
+#UDPARG    tblade      span_in_beta      span_in_beta
+#UDPARG    tblade      span_out_beta     span_out_beta
+#UDPARG    tblade      u2	            u2	           
+#UDPARG    tblade      u3	            u3	          
+#UDPARG    tblade      u4	            u4	          
+#UDPARG    tblade      u5	            u5	          
+#UDPARG    tblade      u6	            u6	          
+#UDPARG    tblade      cur1              cur1          
+#UDPARG    tblade      cur2	            cur2	       
+#UDPARG    tblade      cur3	            cur3	       
+#UDPARG    tblade      cur4	            cur4	       
+#UDPARG    tblade      cur5	            cur5	       
+#UDPARG    tblade      cur6	            cur6	       
+#UDPARG    tblade      cur7              cur7          
+#UDPARG    tblade      span_curv_ctrl    span_curv_ctrl
+#UDPARG    tblade      span_del_m        span_del_m    
+#UDPARG    tblade      span_del_theta    span_del_theta
+#UDPARG    tblade      span_thk_ctrl     span_thk_ctrl 
+#UDPARG    tblade      offsets           offsets     
+#UDPARG    tblade      naca_le_radius    naca_le_radius
+#UDPARG    tblade      naca_u_max        naca_u_max
+#UDPARG    tblade      naca_t_max        naca_t_max
+#UDPARG    tblade      naca_t_te         naca_t_te
+UDPRIM    tblade      filename          $$/3dbgbinput.1.dat \
+                      auxname           $$/spancontrolinputs.1.dat
+#UNION
+#FILLET 1 0
+#dump ../NACA_thickness_blade.step
+
+dump ../Case7-28-8_IGV.step
+dump ../Case7-28-8_IGV.stl
+dump ../Case7-28-8_IGV.iges
+
+END

@@ -1,0 +1,31 @@
+# tblade_comp3
+# written by John Dannenhoffer
+# modified by Mayank Sharma
+# modified to use span_in_beta and span_out_beta along with inci_dev_spline in tblade_comp3.12.dat
+
+#DIMENSION span_thk_c        1 5 1
+#DIMENSION span_in_beta      1 5 1
+#DIMENSION span_out_beta     1 5 1
+#DIMENSION cur4              1 3 1
+#
+#DESPMTR   span_thk_c        "-0.900; -0.900; -0.900; -0.900; -0.900;"
+#DESPMTR   span_in_beta      "0.000; 0.000; 0.000; 0.000; 0.000;"
+#DESPMTR   span_out_beta     "0.000; 0.000; 0.000; 0.000; 0.000;"
+#DESPMTR   cur4              "0.300; 0.200; -.300;"
+
+UDPARG    tblade    ncp             33
+#UDPARG    tblade    span_thk_c      span_thk_c
+#UDPARG    tblade    span_in_beta    span_in_beta
+#UDPARG    tblade    span_out_beta   span_out_beta
+#UDPARG    tblade    cur4            cur4
+#UDPARG    tblade    arg_2           $v0
+UDPRIM    tblade    filename        $$/3dbgbinput.1.dat \
+                    auxname         $$/spancontrolinputs.1.dat
+
+#dump ../ESPfull_6_4_3_hot.step
+
+dump ../Wennerstrom_with_umxthk.step
+dump ../Wennerstrom_with_umxthk.stl
+dump ../Wennerstrom_with_umxthk.iges
+
+END
