@@ -18,7 +18,7 @@ subroutine regtest_readinput()
     isquiet     = .true.
 
     ! Working directory relative path
-    dir_path    = 'inputs/OpenCSM/new_inputs/NACA_thickness_with_derivative'
+    dir_path    = 'inputs/OpenCSM/NACA_thickness_with_derivative'
 
     ! Name of the test input file
     filename    = dir_path//'/3dbgbinput.2.dat' 
@@ -173,7 +173,7 @@ subroutine regtest_read_spanwise_NACA_input()
     real(kind = 8)      :: tol_1 = 10E-4, tol_2 = 10E-8
     
     ! Set working directory
-    dir_path = 'inputs/OpenCSM/new_inputs/NACA_thickness_with_derivative/'
+    dir_path = 'inputs/OpenCSM/NACA_thickness_with_derivative/'
 
     ! Set blade row number
     row_type = '2'

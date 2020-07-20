@@ -64,7 +64,7 @@ subroutine regtest_udpTblade ()
     !
     ! Working directory relative path and input file name
     !
-    dir_path                            = 'inputs/OpenCSM/new_inputs/Case7-28-8/Rotor/'
+    dir_path                            = 'inputs/OpenCSM/Case7-28-8/Rotor/'
     filename                            = dir_path//'tblade_rotor.csm'
 
 

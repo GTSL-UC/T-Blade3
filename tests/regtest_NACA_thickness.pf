@@ -19,7 +19,7 @@ subroutine regtest_modified_NACA_thickness()
     
 
     ! Working directory relative path
-    dir_path        = 'inputs/OpenCSM/new_inputs/NACA_thickness_with_derivative/' 
+    dir_path        = 'inputs/OpenCSM/NACA_thickness_with_derivative/'
 
     ! Name of the main test input file
     filename        = dir_path//'3dbgbinput.2.dat'
@@ -133,7 +133,7 @@ subroutine regtest_modified_NACA_thickness()
     ! Delete all output files in the working directory
     !
     command_2 = 'cd '//dir_path//' && ls | grep -v "3dbgbinput.2.dat\|spancontrolinputs.2.dat\|tblade_NACA_thickness.csm\|&
-                &regtest_files" | xargs rm -rf'
+                &regtest_files\|README.txt" | xargs rm -rf'
     call execute_command_line(command_2)
 
 
