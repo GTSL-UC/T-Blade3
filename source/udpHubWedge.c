@@ -483,7 +483,7 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     /* make an Edge along the X-axis */
     node2[0] = xmin;
     node2[1] = 0;
-    node2[2] = 0.001;    // avoid uncaught exception in EG_rotate
+    node2[2] = 0.000;    // avoid uncaught exception in EG_rotate
 
     status = EG_makeTopology(context, NULL, NODE, 0, node2, 0, NULL, NULL, &(enodes[2]));
 #ifdef DEBUG
@@ -493,7 +493,7 @@ udpExecute(ego  context,                /* (in)  EGADS context */
 
     node3[0] = xmax;
     node3[1] = 0;
-    node3[2] = 0.001;    // avoid uncaught exception in EG_rotate
+    node3[2] = 0.000;    // avoid uncaught exception in EG_rotate
 
     status = EG_makeTopology(context, NULL, NODE, 0, node3, 0, NULL, NULL, &(enodes[3]));
 #ifdef DEBUG
