@@ -2,6 +2,8 @@
 #
 #
 
+print-% : ; @echo $* = $($*)
+
 ifndef ESP_ROOT
 $(error ESP_ROOT must be set -- Please fix the environment...)
 endif
@@ -93,10 +95,10 @@ $(ODIR)/spanwise_variation.o:	spanwise_variation.f90
 $(LDIR)/tblade.so:	$(ODIR)/udpTblade.o $(LDIR)/libTBlade3.a
 	touch $(LDIR)/tblade.so
 	rm $(LDIR)/tblade.so
-	$(FCOMP) $(SOFLGS) -o $(LDIR)/tblade.so $(ODIR)/udpTblade.o -L$(LDIR) -lTBlade3 -legads
+	$(FCOMP) $(SOFLGS) -o $(LDIR)/tblade.so $(ODIR)/udpTblade.o -L$(LDIR) -lTBlade3 -legads -L/usr/lib/ -lgridgen
 
 $(ODIR)/udpTblade.o:	udpTblade.c $(IDIR)/udpUtilities.c $(IDIR)/udpUtilities.h
-	$(CC) -c $(COPTS) $(DEFINE) -I$(IDIR) udpTblade.c -o $(ODIR)/udpTblade.o
+	$(CC) -c $(COPTS) $(DEFINE) -I$(IDIR) -I/home/mayank/Desktop/C_gridgen/ udpTblade.c -o $(ODIR)/udpTblade.o
 
 $(LDIR)/bladevolume.so:	$(ODIR)/udpBladeVolume.o $(LDIR)/libTBlade3.a
 	touch $(LDIR)/bladevolume.so

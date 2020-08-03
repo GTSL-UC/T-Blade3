@@ -1734,7 +1734,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     ! cascade_nondim_file in file_operations.f90
     !
     pitch                                   = 2*pi/nbls
-    call cascade_nondim_file(nsl, ibrow, msle, mste, mprime_ble, mprime_bte, chordm, pitch, casename)
+    call cascade_nondim_file (nsl, casename, ibrow, chordm, pitch, msle, mste, mprime_ble, mprime_bte, &
+                             &nsp, xm, xms, rm, rms, mp)
 
 
 end subroutine bgb3d_sub

@@ -690,16 +690,18 @@ module file_operations
     !                                 3dbgbinput file
     !
     !---------------------------------------------------------------------------
-    subroutine cascade_nondim_file(nsl,ibrow,msle,mste,mprime_ble,mprime_bte,&
-                                   chordm,pitch,casename)
+    subroutine cascade_nondim_file(nsl,casename,ibrow,chordm,pitch,msle,mste, &
+                                   mprime_ble,mprime_bte,nsp,xm,xms,rm,rms,mp)
 
-        integer,                    intent(in)      :: nsl, ibrow
-        real,                       intent(in)      :: msle(nsl), mste(nsl), mprime_ble(nsl), &
-                                                       mprime_bte(nsl), chordm(nsl), pitch
+        integer,                    intent(in)      :: nsl, ibrow, nsp(200)
         character(32),              intent(in)      :: casename
+        real,                       intent(in)      :: msle(nsl), mste(nsl), mprime_ble(nsl), &
+                                                       mprime_bte(nsl), chordm(nsl), pitch,   &
+                                                       xm(500,50), xms(500,50), rm(500,50),   &
+                                                       rms(500,50), mp(500,50)
 
         ! Local variables
-        integer                                     :: ia
+        integer                                     :: ia, j
         character(80)                               :: file1    
 
 
@@ -708,11 +710,21 @@ module file_operations
         write(13,*) trim(casename)
         write(13,*) 'Blade row: ', ibrow
         write(13,*) 'Non-dimensional quantities: '
-        write(13,*) "section    m'sLE           m'sTE           m'blade_LE          m'blade_TE &
-                                &chord           pitch      "
+        write(13,*) "section        chord       pitch       m'sLE       m'sTE       &
+                    &m'blade_LE     m'blade_TE      "
 
         do ia = 1,nsl
-            write(13,101) ia, msle(ia), mste(ia), mprime_ble(ia), mprime_bte(ia), chordm(ia), pitch
+            write(13,101) ia, chordm(ia), pitch, msle(ia), mste(ia), mprime_ble(ia), mprime_bte(ia)
+        end do
+
+        write(13,*) ''
+        write(13,*) 'For streamwise mapping: '
+
+        do ia = 1, nsl
+            write(13,'(i3)') nsp(ia)
+            do j = 1, nsp(ia)
+                write(13,'(5f20.16)') xm(j,ia), xms(j,ia), rm(j,ia), rms(j,ia), mp(j,ia)
+            end do
         end do
 
         close(13)

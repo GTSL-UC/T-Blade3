@@ -30,6 +30,7 @@
 
 #define NUMUDPARGS 38
 #include "udpUtilities.h"
+#include "types.h"
 
 /* shorthands for accessing argument values and velocities */
 #define NCP(                IUDP)   ((int    *) (udps[IUDP].arg[ 0].val))[0]
@@ -79,9 +80,8 @@
 
 /* data about possible arguments */
 static char*  argNames[NUMUDPARGS] = {"ncp",                "filename",         "auxname",              "arg_2",
-                                      /*"chord",            "thk_c",            "inci",                 "devn",*/
                                       "cur1",               "cur2",             "cur3",                 "cur4",
-                                      "cur5",               "cur6",             "cur7",                 /*"in_beta",        "out_beta",*/
+                                      "cur5",               "cur6",             "cur7",
                                       "u2",                 "u3",               "u4",                   "u5",
                                       "u6",                 "span_del_m_ctrl",  "span_del_theta_ctrl",  "span_in_beta_ctrl", 
                                       "span_out_beta_ctrl", "span_chord_ctrl",  "span_thk_c_ctrl",      "span_del_m",   
@@ -90,9 +90,8 @@ static char*  argNames[NUMUDPARGS] = {"ncp",                "filename",         
                                       "offsets",            "hub_inf_offset",   "tip_inf_offset",       "naca_le_radius",   
                                       "naca_u_max",         "naca_t_max",       "naca_t_te",            };
 static int    argTypes[NUMUDPARGS] = {ATTRINT,  ATTRSTRING, ATTRSTRING, ATTRSTRING, 
-                                      /*ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,*/
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   /*ATTRREAL,   ATTRREAL,*/
+                                      ATTRREAL, ATTRREAL,   ATTRREAL,
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL, 
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,    
@@ -101,9 +100,8 @@ static int    argTypes[NUMUDPARGS] = {ATTRINT,  ATTRSTRING, ATTRSTRING, ATTRSTRI
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL, 
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   };
 static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,
-                                      /*0,        0,          0,          0,*/
                                       0,        0,          0,          0,
-                                      0,        0,          0,          /*0,          0,*/
+                                      0,        0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,        
                                       0,        0,          0,          0,      
@@ -112,9 +110,8 @@ static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,
                                       0,        0,          0,          0,        
                                       0,        0,          0,          };
 static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
-                                      /*0.,       0.,         0.,         0.,*/
                                       0.,       0.,         0.,         0.,
-                                      0.,       0.,         0.,         /*0.,         0.,*/
+                                      0.,       0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,       
                                       0.,       0.,         0.,         0.,     
@@ -247,6 +244,9 @@ static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
    void   override_naca_t_te_(          int *nspn, double naca_t_te[            ]);
 #endif
 
+extern void   create_surface_grids (ego outContext, ego *bladeFaces, ego bladeSurface,
+                                    geom_data gridgen_data);
+
 static int    EG_fitBspline(ego context,
                             int npnt, int bitflag, double xyz[],
                             int ncp, ego *ecurve, double *rms);
@@ -295,15 +295,16 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     int     status = EGADS_SUCCESS;
 
 #define NPNT 1000
-    int     ichar, nsec, isec, npnt, ipnt, jpnt, nn, periodic, senses[4];
-    int     oclass, mtype, nbody, *senses2;
-    double  xyz[3*NPNT], rms, xyzNode[18], *xr0=NULL;
-    double  trange[3], data[18], swap;
-    double  toler = 1e-4;
-    char    filename[257], auxname[257], *auxptr, nextline[257], casename[257];
-    FILE    *fp, *fpSrc=NULL, *fpTgt=NULL;
-    ego     enodes[5], eedges[4], eloop, *ecurves=NULL;
-    ego     ecurve, epcurve, esurface, esurf, eref, efaces[4], emodel, *ebodys;
+    int         ichar, nsec, isec, npnt, ipnt, jpnt, nn, periodic, senses[4];
+    int         oclass, mtype, nbody, *senses2;
+    double      xyz[3*NPNT], rms, xyzNode[18], *xr0=NULL;
+    double      trange[3], data[18], swap;
+    double      toler = 1e-4;
+    char        filename[257], auxname[257], *auxptr, nextline[257], casename[257];
+    FILE        *fp, *fpSrc=NULL, *fpTgt=NULL;
+    ego         enodes[5], eedges[4], eloop, *ecurves=NULL;
+    ego         ecurve, epcurve, esurface, esurf, eref, efaces[4], emodel, *ebodys;
+    geom_data   input_data;
 
 #ifdef DEBUG
     printf("udpExecute(context=%llx)\n", (long long)context);
@@ -438,19 +439,24 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     (void) fgets(nextline, 257, fp);
     (void) fgets(nextline, 257, fp);
     sscanf(nextline, "%s", casename);
+    input_data.casename   = casename;
 
     (void) fgets(nextline, 257, fp);
     (void) fgets(nextline, 257, fp);
+    sscanf (nextline, "%d", &input_data.bladerow);
 
     (void) fgets(nextline, 257, fp);
     (void) fgets(nextline, 257, fp);
+    sscanf (nextline, "%d", &input_data.nblades);
 
     (void) fgets(nextline, 257, fp);
     (void) fgets(nextline, 257, fp);
+    sscanf (nextline, "%lf", &input_data.bsf);
 
     (void) fgets(nextline, 257, fp);
     (void) fgets(nextline, 257, fp);
     sscanf(nextline, "%d", &nsec);
+    input_data.nspan    = nsec;
 
     fclose(fp);
 
@@ -761,6 +767,10 @@ udpExecute(ego  context,                /* (in)  EGADS context */
 #ifdef DEBUG
     printf("udpExecute -> *ebody=%llx\n", (long long)(*ebody));
 #endif
+
+    /* Call grid generator surface grid function */
+    input_data.np   = npnt;
+    create_surface_grids (context, efaces, esurf, input_data);
 
 cleanup:
 
@@ -2005,7 +2015,7 @@ void override_naca_t_te_(int *nspn, double naca_t_te[])
  ************************************************************************
  */
 
-static int
+int
 EG_fitBspline(ego    context,           /* (in)  EGADS context */
               int    npnt,              /* (in)  number of points */
               int    bitflag,           /* (in)  1=ordered, 2=periodic */
