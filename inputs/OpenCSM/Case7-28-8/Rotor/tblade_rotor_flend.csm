@@ -29,6 +29,7 @@
 #DIMENSION span_del_theta    1 4 1
 #DIMENSION span_thk_ctrl     1 5 1
 DIMENSION offsets           1 2 1
+DIMENSION hub_inf_offset    1 1 1
 #DIMENSION naca_le_radius    1 5 1
 #DIMENSION naca_u_max        1 5 1
 #DIMENSION naca_t_max        1 5 1
@@ -54,7 +55,8 @@ DIMENSION offsets           1 2 1
 #DESPMTR   span_del_m        "0.000; 0.000; 0.000; 0.000;"
 #DESPMTR   span_del_theta    "0.000; 0.000; 0.000; 0.000;"
 #DESPMTR   span_thk_ctrl     "0.000; 0.250; 0.500; 0.750; 1.000;"
-DESPMTR   offsets           "0.002; -0.001;"
+DESPMTR   offsets           "-0.015; 0.000;"
+DESPMTR   hub_inf_offset    "0.030;"
 #DESPMTR   naca_le_radius    "5.500; 5.500; 5.500; 5.500; 5.500;"
 #DESPMTR   naca_u_max        "0.400; 0.410; 0.430; 0.480; 0.600;"
 #DESPMTR   naca_t_max        "0.120; 0.0852; 0.0462; 0.0285; 0.020;"
@@ -65,67 +67,132 @@ UDPARG    hubwedge    ncp               33
 #UDPARG    hubwedge    span_thk_c        span_thk_c
 #UDPARG    hubwedge    span_in_beta      span_in_beta
 #UDPARG    hubwedge    span_out_beta     span_out_beta
-#UDPARG    hubwedge    u2                u2            
-#UDPARG    hubwedge    u3                u3           
-#UDPARG    hubwedge    u4                u4           
-#UDPARG    hubwedge    u5                u5           
-#UDPARG    hubwedge    u6                u6           
+#UDPARG    hubwedge    u2                u2
+#UDPARG    hubwedge    u3                u3
+#UDPARG    hubwedge    u4                u4
+#UDPARG    hubwedge    u5                u5
+#UDPARG    hubwedge    u6                u6
 #UDPARG    hubwedge    cur1              cur1           
-#UDPARG    hubwedge    cur2              cur2             
-#UDPARG    hubwedge    cur3              cur3             
-#UDPARG    hubwedge    cur4              cur4             
-#UDPARG    hubwedge    cur5              cur5             
-#UDPARG    hubwedge    cur6              cur6             
+#UDPARG    hubwedge    cur2              cur2
+#UDPARG    hubwedge    cur3              cur3
+#UDPARG    hubwedge    cur4              cur4
+#UDPARG    hubwedge    cur5              cur5
+#UDPARG    hubwedge    cur6              cur6
 #UDPARG    hubwedge    cur7              cur7           
 #UDPARG    hubwedge    span_curv_ctrl    span_curv_ctrl 
 #UDPARG    hubwedge    span_del_m        span_del_m     
 #UDPARG    hubwedge    span_del_theta    span_del_theta 
 #UDPARG    hubwedge    span_thk_ctrl     span_thk_ctrl  
-#UDPARG    hubwedge    offsets           offsets     
+#UDPARG    hubwedge    offsets           offsets
+UDPARG    hubwedge    hub_inf_offset    hub_inf_offset
 #UDPARG    hubwedge    naca_le_radius    naca_le_radius
 #UDPARG    hubwedge    naca_u_max        naca_u_max
 #UDPARG    hubwedge    naca_t_max        naca_t_max
 #UDPARG    hubwedge    naca_t_te         naca_t_te 
 UDPRIM    hubwedge    filename          $$/3dbgbinput.2.dat \
                       auxname           $$/spancontrolinputs.2.dat
+STORE     original_wedge
+
+UDPARG    hubwedge    ncp               33
+#UDPARG    hubwedge    span_chord        span_chord
+#UDPARG    hubwedge    span_thk_c        span_thk_c
+#UDPARG    hubwedge    span_in_beta      span_in_beta
+#UDPARG    hubwedge    span_out_beta     span_out_beta
+#UDPARG    hubwedge    u2                u2
+#UDPARG    hubwedge    u3                u3
+#UDPARG    hubwedge    u4                u4
+#UDPARG    hubwedge    u5                u5
+#UDPARG    hubwedge    u6                u6
+#UDPARG    hubwedge    cur1              cur1
+#UDPARG    hubwedge    cur2              cur2
+#UDPARG    hubwedge    cur3              cur3
+#UDPARG    hubwedge    cur4              cur4
+#UDPARG    hubwedge    cur5              cur5
+#UDPARG    hubwedge    cur6              cur6
+#UDPARG    hubwedge    cur7              cur7
+#UDPARG    hubwedge    span_curv_ctrl    span_curv_ctrl
+#UDPARG    hubwedge    span_del_m        span_del_m
+#UDPARG    hubwedge    span_del_theta    span_del_theta
+#UDPARG    hubwedge    span_thk_ctrl     span_thk_ctrl
+UDPARG    hubwedge    offsets           offsets
+#UDPARG    hubwedge    naca_le_radius    naca_le_radius
+#UDPARG    hubwedge    naca_u_max        naca_u_max
+#UDPARG    hubwedge    naca_t_max        naca_t_max
+#UDPARG    hubwedge    naca_t_te         naca_t_te
+UDPRIM    hubwedge    filename          $$/3dbgbinput.2.dat \
+                      auxname           $$/spancontrolinputs.2.dat
+STORE     offset_wedge
 
 UDPARG    tblade      ncp               33
 #UDPARG    tblade      span_chord        span_chord
 #UDPARG    tblade      span_thk_c        span_thk_c
 #UDPARG    tblade      span_in_beta      span_in_beta
 #UDPARG    tblade      span_out_beta     span_out_beta
-#UDPARG    tblade      u2                u2            
-#UDPARG    tblade      u3                u3           
-#UDPARG    tblade      u4                u4           
-#UDPARG    tblade      u5                u5           
-#UDPARG    tblade      u6                u6           
+#UDPARG    tblade      u2                u2
+#UDPARG    tblade      u3                u3
+#UDPARG    tblade      u4                u4
+#UDPARG    tblade      u5                u5
+#UDPARG    tblade      u6                u6
 #UDPARG    tblade      cur1              cur1          
-#UDPARG    tblade      cur2              cur2          
-#UDPARG    tblade      cur3              cur3          
-#UDPARG    tblade      cur4              cur4          
-#UDPARG    tblade      cur5              cur5          
-#UDPARG    tblade      cur6              cur6          
+#UDPARG    tblade      cur2              cur2
+#UDPARG    tblade      cur3              cur3
+#UDPARG    tblade      cur4              cur4
+#UDPARG    tblade      cur5              cur5
+#UDPARG    tblade      cur6              cur6
 #UDPARG    tblade      cur7              cur7          
 #UDPARG    tblade      span_curv_ctrl    span_curv_ctrl
 #UDPARG    tblade      span_del_m        span_del_m    
 #UDPARG    tblade      span_del_theta    span_del_theta
 #UDPARG    tblade      span_thk_ctrl     span_thk_ctrl 
-UDPARG    tblade      offsets           offsets
+#UDPARG    tblade      offsets           offsets
 #UDPARG    tblade      naca_le_radius    naca_le_radius
 #UDPARG    tblade      naca_u_max        naca_u_max
 #UDPARG    tblade      naca_t_max        naca_t_max
 #UDPARG    tblade      naca_t_te         naca_t_te
 UDPRIM    tblade      filename          $$/3dbgbinput.2.dat \
                       auxname           $$/spancontrolinputs.2.dat
+#STORE     original_blade
+#RESTORE   original_blade
+RESTORE   offset_wedge
+SUBTRACT
+STORE     new_blade
 
-UNION
+# Added by John F. Dannenhoffer, III (Syracuse University)
+# Modified by Mayank Sharma (GTSL-UC)
+MARK
+    RESTORE original_wedge
+    UDPARG  fitcurve filename $Tblade3_temp/3D_inflated_hub_section.dat
+    UDPARG  fitcurve ncp      33
+    UDPARG  fitcurve ordered  1
+    UDPARG  fitcurve periodic 1
+    UDPARG  fitcurve split    121
+    UDPRIM  fitcurve
+
+    TRANSLATE 0 0 -0.5
+    EXTRUDE   0 0  1.0
+    SUBTRACT
+    SELECT face 3 2 1
+        ATTRIBUTE _color $cyan
+        ATTRIBUTE _flend $remove
+
+    RESTORE new_blade
+    SELECT  face 6 2 1
+        ATTRIBUTE _color $cyan
+        ATTRIBUTE _flend $remove
+UDPARG flend fraca 0.2
+UDPARG flend fracb 0.2
+UDPARG flend equis 1
+UDPRIM flend
+
+SELECT FACE  @nbody-3 0
+    ATTRIBUTE _color $red
 
 CYLINDER -100.0 0.00 0.00 1000.0 0.00 0.00 12.7
-ROTATEX  90 0 0
+ROTATEX 90 0 0
 SUBTRACT
 
-dump ../Case7-28-8_Rotor_wedge.step
-dump ../Case7-28-8_Rotor_wedge.stl
-dump ../Case7-28-8_Rotor_wedge.iges
+dump ../Case7-28-8_Rotor_flend.step
+dump ../Case7-28-8_Rotor_flend.stl
+dump ../Case7-28-8_Rotor_flend.iges
 
 END
