@@ -1558,8 +1558,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                       LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments,         &
                       sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index,n_normal_distance,casename, &
                       develop,mble,mbte,mles,mtes,i_slope,jcellblade_all,etawidth_all,BGgrid_all,thk_tm_c_spl,     &
-                      theta_offset,TE_der,from_gridgen,np_in,u_in,v_in,uv_grid(js,:,:),uv_top_grid(js,:,:),        &
-                      uv_bot_grid(js,:,:),mblade_grid(js,:),thblade_grid(js,:),spanwise_thk)
+                      theta_offset,TE_der_actual,TE_der_norm,from_gridgen,np_in,u_in,v_in,uv_grid(js,:,:),         &
+                      uv_top_grid(js,:,:),uv_bot_grid(js,:,:),mblade_grid(js,:),thblade_grid(js,:),spanwise_thk)
 
 
 

@@ -2392,7 +2392,7 @@ subroutine read_spanwise_NACA_input(row_type,path)
     ! Local variables
     character(:),   allocatable                     :: file_name, log_file, error_msg, warning_msg, dev_msg
     character(256)                                  :: temps, warning_arg_1, warning_arg_2, warning_arg_3
-    integer                                         :: nopen_aux = 10, nopen, nopen1, kk, n_temp
+    integer                                         :: nopen_aux = 10, nopen, nopen1, kk, n_temp, n_temp_1
     real                                            :: span_dum
     real,           allocatable                     :: temp(:)
     logical                                         :: file_open, file_open_1, isquiet_local
@@ -2834,15 +2834,44 @@ subroutine read_spanwise_NACA_input(row_type,path)
         read(nopen_aux,'(A)') temps
         write(nopen1,'(A)') trim(temps)
         
+        ! Search for substring to determine how the TE angle has
+        ! been specified
+        n_temp   = index(trim(temps), 'dy_dx_TE')
+        n_temp_1 = index(trim(temps), 'dy_dx_norm')
+
         ! Allocate thickness control points array
-        n_temp = index(trim(temps), 'dy_dx_TE')
         if (allocated(cp_chord_thk)) deallocate(cp_chord_thk)
-        if (n_temp == 0) then
-            TE_der  = .false.
-            allocate(cp_chord_thk(ncp_span_thk,5))
-        else
-            TE_der  = .true.
-            allocate(cp_chord_thk(ncp_span_thk,6))
+
+        ! Default TE derivative definition
+        if (n_temp == 0 .and. n_temp_1 == 0) then
+
+            TE_der_actual  = .false.
+            TE_der_norm    = .false.
+            allocate( cp_chord_thk(ncp_span_thk,5) )
+
+        ! Actual TE derivative definition
+        else if (n_temp /= 0 .and. n_temp_1 == 0) then
+
+            TE_der_actual  = .true.
+            TE_der_norm    = .false.
+            allocate( cp_chord_thk(ncp_span_thk,6) )
+
+        ! Normalized TE derivative definition
+        else if (n_temp == 0 .and. n_temp_1 /= 0) then
+
+            TE_der_actual  = .false.
+            TE_der_norm    = .true.
+            allocate ( cp_chord_thk(ncp_span_thk,6) )
+
+        ! Raise an error if TE derivative is defined both directly
+        ! and as a normalized quantity
+        else if ( n_temp /= 0 .and. n_temp_1 /= 0) then
+
+            error_msg   = 'Conflicting definitions of TE derivative found.'
+            warning_msg = 'Refer to T-Blade3 documentation'
+            dev_msg     = 'Check subroutine read_spanwise_NACA_input in readinput.f90'
+            call fatal_error (error_msg, warning_msg, dev_msg)
+
         end if
 
         ! Read thickness control points

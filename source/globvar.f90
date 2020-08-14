@@ -121,7 +121,7 @@ module globvar
 
     ! Global logical variables    
     logical                         :: hub_inflate = .false., tip_inflate = .false.
-    logical                         :: TE_der = .false.
+    logical                         :: TE_der_actual = .false., TE_der_norm = .false.
     logical                         :: isdev, tm_c_spline, is_xyzstreamlines, spanwise_angle_spline, spanwise_inci_dev_spline, &
                                        is2d, isquiet
     logical                         :: u_max_spline = .false.

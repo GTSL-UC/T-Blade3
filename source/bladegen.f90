@@ -6,7 +6,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                     sting_h_all,LEdegree,no_LE_segments,sec_radius,bladedata,amount_data,scf,             &
                     intersec_coord,throat_index, n_normal_distance,casename,develop,mble,mbte,msle,       &
                     mste,i_slope,jcellblade_all, etawidth_all,BGgrid_all,thk_tm_c_spl, theta_offset,      &
-                    TE_derivative,from_gridgen,np_in,u_in,v_in,uv,uv_top,uv_bot,m_prime,theta,spanwise_thk)
+                    TE_der_actual,TE_der_norm,from_gridgen,np_in,u_in,v_in,uv,uv_top,uv_bot,m_prime,theta,spanwise_thk)
 
     use file_operations
     use errors
@@ -27,7 +27,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                                                                    uv(500,2), uv_top(500,2), uv_bot(500,2), m_prime(500), theta(500),         &
                                                                    spanwise_thk(nspn), mble, mbte, intersec_coord(12,nsl)
     character(*),                           intent(in)          :: fext, airfoil, casename, develop
-    logical                                                     :: TE_derivative, from_gridgen
+    logical                                                     :: TE_der_actual, TE_der_norm, from_gridgen
 
     ! Local variables
     integer                                                     :: np_side, i, naca, np_cluster, ncp, i_le, i_te, oo, nopen
@@ -188,11 +188,13 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         LE_round = thk_cp(1,js)
         t_TE     = thk_cp(4,js)
 
-        if (.not. TE_derivative) then
+        if (.not. TE_der_actual .and. .not. TE_der_norm) then
             call compute_te_angle(u_max,dy_dx_te)
-            dy_dx_te    = -2.0*t_max*dy_dx_te
-        else
+            dy_dx_te    = -2.0 * t_max * dy_dx_te
+        else if (TE_der_actual .and. .not. TE_der_norm) then
             dy_dx_te    = thk_cp(5,js)
+        else if (.not. TE_der_actual .and. TE_der_norm) then
+            dy_dx_te    = -2.0 * t_max * thk_cp(5,js)
         end if
 
         ! Compute u_TE and u_center for the modified four digit NACA
@@ -618,7 +620,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             ! Compute TE angle value for u_max
             ! Display on screen and write to log file
             !
-            if (.not. TE_derivative) then
+            if (.not. TE_der_actual) then
                 if (.not. isquiet) print *, 'TE derivative for maximum thickness chordwise location = ', dy_dx_te
                 write(nopen,*) 'TE derivative for maximum thickness chordwise location = ', dy_dx_te
             else

@@ -19,7 +19,7 @@ module funcNsubs
 
         ! Set version IDs for both GitHub branches
         if (present(master_ID)) master_ID   = '1.2.2'
-        if (present(develop_ID)) develop_ID = '1.2.3'
+        if (present(develop_ID)) develop_ID = '1.2.5'
 
 
     end subroutine current_version

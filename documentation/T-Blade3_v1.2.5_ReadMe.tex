@@ -20,7 +20,7 @@
 \begin{document}
 
 \begin{center}
-\textbf{\large T-Blade3 v1.2.2 ReadMe}\\
+\textbf{\large T-Blade3 v1.2.5 ReadMe}\\
 by\\
 Mayank Sharma\\
 Department of Aerospace Engineering\\
@@ -34,7 +34,7 @@ University of Cincinnati\\
 T-Blade3 is a general parametric 3D blade geometry builder\cite{KiranPaper}. The tool can create a variety of 3D blade geometries based on a few basic parameters. The geometric and aerodynamic parameters are used to create 2D airfoils which are then stacked on the desired stacking axis\cite{KiranThesis}. The geometry modeler can also be  used for generating 3D blades with special features like bent tip or a split tip\cite{AbhayThesis} which can be explored with minimum changes to the blade geometry. The use of control points for the definition of spanwise splines makes it easy to modify the blade shapes quickly and smoothly to obtain the desired blade model\cite{SyedPaper}. The second derivative of the mean-line (related to the curvature) is controlled using B-splines to create the airfoils. This is then analytically integrated twice to obtain the mean-line\cite{AhmedPaper}. A smooth thickness distribution is then added to the airfoil. This can either be a Wennerstrom thickness distribution\cite{WennerstromBook}, a smooth quartic thickness distribution or a new modified NACA four-digit thickness distribution\cite{AbbottText}. B-splines have also been implemented to achieve customized airfoil leading and trailing edges.\\
 
 \noindent
-New in version 1.2.2:
+New in version 1.2.5:
 
 \begin{enumerate}[leftmargin=*]
     \item Smooth curvature control based on specifications of normalized meanline second derivatives which ensures curvature and slope of curvature continuity on the airfoil surface
@@ -48,7 +48,7 @@ This document contains instructions on how to install T-Blade3, run the code and
 
 \section{Obtaining T-Blade3}
 \noindent 
-There are two ways of obtaining T-Blade3 version 1.2.2:
+There are two ways of obtaining T-Blade3 version 1.2.5:
  
 \begin{enumerate}[leftmargin=*]
     \item Linux and Windows 64-bit executables can be found on \url{http://gtsl.ase.uc.edu/t-blade3}
@@ -60,7 +60,7 @@ The latter is recommended. There are two branches in use currently: {\fontfamily
 
 \section{Compiling T-Blade3}\label{compilesec}
 \noindent
-With T-Blade3 version 1.2.2, static builds for Linux, Unix and MacOS are no longer supported. The recommended method is to clone or download the T-Blade3 source code and compile it locally. Below are instructions to compile the code. Here, \$TBLADEROOT refers to the T-Blade3 source code directory. 
+With T-Blade3 version 1.2.5, static builds for Linux, Unix and MacOS are no longer supported. The recommended method is to clone or download the T-Blade3 source code and compile it locally. Below are instructions to compile the code. Here, \$TBLADEROOT refers to the T-Blade3 source code directory.
 
 \begin{enumerate}[leftmargin=*]
     \item \textit{Prerequisites}: Make and gfortran (gfortran-6 and above recommended)
@@ -129,13 +129,13 @@ The auxiliary input file \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat
 \end{itemize}
 
 \noindent
-The auxiliary input file \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} (old format) is an older file which is still supported in version 1.2.2. Also see \textbf{\ref{auxinput1}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
+The auxiliary input file \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} (old format) is an older file which is still supported in version 1.2.5. Also see \textbf{\ref{auxinput1}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
 \begin{itemize}
     \item Airfoil defined by curvature control (set to "\textbf{spanwise\_spline}")
 \end{itemize}
 
 \noindent 
-The auxiliary input file \textit{\textcolor{blue}{controlinputs.bladerow.dat}} is an older file which is still supported in version 1.2.2. Also see \textbf{\ref{auxinput2}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
+The auxiliary input file \textit{\textcolor{blue}{controlinputs.bladerow.dat}} is an older file which is still supported in version 1.2.5. Also see \textbf{\ref{auxinput2}}. It is used when the following switches are turned on in the main input file \textit{\textcolor{blue}{3dbgbinput.bladerow.dat}}:
 \begin{itemize}
     \item Airfoil defined by curvature control 
 \end{itemize}
@@ -344,13 +344,17 @@ This is an auxiliary input file for T-Blade3. This file is used when the camber 
         \item The third column specifies the chord-wise location of the maximum thickness for a section
         \item The fourth column specifies the maximum thickness for a section
         \item The fifth column specifies the thickness at the TE for a section
-        \item An optional sixth column can be added, specifying the first derivative of the thickness at the TE for a section. This should \textbf{always} be the sixth column and should be specified with a header "$dy\_dx\_TE$". If the derivatives are not specified by the user, they are computed based on the chord-wise location of the maximum thickness
+      \item The default formulation of the TE derivative is $v'_{t}(u_{\text{TE}}) = k(u_{\text{max}})v_{t}(u_{\text{max}})$ with $k(u_{\text{max}}) \in [1.0,3.5]$ for $u_{\text{max}} \in [0.2,0.6]$ (see \cite{AbbottText}). An optional sixth column can be added, specifying the first derivative of the thickness at the TE for a section. This should \textbf{always} be the sixth column and should be specified with either header:
+      \begin{itemize}[label=\FilledSmallSquare]
+          \item "$dy\_dx\_TE$": specify $v'_{t}(u_{\text{max}})$
+          \item "$dy\_dx\_norm$": specify $k(u_{\text{max}})$
+      \end{itemize}
     \end{enumerate}
 \end{itemize}
 
 \subsection{spancontrolinputs.bladerow.dat (old format)}\label{auxinput1}
 \noindent
-This is an auxiliary input file for T-Blade3. This section describes the old format of the \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} file. While this file is still supported in T-Blade3 version 1.2.2 (refer \textbf{\ref{cmdargs}} for information on how to run T-Blade3 with this file), it is recommended that the modified NACA four-digit thickness distribution is used with the current format of \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} file (refer to \textbf{\ref{auxinput_NACA}}). The file in this format is used when the camber definition switch (line 14) is set to "\textbf{spanwise\_spline}" and the thickness distribution switch (line 16) is set to "$\mathbf{1}$" and "$\mathbf{2}$". Following are the details of the file:
+This is an auxiliary input file for T-Blade3. This section describes the old format of the \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} file. While this file is still supported in T-Blade3 version 1.2.5 (refer \textbf{\ref{cmdargs}} for information on how to run T-Blade3 with this file), it is recommended that the modified NACA four-digit thickness distribution is used with the current format of \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}} file (refer to \textbf{\ref{auxinput_NACA}}). The file in this format is used when the camber definition switch (line 14) is set to "\textbf{spanwise\_spline}" and the thickness distribution switch (line 16) is set to "$\mathbf{1}$" and "$\mathbf{2}$". Following are the details of the file:
 
 \noindent
 \begin{itemize}[leftmargin=*]
@@ -386,7 +390,7 @@ This is an auxiliary input file for T-Blade3. This section describes the old for
 
 \subsection{controlinputs.bladerow.dat}\label{auxinput2}
 \noindent
-This is an auxiliary input file for T-Blade3. This is an older file, which is still supported in T-Blade3 version 1.2.2 (refer \textbf{\ref{cmdargs}} for information on how to run T-Blade3 with this file) but it is recommended that the modified NACA four-digit thickness distribution is used with the current format of \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}}. This file is used when the thickness distribution switch (line 16) is set to "$\mathbf{1}$" and "$\mathbf{2}$". Following are the details of the file:
+This is an auxiliary input file for T-Blade3. This is an older file, which is still supported in T-Blade3 version 1.2.5 (refer \textbf{\ref{cmdargs}} for information on how to run T-Blade3 with this file) but it is recommended that the modified NACA four-digit thickness distribution is used with the current format of \textit{\textcolor{blue}{spancontrolinputs.bladerow.dat}}. This file is used when the thickness distribution switch (line 16) is set to "$\mathbf{1}$" and "$\mathbf{2}$". Following are the details of the file:
 
 \noindent
 \begin{itemize}[leftmargin=*]
