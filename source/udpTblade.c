@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright (C) 2011/2018  John F. Dannenhoffer, III (Syracuse University)
+ * Copyright (C) 2011/2020  John F. Dannenhoffer, III (Syracuse University)
  *
  * This library is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
@@ -28,60 +28,69 @@
  *     MA  02110-1301  USA
  */
 
-#define NUMUDPARGS 38
+#define NUMUDPARGS 39
 #include "udpUtilities.h"
+
+#ifdef  DEBUG
+   #define DPRINT0(A)         printf(A)
+   #define DPRINT1(A,B)       printf(A,B)
+   #define DPRINT2(A,B,C)     printf(A,B,C)
+   #define DPRINT3(A,B,C,D)   printf(A,B,C,D)
+   #define DPRINT4(A,B,C,D,E) printf(A,B,C,D,E)
+#else
+   #define DPRINT0(A)
+   #define DPRINT1(A,B)
+   #define DPRINT2(A,B,C)
+   #define DPRINT3(A,B,C,D)
+   #define DPRINT4(A,B,C,D,E)
+#endif
 
 /* shorthands for accessing argument values and velocities */
 #define NCP(                IUDP)   ((int    *) (udps[IUDP].arg[ 0].val))[0]
 #define FILENAME(           IUDP)   ((char   *) (udps[IUDP].arg[ 1].val))
 #define AUXNAME(            IUDP)   ((char   *) (udps[IUDP].arg[ 2].val))
 #define ARG_2(              IUDP)   ((char   *) (udps[IUDP].arg[ 3].val))
-/*#define CHORD(         IUDP,I) ((double *) (udps[IUDP].arg[ 3].val))[I]
-#define THK_C(         IUDP,I) ((double *) (udps[IUDP].arg[ 4].val))[I]
-#define INCI(          IUDP,I) ((double *) (udps[IUDP].arg[ 5].val))[I]
-#define DEVN(          IUDP,I) ((double *) (udps[IUDP].arg[ 6].val))[I]*/
-#define CUR1(               IUDP,I) ((double *) (udps[IUDP].arg[ 4].val))[I]
-#define CUR2(               IUDP,I) ((double *) (udps[IUDP].arg[ 5].val))[I]
-#define CUR3(               IUDP,I) ((double *) (udps[IUDP].arg[ 6].val))[I]
-#define CUR4(               IUDP,I) ((double *) (udps[IUDP].arg[ 7].val))[I]
-#define CUR5(               IUDP,I) ((double *) (udps[IUDP].arg[ 8].val))[I]
-#define CUR6(               IUDP,I) ((double *) (udps[IUDP].arg[ 9].val))[I]
-#define CUR7(               IUDP,I) ((double *) (udps[IUDP].arg[10].val))[I]
-/*#define IN_BETA(       IUDP,I) ((double *) (udps[IUDP].arg[13].val))[I]
-#define OUT_BETA(      IUDP,I) ((double *) (udps[IUDP].arg[14].val))[I]*/
-#define U2(                 IUDP,I) ((double *) (udps[IUDP].arg[11].val))[I]
-#define U3(                 IUDP,I) ((double *) (udps[IUDP].arg[12].val))[I]
-#define U4(                 IUDP,I) ((double *) (udps[IUDP].arg[13].val))[I]
-#define U5(                 IUDP,I) ((double *) (udps[IUDP].arg[14].val))[I]
-#define U6(                 IUDP,I) ((double *) (udps[IUDP].arg[15].val))[I]
-#define SPAN_DEL_M_CTRL(    IUDP,I) ((double *) (udps[IUDP].arg[16].val))[I]
-#define SPAN_DEL_THETA_CTRL(IUDP,I) ((double *) (udps[IUDP].arg[17].val))[I]
-#define SPAN_IN_BETA_CTRL(  IUDP,I) ((double *) (udps[IUDP].arg[18].val))[I]
-#define SPAN_OUT_BETA_CTRL( IUDP,I) ((double *) (udps[IUDP].arg[19].val))[I]
-#define SPAN_CHORD_CTRL(    IUDP,I) ((double *) (udps[IUDP].arg[20].val))[I]
-#define SPAN_THK_C_CTRL(    IUDP,I) ((double *) (udps[IUDP].arg[21].val))[I]
-#define SPAN_DEL_M(         IUDP,I) ((double *) (udps[IUDP].arg[22].val))[I]
-#define SPAN_DEL_THETA(     IUDP,I) ((double *) (udps[IUDP].arg[23].val))[I]
-#define SPAN_IN_BETA(       IUDP,I) ((double *) (udps[IUDP].arg[24].val))[I]
-#define SPAN_OUT_BETA(      IUDP,I) ((double *) (udps[IUDP].arg[25].val))[I]
-#define SPAN_CHORD(         IUDP,I) ((double *) (udps[IUDP].arg[26].val))[I]
-#define SPAN_THK_C(         IUDP,I) ((double *) (udps[IUDP].arg[27].val))[I]
-#define SPAN_U_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[28].val))[I]
-#define SPAN_CURV_CTRL(     IUDP,I) ((double *) (udps[IUDP].arg[29].val))[I]
-#define SPAN_THK_CTRL(      IUDP,I) ((double *) (udps[IUDP].arg[30].val))[I]
-#define OFFSETS(            IUDP,I) ((double *) (udps[IUDP].arg[31].val))[I]
-#define HUB_INF_OFFSET(     IUDP,I) ((double *) (udps[IUDP].arg[32].val))[I]
-#define TIP_INF_OFFSET(     IUDP,I) ((double *) (udps[IUDP].arg[33].val))[I]
-#define NACA_LE_RADIUS(     IUDP,I) ((double *) (udps[IUDP].arg[34].val))[I]
-#define NACA_U_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[35].val))[I]
-#define NACA_T_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[36].val))[I]
-#define NACA_T_TE(          IUDP,I) ((double *) (udps[IUDP].arg[37].val))[I]
+#define VLIMITS(            IUDP,I) ((double *) (udps[IUDP].arg[ 4].val))[I]
+#define VLIMITS_SIZE(       IUDP)                udps[IUDP].arg[ 4].size
+#define CUR1(               IUDP,I) ((double *) (udps[IUDP].arg[ 5].val))[I]
+#define CUR2(               IUDP,I) ((double *) (udps[IUDP].arg[ 6].val))[I]
+#define CUR3(               IUDP,I) ((double *) (udps[IUDP].arg[ 7].val))[I]
+#define CUR4(               IUDP,I) ((double *) (udps[IUDP].arg[ 8].val))[I]
+#define CUR5(               IUDP,I) ((double *) (udps[IUDP].arg[ 9].val))[I]
+#define CUR6(               IUDP,I) ((double *) (udps[IUDP].arg[10].val))[I]
+#define CUR7(               IUDP,I) ((double *) (udps[IUDP].arg[11].val))[I]
+#define U2(                 IUDP,I) ((double *) (udps[IUDP].arg[12].val))[I]
+#define U3(                 IUDP,I) ((double *) (udps[IUDP].arg[13].val))[I]
+#define U4(                 IUDP,I) ((double *) (udps[IUDP].arg[14].val))[I]
+#define U5(                 IUDP,I) ((double *) (udps[IUDP].arg[15].val))[I]
+#define U6(                 IUDP,I) ((double *) (udps[IUDP].arg[16].val))[I]
+#define SPAN_DEL_M_CTRL(    IUDP,I) ((double *) (udps[IUDP].arg[17].val))[I]
+#define SPAN_DEL_THETA_CTRL(IUDP,I) ((double *) (udps[IUDP].arg[18].val))[I]
+#define SPAN_IN_BETA_CTRL(  IUDP,I) ((double *) (udps[IUDP].arg[19].val))[I]
+#define SPAN_OUT_BETA_CTRL( IUDP,I) ((double *) (udps[IUDP].arg[20].val))[I]
+#define SPAN_CHORD_CTRL(    IUDP,I) ((double *) (udps[IUDP].arg[21].val))[I]
+#define SPAN_THK_C_CTRL(    IUDP,I) ((double *) (udps[IUDP].arg[22].val))[I]
+#define SPAN_DEL_M(         IUDP,I) ((double *) (udps[IUDP].arg[23].val))[I]
+#define SPAN_DEL_THETA(     IUDP,I) ((double *) (udps[IUDP].arg[24].val))[I]
+#define SPAN_IN_BETA(       IUDP,I) ((double *) (udps[IUDP].arg[25].val))[I]
+#define SPAN_OUT_BETA(      IUDP,I) ((double *) (udps[IUDP].arg[26].val))[I]
+#define SPAN_CHORD(         IUDP,I) ((double *) (udps[IUDP].arg[27].val))[I]
+#define SPAN_THK_C(         IUDP,I) ((double *) (udps[IUDP].arg[28].val))[I]
+#define SPAN_U_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[29].val))[I]
+#define SPAN_CURV_CTRL(     IUDP,I) ((double *) (udps[IUDP].arg[30].val))[I]
+#define SPAN_THK_CTRL(      IUDP,I) ((double *) (udps[IUDP].arg[31].val))[I]
+#define OFFSETS(            IUDP,I) ((double *) (udps[IUDP].arg[32].val))[I]
+#define HUB_INF_OFFSET(     IUDP,I) ((double *) (udps[IUDP].arg[33].val))[I]
+#define TIP_INF_OFFSET(     IUDP,I) ((double *) (udps[IUDP].arg[34].val))[I]
+#define NACA_LE_RADIUS(     IUDP,I) ((double *) (udps[IUDP].arg[35].val))[I]
+#define NACA_U_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[36].val))[I]
+#define NACA_T_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[37].val))[I]
+#define NACA_T_TE(          IUDP,I) ((double *) (udps[IUDP].arg[38].val))[I]
 
 /* data about possible arguments */
-static char*  argNames[NUMUDPARGS] = {"ncp",                "filename",         "auxname",              "arg_2",
-                                      /*"chord",            "thk_c",            "inci",                 "devn",*/
+static char*  argNames[NUMUDPARGS] = {"ncp",                "filename",         "auxname",              "arg_2",          "vlimits",
                                       "cur1",               "cur2",             "cur3",                 "cur4",
-                                      "cur5",               "cur6",             "cur7",                 /*"in_beta",        "out_beta",*/
+                                      "cur5",               "cur6",             "cur7",
                                       "u2",                 "u3",               "u4",                   "u5",
                                       "u6",                 "span_del_m_ctrl",  "span_del_theta_ctrl",  "span_in_beta_ctrl", 
                                       "span_out_beta_ctrl", "span_chord_ctrl",  "span_thk_c_ctrl",      "span_del_m",   
@@ -89,10 +98,9 @@ static char*  argNames[NUMUDPARGS] = {"ncp",                "filename",         
                                       "span_thk_c",         "span_u_max",       "span_curv_ctrl",       "span_thk_ctrl",        
                                       "offsets",            "hub_inf_offset",   "tip_inf_offset",       "naca_le_radius",   
                                       "naca_u_max",         "naca_t_max",       "naca_t_te",            };
-static int    argTypes[NUMUDPARGS] = {ATTRINT,  ATTRSTRING, ATTRSTRING, ATTRSTRING, 
-                                      /*ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,*/
+static int    argTypes[NUMUDPARGS] = {ATTRINT,  ATTRSTRING, ATTRSTRING, ATTRSTRING, ATTRREAL,
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   /*ATTRREAL,   ATTRREAL,*/
+                                      ATTRREAL, ATTRREAL,   ATTRREAL,
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL, 
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,    
@@ -100,10 +108,9 @@ static int    argTypes[NUMUDPARGS] = {ATTRINT,  ATTRSTRING, ATTRSTRING, ATTRSTRI
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL, 
                                       ATTRREAL, ATTRREAL,   ATTRREAL,   };
-static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,
-                                      /*0,        0,          0,          0,*/
+static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,          0,
                                       0,        0,          0,          0,
-                                      0,        0,          0,          /*0,          0,*/
+                                      0,        0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,        
                                       0,        0,          0,          0,      
@@ -111,10 +118,9 @@ static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,        
                                       0,        0,          0,          };
-static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
-                                      /*0.,       0.,         0.,         0.,*/
+static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
-                                      0.,       0.,         0.,         /*0.,         0.,*/
+                                      0.,       0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,       
                                       0.,       0.,         0.,         0.,     
@@ -161,10 +167,6 @@ static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
    extern void   BGB3D_SUB (char fname[], char sname[], char arg2[], char arg3[], char arg4[],
                             int len_fname, int len_sname, int len_arg2, int len_arg3, int len_arg4);
 
-   /*void   OVERRIDE_CHORD (        int *nspn, double chord[         ]);
-   void   OVERRIDE_THK_C (        int *nspn, double thk_c[         ]);
-   void   OVERRIDE_INCI (         int *nspn, double inci[          ]);
-   void   OVERRIDE_DEVN (         int *nspn, double devn[          ]);*/
    void   OVERRIDE_CUR1 (               int *nspn, double cur1[                 ]);
    void   OVERRIDE_CUR2 (               int *nspn, double cur2[                 ]);
    void   OVERRIDE_CUR3 (               int *nspn, double cur3[                 ]);
@@ -172,8 +174,6 @@ static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
    void   OVERRIDE_CUR5 (               int *nspn, double cur5[                 ]);
    void   OVERRIDE_CUR6 (               int *nspn, double cur6[                 ]);
    void   OVERRIDE_CUR7 (               int *nspn, double cur7[                 ]);
-   /*void   OVERRIDE_IN_BETA(       int *nspn, double in_beta[       ]);
-   void   OVERRIDE_OUT_BETA(      int *nspn, double out_beta[      ]);*/
    void   OVERRIDE_U2 (                 int *nspn, double u2[                   ]);
    void   OVERRIDE_U3 (                 int *nspn, double u3[                   ]);
    void   OVERRIDE_U4 (                 int *nspn, double u4[                   ]);
@@ -205,10 +205,6 @@ static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
    extern void   bgb3d_sub_(char fname[], char sname[], char arg2[], char arg3[],   char arg4[],
                             int len_fname, int len_sname, int len_arg2, int len_arg3, int len_arg4);
 
-   /*void   override_chord_(         int *nspn, double chord[         ]);
-   void   override_thk_c_(         int *nspn, double thk_c[         ]);
-   void   override_inci_(          int *nspn, double inci[          ]);
-   void   override_devn_(          int *nspn, double devn[          ]);*/
    void   override_cur1_(               int *nspn, double cur1[                 ]);
    void   override_cur2_(               int *nspn, double cur2[                 ]);
    void   override_cur3_(               int *nspn, double cur3[                 ]);
@@ -216,8 +212,6 @@ static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
    void   override_cur5_(               int *nspn, double cur5[                 ]);
    void   override_cur6_(               int *nspn, double cur6[                 ]);
    void   override_cur7_(               int *nspn, double cur7[                 ]);
-   /*void   override_in_beta_(       int *nspn, double in_beta[       ]);
-   void   override_out_beta_(      int *nspn, double out_beta[      ]);*/
    void   override_u2_(                 int *nspn, double u2[                   ]);
    void   override_u3_(                 int *nspn, double u3[                   ]);
    void   override_u4_(                 int *nspn, double u4[                   ]);
@@ -296,21 +290,19 @@ udpExecute(ego  context,                /* (in)  EGADS context */
 
 #define NPNT 1000
     int     ichar, nsec, isec, npnt, ipnt, jpnt, nn, periodic, senses[4];
-    int     oclass, mtype, nbody, *senses2;
-    double  xyz[3*NPNT], rms, xyzNode[18], *xr0=NULL;
-    double  trange[3], data[18], swap;
+    int     oclass, mtype, nbody, nface, *senses2;
+    double  vlimits[2], xyz[3*NPNT], rms, xyzNode[18], *xr0=NULL;
+    double  trange[3], tt, data[18], data2[18], swap;
     double  toler = 1e-4;
     char    filename[257], auxname[257], *auxptr, nextline[257], casename[257];
     FILE    *fp, *fpSrc=NULL, *fpTgt=NULL;
     ego     enodes[5], eedges[4], eloop, *ecurves=NULL;
     ego     ecurve, epcurve, esurface, esurf, eref, efaces[4], emodel, *ebodys;
 
-#ifdef DEBUG
-    printf("udpExecute(context=%llx)\n", (long long)context);
-    printf("ncp(     0) = %d\n", NCP(     0));
-    printf("filename(0) = %s\n", FILENAME(0));
-    printf("auxname( 0) = %s\n", AUXNAME( 0));
-#endif
+    DPRINT1("udpExecute(context=%llx)\n", (long long)context);
+    DPRINT1("ncp(     0) = %d\n", NCP(     0));
+    DPRINT1("filename(0) = %s\n", FILENAME(0));
+    DPRINT1("auxname( 0) = %s\n", AUXNAME( 0));
 
     /* default return values */
     *ebody  = NULL;
@@ -318,7 +310,20 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     *string = NULL;
 
     /* check arguments */
+    if (VLIMITS_SIZE(0) == 2) {
+        vlimits[0] = MAX(0, VLIMITS(0,0));
+        vlimits[1] = MIN(1, VLIMITS(0,1));
+    } else {
+        vlimits[0] = 0;
+        vlimits[1] = 1;
+    }
 
+    if (vlimits[1] <= vlimits[0]) {
+        printf(" udpExecute: vlimits[0] = %f should be less than vlimits[1] = %f\n", vlimits[0], vlimits[1]);
+        status  = EGADS_RANGERR;
+        goto cleanup;
+    }
+    
     /* make the Tblade3_temp temporary directory */
     status = mkdir("Tblade3_temp", 0777);
     if (status < 0) {
@@ -327,10 +332,8 @@ udpExecute(ego  context,                /* (in)  EGADS context */
 
     /* copy the input files to the Tblade3_temp directory */
     snprintf(filename, 256, "Tblade3_temp%c%s", SLASH, basename(FILENAME(0)));
-#ifdef DEBUG
-    printf("FILENAME(0)=%s\n", FILENAME(0));
-    printf("fileame    =%s\n", filename   );
-#endif
+    DPRINT1("FILENAME(0)=%s\n", FILENAME(0));
+    DPRINT1("fileame    =%s\n", filename   );
 
     fpSrc = fopen(FILENAME(0), "r");
     fpTgt = fopen(filename,    "w");
@@ -370,10 +373,8 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     }
 
     snprintf(auxname, 256, "Tblade3_temp%c%s", SLASH, auxptr);
-#ifdef DEBUG
-    printf("AUXNAME(0)=%s\n", AUXNAME(0));
-    printf("auxname   =%s\n", auxname   );
-#endif
+    DPRINT1("AUXNAME(0)=%s\n", AUXNAME(0));
+    DPRINT1("auxname   =%s\n", auxname   );
 
     fpSrc = fopen(AUXNAME(0), "r");
     fpTgt = fopen(auxname,    "w");
@@ -418,11 +419,9 @@ udpExecute(ego  context,                /* (in)  EGADS context */
         goto cleanup;
     }
 
-#ifdef DEBUG
-    printf("ncp(     %d) = %d\n", numUdp, NCP(     numUdp));
-    printf("filename(%d) = %s\n", numUdp, FILENAME(numUdp));
-    printf("auxname( %d) = %s\n", numUdp, AUXNAME( numUdp));
-#endif
+    DPRINT2("ncp(     %d) = %d\n", numUdp, NCP(     numUdp));
+    DPRINT2("filename(%d) = %s\n", numUdp, FILENAME(numUdp));
+    DPRINT2("auxname( %d) = %s\n", numUdp, AUXNAME( numUdp));
 
     /* open the input file to extract the casename and number of sections */
     snprintf(filename, 256, "%s", basename(FILENAME(numUdp)));
@@ -456,10 +455,6 @@ udpExecute(ego  context,                /* (in)  EGADS context */
 
     /* try running Tblade */
 #ifdef WIN32
-    printf("filename=%s\n", filename);
-    printf("strlen(filename)=%d\n", (int)strlen(filename));
-    printf("auxname=%s\n", AUXNAME(numUdp));
-    printf("strlen(auxname)=%d\n", (int)strlen(AUXNAME(numUdp)));
     BGB3D_SUB (filename, AUXNAME(numUdp), ARG_2(numUdp), "", "",
                strlen(filename), strlen(AUXNAME(numUdp)), (int)strlen(ARG_2(numUdp)), strlen(""), strlen(""));
 #else
@@ -513,93 +508,92 @@ udpExecute(ego  context,                /* (in)  EGADS context */
             goto cleanup;
         }
 
-        /* if the hub or tip, generate a fit for the body of revolution */
-        if (isec == 1 || isec == nsec) {
-            for (ipnt = 0; ipnt < npnt; ipnt++) {
-                xr0[3*ipnt  ] =      xyz[3*ipnt  ];
-                xr0[3*ipnt+1] = sqrt(xyz[3*ipnt+1]*xyz[3*ipnt+1]
-                                    +xyz[3*ipnt+2]*xyz[3*ipnt+2]);
-                xr0[3*ipnt+2] = 0;
-            }
-
-            /* order the points based upon x (using SLOW bubble sort) */
-            for (ipnt = 0; ipnt < npnt-1; ipnt++) {
-                for (jpnt = ipnt+1; jpnt < npnt; jpnt++) {
-                    if (xr0[3*ipnt] > xr0[3*jpnt]) {
-                        swap = xr0[3*ipnt  ]; xr0[3*ipnt  ] = xr0[3*jpnt  ]; xr0[3*jpnt  ] = swap;
-                        swap = xr0[3*ipnt+1]; xr0[3*ipnt+1] = xr0[3*jpnt+1]; xr0[3*jpnt+1] = swap;
-                        swap = xr0[3*ipnt+2]; xr0[3*ipnt+2] = xr0[3*jpnt+2]; xr0[3*jpnt+2] = swap;
-                    }
-                }
-            }
-
-            /* arbitrarily extend surface beyond xmin and xmax */
-            if (npnt > 25) {
-                xr0[3] =     xr0[0];
-                xr0[4] =     xr0[1];
-                xr0[5] =     xr0[2];
-                xr0[0] = 2 * xr0[3] - xr0[30];
-                xr0[1] = 2 * xr0[4] - xr0[31];
-                xr0[2] = 2 * xr0[5] - xr0[32];
-
-                xr0[3*npnt-6] =     xr0[3*npnt-3];
-                xr0[3*npnt-5] =     xr0[3*npnt-2];
-                xr0[3*npnt-4] =     xr0[3*npnt-1];
-                xr0[3*npnt-3] = 2 * xr0[3*npnt-6] - xr0[3*npnt-30];
-                xr0[3*npnt-2] = 2 * xr0[3*npnt-5] - xr0[3*npnt-29];
-                xr0[3*npnt-1] = 2 * xr0[3*npnt-4] - xr0[3*npnt-28];
-            }
-
-            /* fit r(x) */
-            status = EG_fitBspline(context, npnt, 1, xr0, 6, &ecurve, &rms);
-#ifdef DEBUG
-            printf("EG_fitBspline -> status=%d, rms=%f\n", status, rms);
-#endif
-            if (status != EGADS_SUCCESS) goto cleanup;
-
-#ifdef GRAFIC
-            /* plot the fit */
-            status = plotCurve(npnt, xr0, ecurve);
-            if (status != EGADS_SUCCESS) goto cleanup;
-#endif
-
-            /* generate a body of revolution */
-            data[0] = data[1] = data[2] = 0;
-            data[3] = 1;
-            data[4] = data[5] = 0;
-            status = EG_makeGeometry(context, SURFACE, REVOLUTION, ecurve,
-                                     NULL, data, &esurface);
-#ifdef DEBUG
-            printf("EG_makeGeometry -> status=%d\n", status);
-#endif
-            if (status != EGADS_SUCCESS) goto cleanup;
-        }
-#ifdef GRAFIC
-        /* compute and plot r(x) */
-        if (isec == 1 || isec == nsec) {
-            int   io_kbd=5, io_scr=6, indgr=1+4+16+64;
-            int   nline=1, ilin[1], isym[1], nper[1];
-            float xplot[250], rplot[250];
-
-            for (ipnt = 0; ipnt < npnt; ipnt++) {
-                xplot[ipnt] = xr0[3*ipnt  ];
-                rplot[ipnt] = xr0[3*ipnt+1];
-            }
-            ilin[0] = -GR_SOLID;
-            isym[0] =  GR_CIRCLE;
-            nper[0] = npnt;
-
-            grinit_(&io_kbd, &io_scr, "rad(x)", strlen("rad(x)"));
-            grline_(ilin, isym, &nline, "~x~r~ ", &indgr,
-                    xplot, rplot, nper, strlen("~x~r "));
-        }
-#endif
+//$$$        /* if the hub or tip, generate a fit for the body of revolution */
+//$$$        if (isec == 1 || isec == nsec) {
+//$$$            for (ipnt = 0; ipnt < npnt; ipnt++) {
+//$$$                xr0[3*ipnt  ] =      xyz[3*ipnt  ];
+//$$$                xr0[3*ipnt+1] = sqrt(xyz[3*ipnt+1]*xyz[3*ipnt+1]
+//$$$                                    +xyz[3*ipnt+2]*xyz[3*ipnt+2]);
+//$$$                xr0[3*ipnt+2] = 0;
+//$$$            }
+//$$$
+//$$$            /* order the points based upon x (using SLOW bubble sort) */
+//$$$            for (ipnt = 0; ipnt < npnt-1; ipnt++) {
+//$$$                for (jpnt = ipnt+1; jpnt < npnt; jpnt++) {
+//$$$                    if (xr0[3*ipnt] > xr0[3*jpnt]) {
+//$$$                        swap = xr0[3*ipnt  ]; xr0[3*ipnt  ] = xr0[3*jpnt  ]; xr0[3*jpnt  ] = swap;
+//$$$                        swap = xr0[3*ipnt+1]; xr0[3*ipnt+1] = xr0[3*jpnt+1]; xr0[3*jpnt+1] = swap;
+//$$$                        swap = xr0[3*ipnt+2]; xr0[3*ipnt+2] = xr0[3*jpnt+2]; xr0[3*jpnt+2] = swap;
+//$$$                    }
+//$$$                }
+//$$$            }
+//$$$
+//$$$            /* arbitrarily extend surface beyond xmin and xmax */
+//$$$            if (npnt > 25) {
+//$$$                xr0[3] =     xr0[0];
+//$$$                xr0[4] =     xr0[1];
+//$$$                xr0[5] =     xr0[2];
+//$$$                xr0[0] = 2 * xr0[3] - xr0[30];
+//$$$                xr0[1] = 2 * xr0[4] - xr0[31];
+//$$$                xr0[2] = 2 * xr0[5] - xr0[32];
+//$$$
+//$$$                xr0[3*npnt-6] =     xr0[3*npnt-3];
+//$$$                xr0[3*npnt-5] =     xr0[3*npnt-2];
+//$$$                xr0[3*npnt-4] =     xr0[3*npnt-1];
+//$$$                xr0[3*npnt-3] = 2 * xr0[3*npnt-6] - xr0[3*npnt-30];
+//$$$                xr0[3*npnt-2] = 2 * xr0[3*npnt-5] - xr0[3*npnt-29];
+//$$$                xr0[3*npnt-1] = 2 * xr0[3*npnt-4] - xr0[3*npnt-28];
+//$$$            }
+//$$$
+//$$$            /* fit r(x) */
+//$$$            status = EG_fitBspline(context, npnt, 1, xr0, 6, &ecurve, &rms);
+//$$$#ifdef DEBUG 
+//$$$            printf("EG_fitBspline -> status=%d, rms=%f\n", status, rms);
+//$$$#endif
+//$$$            if (status != EGADS_SUCCESS) goto cleanup;
+//$$$
+//$$$#ifdef GRAFIC
+//$$$            /* plot the fit */
+//$$$            status = plotCurve(npnt, xr0, ecurve);
+//$$$            if (status != EGADS_SUCCESS) goto cleanup;
+//$$$#endif
+//$$$
+//$$$            /* generate a body of revolution */
+//$$$            data[0] = data[1] = data[2] = 0;
+//$$$            data[3] = 1;
+//$$$            data[4] = data[5] = 0;
+//$$$            status = EG_makeGeometry(context, SURFACE, REVOLUTION, ecurve,
+//$$$                                     NULL, data, &esurface);
+//$$$#ifdef DEBUG
+//$$$            printf("EG_makeGeometry -> status=%d\n", status);
+//$$$#endif
+//$$$            if (status != EGADS_SUCCESS) goto cleanup;
+//$$$        }
+//$$$
+//$$$#ifdef GRAFIC
+//$$$        /* compute and plot r(x) */
+//$$$        if (isec == 1 || isec == nsec) {
+//$$$            int   io_kbd=5, io_scr=6, indgr=1+4+16+64;
+//$$$            int   nline=1, ilin[1], isym[1], nper[1];
+//$$$            float xplot[250], rplot[250];
+//$$$
+//$$$            for (ipnt = 0; ipnt < npnt; ipnt++) {
+//$$$                xplot[ipnt] = xr0[3*ipnt  ];
+//$$$                rplot[ipnt] = xr0[3*ipnt+1];
+//$$$            }
+//$$$            ilin[0] = -GR_SOLID;
+//$$$            isym[0] =  GR_CIRCLE;
+//$$$            nper[0] = npnt;
+//$$$
+//$$$            grinit_(&io_kbd, &io_scr, "rad(x)", strlen("rad(x)"));
+//$$$            grline_(ilin, isym, &nline, "~x~r~ ", &indgr,
+//$$$                    xplot, rplot, nper, strlen("~x~r "));
+//$$$        }
+//$$$#endif
 
         /* generate a fit of the curve */
         status = EG_fitBspline(context, npnt, 3, xyz, NCP(numUdp), &(ecurves[isec-1]), &rms);
-#ifdef DEBUG
-        printf("EG_fitBspline -> status=%d, rms=%f\n", status, rms);
-#endif
+        DPRINT2("EG_fitBspline -> status=%d, rms=%f\n", status, rms);
         if (status != EGADS_SUCCESS) goto cleanup;
 
 #ifdef GRAFIC
@@ -613,92 +607,90 @@ udpExecute(ego  context,                /* (in)  EGADS context */
         trange[2] =  trange[1];
         trange[1] = (trange[0] + trange[2]) / 2;
 
-#ifdef DEBUG
-        printf("EG_getRange -> status=%d\n", status);
-        printf("trange =%f %f %f\n", trange[0], trange[1], trange[2]);
-#endif
+        DPRINT1("EG_getRange -> status=%d\n", status);
+        DPRINT3("trange =%f %f %f\n", trange[0], trange[1], trange[2]);
         if (status != EGADS_SUCCESS) goto cleanup;
 
-        /* special processing for hub and tip */
-        if (isec == 1 || isec == nsec) {
-
-            /* create the two Nodes for this section */
-            status = EG_evaluate(ecurves[isec-1], trange, xyzNode);
-#ifdef DEBUG
-            printf("EG_evaluate -> status=%d, xyzNode=%f %f %f\n",
-                   status, xyzNode[0], xyzNode[1], xyzNode[2]);
-#endif
-            if (status != EGADS_SUCCESS) goto cleanup;
-
-            status = EG_makeTopology(context, NULL, NODE, 0,
-                                     xyzNode, 0, NULL, NULL, &(enodes[0]));
-#ifdef DEBUG
-            printf("EG_makeTopology(node0) -> status=%d\n", status);
-#endif
-            if (status != EGADS_SUCCESS) goto cleanup;
-
-            status = EG_evaluate(ecurves[isec-1], &(trange[1]), xyzNode);
-#ifdef DEBUG
-            printf("EG_evaluate -> status=%d, xyzNode=%f %f %f\n",
-                   status, xyzNode[0], xyzNode[1], xyzNode[2]);
-#endif
-            if (status != EGADS_SUCCESS) goto cleanup;
-
-            status = EG_makeTopology(context, NULL, NODE, 0,
-                                     xyzNode, 0, NULL, NULL, &(enodes[1]));
-#ifdef DEBUG
-            printf("EG_makeTopology(node1) -> status=%d\n", status);
-#endif
-            if (status != EGADS_SUCCESS) goto cleanup;
-
-            enodes[2] = enodes[0];
-
-            /* create the two Edges for this section */
-            status = EG_makeTopology(context, ecurves[isec-1], EDGE, TWONODE,
-                                     trange, 2, &(enodes[0]), NULL, &(eedges[0]));
-#ifdef DEBUG
-            printf("EG_makeTopology(edge0) -> status=%d\n", status);
-#endif
-            if (status != EGADS_SUCCESS) goto cleanup;
-
-            status = EG_makeTopology(context, ecurves[isec-1], EDGE, TWONODE,
-                                     &(trange[1]), 2, &(enodes[1]), NULL, &(eedges[1]));
-#ifdef DEBUG
-            printf("EG_makeTopology(edge1) -> status=%d\n", status);
-#endif
-            if (status != EGADS_SUCCESS) goto cleanup;
-
-            /* create the Loop for this section */
-            status = EG_otherCurve(esurface, ecurves[isec-1], toler, &epcurve);
-#ifdef DEBUG
-            printf("EG_otherCurve -> status=%d\n", status);
-#endif
-            if (status != EGADS_SUCCESS) goto cleanup;
-
-            eedges[2] = epcurve;
-            eedges[3] = epcurve;
-
-            senses[0] = SFORWARD;
-            senses[1] = SFORWARD;
-            status = EG_makeTopology(context, esurface, LOOP, CLOSED,
-                                     NULL, 2, eedges, senses, &eloop);
-#ifdef DEBUG
-            printf("EG_makeTopology(loop) -> status=%d\n", status);
-#endif
-            if (status != EGADS_SUCCESS) goto cleanup;
-
-            if (isec == 1) {
-                status = EG_makeTopology(context, esurface, FACE, SFORWARD,
-                                         NULL, 1, &eloop, senses, &(efaces[2]));
-            } else {
-                status = EG_makeTopology(context, esurface, FACE, SFORWARD,
-                                         NULL, 1, &eloop, senses, &(efaces[3]));
-            }
-#ifdef DEBUG
-            printf("EG_makeTopology(face) -> status=%d\n", status);
-#endif
-            if (status != EGADS_SUCCESS) goto cleanup;
-        }
+//$$$        /* special processing for hub and tip */
+//$$$        if (isec == 1 || isec == nsec) {
+//$$$
+//$$$            /* create the two Nodes for this section */
+//$$$            status = EG_evaluate(ecurves[isec-1], trange, xyzNode);
+//$$$#ifdef DEBUG
+//$$$            printf("EG_evaluate -> status=%d, xyzNode=%f %f %f\n",
+//$$$                   status, xyzNode[0], xyzNode[1], xyzNode[2]);
+//$$$#endif
+//$$$            if (status != EGADS_SUCCESS) goto cleanup;
+//$$$
+//$$$            status = EG_makeTopology(context, NULL, NODE, 0,
+//$$$                                     xyzNode, 0, NULL, NULL, &(enodes[0]));
+//$$$#ifdef DEBUG
+//$$$            printf("EG_makeTopology(node0) -> status=%d\n", status);
+//$$$#endif
+//$$$            if (status != EGADS_SUCCESS) goto cleanup;
+//$$$
+//$$$            status = EG_evaluate(ecurves[isec-1], &(trange[1]), xyzNode);
+//$$$#ifdef DEBUG
+//$$$            printf("EG_evaluate -> status=%d, xyzNode=%f %f %f\n",
+//$$$                   status, xyzNode[0], xyzNode[1], xyzNode[2]);
+//$$$#endif
+//$$$            if (status != EGADS_SUCCESS) goto cleanup;
+//$$$
+//$$$            status = EG_makeTopology(context, NULL, NODE, 0,
+//$$$                                     xyzNode, 0, NULL, NULL, &(enodes[1]));
+//$$$#ifdef DEBUG
+//$$$            printf("EG_makeTopology(node1) -> status=%d\n", status);
+//$$$#endif
+//$$$            if (status != EGADS_SUCCESS) goto cleanup;
+//$$$
+//$$$            enodes[2] = enodes[0];
+//$$$
+//$$$            /* create the two Edges for this section */
+//$$$            status = EG_makeTopology(context, ecurves[isec-1], EDGE, TWONODE,
+//$$$                                     trange, 2, &(enodes[0]), NULL, &(eedges[0]));
+//$$$#ifdef DEBUG
+//$$$            printf("EG_makeTopology(edge0) -> status=%d\n", status);
+//$$$#endif
+//$$$            if (status != EGADS_SUCCESS) goto cleanup;
+//$$$
+//$$$            status = EG_makeTopology(context, ecurves[isec-1], EDGE, TWONODE,
+//$$$                                     &(trange[1]), 2, &(enodes[1]), NULL, &(eedges[1]));
+//$$$#ifdef DEBUG
+//$$$            printf("EG_makeTopology(edge1) -> status=%d\n", status);
+//$$$#endif
+//$$$            if (status != EGADS_SUCCESS) goto cleanup;
+//$$$
+//$$$            /* create the Loop for this section */
+//$$$            status = EG_otherCurve(esurface, ecurves[isec-1], toler, &epcurve);
+//$$$#ifdef DEBUG
+//$$$            printf("EG_otherCurve -> status=%d\n", status);
+//$$$#endif
+//$$$            if (status != EGADS_SUCCESS) goto cleanup;
+//$$$
+//$$$            eedges[2] = epcurve;
+//$$$            eedges[3] = epcurve;
+//$$$
+//$$$            senses[0] = SFORWARD;
+//$$$            senses[1] = SFORWARD;
+//$$$            status = EG_makeTopology(context, esurface, LOOP, CLOSED,
+//$$$                                     NULL, 2, eedges, senses, &eloop);
+//$$$#ifdef DEBUG
+//$$$            printf("EG_makeTopology(loop) -> status=%d\n", status);
+//$$$#endif
+//$$$            if (status != EGADS_SUCCESS) goto cleanup;
+//$$$
+//$$$            if (isec == 1) {
+//$$$                status = EG_makeTopology(context, esurface, FACE, SFORWARD,
+//$$$                                         NULL, 1, &eloop, senses, &(efaces[2]));
+//$$$            } else {
+//$$$                status = EG_makeTopology(context, esurface, FACE, SFORWARD,
+//$$$                                         NULL, 1, &eloop, senses, &(efaces[3]));
+//$$$            }
+//$$$#ifdef DEBUG
+//$$$            printf("EG_makeTopology(face) -> status=%d\n", status);
+//$$$#endif
+//$$$            if (status != EGADS_SUCCESS) goto cleanup;
+//$$$        }
 
         fclose(fp);
 
@@ -706,49 +698,192 @@ udpExecute(ego  context,                /* (in)  EGADS context */
         xr0 = NULL;
     }
 
-    /* create the blde surface */
+    /* create the blade surface */
     status = EG_skinning(context, nsec, ecurves, 3, &esurf);
-#ifdef DEBUG
-    printf("EG_skinning -> status=%d\n", status);
+    DPRINT1("EG_skinning -> status=%d\n", status);
 
+#ifdef DEBUG
     printf("esurf:\n");
     ocsmPrintEgo(esurf);
 #endif
     if (status != EGADS_SUCCESS) goto cleanup;
-        
+
     /* break the surface into 2 Faces */
     data[0] = trange[0];
     data[1] = trange[1];
-    data[2] = 0;
-    data[3] = 1;
+    data[2] = vlimits[0];
+    data[3] = vlimits[1];
+    DPRINT4("data(limits)=%f, %f, %f, %f\n", data[0], data[1], data[2], data[3]);
+    
     status = EG_makeFace(esurf, SFORWARD, data, &(efaces[0]));
-#ifdef DEBUG
-    printf("EG_makeFace -> status=%d\n", status);
-#endif
+    DPRINT1("EG_makeFace -> status=%d\n", status);
     if (status != EGADS_SUCCESS) goto cleanup;
 
     data[0] = trange[1];
     data[1] = trange[2];
-    data[2] = 0;
-    data[3] = 1;
+    data[2] = vlimits[0];
+    data[3] = vlimits[1];
+    DPRINT4("data(limits)=%f, %f, %f, %f\n", data[0], data[1], data[2], data[3]);
+
     status = EG_makeFace(esurf, SFORWARD, data, &(efaces[1]));
-#ifdef DEBUG
-    printf("EG_makeFace -> status=%d\n", status);
-#endif
+    DPRINT1("EG_makeFace -> status=%d\n", status);
     if (status != EGADS_SUCCESS) goto cleanup;
 
-    /* sew the Faces into a SolidBody */
-    status = EG_sewFaces(4, efaces, toler, 0, &emodel);
-#ifdef DEBUG
-    printf("EG_sewFaces -> status=%d\n", status);
+    nface = 2;
+    
+    /* generate the hub and tip Faces */
+    for (isec = 1; isec <= nsec; isec += (nsec-1)) {
+        if (isec == 1    && vlimits[0] > 0) continue;
+        if (isec == nsec && vlimits[1] < 1) continue;
+
+        DPRINT1("making end-cap to produce Face[%d]\n", nface);
+
+        /* extract the Edges at constant V on the two Faces */
+        if (isec == 1) {
+            status = EG_isoCline(esurf, VISO, vlimits[0], &ecurve);
+        } else {
+            status = EG_isoCline(esurf, VISO, vlimits[1], &ecurve);
+        }
+        DPRINT1("EG_isoCline -> status=%d\n", status);
+
+        /* make a fit of r vs. x*/
+        xr0 = (double*) malloc(3*npnt*sizeof(double));
+        if (xr0 == NULL) {
+            status = EGADS_MALLOC;
+            goto cleanup;
+        }
+    
+        status = EG_getRange(ecurve, trange, &periodic);
+        DPRINT3("EG_getRange -> status=%d, trange=%f, %f\n", status, trange[0], trange[1]);
+
+        for (ipnt = 0; ipnt < npnt; ipnt++) {
+            tt = trange[0] + (double)(ipnt) / (double)(npnt-1) * (trange[1] - trange[0]);
+
+            status = EG_evaluate(ecurve, &tt, data2);
+
+            xr0[3*ipnt  ] = data2[0];
+            xr0[3*ipnt+1] = sqrt(data2[1]*data2[1] + data2[2]*data2[2]);
+            xr0[3*ipnt+2] = 0;
+        }
+
+        /* order the points based upon x (using SLOW bubble sort) */
+        for (ipnt = 0; ipnt < npnt-1; ipnt++) {
+            for (jpnt = ipnt+1; jpnt < npnt; jpnt++) {
+                if (xr0[3*ipnt] > xr0[3*jpnt]) {
+                    swap = xr0[3*ipnt  ]; xr0[3*ipnt  ] = xr0[3*jpnt  ]; xr0[3*jpnt  ] = swap;
+                    swap = xr0[3*ipnt+1]; xr0[3*ipnt+1] = xr0[3*jpnt+1]; xr0[3*jpnt+1] = swap;
+                    swap = xr0[3*ipnt+2]; xr0[3*ipnt+2] = xr0[3*jpnt+2]; xr0[3*jpnt+2] = swap;
+                }
+            }
+        }
+        
+        /* arbitrarily extend surface beyond xmin and xmax */
+        xr0[3] =     xr0[0];
+        xr0[4] =     xr0[1];
+        xr0[5] =     xr0[2];
+        xr0[0] = 2 * xr0[3] - xr0[30];
+        xr0[1] = 2 * xr0[4] - xr0[31];
+        xr0[2] = 2 * xr0[5] - xr0[32];
+
+        xr0[3*npnt-6] =     xr0[3*npnt-3];
+        xr0[3*npnt-5] =     xr0[3*npnt-2];
+        xr0[3*npnt-4] =     xr0[3*npnt-1];
+        xr0[3*npnt-3] = 2 * xr0[3*npnt-6] - xr0[3*npnt-30];
+        xr0[3*npnt-2] = 2 * xr0[3*npnt-5] - xr0[3*npnt-29];
+        xr0[3*npnt-1] = 2 * xr0[3*npnt-4] - xr0[3*npnt-28];
+
+        status = EG_fitBspline(context, npnt, 1, xr0, 6, &ecurve, &rms);
+        DPRINT2("EG_fitBspline -> status=%d, rms=%f\n", status, rms);
+        if (status != EGADS_SUCCESS) goto cleanup;
+
+#ifdef GRAFIC
+        /* plot the fit */
+        status = plotCurve(npnt, xr0, ecurve);
+        if (status != EGADS_SUCCESS) goto cleanup;
 #endif
+    
+        /* make a surface of revolution */
+        data[0] = data[1] = data[2] = 0;
+        data[3] = 1;
+        data[4] = data[5] = 0;
+        status = EG_makeGeometry(context, SURFACE, REVOLUTION, ecurve,
+                                 NULL, data, &esurface);
+        DPRINT1("EG_makeGeometry -> status=%d\n", status);
+        if (status != EGADS_SUCCESS) goto cleanup;
+
+        /* create the Face */
+        status = EG_getRange(ecurves[isec-1], trange, &periodic);
+        trange[2] =  trange[1];
+        trange[1] = (trange[0] + trange[2]) / 2;
+
+        DPRINT1("EG_getRange -> status=%d\n", status);
+        DPRINT3("trange =%f %f %f\n", trange[0], trange[1], trange[2]);
+        if (status != EGADS_SUCCESS) goto cleanup;
+
+        status = EG_evaluate(ecurves[isec-1], &(trange[0]), xyzNode);
+        DPRINT4("EG_evaluate -> status=%d, xyzNode=%f %f %f\n",
+               status, xyzNode[0], xyzNode[1], xyzNode[2]);
+        if (status != EGADS_SUCCESS) goto cleanup;
+
+        status = EG_makeTopology(context, NULL, NODE, 0,
+                                 xyzNode, 0, NULL, NULL, &(enodes[0]));
+        DPRINT1("EG_makeTopology(node0) -> status=%d\n", status);
+        if (status != EGADS_SUCCESS) goto cleanup;
+
+        status = EG_evaluate(ecurves[isec-1], &(trange[1]), xyzNode);
+        DPRINT4("EG_evaluate -> status=%d, xyzNode=%f %f %f\n",
+                status, xyzNode[0], xyzNode[1], xyzNode[2]);
+        if (status != EGADS_SUCCESS) goto cleanup;
+
+        status = EG_makeTopology(context, NULL, NODE, 0,
+                                 xyzNode, 0, NULL, NULL, &(enodes[1]));
+        DPRINT1("EG_makeTopology(node1) -> status=%d\n", status);
+        if (status != EGADS_SUCCESS) goto cleanup;
+
+        enodes[2] = enodes[0];
+
+    /* create the two Edges for this section */
+        status = EG_makeTopology(context, ecurves[isec-1], EDGE, TWONODE,
+                                 trange, 2, &(enodes[0]), NULL, &(eedges[0]));
+        DPRINT1("EG_makeTopology(edge0) -> status=%d\n", status);
+        if (status != EGADS_SUCCESS) goto cleanup;
+
+        status = EG_makeTopology(context, ecurves[isec-1], EDGE, TWONODE,
+                                 &(trange[1]), 2, &(enodes[1]), NULL, &(eedges[1]));
+        DPRINT1("EG_makeTopology(edge1) -> status=%d\n", status);
+        if (status != EGADS_SUCCESS) goto cleanup;
+
+        /* create the Loop for this section */
+        status = EG_otherCurve(esurface, ecurves[isec-1], 10*toler, &epcurve);
+        DPRINT1("EG_otherCurve -> status=%d\n", status);
+        if (status != EGADS_SUCCESS) goto cleanup;
+
+        eedges[2] = epcurve;
+        eedges[3] = epcurve;
+
+        senses[0] = SFORWARD;
+        senses[1] = SFORWARD;
+        status = EG_makeTopology(context, esurface, LOOP, CLOSED,
+                                 NULL, 2, eedges, senses, &eloop);
+        DPRINT1("EG_makeTopology(loop) -> status=%d\n", status);
+        if (status != EGADS_SUCCESS) goto cleanup;
+
+        status = EG_makeTopology(context, esurface, FACE, SFORWARD,
+                                 NULL, 1, &eloop, senses, &(efaces[nface]));
+        DPRINT1("EG_makeTopology(face) -> status=%d\n", status);
+        if (status != EGADS_SUCCESS) goto cleanup;
+
+        nface++;
+    }
+
+    /* sew the Faces into a SolidBody */
+    status = EG_sewFaces(nface, efaces, toler, 0, &emodel);
+    DPRINT1("EG_sewFaces -> status=%d\n", status);
     if (status != EGADS_SUCCESS) goto cleanup;
 
     status = EG_getTopology(emodel, &eref, &oclass, &mtype,
                             data, &nbody, &ebodys, &senses2);
-#ifdef DEBUG
-    printf("EG_getTopology(model) -> status=%d, nbody=%d\n", status, nbody);
-#endif
+    DPRINT2("EG_getTopology(model) -> status=%d, nbody=%d\n", status, nbody);
     if (status != EGADS_SUCCESS) goto cleanup;
 
     *ebody = ebodys[0];
@@ -758,9 +893,7 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     /* remember this model (body) */
     udps[numUdp].ebody = *ebody;
 
-#ifdef DEBUG
-    printf("udpExecute -> *ebody=%llx\n", (long long)(*ebody));
-#endif
+    DPRINT1("udpExecute -> *ebody=%llx\n", (long long)(*ebody));
 
 cleanup:
 
@@ -822,122 +955,6 @@ udpSensitivity(ego    ebody,            /* (in)  Body pointer */
 /*
  ************************************************************************
  *                                                                      *
- *   override_chord - callback from T-Blade3 to change chord array      *
- *                                                                      *
- ************************************************************************
- */
-
-/*#ifdef WIN32
-void OVERRIDE_CHORD (int *nspn, double chord[])
-#else
-void override_chord_(int *nspn, double chord[])
-#endif
-{
-    int    ispn, narg=3;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding chord\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            chord[ispn] = CHORD(numUdp,ispn);
-            printf("     chord(%2d) = %12.5f\n", ispn+1, chord[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding chord (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}*/
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_thk_c - callback from T-Blade3 to change thk_c array      *
- *                                                                      *
- ************************************************************************
- */
-
-/*#ifdef WIN32
-void OVERRIDE_THK_C (int *nspn, double thk_c[])
-#else
-void override_thk_c_(int *nspn, double thk_c[])
-#endif
-{
-    int    ispn, narg=4;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding thk_c\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            thk_c[ispn] = THK_C(numUdp,ispn);
-            printf("     thk_c(%2d) = %12.5f\n", ispn+1, thk_c[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding thk_c (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}*/
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_inci - callback from T-Blade3 to change inci array        *
- *                                                                      *
- ************************************************************************
- */
-
-/*#ifdef WIN32
-void OVERRIDE_INCI (int *nspn, double inci[])
-#else
-void override_inci_(int *nspn, double inci[])
-#endif
-{
-    int    ispn, narg=5;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding inci\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            inci[ispn] = INCI(numUdp,ispn);
-            printf("     inci(%2d) = %12.5f\n", ispn+1, inci[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding inci (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}*/
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_devn - callback from T-Blade3 to change devn array        *
- *                                                                      *
- ************************************************************************
- */
-
-/*#ifdef WIN32
-void OVERRIDE_DEVN (int *nspn, double devn[])
-#else
-void override_devn_(int *nspn, double devn[])
-#endif
-{
-    int    ispn, narg=6;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding devn\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            devn[ispn] = DEVN(numUdp,ispn);
-            printf("     devn(%2d) = %12.5f\n", ispn+1, devn[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding devn (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}*/
-
-
-/*
- ************************************************************************
- *                                                                      *
  *   override_cur1 - callback from T-Blade3 to change cur1 array        *
  *                                                                      *
  ************************************************************************
@@ -949,7 +966,7 @@ void OVERRIDE_CUR1 (int *nspn, double cur1[])
 void override_cur1_(int *nspn, double cur1[])
 #endif
 {
-    int    ispn, narg=4;
+    int    ispn, narg=5;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur1\n");
@@ -978,7 +995,7 @@ void OVERRIDE_CUR2 (int *nspn, double cur2[])
 void override_cur2_(int *nspn, double cur2[])
 #endif
 {
-    int    ispn, narg=5;
+    int    ispn, narg=6;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur2\n");
@@ -1007,7 +1024,7 @@ void OVERRIDE_CUR3 (int *nspn, double cur3[])
 void override_cur3_(int *nspn, double cur3[])
 #endif
 {
-    int    ispn, narg=6;
+    int    ispn, narg=7;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur3\n");
@@ -1036,7 +1053,7 @@ void OVERRIDE_CUR4 (int *nspn, double cur4[])
 void override_cur4_(int *nspn, double cur4[])
 #endif
 {
-    int    ispn, narg=7;
+    int    ispn, narg=8;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur4\n");
@@ -1065,7 +1082,7 @@ void OVERRIDE_CUR5 (int *nspn, double cur5[])
 void override_cur5_(int *nspn, double cur5[])
 #endif
 {
-    int    ispn, narg=8;
+    int    ispn, narg=9;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur5\n");
@@ -1094,7 +1111,7 @@ void OVERRIDE_CUR6 (int *nspn, double cur6[])
 void override_cur6_(int *nspn, double cur6[])
 #endif
 {
-    int    ispn, narg=9;
+    int    ispn, narg=10;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur6\n");
@@ -1123,7 +1140,7 @@ void OVERRIDE_CUR7 (int *nspn, double cur7[])
 void override_cur7_(int *nspn, double cur7[])
 #endif
 {
-    int    ispn, narg=10;
+    int    ispn, narg=11;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding cur7\n");
@@ -1141,64 +1158,6 @@ void override_cur7_(int *nspn, double cur7[])
 /*
  ************************************************************************
  *                                                                      *
- *   override_in_beta - callback from T-Blade3 to change in_beta array  *
- *                                                                      *
- ************************************************************************
- */
-
-/*#ifdef WIN32
-void OVERRIDE_IN_BETA (int *nspn, double in_beta[])
-#else
-void override_in_beta_(int *nspn, double in_beta[])
-#endif
-{
-    int    ispn, narg=13;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding in_beta\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            in_beta[ispn] = IN_BETA(numUdp,ispn);
-            printf("     in_beta(%2d) = %12.5f\n", ispn+1, in_beta[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding in_beta (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}*/
-
-
-/*
- ************************************************************************
- *                                                                      *
- *   override_out_beta - callback from T-Blade3 to change out_beta array*
- *                                                                      *
- ************************************************************************
- */
-
-/*#ifdef WIN32
-void OVERRIDE_OUT_BETA (int *nspn, double out_beta[])
-#else
-void override_out_beta_(int *nspn, double out_beta[])
-#endif
-{
-    int    ispn, narg=14;
-
-    if (udps[numUdp].arg[narg].size == *nspn) {
-        printf(" ==> overriding out_beta\n");
-        for (ispn = 0; ispn < *nspn; ispn++) {
-            out_beta[ispn] = OUT_BETA(numUdp,ispn);
-            printf("     out_beta(%2d) = %12.5f\n", ispn+1, out_beta[ispn]);
-        }
-    } else {
-        printf(" ==> not overriding out_beta (nspn=%d but size=%d)\n",
-               *nspn, udps[numUdp].arg[narg].size);
-    }
-}*/
-
-
-/*
- ************************************************************************
- *                                                                      *
  *   override_u2 - callback from T-Blade3 to change u2 array            *
  *                                                                      *
  ************************************************************************
@@ -1210,7 +1169,7 @@ void OVERRIDE_U2 (int *nspn, double u2[])
 void override_u2_(int *nspn, double u2[])
 #endif
 {
-    int    ispn, narg=11;
+    int    ispn, narg=12;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding u2\n");
@@ -1239,7 +1198,7 @@ void OVERRIDE_U3 (int *nspn, double u3[])
 void override_u3_(int *nspn, double u3[])
 #endif
 {
-    int    ispn, narg=12;
+    int    ispn, narg=13;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding u3\n");
@@ -1268,7 +1227,7 @@ void OVERRIDE_U4 (int *nspn, double u4[])
 void override_u4_(int *nspn, double u4[])
 #endif
 {
-    int    ispn, narg=13;
+    int    ispn, narg=14;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding u4\n");
@@ -1297,7 +1256,7 @@ void OVERRIDE_U5 (int *nspn, double u5[])
 void override_u5_(int *nspn, double u5[])
 #endif
 {
-    int    ispn, narg=14;
+    int    ispn, narg=15;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding u5\n");
@@ -1326,7 +1285,7 @@ void OVERRIDE_U6 (int *nspn, double u6[])
 void override_u6_(int *nspn, double u6[])
 #endif
 {
-    int    ispn, narg=15;
+    int    ispn, narg=16;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding u6\n");
@@ -1356,7 +1315,7 @@ void OVERRIDE_SPAN_DEL_M_CTRL (int *nspn, double span_del_m_ctrl[])
 void override_span_del_m_ctrl_(int *nspn, double span_del_m_ctrl[])
 #endif
 {
-    int    ispn, narg = 16;
+    int    ispn, narg=17;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_del_m_ctrl\n");
@@ -1386,7 +1345,7 @@ void OVERRIDE_SPAN_DEL_THETA_CTRL (int *nspn, double span_del_theta_ctrl[])
 void override_span_del_theta_ctrl_(int *nspn, double span_del_theta_ctrl[])
 #endif
 {
-    int    ispn, narg = 17;
+    int    ispn, narg=18;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_del_theta_ctrl\n");
@@ -1416,7 +1375,7 @@ void OVERRIDE_SPAN_IN_BETA_CTRL (int *nspn, double span_in_beta_ctrl[])
 void override_span_in_beta_ctrl_(int *nspn, double span_in_beta_ctrl[])
 #endif
 {
-    int    ispn, narg = 18;
+    int    ispn, narg=19;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_in_beta_ctrl\n");
@@ -1446,7 +1405,7 @@ void OVERRIDE_SPAN_OUT_BETA_CTRL (int *nspn, double span_out_beta_ctrl[])
 void override_span_out_beta_ctrl_(int *nspn, double span_out_beta_ctrl[])
 #endif
 {
-    int    ispn, narg = 19;
+    int    ispn, narg=20;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_out_beta_ctrl\n");
@@ -1476,7 +1435,7 @@ void OVERRIDE_SPAN_CHORD_CTRL (int *nspn, double span_chord_ctrl[])
 void override_span_chord_ctrl_(int *nspn, double span_chord_ctrl[])
 #endif
 {
-    int    ispn, narg=20;
+    int    ispn, narg=21;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_chord_ctrl\n");
@@ -1506,7 +1465,7 @@ void OVERRIDE_SPAN_THK_C_CTRL (int *nspn, double span_thk_c_ctrl[])
 void override_span_thk_c_ctrl_(int *nspn, double span_thk_c_ctrl[])
 #endif
 {
-    int   ispn, narg=21;
+    int   ispn, narg=22;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_thk_c_ctrl\n");
@@ -1536,7 +1495,7 @@ void OVERRIDE_SPAN_DEL_M (int *nspn, double span_del_m[])
 void override_span_del_m_(int *nspn, double span_del_m[])
 #endif
 {
-    int    ispn, narg = 22;
+    int    ispn, narg=23;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_del_m\n");
@@ -1566,7 +1525,7 @@ void OVERRIDE_SPAN_DEL_THETA (int *nspn, double span_del_theta[])
 void override_span_del_theta_(int *nspn, double span_del_theta[])
 #endif
 {
-    int    ispn, narg = 23;
+    int    ispn, narg=24;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_del_theta\n");
@@ -1596,7 +1555,7 @@ void OVERRIDE_SPAN_IN_BETA (int *nspn, double span_in_beta[])
 void override_span_in_beta_(int *nspn, double span_in_beta[])
 #endif
 {
-    int    ispn, narg=24;
+    int    ispn, narg=25;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_in_beta\n");
@@ -1626,7 +1585,7 @@ void OVERRIDE_SPAN_OUT_BETA (int *nspn, double span_out_beta[])
 void override_span_out_beta_(int *nspn, double span_out_beta[])
 #endif
 {
-    int    ispn, narg=25;
+    int    ispn, narg=26;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_out_beta\n");
@@ -1656,7 +1615,7 @@ void OVERRIDE_SPAN_CHORD (int *nspn, double span_chord[])
 void override_span_chord_(int *nspn, double span_chord[])
 #endif
 {
-    int    ispn, narg=26;
+    int    ispn, narg=27;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_chord\n");
@@ -1686,7 +1645,7 @@ void OVERRIDE_SPAN_THK_C (int *nspn, double span_thk_c[])
 void override_span_thk_c_(int *nspn, double span_thk_c[])
 #endif
 {
-    int    ispn, narg=27;
+    int    ispn, narg=28;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_thk_c\n");
@@ -1716,7 +1675,7 @@ void OVERRIDE_SPAN_U_MAX (int *nspn, double span_u_max[])
 void override_span_u_max_(int *nspn, double span_u_max[])
 #endif
 {
-    int    ispn, narg=28;
+    int    ispn, narg=29;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_u_max\n");
@@ -1746,7 +1705,7 @@ void OVERRIDE_SPAN_CURV_CTRL (int *nspn, double span_curv_ctrl[])
 void override_span_curv_ctrl_(int *nspn, double span_curv_ctrl[])
 #endif
 {
-    int    ispn, narg=29;
+    int    ispn, narg=30;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_curv_ctrl\n");
@@ -1776,7 +1735,7 @@ void OVERRIDE_SPAN_THK_CTRL (int *nspn, double span_thk_ctrl[])
 void override_span_thk_ctrl_(int *nspn, double span_thk_ctrl[])
 #endif
 {
-    int    ispn, narg=30;
+    int    ispn, narg=31;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding span_thk_ctrl\n");
@@ -1806,7 +1765,7 @@ void OVERRIDE_OFFSETS (double offsets[])
 void override_offsets_(double offsets[])
 #endif
 {
-    int    ioffset, narg=31;
+    int    ioffset, narg=32;
 
     if (udps[numUdp].arg[narg].size == 2) {
         printf(" ==> overriding offsets\n");
@@ -1836,7 +1795,7 @@ void OVERRIDE_HUB_INF_OFFSET (double hub_inf_offset[])
 void override_hub_inf_offset_(double hub_inf_offset[])
 #endif
 {
-    int    narg = 32;
+    int    narg=33;
 
     if (udps[numUdp].arg[narg].size == 1) {
         printf(" ==> overriding hub_inf_offset\n");
@@ -1864,7 +1823,7 @@ void OVERRIDE_TIP_INF_OFFSET (double tip_inf_offset[])
 void override_tip_inf_offset_(double tip_inf_offset[])
 #endif
 {
-    int    narg = 33;
+    int    narg=34;
 
     if (udps[numUdp].arg[narg].size == 1) {
         printf(" ==> overriding tip_inf_offset\n");
@@ -1892,7 +1851,7 @@ void OVERRIDE_NACA_LE_RADIUS (int *nspn, double naca_le_radius[])
 void override_naca_le_radius_(int *nspn, double naca_le_radius[])
 #endif
 {
-    int    ispn, narg=34;
+    int    ispn, narg=35;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_le_radius\n");
@@ -1922,7 +1881,7 @@ void OVERRIDE_NACA_U_MAX (int *nspn, double naca_u_max[])
 void override_naca_u_max_(int *nspn, double naca_u_max[])
 #endif
 {
-    int    ispn, narg=35;
+    int    ispn, narg=36;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_u_max\n");
@@ -1952,7 +1911,7 @@ void OVERRIDE_NACA_T_MAX (int *nspn, double naca_t_max[])
 void override_naca_t_max_(int *nspn, double naca_t_max[])
 #endif
 {
-    int    ispn, narg=36;
+    int    ispn, narg=37;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_t_max\n");
@@ -1982,7 +1941,7 @@ void OVERRIDE_NACA_T_TE (int *nspn, double naca_t_te[])
 void override_naca_t_te_(int *nspn, double naca_t_te[])
 #endif
 {
-    int    ispn, narg=37;
+    int    ispn, narg=38;
 
     if (udps[numUdp].arg[narg].size == *nspn) {
         printf(" ==> overriding naca_t_te\n");
@@ -2136,9 +2095,7 @@ fit1dCloud(int    m,                    /* (in)  number of points in cloud */
 
     /* --------------------------------------------------------------- */
 
-#ifdef DEBUG
-    printf("enter fit1dCloud(m=%d, bitflag=%d, n=%d)\n", m, bitflag, n);
-#endif
+    DPRINT3("enter fit1dCloud(m=%d, bitflag=%d, n=%d)\n", m, bitflag, n);
 
     assert(m > 1);                      // needed to avoid clang warning
     assert(n > 2);                      // needed to avoid clang warning
@@ -2165,9 +2122,7 @@ fit1dCloud(int    m,                    /* (in)  number of points in cloud */
             cp[3*j+2] = (1-frac) * cp[2] + frac * cp[3*n-1];
         }
 
-#ifdef DEBUG
-        printf("making linear fit because not enough points in cloud\n");
-#endif
+        DPRINT0("making linear fit because not enough points in cloud\n");
         goto cleanup;
     }
 
@@ -2365,9 +2320,7 @@ fit1dCloud(int    m,                    /* (in)  number of points in cloud */
         f[3*k+2] = XYZcopy[3*k+2] - XYZ[2];
     }
     *normf = L2norm(f, nobj) / m;
-#ifdef DEBUG
-    printf("initial   norm(f)=%11.4e\n", *normf);
-#endif
+    DPRINT1("initial   norm(f)=%11.4e\n", *normf);
 
     /* initialize the Levenberg-Marquardt algorithm */
     niter  = 501;
@@ -2500,9 +2453,7 @@ fit1dCloud(int    m,                    /* (in)  number of points in cloud */
         normdelta = L2norm(delta, nvar);
 
         if (normdelta < toler) {
-#ifdef DEBUG
-            printf("converged with norm(delta)=%11.4e\n", normdelta);
-#endif
+            DPRINT1("converged with norm(delta)=%11.4e\n", normdelta);
             break;
         }
 
@@ -2565,22 +2516,18 @@ fit1dCloud(int    m,                    /* (in)  number of points in cloud */
             fnew[3*k+2] = XYZcopy[3*k+2] - XYZ[2];
         }
         normfnew = L2norm(fnew, nobj) / m;
-#ifdef DEBUG
         if (iter%10 == 0) {
-            printf("iter=%4d: norm(delta)=%11.4e, norm(f)=%11.4e  ",
+            DPRINT3("iter=%4d: norm(delta)=%11.4e, norm(f)=%11.4e  ",
                    iter, normdelta, normfnew);
         }
-#endif
 
         /* if this was a better step, accept it and decrease
            lambda (making it more Newton-like) */
         if (normfnew < *normf) {
             lambda /= 2;
-#ifdef DEBUG
             if (iter%10 == 0) {
-                printf("ACCEPTED,  lambda=%11.4e, omega=%10.5f\n", lambda, omega);
+                DPRINT2("ACCEPTED,  lambda=%11.4e, omega=%10.5f\n", lambda, omega);
             }
-#endif
 
             /* save new design variables, control points, and
                objective function */
@@ -2601,19 +2548,15 @@ fit1dCloud(int    m,                    /* (in)  number of points in cloud */
            more steepest-descent-like) */
         } else {
             lambda *= 2;
-#ifdef DEBUG
             if (iter %10 == 0) {
-                printf("rejected,  lambda=%11.4e, omega=%10.5f\n", lambda, omega);
+                DPRINT2("rejected,  lambda=%11.4e, omega=%10.5f\n", lambda, omega);
             }
-#endif
         }
 
         /* check for convergence (based upon a small value of
            objective function) */
         if (*normf < toler) {
-#ifdef DEBUG
-            printf("converged with norm(f)=%11.4e\n", *normf);
-#endif
+            DPRINT1("converged with norm(f)=%11.4e\n", *normf);
             break;
         }
     }
