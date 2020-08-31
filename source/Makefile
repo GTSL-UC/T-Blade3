@@ -3,9 +3,8 @@
 .SUFFIXES: .f .o .f90
 
 # Common executable variables
-EXEC1 = 3dbgb
-EXEC2 = tblade3
-EXEC3 = techop
+EXEC1 = tblade3
+EXEC2 = techop
 
 # Linux-only variables
 ifeq ($(detected_OS),Linux)
@@ -30,9 +29,9 @@ OBJS =  globvar.o file_operations.o errors.o funcNsubs.o spline.o readinput.o 3d
 
 # 'Make code' behavior
 ifeq ($(detected_OS),Windows)
-    code: $(EXEC1) $(EXEC2) $(EXEC3)
+    code: $(EXEC1) $(EXEC2)
 else
-    code: $(EXEC_DIR) $(EXEC1) $(EXEC2) $(EXEC3) #$(TARGET_LIB)
+    code: $(EXEC_DIR) $(EXEC1) $(EXEC2) #$(TARGET_LIB)
     library: $(LIB_DIR) $(TARGET_LIB)
 endif
 
@@ -40,19 +39,15 @@ endif
 ifeq ($(detected_OS),Windows)
   $(EXEC1):$(OBJS)
 	$(FCOMP)  -g $(OBJS) -o ..\$(EXEC1)
-  $(EXEC2):$(OBJS)
-	$(FCOMP)  -g $(OBJS) -o ..\$(EXEC2)
-  $(EXEC3):globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o
-	$(FCOMP) -g globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o -o ..\$(EXEC3)
+  $(EXEC2):globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o
+	$(FCOMP) -g globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o -o ..\$(EXEC2)
 else # Compilation for Linux/MacOS
   $(EXEC_DIR):
 	$(MKDIR_P) $(EXEC_DIR)
   $(EXEC1):$(OBJS)
-	$(FCOMP)  -g $(OBJS) -o $(EXEC_DIR)/$(EXEC1) 
-  $(EXEC2):$(OBJS)
-	$(FCOMP)  -g $(OBJS) -o $(EXEC_DIR)/$(EXEC2)
-  $(EXEC3):globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o
-	$(FCOMP) -g globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o -o $(EXEC_DIR)/$(EXEC3)
+	$(FCOMP)  -g $(OBJS) -o $(EXEC_DIR)/$(EXEC1)
+  $(EXEC2):globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o
+	$(FCOMP) -g globvar.o file_operations.o errors.o funcNsubs.o spline.o techop.o -o $(EXEC_DIR)/$(EXEC2)
   $(LIB_DIR):
 	$(MKDIR_P) $(LIB_DIR)
   $(TARGET_LIB):$(OBJS)
@@ -66,9 +61,9 @@ endif
 clean:
 
     ifeq ($(detected_OS),Windows)
-		-rm -f $(EXEC1) $(EXEC2) $(EXEC3) techop.o $(OBJS) *.mod *.x *.exe
+		-rm -f $(EXEC1) $(EXEC2) techop.o $(OBJS) *.mod *.x *.exe
     else
-		-rm -f $(EXEC_DIR)/$(EXEC1) $(EXEC_DIR)/$(EXEC2) $(EXEC_DIR)/$(EXEC3) techop.o $(OBJS) *.mod *.x *.exe
+		-rm -f $(EXEC_DIR)/$(EXEC1) $(EXEC_DIR)/$(EXEC2) techop.o $(OBJS) *.mod *.x *.exe
 		-rm -r $(EXEC_DIR)
     endif
 
