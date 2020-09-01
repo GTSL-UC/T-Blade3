@@ -35,8 +35,9 @@ module file_operations
         ! 
         inquire(file = log_file, exist=exist)
         if (exist) then
-            if (present(initial) .and. initial .eqv. .true.) then
-                open(nopen, file = log_file, status = 'old', action = 'write')
+            if (present(initial)) then
+                if (initial) &
+                    open(nopen, file = log_file, status = 'old', action = 'write')
             else 
                 open(nopen, file = log_file, status = 'old', iostat = ierr, position = 'append', action = 'write')
             end if
@@ -275,8 +276,9 @@ module file_operations
         !
         inquire(file = error_file, exist=exist)
         if (exist) then
-            if (present(initial) .and. initial .eqv. .true.) then
-                open(nopen, file = error_file, status = 'old', iostat = ierr, action = 'write')
+            if (present(initial)) then
+                if (initial) &
+                    open(nopen, file = error_file, status = 'old', iostat = ierr, action = 'write')
             else
                 open(nopen, file = error_file, status = 'old', iostat = ierr, position = 'append', action = 'write')
             end if
