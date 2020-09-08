@@ -21,15 +21,16 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     character(*)                :: arg4
 
     ! Local variables
-    integer                     :: nopen, nopen_error, np_in
+    integer                     :: nopen, nopen_error, n_ext = 21, n_ext_mean
     real                        :: spl_eval, dspl_eval, xdiff, temp_1, temp_2
-    real,           allocatable :: um_spl(:), u_in(:), v_in(:), spanwise_thk(:), mhub_inf(:), &
+    real,           allocatable :: um_spl(:), spanwise_thk(:), mhub_inf(:), &
                                    thhub_inf(:), xhub_inf(:), yhub_inf(:), zhub_inf(:), mtip_inf(:), &
-                                   thtip_inf(:), xtip_inf(:), ytip_inf(:), ztip_inf(:)
+                                   thtip_inf(:), xtip_inf(:), ytip_inf(:), ztip_inf(:),              &
+                                   m_ext_mean(:,:), th_ext_mean(:,:)
     character(256)              :: fname, temp, row_type, path
     character(:),   allocatable :: log_file, error_file, auxinput_filename, error_msg
     logical                     :: axial_TE, radial_TE, file_open, file_exist, &
-                                   initial, open_error, from_gridgen = .false. !axial_LE, radial_LE
+                                   initial, open_error  !axial_LE, radial_LE
 
 
     !
@@ -1525,23 +1526,15 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         !
         if (js == 1) then
              
-             if (allocated(mblade_grid)) deallocate(mblade_grid)
-             allocate(mblade_grid(nspn,500))
-             if (allocated(thblade_grid)) deallocate(thblade_grid)
-             allocate(thblade_grid(nspn,500))
-             
-             if (allocated(uv_grid)) deallocate(uv_grid)
-             allocate(uv_grid(nspn,500,2))
-             if (allocated(uv_top_grid)) deallocate(uv_top_grid)
-             allocate(uv_top_grid(nspn,500,2))
-             if (allocated(uv_bot_grid)) deallocate(uv_bot_grid)
-             allocate(uv_bot_grid(nspn,500,2))
+            if (allocated(mblade_grid)) deallocate(mblade_grid)
+            allocate(mblade_grid(nspn,500))
+            if (allocated(thblade_grid)) deallocate(thblade_grid)
+            allocate(thblade_grid(nspn,500))
 
-             np_in   = 241
-             if (allocated(u_in)) deallocate(u_in)
-             allocate(u_in(np_in))
-             if (allocated(v_in)) deallocate(v_in)
-             allocate(v_in(np_in))
+            if (allocated(m_ext_mean)) deallocate(m_ext_mean)
+            allocate(m_ext_mean(nspn, 200))
+            if (allocated(th_ext_mean)) deallocate(th_ext_mean)
+            allocate(th_ext_mean(nspn, 200))
 
         end if
 
@@ -1558,8 +1551,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                       LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments,         &
                       sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index,n_normal_distance,casename, &
                       develop,mble,mbte,mles,mtes,i_slope,jcellblade_all,etawidth_all,BGgrid_all,thk_tm_c_spl,     &
-                      theta_offset,TE_der_actual,TE_der_norm,from_gridgen,np_in,u_in,v_in,uv_grid(js,:,:),         &
-                      uv_top_grid(js,:,:),uv_bot_grid(js,:,:),mblade_grid(js,:),thblade_grid(js,:),spanwise_thk)
+                      theta_offset,TE_der_actual,TE_der_norm, mblade_grid(js,:),thblade_grid(js,:),spanwise_thk,   &
+                      n_ext,m_ext_mean(js,:),th_ext_mean(js,:))
 
 
 
@@ -1586,23 +1579,16 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !    !goto 1001
     !end if
 
-    
+
 
     !
-    ! Global arrays to store 3D sections for grid generator
+    ! Number of points along the (m',theta) extended meanlines
+    ! computed in bladegen
     !
-    if (allocated(xblade_grid)) deallocate(xblade_grid)
-    allocate(xblade_grid(nspn,np))
-    if (allocated(yblade_grid)) deallocate(yblade_grid)
-    allocate(yblade_grid(nspn,np))
-    if (allocated(zblade_grid)) deallocate(zblade_grid)
-    allocate(zblade_grid(nspn,np))
-    xblade_grid = 0.0
-    yblade_grid = 0.0
-    zblade_grid = 0.0
+    n_ext_mean                              = ((np + 1)/2) + (2 * (n_ext - 1))
 
 
-
+   
     !
     ! Stacking 2D blade sections to create 3D blade
     !
@@ -1619,8 +1605,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                         xm, rm, xms, rms, mp, nsp, bladedata, amount_data, intersec_coord,                &
                         throat_3D, mouth_3D, exit_3D, casename, nbls, LE, axchrd, mprime_ble,             &
                         mprime_bte, units, stagger, chrdsweep, chrdlean, axial_LE, radial_LE,thick_distr, &
-                        transpose(mblade_grid(:,1:np)), transpose(thblade_grid(:,1:np)), xblade_grid,     &
-                        yblade_grid, zblade_grid, from_gridgen)
+                        transpose(mblade_grid(:,1:np)), transpose(thblade_grid(:,1:np)), n_ext_mean,      &
+                        m_ext_mean(:,1:n_ext_mean), th_ext_mean(:,1:n_ext_mean))
 
     end do  ! js = 1, nrow
 

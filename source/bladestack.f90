@@ -2,7 +2,7 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
                       spantheta,xcpdeltheta,cpinbeta,spaninbeta,xcpinbeta,cpoutbeta,spanoutbeta,xcpoutbeta,  &
                       xm,rm,xms,rms,mp,nsp,bladedata,amount_data,intersec_coord,throat_3D,mouth_3D,exit_3D,  &
                       casename,nbls,LE,axchrd,mble,mbte,units,stagger,chrdsweep,chrdlean,axial_LE,radial_LE, &
-                      thick_distr,x_in,y_in,xbi,ybi,zbi,from_gridgen)
+                      thick_distr,x_in,y_in, nmeanline, xmeanline, ymeanline)
 
     use file_operations
     use funcNsubs
@@ -13,7 +13,7 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
 
     ! Input parameters
     integer,                            intent(in)      :: nspn, nsec, np, stack, cpdeltam, cpdeltheta, cpinbeta, cpoutbeta, nsp(nspan), amount_data,      &
-                                                           nbls, LE, chrdsweep, chrdlean, thick_distr
+                                                           nbls, LE, chrdsweep, chrdlean, thick_distr, nmeanline
     real,                               intent(in)      :: X_le(nspan), X_te(nspan), R_le(nspan), R_te(nspan), xm(nx,nax), rm(nx,nax), xms(nx,nax),        &
                                                            rms(nx,nax), mp(nx,nax)
     real,                               intent(in)      :: scf, msle(nspan), spanmp(100), xcpdelm(100), spantheta(100), xcpdeltheta(100), spaninbeta(100), &
@@ -22,9 +22,8 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     real,                               intent(inout)   :: bladedata(amount_data,nspn), throat_3D(nspn), mouth_3D(nspn), exit_3D(nspn)
     character(32),                      intent(in)      :: casename
     character(2),                       intent(in)      :: units
-    logical,                            intent(in)      :: axial_LE, radial_LE, from_gridgen
-    real,                               intent(inout)   :: xbi(nspn,np), ybi(nspn,np), zbi(nspn,np)
-    real,                               intent(inout)   :: x_in(np,nspn), y_in(np,nspn)
+    logical,                            intent(in)      :: axial_LE, radial_LE
+    real,                               intent(inout)   :: x_in(np,nspn), y_in(np,nspn), xmeanline(nspn,nmeanline), ymeanline(nspn,nmeanline)
 
     ! Local variables
     character(80)                                       :: fname1
@@ -34,8 +33,9 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
                                                            xneglean(:,:), yneglean(:,:), zneglean(:,:)
     real                                                :: chord_actual(100), mps(nxx,nax), demp, spl_eval, xxa, yya, pi, dtor, dmp(nspan), mp_stack(nspan),      &
                                                            xm_slope, rm_slope, mps_inter, inter_xb(6,nspn), inter_rb(6,nspn), inter_yb(6,nspn), inter_zb(6,nspn), &
-                                                           lref, delmp(nspan), span(nspan), mpxc(nspan), delta_theta(nspan), y_spl_end(nx),        &
-                                                           xbs(nx), ybs(nx), xc(nx), yc(nx)!stingl(nspan)
+                                                           lref, delmp(nspan), span(nspan), mpxc(nspan), delta_theta(nspan), y_spl_end(nx), xbs(nx), ybs(nx),     &
+                                                           xc(nx), yc(nx), mp3D_meanline(nspn,nmeanline), xem(nspn,nmeanline), rem(nspn,nmeanline),               &
+                                                           yem(nspn,nmeanline), zem(nspn,nmeanline)  !stingl(nspan)
     character(:),   allocatable                         :: log_file
     logical                                             :: file_open, isquiet
     common / BladeSectionPoints /xxa(nxx,nax),yya(nxx,nax)
@@ -56,7 +56,6 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     ! Constants
     pi   = 4.*atan(1.0)
     dtor = pi/180.
-
 
 
     !
@@ -314,13 +313,18 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     do ia = 1,na
        
         write(temp,*) ia
-        ile           = (iap + 1)/2 
-        mp_stack(ia)  = msle(ia) 
-        dmp(ia)       = mp_stack(ia) - xa(ile,ia)
+        ile                     = (iap + 1)/2
+        mp_stack(ia)            = msle(ia)
+        dmp(ia)                 = mp_stack(ia) - xa(ile,ia)
        
-        do i = 1,iap   
-            demp      = delmp(ia)
-            mps(i,ia) = xa(i,ia) + dmp(ia) + delmp(ia) 
+        do i = 1,iap
+            demp                = delmp(ia)
+            mps(i,ia)           = xa(i,ia) + dmp(ia) + delmp(ia)
+        end do
+
+        ! Compute m'_3D for extended meanlines
+        do i = 1, nmeanline
+            mp3D_meanline(ia,i) = xmeanline(ia,i) + dmp(ia) + delmp(ia)
         end do
 
     end do  ! ia = 1,na
@@ -331,10 +335,19 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     ! Calculating streamwise x and r coordinates
     !
     do ia = 1,na
+
+        ! For blade section
         do i = 1,iap
-            xb(i,ia) = spl_eval(nsp(ia),mps(i,ia),xm(1,ia),xms(1,ia),mp(1,ia))      
-            rb(i,ia) = spl_eval(nsp(ia),mps(i,ia),rm(1,ia),rms(1,ia),mp(1,ia))
-        end do 
+            xb(i,ia)    = spl_eval(nsp(ia),mps(i,ia),xm(1,ia),xms(1,ia),mp(1,ia))
+            rb(i,ia)    = spl_eval(nsp(ia),mps(i,ia),rm(1,ia),rms(1,ia),mp(1,ia))
+        end do
+
+        ! For extended meanlines
+        do i = 1, nmeanline
+           xem(ia,i)    = spl_eval(nsp(ia), mp3D_meanline(ia,i), xm(1,ia), xms(1,ia), mp(1,ia))
+           rem(ia,i)    = spl_eval(nsp(ia), mp3D_meanline(ia,i), rm(1,ia), rms(1,ia), mp(1,ia))
+        end do
+
     end do
 
 
@@ -352,7 +365,7 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     if (.not. isquiet) print*,''
 
 
-
+   
     !
     ! Allocate arrays for coordinates for the half pitch leaned blade for 
     ! periodic walls
@@ -399,6 +412,14 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
             zneglean(i,ia)   = rb(i,ia)*cos(ya(i,ia) - (pi/nbls)) 
 
         end do   ! i = 1,iap
+
+
+        ! Convert extended meanlines to Cartesian coordinates
+        do i = 1, nmeanline
+            yem(ia, i)      = rem(ia, i) * sin (ymeanline(ia, i) + delta_theta(ia))
+            zem(ia, i)      = rem(ia, i) * cos (ymeanline(ia, i) + delta_theta(ia))
+        end do
+
 
         ! Get (x,y,z) for the intersection point
         do k = 1, 6      
@@ -460,7 +481,7 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     
     ! TODO: Move to file_operations
     fname1 = 'blade3d.'//trim(casename)//'.dat'
-    if (.not. from_gridgen) open(3,file=fname1,status='unknown')
+    open(3,file=fname1,status='unknown')
     if (.not. isquiet) then
         write(*,*)
         write(*,*) 'Writing 3D blade geometry ...'
@@ -469,16 +490,16 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     write(nopen,*) ''
     write(nopen,*) 'Writing 3D blade geometry ...'
     write(nopen,*) ''
-    if (.not. from_gridgen) write(3,*) iap,nsec
+    write(3,*) iap,nsec
 
 
     
     !
     ! Store blade (x,y,z) coordinates 
     !
-    xbi = scf*transpose(xb)
-    ybi = scf*transpose(yb)
-    zbi = scf*transpose(zb)
+    !xbi = scf*transpose(xb)
+    !ybi = scf*transpose(yb)
+    !zbi = scf*transpose(zb)
 
 
 
@@ -488,7 +509,7 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     do ia = 1,nsec
        
         do i = 1,iap
-            if (.not. from_gridgen) write(3,10) scf*xb(i,ia),scf*yb(i,ia),scf*zb(i,ia)       
+            write(3,10) scf*xb(i,ia),scf*yb(i,ia),scf*zb(i,ia)
         end do
 
         chord_actual(ia) = scf*sqrt((xb(ile,ia) - xb(iap,ia))**2 + (yb(ile,ia) - yb(iap,ia))**2 + &
@@ -500,7 +521,7 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     end do  ! ia = 1, nsec
 
     ! Close file 'blade3D.casename.dat'
-    if (.not. from_gridgen) close(3)
+    close(3)
 
 
 
@@ -526,9 +547,9 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
 
     ! Calculate constant slope meanline
     ! constantslopemeanline3D in funcNsubs.f90
-    if (.not. from_gridgen) &
-        call constantslopemeanline3D(xb,yb,zb,xposlean,yposlean,zposlean,xneglean,yneglean,zneglean,iap,nsec, &
-                                     uplmt,scf,casename)
+    !call constantslopemeanline3D(xb,yb,zb,xposlean,yposlean,zposlean,xneglean,yneglean,zneglean,iap,nsec, &
+    !                                 uplmt,scf,casename)
+    call write_extended_meanlines (casename, nspn, nmeanline, scf*xem, scf*yem, scf*zem)
 
     ! format statements
     10 format(3(f25.16,1x))

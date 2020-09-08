@@ -6,7 +6,7 @@
 !                   y   - dependent variable values
 !                   n   - number of spline points
 !------------------------------------------------------------------------------------
-subroutine arclength(n, t,y,arcl) 
+subroutine arclength(n, t, y, arcl)
     implicit none
 
     integer,    intent (in)                 :: n
@@ -129,8 +129,6 @@ end function find_knt
 !                                        derivative at t(n)
 !                                     c) can be specified as -999.0 for a zero third
 !                                        derivative at t(n)
-!                   from_gridgen    - flag to print data when being called from the 
-!                                     grid generator
 !
 ! References: Kreyszig, E., "Numerical Methods in General", Advanced Engineering Mathematics,
 !             8th Ed., John Wiley and Sons, 1999, pp. 861-866
@@ -675,17 +673,14 @@ end subroutine spl_intersect
 ! conditions
 !
 ! Input parameters: n               - number of spline points
-!                   from_gridgen    - flag for additional output when called from 
-!                                     grid_generator
 !                   y               - dependent variable values
 !
 !------------------------------------------------------------------------------------
-subroutine open_uniform_cubic_spline(n, from_gridgen, y, dy)
+subroutine open_uniform_cubic_spline(n, y, dy)
     use funcNsubs
     implicit none
 
     integer,        intent(in)              :: n
-    logical,        intent(in)              :: from_gridgen
     real,           intent(in)              :: y(n)
     real,           intent(inout)           :: dy(n)
 

@@ -1197,7 +1197,7 @@ module funcNsubs
         camber  = 0
         angle   = 0
 
-        if (.not. isquiet) print*, 'np',np
+        if (.not. isquiet) print *, 'np', np
 
         ! Calculating the average:
         do i = 1,(np + 1)/2
@@ -1219,6 +1219,205 @@ module funcNsubs
 
        
     end subroutine averaged_camber
+    !------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Create LE side meanline extension with uniformaly space points
+    !
+    ! Input parameters: xLE_end - m' coordinate of extended meanline endpoint
+    !                   yLE_end - theta coordinate of extended meanline endpoint
+    !                   xLE     - m' coordinate of blade section LE
+    !                   yLE     - theta coordinate of blade section LE
+    !                   n_ext   - number of points along extension
+    !
+    !------------------------------------------------------------------------------------------------------
+    subroutine LE_meanline_extension (xLE_end, yLE_end, xLE, yLE, n_ext, xLE_ext, yLE_ext)
+
+        real,                           intent(in)      :: xLE_end, yLE_end, xLE, yLE
+        integer,                        intent(in)      :: n_ext
+        real,   allocatable,            intent(inout)   :: xLE_ext(:), yLE_ext(:)
+
+        ! Local variables
+        integer                                         :: i
+        real                                            :: slope, intercept, dx
+
+
+        ! Compute slope and intercept of the LE side meanline extension
+        slope       = (yLE - yLE_end)/(xLE - xLE_end)
+        intercept   = yLE - (slope * xLE)
+
+        ! dx for the meanline extension
+        dx          = xLE - xLE_end
+
+
+        ! Allocate arrays to store meanline extension coordinates
+        if (allocated(xLE_ext)) deallocate(xLE_ext)
+        allocate(xLE_ext(n_ext))
+        if (allocated(yLE_ext)) deallocate(yLE_ext)
+        allocate(yLE_ext(n_ext))
+
+
+        ! Divide LE side meanline extension in equal intervals
+        xLE_ext(1)  = xLE_end
+        yLE_ext(1)  = yLE_end
+
+        do i = 2, n_ext - 1
+            xLE_ext(i)  = xLE_end + ((real(i - 1)/real(n_ext - 1)) * dx)
+            yLE_ext(i)  = (slope * xLE_ext(i)) + intercept
+        end do
+
+        xLE_ext(n_ext)  = xLE
+        yLE_ext(n_ext)  = yLE
+
+
+    end subroutine LE_meanline_extension
+    !------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Create TE side meanline extension with uniformaly space points
+    !
+    ! Input parameters: xTE     - m' coordinate of blade section TE
+    !                   yTE     - theta coordinate of blade section TE
+    !                   xTE_end - m' coordinate of extended meanline endpoint
+    !                   yTE_end - theta coordinate of extended meanline endpoint
+    !                   n_ext   - number of points along extension
+    !
+    !------------------------------------------------------------------------------------------------------
+    subroutine TE_meanline_extension (xTE, yTE, xTE_end, yTE_end, n_ext, xTE_ext, yTE_ext)
+
+        real,                           intent(in)      :: xTE, yTE, xTE_end, yTE_end
+        integer,                        intent(in)      :: n_ext
+        real,   allocatable,            intent(inout)   :: xTE_ext(:), yTE_ext(:)
+
+        ! Local variables
+        integer                                         :: i
+        real                                            :: slope, intercept, dx
+
+
+        ! Compute slope and intercept of the LE side meanline extension
+        slope       = (yTE_end - yTE)/(xTE_end - xTE)
+        intercept   = yTE - (slope * xTE)
+
+        ! dx for the meanline extension
+        dx          = xTE_end - xTE
+
+
+        ! Allocate arrays to store meanline extension coordinates
+        if (allocated(xTE_ext)) deallocate(xTE_ext)
+        allocate(xTE_ext(n_ext))
+        if (allocated(yTE_ext)) deallocate(yTE_ext)
+        allocate(yTE_ext(n_ext))
+
+
+        ! Divide LE side meanline extension in equal intervals
+        xTE_ext(1)  = xTE
+        yTE_ext(1)  = yTE
+
+        do i = 2, n_ext - 1
+            xTE_ext(i)  = xTE + ((real(i - 1)/real(n_ext - 1)) * dx)
+            yTE_ext(i)  = (slope * xTE_ext(i)) + intercept
+        end do
+
+        xTE_ext(n_ext)  = xTE_end
+        yTE_ext(n_ext)  = yTE_end
+
+
+    end subroutine TE_meanline_extension
+    !------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Create extended meanlines for (m',theta) blade sections by
+    ! computing unit tangents to the blade meanline at the LE and
+    ! TE and then moving outward along the unit tangent
+    !
+    ! Input parameters: n_ext   - number of points along meanline extension
+    !                   nmean   - number of points along blade section meanline
+    !                   xmean   - m' coordinate of blade section meanline
+    !                   ymean   - theta coordinates of blade section meanline
+    !
+    !------------------------------------------------------------------------------------------------------
+    subroutine get_extended_meanlines_2D (n_ext, nmean, xmean, ymean, x_ext_mean, y_ext_mean)
+
+        integer,                        intent(in)      :: n_ext, nmean
+        real,                           intent(in)      :: xmean(nmean), ymean(nmean)
+        real,                           intent(inout)   :: x_ext_mean(200), y_ext_mean(200)
+
+        ! Local variables
+        integer                                         :: i, n_ext_mean
+        real                                            :: arclen(nmean), magnitude(nmean), dxmean(nmean), &
+                                                           dymean(nmean)
+        real                                            :: xLE_end, yLE_end, xTE_end, yTE_end
+        real,   allocatable                             :: xLE_ext(:), yLE_ext(:), xTE_ext(:), yTE_ext(:)
+
+
+        ! Cubic spline fit for (m',theta) meanline
+        ! Compute spline parameter values using arclength
+        call arclength (nmean, xmean, ymean, arclen)
+
+        ! Compute spline first derivatives
+        call spline (nmean, xmean, dxmean, arclen, 999.0, 999.0)
+        call spline (nmean, ymean, dymean, arclen, 999.0, 999.0)
+
+
+        ! Compute magnitude and components of unit tangent
+        ! vectors to the (m',theta) meanlines
+        do i = 1, nmean
+
+            magnitude(i)    = sqrt((dxmean(i))**2 + (dymean(i))**2)
+            dxmean(i)       = dxmean(i)/magnitude(i)
+            dymean(i)       = dymean(i)/magnitude(i)
+
+        end do
+
+
+        ! Compute extended meanline endpoints
+        xLE_end             = xmean(1) - (0.15 * dxmean(1))
+        yLE_end             = ymean(1) - (0.15 * dymean(1))
+        xTE_end             = xmean(nmean) + (0.15 * dxmean(nmean))
+        yTE_end             = ymean(nmean) + (0.15 * dymean(nmean))
+
+
+        ! Compute LE side meanline extension
+        call LE_meanline_extension (xLE_end, yLE_end, xmean(1), ymean(1), n_ext, xLE_ext, yLE_ext)
+        call TE_meanline_extension (xmean(nmean), ymean(nmean), xTE_end, yTE_end, n_ext, xTE_ext, yTE_ext)
+
+
+        ! Number of points along the extended meanline
+        n_ext_mean          = nmean + (2 * (n_ext - 1))
+
+        ! Concatenate arrays to generate extended meanline
+        do i = 1, n_ext - 1
+            x_ext_mean(i)   = xLE_ext(i)
+            y_ext_mean(i)   = yLE_ext(i)
+        end do
+
+        do i = n_ext, nmean + n_ext - 1
+            x_ext_mean(i)   = xmean(i - n_ext + 1)
+            y_ext_mean(i)   = ymean(i - n_ext + 1)
+        end do
+
+        do i = nmean + n_ext, n_ext_mean
+            x_ext_mean(i)   = xTE_ext(i - nmean - n_ext + 2)
+            y_ext_mean(i)   = yTE_ext(i - nmean - n_ext + 2)
+        end do
+
+
+    end subroutine get_extended_meanlines_2D
     !------------------------------------------------------------------------------------------------------
 
 
@@ -1660,13 +1859,47 @@ module funcNsubs
     ! Get current section number from globvar
     !
     !------------------------------------------------------------------------------------------------------
-    subroutine get_sec_number(js_local)
+    subroutine get_sec_number(js_local, get_string, js_string)
         use globvar
+        use errors
 
         integer,                    intent(inout)       :: js_local
+        logical,        optional,   intent(in)          :: get_string
+        character(50),  optional,   intent(inout)       :: js_string
+
+        ! Local variables
+        character(:),   allocatable                     :: error_msg, dev_msg
 
 
         js_local = js
+
+        if (present(get_string)) then
+
+            ! If get_string is true
+            if (get_string) then
+
+                ! Write section number to a string if both optional
+                ! arguments are present
+                if (present(js_string)) then
+
+                    write(js_string, "(i0)") js_local
+
+                ! Raise fatal error if optional argument for writing to
+                ! string is missing
+                else
+                    error_msg   = "Optional argument for writing section index to string is missing."
+                    dev_msg     = "Check subroutine get_sec_number in funcNsubs.f90"
+                    call fatal_error (error_msg, dev_msg = dev_msg)
+
+                end if  ! if (present(js_string))
+
+            ! If get_string is false
+            else
+
+                continue
+
+            end if  ! if (get_string)
+        end if  ! if (present(get_string))
 
 
     end subroutine get_sec_number
@@ -1733,31 +1966,6 @@ module funcNsubs
 
 
     end subroutine get_n_section_points
-    !------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-    !
-    ! Get all (m',theta) sections
-    !
-    !------------------------------------------------------------------------------------------------------
-    subroutine get_mth_sections(nspan_local,np_local,m_local,theta_local)
-        use globvar
-
-        integer,                    intent(in)          :: nspan_local
-        integer,                    intent(in)          :: np_local
-        real,                       intent(inout)       :: m_local(nspan_local,np_local)
-        real,                       intent(inout)       :: theta_local(nspan_local,np_local)
-
-
-        m_local         = mblade_grid(:,1:np_local)
-        theta_local     = thblade_grid(:,1:np_local)
-
-
-    end subroutine get_mth_sections
     !------------------------------------------------------------------------------------------------------
 
 

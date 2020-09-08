@@ -6,7 +6,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                     sting_h_all,LEdegree,no_LE_segments,sec_radius,bladedata,amount_data,scf,             &
                     intersec_coord,throat_index, n_normal_distance,casename,develop,mble,mbte,msle,       &
                     mste,i_slope,jcellblade_all, etawidth_all,BGgrid_all,thk_tm_c_spl, theta_offset,      &
-                    TE_der_actual,TE_der_norm,from_gridgen,np_in,u_in,v_in,uv,uv_top,uv_bot,m_prime,theta,spanwise_thk)
+                    TE_der_actual,TE_der_norm,m_prime,theta,spanwise_thk,n_ext,m_mean,th_mean)
 
     use file_operations
     use errors
@@ -15,19 +15,18 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
     integer,                                intent(in)          :: nspn, js, stack, stack_switch, chord_switch, clustering_switch, nsl, nbls, curv_camber,         &
                                                                    thick, LE, ncp_curv(nsl), ncp_thk(nsl), wing_flag, thick_distr, LEdegree, no_LE_segments,       &
-                                                                   amount_data, i_slope, np_in
+                                                                   amount_data, i_slope, n_ext
     integer,                                intent(inout)       :: np, throat_index(nspn), n_normal_distance
     real,                                   intent(in)          :: thkc, mr1, chrdx, xcen, ycen, stk_u(1), stk_v(1), xb_stk, yb_stk, clustering_parameter,         &
                                                                    curv_cp(20,2*nsl), thk_cp(20,2*nsl), lethk_all(nsl), tethk_all(nsl), s_all(nsl), ee_all(nsl),   &
                                                                    umxthk_all(nsl), C_le_x_top_all(nsl), C_le_x_bot_all(nsl), C_le_y_top_all(nsl),                 &
                                                                    C_le_y_bot_all(nsl), LE_vertex_ang_all(nsl), LE_vertex_dis_all(nsl), sting_l_all(nsl),          &
-                                                                   sting_h_all(nsl), sec_radius(nsl,2), scf, msle, mste,       &
-                                                                   jcellblade_all(nspn), etawidth_all(nspn), BGgrid_all(nspn), thk_tm_c_spl(nsl), theta_offset
-    real,                                   intent(inout)       :: sinl, sext, stagger, bladedata(amount_data,nsl), u_in(np_in), v_in(np_in), &
-                                                                   uv(500,2), uv_top(500,2), uv_bot(500,2), m_prime(500), theta(500),         &
-                                                                   spanwise_thk(nspn), mble, mbte, intersec_coord(12,nsl)
+                                                                   sting_h_all(nsl), sec_radius(nsl,2), scf, msle, mste, jcellblade_all(nspn), etawidth_all(nspn), &
+                                                                   BGgrid_all(nspn), thk_tm_c_spl(nsl), theta_offset
+    real,                                   intent(inout)       :: sinl, sext, stagger, bladedata(amount_data,nsl), m_prime(500), theta(500), spanwise_thk(nspn),  &
+                                                                   mble, mbte, intersec_coord(12,nsl), m_mean(200), th_mean(200)
     character(*),                           intent(in)          :: fext, airfoil, casename, develop
-    logical                                                     :: TE_der_actual, TE_der_norm, from_gridgen
+    logical                                                     :: TE_der_actual, TE_der_norm
 
     ! Local variables
     integer                                                     :: np_side, i, naca, np_cluster, ncp, i_le, i_te, oo, nopen
@@ -35,11 +34,10 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                                                                    pt2 = 1, TE_del = 0 
     real                                                        :: chrd, pitch, radius_pitch, scaling, lethk, thkmultip, aext, ainl, area, cam, cam_u, dtor, pi,   &
                                                                    flex, flin, fmxthk, rr1, rr2, sang, sexts, sinls, tethk, thk, ui, umxthk, xi, yi, xxa, yya,     &
-                                                                   u_le, uin_le, Zweifel(nsl), ucp_top(11),         &
-                                                                   vcp_top(11), ucp_bot(11), vcp_bot(11), xcp_LE, ycp_LE,  xcp_TE, ycp_TE, cp_LE(4,2), cp_TE(4,2), &
-                                                                   a_NACA(4), d_NACA(4), t_max, u_max, t_TE, dy_dx_TE, LE_round, min_throat_2D, u_translation,     &
-                                                                   camber_trans, u_rot, camber_rot, u_TE_quadratic_a, u_TE_quadratic_b, u_TE_quadratic_c, u_TE, u_center, &
-                                                                   TE_radius
+                                                                   u_le, uin_le, Zweifel(nsl), ucp_top(11), vcp_top(11), ucp_bot(11), vcp_bot(11), xcp_LE, ycp_LE, &
+                                                                   xcp_TE, ycp_TE, cp_LE(4,2), cp_TE(4,2), a_NACA(4), d_NACA(4), t_max, u_max, t_TE, dy_dx_TE,     &
+                                                                   LE_round, min_throat_2D, u_translation, camber_trans, u_rot, camber_rot, u_TE_quadratic_a,      &
+                                                                   u_TE_quadratic_b, u_TE_quadratic_c, u_TE, u_center, TE_radius
     real,                   allocatable                         :: init_angles(:), init_cambers(:), x_spl_end_curv(:), xcp_curv(:), ycp_curv(:), xcp_thk(:), &
                                                                    ycp_thk(:), ueq(:), xmean(:), ymean(:), xtop(:), ytop(:), xbot(:), ybot(:), u(:), xb(:),  &
                                                                    yb(:), u_new(:), splthick(:), thickness(:), angle(:), camber(:), slope(:),                &
@@ -782,13 +780,6 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         !
         call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE)
 
-        uv(1:np,1)              = xb
-        uv(1:np,2)              = yb
-        uv_top(1:(np + 1)/2,1)  = xtop
-        uv_top(1:(np + 1)/2,2)  = ytop
-        uv_bot(1:(np + 1)/2,1)  = xbot
-        uv_bot(1:(np + 1)/2,2)  = ybot
-
         ! Write u,v section coordinates to a file in developer mode
         if(isdev) then
             file7 = 'uvblade.'//trim(fext)
@@ -800,10 +791,6 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         write(nopen,*) 'chrd bladegen: ', chrd
         call close_log_file(nopen, file_open)
 
-        if (from_gridgen) then
-            xb                  = u_in
-            yb                  = v_in
-        end if
 
         !
         ! Write stagger angles to a file
@@ -905,8 +892,15 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
         ! Average top and bottom curves to obtain the camber
         call averaged_camber(xb, yb, np, u, camber, angle, sinl)
+
     end if
 
+
+    ! Compute (m',theta) extended meanlines
+    ! get_extended_meanlines_2D in funcNsubs.f90
+    call get_extended_meanlines_2D (n_ext, np_side, u, camber, m_mean, th_mean)
+
+   
     ! throat_calc_pitch_line in funcNsubs.f90
     call throat_calc_pitch_line(xb, yb, np, camber, angle, sang, u, pi, pitch, intersec_coord(1:4, js), &
                                 intersec_coord(5:8, js), intersec_coord(9:12, js), min_throat_2D,       &

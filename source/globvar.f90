@@ -109,17 +109,11 @@ module globvar
 
     ! Global 2D real allocatable arrays
     real,               allocatable :: bladedata(:,:), bladedata_before(:,:), splinedata(:,:), curv_cp(:,:), thk_cp(:,:),   &
-                                       sec_radius(:,:), sting_h_all(:,:), intersec_coord(:,:), xblade_grid(:,:),            &
-                                       yblade_grid(:,:), zblade_grid(:,:), mblade_grid(:,:), thblade_grid(:,:),             &
-                                       cp_chord_curv(:,:), bspline_chord_curv(:,:), cp_chord_thk(:,:), bspline_thk(:,:),    &
-                                       cp_LE(:,:), bspline_LE(:,:)
+                                       sec_radius(:,:), sting_h_all(:,:), intersec_coord(:,:), mblade_grid(:,:),            &
+                                       thblade_grid(:,:), cp_chord_curv(:,:), bspline_chord_curv(:,:), cp_chord_thk(:,:),   &
+                                       bspline_thk(:,:), cp_LE(:,:), bspline_LE(:,:)
 
-    ! Global 3D real allocatable arrays
-    real,               allocatable :: uv_grid(:,:,:), uv_top_grid(:,:,:), uv_bot_grid(:,:,:)
-
-
-
-    ! Global logical variables    
+    ! Global logical variables
     logical                         :: hub_inflate = .false., tip_inflate = .false.
     logical                         :: TE_der_actual = .false., TE_der_norm = .false.
     logical                         :: isdev, tm_c_spline, is_xyzstreamlines, spanwise_angle_spline, spanwise_inci_dev_spline, &

@@ -833,6 +833,57 @@ module file_operations
 
 
     !
+    ! Write (x,y,z) extended meanlines to their respective files
+    ! The meanlines are defined in (m',theta) and mapped on to
+    ! their corresponding streamlines
+    !
+    ! Input parameters: casename    - name of current T-Blade3 case
+    !                   nspan       - number of spanwise sections
+    !                   nmeanline   - number of points along the meanlines
+    !                   xmeanline   - x coordinates of extended meanlines
+    !                   ymeanline   - y coordinates of extended meanlines
+    !                   zmeanline   - z coordinates of extended meanlines
+    !
+    !---------------------------------------------------------------------------
+    subroutine write_extended_meanlines (casename, nspan, nmeanline, xmeanline, ymeanline, zmeanline)
+
+        character(32),              intent(in)      :: casename
+        integer,                    intent(in)      :: nspan, nmeanline
+        real,                       intent(in)      :: xmeanline(nspan,nmeanline), &
+                                                       ymeanline(nspan,nmeanline), &
+                                                       zmeanline(nspan,nmeanline)
+
+        ! Local variables
+        integer                                     :: ispan, imean, funit = 423
+        character(32)                               :: temp
+        character(:),   allocatable                 :: filename
+
+
+        ! Write extended meanline (x,y,z) coordinates for all spanwise
+        ! sections to their respective files
+        do ispan = 1, nspan
+
+            write(temp, "(i0)") ispan
+            filename    = 'meanline.sec'//trim(adjustl(temp))//'.'//trim(casename)//'.dat'
+
+            open(funit, file = filename, form = 'formatted')
+            do imean = 1, nmeanline
+                write(funit, *) xmeanline(ispan,imean), ymeanline(ispan,imean), zmeanline(ispan,imean)
+            end do
+            close(funit)
+
+        end do
+
+
+    end subroutine write_extended_meanlines
+    !---------------------------------------------------------------------------
+
+
+
+
+
+
+    !
     ! Write 3D meanline coordinates to a file
     !
     ! Input parameters: ia          - spanwise section index
