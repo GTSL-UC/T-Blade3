@@ -406,11 +406,11 @@ udpExecute(ego  context,                /* (in)  EGADS context */
         fclose(fp_meanline);
     }
 
-    /* bump coordinates out a little to ensure UNION */
+    /* bump coordinates out a little to ensure UNION
     for (i = 0; i < npnt; i++) {
         xyz2[3*i+1] *= 1.002;
         xyz2[3*i+2] *= 1.002;
-    }
+    } */
 
     /* find xyz positions of the first and last points */
     xmin = xyz2[0];
