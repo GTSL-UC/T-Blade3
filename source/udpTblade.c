@@ -28,7 +28,7 @@
  *     MA  02110-1301  USA
  */
 
-#define NUMUDPARGS 39
+#define NUMUDPARGS 40
 #include "udpUtilities.h"
 
 #ifdef  DEBUG
@@ -47,87 +47,89 @@
 
 /* shorthands for accessing argument values and velocities */
 #define NCP(                IUDP)   ((int    *) (udps[IUDP].arg[ 0].val))[0]
-#define FILENAME(           IUDP)   ((char   *) (udps[IUDP].arg[ 1].val))
-#define AUXNAME(            IUDP)   ((char   *) (udps[IUDP].arg[ 2].val))
-#define ARG_2(              IUDP)   ((char   *) (udps[IUDP].arg[ 3].val))
-#define VLIMITS(            IUDP,I) ((double *) (udps[IUDP].arg[ 4].val))[I]
-#define VLIMITS_SIZE(       IUDP)                udps[IUDP].arg[ 4].size
-#define CUR1(               IUDP,I) ((double *) (udps[IUDP].arg[ 5].val))[I]
-#define CUR2(               IUDP,I) ((double *) (udps[IUDP].arg[ 6].val))[I]
-#define CUR3(               IUDP,I) ((double *) (udps[IUDP].arg[ 7].val))[I]
-#define CUR4(               IUDP,I) ((double *) (udps[IUDP].arg[ 8].val))[I]
-#define CUR5(               IUDP,I) ((double *) (udps[IUDP].arg[ 9].val))[I]
-#define CUR6(               IUDP,I) ((double *) (udps[IUDP].arg[10].val))[I]
-#define CUR7(               IUDP,I) ((double *) (udps[IUDP].arg[11].val))[I]
-#define U2(                 IUDP,I) ((double *) (udps[IUDP].arg[12].val))[I]
-#define U3(                 IUDP,I) ((double *) (udps[IUDP].arg[13].val))[I]
-#define U4(                 IUDP,I) ((double *) (udps[IUDP].arg[14].val))[I]
-#define U5(                 IUDP,I) ((double *) (udps[IUDP].arg[15].val))[I]
-#define U6(                 IUDP,I) ((double *) (udps[IUDP].arg[16].val))[I]
-#define SPAN_DEL_M_CTRL(    IUDP,I) ((double *) (udps[IUDP].arg[17].val))[I]
-#define SPAN_DEL_THETA_CTRL(IUDP,I) ((double *) (udps[IUDP].arg[18].val))[I]
-#define SPAN_IN_BETA_CTRL(  IUDP,I) ((double *) (udps[IUDP].arg[19].val))[I]
-#define SPAN_OUT_BETA_CTRL( IUDP,I) ((double *) (udps[IUDP].arg[20].val))[I]
-#define SPAN_CHORD_CTRL(    IUDP,I) ((double *) (udps[IUDP].arg[21].val))[I]
-#define SPAN_THK_C_CTRL(    IUDP,I) ((double *) (udps[IUDP].arg[22].val))[I]
-#define SPAN_DEL_M(         IUDP,I) ((double *) (udps[IUDP].arg[23].val))[I]
-#define SPAN_DEL_THETA(     IUDP,I) ((double *) (udps[IUDP].arg[24].val))[I]
-#define SPAN_IN_BETA(       IUDP,I) ((double *) (udps[IUDP].arg[25].val))[I]
-#define SPAN_OUT_BETA(      IUDP,I) ((double *) (udps[IUDP].arg[26].val))[I]
-#define SPAN_CHORD(         IUDP,I) ((double *) (udps[IUDP].arg[27].val))[I]
-#define SPAN_THK_C(         IUDP,I) ((double *) (udps[IUDP].arg[28].val))[I]
-#define SPAN_U_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[29].val))[I]
-#define SPAN_CURV_CTRL(     IUDP,I) ((double *) (udps[IUDP].arg[30].val))[I]
-#define SPAN_THK_CTRL(      IUDP,I) ((double *) (udps[IUDP].arg[31].val))[I]
-#define OFFSETS(            IUDP,I) ((double *) (udps[IUDP].arg[32].val))[I]
-#define HUB_INF_OFFSET(     IUDP,I) ((double *) (udps[IUDP].arg[33].val))[I]
-#define TIP_INF_OFFSET(     IUDP,I) ((double *) (udps[IUDP].arg[34].val))[I]
-#define NACA_LE_RADIUS(     IUDP,I) ((double *) (udps[IUDP].arg[35].val))[I]
-#define NACA_U_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[36].val))[I]
-#define NACA_T_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[37].val))[I]
-#define NACA_T_TE(          IUDP,I) ((double *) (udps[IUDP].arg[38].val))[I]
+#define SWITCH(		        IUDP)   ((int    *) (udps[IUDP].arg[ 1].val))[0]
+#define FILENAME(           IUDP)   ((char   *) (udps[IUDP].arg[ 2].val))
+#define AUXNAME(            IUDP)   ((char   *) (udps[IUDP].arg[ 3].val))
+#define ARG_2(              IUDP)   ((char   *) (udps[IUDP].arg[ 4].val))
+#define VLIMITS(            IUDP,I) ((double *) (udps[IUDP].arg[ 5].val))[I]
+#define VLIMITS_SIZE(       IUDP)                udps[IUDP].arg[ 5].size
+#define CUR1(               IUDP,I) ((double *) (udps[IUDP].arg[ 6].val))[I]
+#define CUR2(               IUDP,I) ((double *) (udps[IUDP].arg[ 7].val))[I]
+#define CUR3(               IUDP,I) ((double *) (udps[IUDP].arg[ 8].val))[I]
+#define CUR4(               IUDP,I) ((double *) (udps[IUDP].arg[ 9].val))[I]
+#define CUR5(               IUDP,I) ((double *) (udps[IUDP].arg[10].val))[I]
+#define CUR6(               IUDP,I) ((double *) (udps[IUDP].arg[11].val))[I]
+#define CUR7(               IUDP,I) ((double *) (udps[IUDP].arg[12].val))[I]
+#define U2(                 IUDP,I) ((double *) (udps[IUDP].arg[13].val))[I]
+#define U3(                 IUDP,I) ((double *) (udps[IUDP].arg[14].val))[I]
+#define U4(                 IUDP,I) ((double *) (udps[IUDP].arg[15].val))[I]
+#define U5(                 IUDP,I) ((double *) (udps[IUDP].arg[16].val))[I]
+#define U6(                 IUDP,I) ((double *) (udps[IUDP].arg[17].val))[I]
+#define SPAN_DEL_M_CTRL(    IUDP,I) ((double *) (udps[IUDP].arg[18].val))[I]
+#define SPAN_DEL_THETA_CTRL(IUDP,I) ((double *) (udps[IUDP].arg[19].val))[I]
+#define SPAN_IN_BETA_CTRL(  IUDP,I) ((double *) (udps[IUDP].arg[20].val))[I]
+#define SPAN_OUT_BETA_CTRL( IUDP,I) ((double *) (udps[IUDP].arg[21].val))[I]
+#define SPAN_CHORD_CTRL(    IUDP,I) ((double *) (udps[IUDP].arg[22].val))[I]
+#define SPAN_THK_C_CTRL(    IUDP,I) ((double *) (udps[IUDP].arg[23].val))[I]
+#define SPAN_DEL_M(         IUDP,I) ((double *) (udps[IUDP].arg[24].val))[I]
+#define SPAN_DEL_THETA(     IUDP,I) ((double *) (udps[IUDP].arg[25].val))[I]
+#define SPAN_IN_BETA(       IUDP,I) ((double *) (udps[IUDP].arg[26].val))[I]
+#define SPAN_OUT_BETA(      IUDP,I) ((double *) (udps[IUDP].arg[27].val))[I]
+#define SPAN_CHORD(         IUDP,I) ((double *) (udps[IUDP].arg[28].val))[I]
+#define SPAN_THK_C(         IUDP,I) ((double *) (udps[IUDP].arg[29].val))[I]
+#define SPAN_U_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[30].val))[I]
+#define SPAN_CURV_CTRL(     IUDP,I) ((double *) (udps[IUDP].arg[31].val))[I]
+#define SPAN_THK_CTRL(      IUDP,I) ((double *) (udps[IUDP].arg[32].val))[I]
+#define OFFSETS(            IUDP,I) ((double *) (udps[IUDP].arg[33].val))[I]
+#define HUB_INF_OFFSET(     IUDP,I) ((double *) (udps[IUDP].arg[34].val))[I]
+#define TIP_INF_OFFSET(     IUDP,I) ((double *) (udps[IUDP].arg[35].val))[I]
+#define NACA_LE_RADIUS(     IUDP,I) ((double *) (udps[IUDP].arg[36].val))[I]
+#define NACA_U_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[37].val))[I]
+#define NACA_T_MAX(         IUDP,I) ((double *) (udps[IUDP].arg[38].val))[I]
+#define NACA_T_TE(          IUDP,I) ((double *) (udps[IUDP].arg[39].val))[I]
+
 
 /* data about possible arguments */
-static char*  argNames[NUMUDPARGS] = {"ncp",                "filename",         "auxname",              "arg_2",          "vlimits",
-                                      "cur1",               "cur2",             "cur3",                 "cur4",
-                                      "cur5",               "cur6",             "cur7",
-                                      "u2",                 "u3",               "u4",                   "u5",
-                                      "u6",                 "span_del_m_ctrl",  "span_del_theta_ctrl",  "span_in_beta_ctrl", 
-                                      "span_out_beta_ctrl", "span_chord_ctrl",  "span_thk_c_ctrl",      "span_del_m",   
-                                      "span_del_theta",     "span_in_beta",     "span_out_beta",        "span_chord",   
-                                      "span_thk_c",         "span_u_max",       "span_curv_ctrl",       "span_thk_ctrl",        
-                                      "offsets",            "hub_inf_offset",   "tip_inf_offset",       "naca_le_radius",   
-                                      "naca_u_max",         "naca_t_max",       "naca_t_te",            };
-static int    argTypes[NUMUDPARGS] = {ATTRINT,  ATTRSTRING, ATTRSTRING, ATTRSTRING, ATTRREAL,
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL, 
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,    
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL,
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   ATTRREAL, 
-                                      ATTRREAL, ATTRREAL,   ATTRREAL,   };
-static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,          0,
+static char*  argNames[NUMUDPARGS] = {"ncp",                "switch",               "filename",         "auxname",              
+                                      "arg_2",              "vlimits",              "cur1",             "cur2",             
+                                      "cur3",               "cur4",                 "cur5",             "cur6",             
+                                      "cur7",               "u2",                   "u3",               "u4",                   
+                                      "u5",                 "u6",                   "span_del_m_ctrl",  "span_del_theta_ctrl",  
+                                      "span_in_beta_ctrl",  "span_out_beta_ctrl",   "span_chord_ctrl",  "span_thk_c_ctrl",      
+                                      "span_del_m",         "span_del_theta",       "span_in_beta",     "span_out_beta",        
+                                      "span_chord",         "span_thk_c",           "span_u_max",       "span_curv_ctrl",       
+                                      "span_thk_ctrl",      "offsets",              "hub_inf_offset",   "tip_inf_offset",       
+                                      "naca_le_radius",     "naca_u_max",           "naca_t_max",       "naca_t_te",    };
+static int    argTypes[NUMUDPARGS] = {ATTRINT,      ATTRINT,    ATTRSTRING, ATTRSTRING, 
+                                      ATTRSTRING,   ATTRREAL,   ATTRREAL,   ATTRREAL,   
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL, 
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,    
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL, 
+                                      ATTRREAL,     ATTRREAL,   ATTRREAL,   ATTRREAL,   };
+static int    argIdefs[NUMUDPARGS] = {33,       0,          0,          0,
                                       0,        0,          0,          0,
-                                      0,        0,          0,
+                                      0,        0,          0,          0,
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,        
                                       0,        0,          0,          0,      
                                       0,        0,          0,          0,
                                       0,        0,          0,          0,
-                                      0,        0,          0,          0,        
-                                      0,        0,          0,          };
-static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,         0.,
+                                      0,        0,          0,          0,
+                                      0,        0,          0,          0,  };
+static double argDdefs[NUMUDPARGS] = {33.,      0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
-                                      0.,       0.,         0.,
+                                      0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,       
                                       0.,       0.,         0.,         0.,     
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,
                                       0.,       0.,         0.,         0.,       
-                                      0.,       0.,         0.,         };
+                                      0.,       0.,         0.,         0., };
 
 /* get utility routines: udpErrorStr, udpInitialize, udpReset, udpSet,
                          udpGet, udpVel, udpClean, udpMesh */
@@ -301,6 +303,7 @@ udpExecute(ego  context,                /* (in)  EGADS context */
 
     DPRINT1("udpExecute(context=%llx)\n", (long long)context);
     DPRINT1("ncp(     0) = %d\n", NCP(     0));
+    DPRINT1("switch(     0) = %d\n", SWITCH(     0));
     DPRINT1("filename(0) = %s\n", FILENAME(0));
     DPRINT1("auxname( 0) = %s\n", AUXNAME( 0));
 
@@ -324,14 +327,14 @@ udpExecute(ego  context,                /* (in)  EGADS context */
         goto cleanup;
     }
     
-    /* make the Tblade3_temp temporary directory */
-    status = mkdir("Tblade3_temp", 0777);
+    /* make the Tblade3_temp2 temporary directory */
+    status = mkdir("Tblade3_temp2", 0777);
     if (status < 0) {
-        printf(" udpExecute: could not \"mkdir Tblade3_temp\".  If it already exists, files may be overwritten.\n");
+        printf(" udpExecute: could not \"mkdir Tblade3_temp2\".  If it already exists, files may be overwritten.\n");
     }
 
     /* copy the input files to the Tblade3_temp directory */
-    snprintf(filename, 256, "Tblade3_temp%c%s", SLASH, basename(FILENAME(0)));
+    snprintf(filename, 256, "Tblade3_temp2%c%s", SLASH, basename(FILENAME(0)));
     DPRINT1("FILENAME(0)=%s\n", FILENAME(0));
     DPRINT1("fileame    =%s\n", filename   );
 
@@ -372,7 +375,7 @@ udpExecute(ego  context,                /* (in)  EGADS context */
         }
     }
 
-    snprintf(auxname, 256, "Tblade3_temp%c%s", SLASH, auxptr);
+    snprintf(auxname, 256, "Tblade3_temp2%c%s", SLASH, auxptr);
     DPRINT1("AUXNAME(0)=%s\n", AUXNAME(0));
     DPRINT1("auxname   =%s\n", auxname   );
 
@@ -403,11 +406,11 @@ udpExecute(ego  context,                /* (in)  EGADS context */
         fpTgt = NULL;
     }
 
-    /* change working directory to Tblade3_temp so that all temporary
+    /* change working directory to Tblade3_temp2 so that all temporary
        files are kept together */
-    status = chdir("Tblade3_temp");
+    status = chdir("Tblade3_temp2");
     if (status < 0) {
-        printf(" udpExecute: could not change to \"Tblade3_temp\"\n");
+        printf(" udpExecute: could not change to \"Tblade3_temp2\"\n");
         status = EGADS_EMPTY;
         return status; 
     }
@@ -420,6 +423,7 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     }
 
     DPRINT2("ncp(     %d) = %d\n", numUdp, NCP(     numUdp));
+    DPRINT2("switch(     %d) = %d\n", numUdp, SWITCH(     numUdp));
     DPRINT2("filename(%d) = %s\n", numUdp, FILENAME(numUdp));
     DPRINT2("auxname( %d) = %s\n", numUdp, AUXNAME( numUdp));
 
@@ -454,13 +458,15 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     fclose(fp);
 
     /* try running Tblade */
+    if (SWITCH(0) != 1) {
 #ifdef WIN32
-    BGB3D_SUB (filename, AUXNAME(numUdp), ARG_2(numUdp), "", "",
+        BGB3D_SUB (filename, AUXNAME(numUdp), ARG_2(numUdp), "", "",
                strlen(filename), strlen(AUXNAME(numUdp)), (int)strlen(ARG_2(numUdp)), strlen(""), strlen(""));
 #else
-    bgb3d_sub_(filename, AUXNAME(numUdp), ARG_2(numUdp), "", "",
+        bgb3d_sub_(filename, AUXNAME(numUdp), ARG_2(numUdp), "", "",
                strlen(filename), strlen(AUXNAME(numUdp)), (int)strlen(ARG_2(numUdp)), strlen(""), strlen(""));
-#endif
+#endif 
+    }
 
     ecurves = (ego*) malloc(nsec*sizeof(ego));
     if (ecurves == NULL) {
