@@ -89,8 +89,8 @@ UDPARG    tblade      ncp               33
 UDPRIM    tblade      filename          $$/3dbgbinput.2.dat \
                       auxname           $$/spancontrolinputs.2.dat
 
-dump ../Case_7-28-8_Rotor.step
-dump ../Case_7-28-8_Rotor.stl
-dump ../Case_7-28-8_Rotor.iges
+dump Tblade3_temp2/Case_7-28-8_Rotor.step
+dump Tblade3_temp2/Case_7-28-8_Rotor.stl
+dump Tblade3_temp2/Case_7-28-8_Rotor.iges
 
 end

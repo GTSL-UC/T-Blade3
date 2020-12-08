@@ -124,8 +124,8 @@ CYLINDER -100.0 0.00 0.00 1000.0 0.00 0.00 12.7
 ROTATEX  90 0 0
 SUBTRACT
 
-dump ../Case7-28-8_Rotor_wedge.step
-dump ../Case7-28-8_Rotor_wedge.stl
-dump ../Case7-28-8_Rotor_wedge.iges
+dump Tblade3_temp2/Case7-28-8_Rotor_wedge.step
+dump Tblade3_temp2/Case7-28-8_Rotor_wedge.stl
+dump Tblade3_temp2/Case7-28-8_Rotor_wedge.iges
 
 END

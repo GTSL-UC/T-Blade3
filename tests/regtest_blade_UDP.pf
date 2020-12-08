@@ -151,7 +151,7 @@ subroutine regtest_udpTblade ()
     do i = 1, nspan
 
         ! Spanwise section file name
-        write (test_file, "('Tblade3_temp/sec',i0,'.Case7-28-8.dat')") i
+        write (test_file, "('Tblade3_temp2/sec',i0,'.Case7-28-8.dat')") i
 
         ! Read all (x,y,z) section files created by test
         open (funit, file = trim(test_file))
@@ -181,7 +181,7 @@ subroutine regtest_udpTblade ()
     ! Read reference log file and determine location of the
     ! maass properties in the file
     !
-    open (funit, file = dir_path//'regtest_files/ESP_run.log')
+    open (funit, file = dir_path//'regtest_files/ESP_blade_run.log')
 
     ! Line number counter
     iread                               = 0
@@ -253,8 +253,7 @@ subroutine regtest_udpTblade ()
     ! Deletion commands
     call execute_command_line ('rm run.dat')
     call execute_command_line ('rm *.jrnl')
-    call execute_command_line ('rm *.stl')
-    call execute_command_line ('rm -rf Tblade3_temp')
+    call execute_command_line ('rm -rf Tblade3_temp2')
 
 
 end subroutine regtest_udpTblade
