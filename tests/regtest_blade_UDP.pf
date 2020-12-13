@@ -10,7 +10,7 @@ subroutine regtest_udpTblade ()
     use pfunit_mod
     implicit none
 
-    character(255)              :: shell, serveCSM, cwd, test_file
+    character(255)              :: shell, serveCSM, test_file
     character(1000)             :: read_line
     character(:),   allocatable :: ESPROOT, error_msg, srcESP, dir_path, filename, &
                                    command_1
@@ -179,7 +179,7 @@ subroutine regtest_udpTblade ()
 
     !
     ! Read reference log file and determine location of the
-    ! maass properties in the file
+    ! mass properties in the file
     !
     open (funit, file = dir_path//'regtest_files/ESP_blade_run.log')
 
@@ -213,7 +213,7 @@ subroutine regtest_udpTblade ()
 
     !
     ! Read log file created by the test and determine location of the
-    ! maass properties in the file
+    ! mass properties in the file
     !
     open (funit, file = 'run.dat')
 
