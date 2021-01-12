@@ -174,11 +174,11 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
 
     ! Local variables    
     integer                             :: i, j, nopen, js
-    real                                :: P, knew, det, k1, k2, curv(np), cam(np), cam_u(np), &
-                                           cam_u_dev(np), tot_cam, d1v_end(ncp - 2), v_end(ncp - 2),  &
-                                           xcp_seg(4), ycp_seg(4), t, angle0, camber0,                &
-                                           intg_d2v_end(ncp - 2), intg_d1v_end(ncp - 2), sang2,       &
-                                           sc_factor_dev, inlet_uv_dev, exit_uv_dev
+    real                                :: P, knew, det, k1, k2, curv(np), cam(np), cam_u(np),    &
+                                           tot_cam, d1v_end(ncp - 2), v_end(ncp - 2), xcp_seg(4), &
+                                           ycp_seg(4), t, angle0, camber0, intg_d2v_end(ncp - 2), &
+                                           intg_d1v_end(ncp - 2)
+                                           !cam_u_dev(np), sang2, sc_factor_dev, inlet_uv_dev, exit_uv_dev
     character(:),   allocatable         :: log_file, error_msg, dev_msg
     character(10)                       :: error_arg
     logical                             :: file_open, isquiet
@@ -401,13 +401,13 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
     if (isdev) then
 
         if (.not. isquiet) then
-            write(*, '(A, 2F25.15)') 'Camber line second derivative scaling factor: ', knew, sc_factor_dev
-            write(*, '(A, 2F25.15)') 'Inlet u-v metal angle in deg: ', atan(d1v_end(1))/dtor, inlet_uv_dev
-            write(*, '(A, 2F25.15)') 'Exit u-v metal angle in deg: ', atan(d1v_end(ncp - 2))/dtor, exit_uv_dev
+            write(*, '(A, 2F25.15)') 'Camber line second derivative scaling factor: ', knew!, sc_factor_dev
+            write(*, '(A, 2F25.15)') 'Inlet u-v metal angle in deg: ', atan(d1v_end(1))/dtor!, inlet_uv_dev
+            write(*, '(A, 2F25.15)') 'Exit u-v metal angle in deg: ', atan(d1v_end(ncp - 2))/dtor!, exit_uv_dev
         end if
-        write(nopen, '(A, 2F25.15)') 'Camber line second derivative scaling factor: ', knew, sc_factor_dev
-        write(nopen, '(A, 2F25.15)') 'Inlet u-v metal angle in deg: ', atan(d1v_end(1))/dtor, inlet_uv_dev
-        write(nopen, '(A, 2F25.15)') 'Exit u-v metal angle in deg: ', atan(d1v_end(ncp - 2))/dtor, exit_uv_dev
+        write(nopen, '(A, 2F25.15)') 'Camber line second derivative scaling factor: ', knew!, sc_factor_dev
+        write(nopen, '(A, 2F25.15)') 'Inlet u-v metal angle in deg: ', atan(d1v_end(1))/dtor!, inlet_uv_dev
+        write(nopen, '(A, 2F25.15)') 'Exit u-v metal angle in deg: ', atan(d1v_end(ncp - 2))/dtor!, exit_uv_dev
 
     else
 
@@ -493,9 +493,9 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
         
         sang                            = (ainl - atan(cam_u(1)))
         if (isdev) then
-           sang2                        = (ainl - atan(cam_u_dev(1)))
-           if (.not. isquiet) write(*, '(A, 2F25.15)') 'Stagger angle in deg: ', sang/dtor, sang2/dtor
-           write(nopen, '(A, 2F25.15)') 'Stagger angle in deg: ', sang/dtor, sang2/dtor
+           !sang2                        = (ainl - atan(cam_u_dev(1)))
+           if (.not. isquiet) write(*, '(A, 2F25.15)') 'Stagger angle in deg: ', sang/dtor!, sang2/dtor
+           write(nopen, '(A, 2F25.15)') 'Stagger angle in deg: ', sang/dtor!, sang2/dtor
         else
            if (.not. isquiet) write (*, '(A, F20.15)') 'Stagger angle in deg: ', sang/dtor
            write (nopen, '(A, F20.15)') 'Stagger angle in deg: ', sang/dtor
