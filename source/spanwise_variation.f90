@@ -357,15 +357,20 @@ subroutine span_variation()
         ! Spanwise distribution of "LE_radius", "u_max", "t_max" and "t_TE"
         do i = 2,size(cp_chord_thk,2)
 
-            call cubicspline(ncp_span_thk,cp_chord_thk(:,i),cp_chord_thk(:,1),xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
-            call cubicbspline_intersec(ncp1,xc,yc,na,span,intersec_u,xbs,ybs,y_spl_end)
-
             ! For "t_max" and "t_TE", store as half thickness
             if (i == 4 .or. i == 5) then
-                bspline_thk(:,i) = 0.5*intersec_u(1:nsl)
+
+                call cubicspline(ncp_span_thk,0.5*cp_chord_thk(:,i),cp_chord_thk(:,1),xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
+                call cubicbspline_intersec(ncp1,xc,yc,na,span,intersec_u,xbs,ybs,y_spl_end)
+
             else
-                bspline_thk(:,i) = intersec_u(1:nsl)
+
+                call cubicspline(ncp_span_thk,cp_chord_thk(:,i),cp_chord_thk(:,1),xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
+                call cubicbspline_intersec(ncp1,xc,yc,na,span,intersec_u,xbs,ybs,y_spl_end)
+
             end if
+
+            bspline_thk(:,i) = intersec_u(1:nsl)
 
         end do  ! i = 2,5
 

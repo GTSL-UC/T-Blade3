@@ -37,11 +37,12 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                                                                    u_le, uin_le, Zweifel(nsl), ucp_top(11), vcp_top(11), ucp_bot(11), vcp_bot(11), xcp_LE, ycp_LE, &
                                                                    xcp_TE, ycp_TE, cp_LE(4,2), cp_TE(4,2), a_NACA(4), d_NACA(4), t_max, u_max, t_TE, dy_dx_TE,     &
                                                                    LE_round, min_throat_2D, u_translation, camber_trans, u_rot, camber_rot, u_TE_quadratic_a,      &
-                                                                   u_TE_quadratic_b, u_TE_quadratic_c, u_TE, u_center, TE_radius
+                                                                   u_TE_quadratic_b, u_TE_quadratic_c, u_TE, u_center, TE_radius, dddtmax(4), A(3, 3), dadtmax(4)
     real,                   allocatable                         :: init_angles(:), init_cambers(:), x_spl_end_curv(:), xcp_curv(:), ycp_curv(:), xcp_thk(:), &
                                                                    ycp_thk(:), ueq(:), xmean(:), ymean(:), xtop(:), ytop(:), xbot(:), ybot(:), u(:), xb(:),  &
                                                                    yb(:), u_new(:), splthick(:), thickness(:), angle(:), camber(:), slope(:),                &
-                                                                   thickness_data(:,:), splinedata(:,:)
+                                                                   thickness_data(:,:), splinedata(:,:), dtdtmax(:), dubdthubmax(:), dvbdthubmax(:),         &
+                                                                   dutdthubmax(:), dvtdthubmax(:)
     character(80)                                               :: file1, file7
     character(20)                                               :: sec
     character(:),           allocatable                         :: log_file, error_msg, dev_msg, stagger_file
@@ -134,7 +135,15 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     if (allocated(thickness     )) deallocate(thickness     )
     if (allocated(thickness_data)) deallocate(thickness_data)
     allocate(splthick(np),thickness(np), &
-             thickness_data(np,12))
+         thickness_data(np,12))
+
+    if (allocated(dtdtmax))        deallocate(dtdtmax       )
+    if (allocated(dubdthubmax))    deallocate(dubdthubmax   )
+    if (allocated(dvbdthubmax))    deallocate(dvbdthubmax   )
+    if (allocated(dutdthubmax))    deallocate(dutdthubmax   )
+    if (allocated(dvtdthubmax))    deallocate(dvtdthubmax   )
+    allocate(dtdtmax(np), dubdthubmax(np), dvbdthubmax(np), &
+             dutdthubmax(np), dvtdthubmax(np))
 
     if (allocated(angle         )) deallocate(angle         )
     if (allocated(camber        )) deallocate(camber        )
@@ -210,6 +219,26 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
     end if
 
+    ! Sensitivities of NACA thickness coefficients d wrt t_max
+    dddtmax(1) = (3.0 * (1.0 - u_max) * ((1.0 - u_TE)**2))/((u_TE - u_max)**3)
+    dddtmax(2) = (-6.0 * (1.0 - u_max) * (1.0 - u_TE))/((u_TE - u_max)**3)
+    dddtmax(3) = (3.0 * (2.0 - u_max - u_TE))/((u_TE - u_max)**3)
+    dddtmax(4) = -2.0/((u_TE - u_max)**3)
+
+    ! Matrix needed to compute coefficient sensitivities
+    A(1, :) = [3.0/u_max, -2.0, u_max/2.0]
+    A(2, :) = [-3.0/(u_max**2), 3.0/u_max, -1.0]
+    A(3, :) = [1.0/(u_max**3), -1.0/(u_max**2), 1.0/(2.0 * u_max)]
+
+    ! Sensitivities of NACA thickness coefficients a wrt t_max
+    dadtmax(1) = (sqrt(2.2038) * LE_round)/6.0
+    dadtmax(2) = (A(1, 1) * (1.0 - (dadtmax(1) * sqrt(u_max)))) - ((A(1, 2) * dadtmax(1))/(2.0 * sqrt(u_max))) + &
+                 (A(1, 3) * ((2.0 * dddtmax(3)) + (6.0 * dddtmax(4) * (1.0 - u_max)) + (dadtmax(1)/(4.0 * (sqrt(u_max)**3)))))
+    dadtmax(3) = (A(2, 1) * (1.0 - (dadtmax(1) * sqrt(u_max)))) - ((A(2, 2) * dadtmax(1))/(2.0 * sqrt(u_max))) + &
+                 (A(2, 3) * ((2.0 * dddtmax(3)) + (6.0 * dddtmax(4) * (1.0 - u_max)) + (dadtmax(1)/(4.0 * (sqrt(u_max)**3)))))
+    dadtmax(4) = (A(3, 1) * (1.0 - (dadtmax(1) * sqrt(u_max)))) - ((A(3, 2) * dadtmax(1))/(2.0 * sqrt(u_max))) + &
+                 (A(3, 3) * ((2.0 * dddtmax(3)) + (6.0 * dddtmax(4) * (1.0 - u_max)) + (dadtmax(1)/(4.0 * (sqrt(u_max)**3)))))
+
 
 
     !
@@ -251,10 +280,22 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         end if
     end if
 
+    ! Sensitivity of thickness to maximum thickness
+    do i = 1, np
+        if (u(i) < u_max) then
+            dtdtmax(i) = (dadtmax(1) * sqrt(u(i))) + (dadtmax(2) * u(i)) + (dadtmax(3) * (u(i)**2)) + &
+                         (dadtmax(4) * (u(i)**3))
+        else
+            dtdtmax(i) = dddtmax(1) + (dddtmax(2) * (1.0 - u(i))) + (dddtmax(3) * ((1.0 - u(i))**2)) + &
+                         (dddtmax(4) * ((1.0 - u(i))**3))
+        end if
+    end do
+
 
 
     !
-    ! Set blade parameters related to LE/TE thickness and location of max. thickness
+    ! Set blade parameters related to LE/TE thickness and location of max.
+    ! thickness
     !
     flin    = 0.10
     flex    = 0.05   
@@ -738,6 +779,17 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         ybot  = camber - thickness*cos(angle)
         xtop  = u   - thickness*sin(angle)
         ytop  = camber + thickness*cos(angle)
+
+        ! Sensitivty of geometry to thickness
+        do i = 1, np
+            dubdthubmax(i) = sin(angle(i)) * dtdtmax(i)
+            dvbdthubmax(i) = -cos(angle(i)) * dtdtmax(i)
+            dutdthubmax(i) = -sin(angle(i)) * dtdtmax(i)
+            dvtdthubmax(i) = cos(angle(i)) * dtdtmax(i)
+
+            !if (js == 1) print *, dubdthubmax(i), dvbdthubmax(i), &
+            !                      dutdthubmax(i), dvtdthubmax(i)
+        end do
 
         ! Write the top and bottom curve coordinates to a file in developer mode
         if (isdev) then
