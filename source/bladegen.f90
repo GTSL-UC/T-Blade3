@@ -6,46 +6,60 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                     sting_h_all,LEdegree,no_LE_segments,sec_radius,bladedata,amount_data,scf,             &
                     intersec_coord,throat_index, n_normal_distance,casename,develop,mble,mbte,msle,       &
                     mste,i_slope,jcellblade_all, etawidth_all,BGgrid_all,thk_tm_c_spl, theta_offset,      &
-                    TE_der_actual,TE_der_norm,m_prime,theta,spanwise_thk,n_ext,m_mean,th_mean)
+                    TE_der_actual,TE_der_norm,m_prime,theta,spanwise_thk,n_ext,m_mean,th_mean,mt_umax)
 
     use file_operations
     use errors
     use funcNsubs
     implicit none
 
-    integer,                                intent(in)          :: nspn, js, stack, stack_switch, chord_switch, clustering_switch, nsl, nbls, curv_camber,         &
-                                                                   thick, LE, ncp_curv(nsl), ncp_thk(nsl), wing_flag, thick_distr, LEdegree, no_LE_segments,       &
-                                                                   amount_data, i_slope, n_ext
+    integer,                                intent(in)          :: nspn, js, stack, stack_switch, chord_switch, nsl, nbls,    &
+                                                                   curv_camber, thick, LE, ncp_curv(nsl), ncp_thk(nsl),       &
+                                                                   wing_flag, thick_distr, LEdegree, no_LE_segments,          &
+                                                                   amount_data, i_slope, n_ext, clustering_switch
     integer,                                intent(inout)       :: np, throat_index(nspn), n_normal_distance
-    real,                                   intent(in)          :: thkc, mr1, chrdx, xcen, ycen, stk_u(1), stk_v(1), xb_stk, yb_stk, clustering_parameter,         &
-                                                                   curv_cp(20,2*nsl), thk_cp(20,2*nsl), lethk_all(nsl), tethk_all(nsl), s_all(nsl), ee_all(nsl),   &
-                                                                   umxthk_all(nsl), C_le_x_top_all(nsl), C_le_x_bot_all(nsl), C_le_y_top_all(nsl),                 &
-                                                                   C_le_y_bot_all(nsl), LE_vertex_ang_all(nsl), LE_vertex_dis_all(nsl), sting_l_all(nsl),          &
-                                                                   sting_h_all(nsl), sec_radius(nsl,2), scf, msle, mste, jcellblade_all(nspn), etawidth_all(nspn), &
+    real,                                   intent(in)          :: thkc, mr1, chrdx, xcen, ycen, stk_u(1), stk_v(1), xb_stk,  &
+                                                                   yb_stk, clustering_parameter, curv_cp(20,2*nsl),           &
+                                                                   thk_cp(20,2*nsl), lethk_all(nsl), tethk_all(nsl),          &
+                                                                   s_all(nsl), ee_all(nsl), umxthk_all(nsl),                  &
+                                                                   C_le_x_top_all(nsl), C_le_x_bot_all(nsl),                  &
+                                                                   C_le_y_top_all(nsl), C_le_y_bot_all(nsl),                  &
+                                                                   LE_vertex_ang_all(nsl), LE_vertex_dis_all(nsl),            &
+                                                                   sting_l_all(nsl), sting_h_all(nsl), sec_radius(nsl,2),     &
+                                                                   scf, msle, mste, jcellblade_all(nspn), etawidth_all(nspn), &
                                                                    BGgrid_all(nspn), thk_tm_c_spl(nsl), theta_offset
-    real,                                   intent(inout)       :: sinl, sext, stagger, bladedata(amount_data,nsl), m_prime(500), theta(500), spanwise_thk(nspn),  &
-                                                                   mble, mbte, intersec_coord(12,nsl), m_mean(200), th_mean(200)
+    real,                                   intent(inout)       :: sinl, sext, stagger, bladedata(amount_data,nsl),           &
+                                                                   m_prime(500), theta(500), spanwise_thk(nspn), mble, mbte,  &
+                                                                   intersec_coord(12,nsl), m_mean(200), th_mean(200), mt_umax(4)
     character(*),                           intent(in)          :: fext, airfoil, casename, develop
     logical                                                     :: TE_der_actual, TE_der_norm
 
     ! Local variables
     integer                                                     :: np_side, i, naca, np_cluster, ncp, i_le, i_te, oo, nopen
-    integer,    parameter                                       :: nspan = 200, nx = 500, nxx = 1000, nrow = 1, nax = 50, nb = 300, spline_data = 6, interval = 6, &
-                                                                   pt2 = 1, TE_del = 0 
-    real                                                        :: chrd, pitch, radius_pitch, scaling, lethk, thkmultip, aext, ainl, area, cam, cam_u, dtor, pi,   &
-                                                                   flex, flin, fmxthk, rr1, rr2, sang, sexts, sinls, tethk, thk, ui, umxthk, xi, yi, xxa, yya,     &
-                                                                   u_le, uin_le, Zweifel(nsl), ucp_top(11), vcp_top(11), ucp_bot(11), vcp_bot(11), xcp_LE, ycp_LE, &
-                                                                   xcp_TE, ycp_TE, cp_LE(4,2), cp_TE(4,2), a_NACA(4), d_NACA(4), t_max, u_max, t_TE, dy_dx_TE,     &
-                                                                   LE_round, min_throat_2D, u_translation, camber_trans, u_rot, camber_rot, u_TE_quadratic_a,      &
-                                                                   u_TE_quadratic_b, u_TE_quadratic_c, u_TE, u_center, TE_radius
-    real,                   allocatable                         :: init_angles(:), init_cambers(:), x_spl_end_curv(:), xcp_curv(:), ycp_curv(:), xcp_thk(:), &
-                                                                   ycp_thk(:), ueq(:), xmean(:), ymean(:), xtop(:), ytop(:), xbot(:), ybot(:), u(:), xb(:),  &
-                                                                   yb(:), u_new(:), splthick(:), thickness(:), angle(:), camber(:), slope(:),                &
-                                                                   thickness_data(:,:), splinedata(:,:)
+    integer,    parameter                                       :: nspan = 200, nx = 500, nxx = 1000, nrow = 1, nax = 50,     &
+                                                                   nb = 300, spline_data = 6, interval = 6, pt2 = 1, TE_del = 0
+    real(kind = 8)                                              :: chrd, pitch, radius_pitch, scaling, lethk, thkmultip, aext,&
+                                                                   ainl, area, cam, cam_u, dtor, pi, flex, flin, fmxthk, rr1, &
+                                                                   rr2, sang, sexts, sinls, tethk, thk, ui, umxthk, xi, yi,   &
+                                                                   xxa, yya, u_le, uin_le, Zweifel(nsl), ucp_top(11),         &
+                                                                   vcp_top(11), ucp_bot(11), vcp_bot(11), xcp_LE, ycp_LE,     &
+                                                                   xcp_TE, ycp_TE, cp_LE(4,2), cp_TE(4,2), a_NACA(4),         &
+                                                                   d_NACA(4), t_max, u_max, t_TE, dy_dx_TE, LE_round,         &
+                                                                   min_throat_2D, u_translation, camber_trans, u_rot,         &
+                                                                   camber_rot, u_TE_quadratic_a, u_TE_quadratic_b,            &
+                                                                   u_TE_quadratic_c, u_TE, u_center, TE_radius, cam_umax,     &
+                                                                   slope_umax, u_stack, v_stack
+    real,                   allocatable                         :: init_angles(:), init_cambers(:), x_spl_end_curv(:),        &
+                                                                   xcp_curv(:), ycp_curv(:), xcp_thk(:), ycp_thk(:), ueq(:),  &
+                                                                   xmean(:), ymean(:), xtop(:), ytop(:), xbot(:), ybot(:),    &
+                                                                   u(:), xb(:), yb(:), u_new(:), splthick(:), thickness(:),   &
+                                                                   angle(:), camber(:), slope(:), thickness_data(:,:),        &
+                                                                   splinedata(:,:)
     character(80)                                               :: file1, file7
     character(20)                                               :: sec
     character(:),           allocatable                         :: log_file, error_msg, dev_msg, stagger_file
-    logical                                                     :: ellip, file_open, isdev, isquiet, monotonic = .true., write_to_file = .true., exist
+    logical                                                     :: ellip, file_open, isdev, isquiet, monotonic = .true.,      &
+                                                                   write_to_file = .true., exist
     common / BladeSectionPoints /xxa(nxx, nax), yya(nxx, nax) 
 
 
@@ -238,7 +252,8 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
             ! TE ellipse control points
             xcp_TE      = u_TE!1.0 - t_TE
-            ycp_TE      = d_NACA(1) + (d_NACA(2)*(1.0 -  xcp_TE)) + (d_NACA(3)*((1.0 - xcp_TE)**2)) + (d_NACA(4)*((1.0 - xcp_TE)**3))
+            ycp_TE      = d_NACA(1) + (d_NACA(2)*(1.0 -  xcp_TE)) + (d_NACA(3)*((1.0 - xcp_TE)**2)) + &
+                          (d_NACA(4)*((1.0 - xcp_TE)**3))
             cp_TE(:,1)  = [xcp_TE, xcp_TE , 1.0, xcp_TE]
             cp_TE(:,2)  = [ycp_TE, -ycp_TE, 0.0, 0.0   ]
 
@@ -297,7 +312,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         if (trim(airfoil) == 'crcle') then
 
             call circle(np, xb, yb)
-            call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE)
+            call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE, u_stack, v_stack)
             
             ! Add stagger and scale the airfoil using the non-dimensional actual chord input
             do i = 1, np
@@ -318,7 +333,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             stagger = stagger*dtor
             chrd    = chrdx/abs(cos(stagger))
             call s809m(np, xb, yb)
-            call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE)
+            call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE, u_stack, v_stack)
             
             ! Add stagger and scale the airfoil using the non-dimensional actual chord input
             do i = 1, np   
@@ -342,7 +357,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             stagger = stagger*dtor
             chrd    = chrdx/abs(cos(stagger))
             call clarky(np, xb, yb)
-            call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE)
+            call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE, u_stack, v_stack)
             
             ! Add stagger and scale the airfoil using the non-dimensional actual chord input
             do i = 1, np   
@@ -366,7 +381,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             stagger = stagger*dtor
             chrd    = chrdx/abs(cos(stagger))
             call negclarky(np, xb, yb)
-            call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE)
+            call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE, u_stack, v_stack)
             
             ! Add stagger and scale the airfoil using the non-dimensional actual chord input
             do i = 1, np   
@@ -380,7 +395,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                 xxa(i, js) = xb(i)
                 yya(i, js) = yb(i)
             end do 
-            call bladesection(xb, yb, np, nbls, TE_del, sinls, sexts, chrd, fext, js, pitch, mble, mbte, airfoil)  
+            call bladesection(xb, yb, np, nbls, TE_del, sinls, sexts, chrd, fext, js, pitch, mble, mbte, airfoil)
        
         !
         ! NACA 4 series airfoil with circular TE
@@ -410,7 +425,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                 file1 = 'uvnaca.dat'
                 call file_write_1D(file1, xb, yb, np)
             end if  
-            call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE)
+            call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE, u_stack, v_stack)
             
             ! Add stagger and scale the airfoil
             do i = 1, np
@@ -482,7 +497,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                 file1 = 'uvairfoil.dat'
                 call file_write_1D(file1, xb, yb, np)
             end if
-            call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE)
+            call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE, u_stack, v_stack)
 
             ! Add stagger and scale the airfoil using the non-dimensional actual chord input
             do i = 1, np
@@ -529,8 +544,15 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         allocate(init_angles(ncp - 2),init_cambers(ncp - 2),x_spl_end_curv(ncp - 2))
         
         ! Get camber line from the spline curvature:
-        call camline(casename, isdev, ncp, np, xcp_curv, ycp_curv, u, ainl, aext, chrdx, wing_flag, &
-        sang, chrd, init_angles, init_cambers, x_spl_end_curv, splinedata)
+        ! TODO: Why aren't optional arguments working?
+        if (thick_distr == 5) then
+            call camline(casename, isdev, ncp, np, xcp_curv, ycp_curv, u, ainl, aext, chrdx, wing_flag, &
+                        sang, chrd, init_angles, init_cambers, x_spl_end_curv, splinedata, u_max,       &
+                        cam_umax, slope_umax)
+        else
+            call camline(casename, isdev, ncp, np, xcp_curv, ycp_curv, u, ainl, aext, chrdx, wing_flag, &
+                        sang, chrd, init_angles, init_cambers, x_spl_end_curv, splinedata, -1.0, 0.0, 0.0)
+        end if
         camber = splinedata(2, :)
         slope  = splinedata(3, :)
 
@@ -739,6 +761,15 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         xtop  = u   - thickness*sin(angle)
         ytop  = camber + thickness*cos(angle)
 
+        ! Airfoil coordinates associated with maximum thickness
+        ! location for NACA thickness
+        if (thick_distr == 5) then
+            mt_umax(1) = u_max    + (t_max * sin(atan(slope_umax)))
+            mt_umax(2) = cam_umax - (t_max * cos(atan(slope_umax)))
+            mt_umax(3) = u_max    - (t_max * sin(atan(slope_umax)))
+            mt_umax(4) = cam_umax + (t_max * cos(atan(slope_umax)))
+        end if
+
         ! Write the top and bottom curve coordinates to a file in developer mode
         if (isdev) then
 
@@ -778,7 +809,16 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         !
         ! Stacking of airfoils
         !
-        call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE)
+        call stacking(xb, yb, xbot, ybot, xtop, ytop, js, np, stack_switch, stack, stk_u, stk_v, area, LE, u_stack, v_stack)
+
+        ! Stacked (u,v) coordinates associated with maximum
+        ! thickness location for NACA thickness
+        if (thick_distr == 5) then
+            mt_umax(1) = mt_umax(1) - u_stack
+            mt_umax(2) = mt_umax(2) - v_stack
+            mt_umax(3) = mt_umax(3) - u_stack
+            mt_umax(4) = mt_umax(4) - v_stack
+        end if
 
         ! Write u,v section coordinates to a file in developer mode
         if(isdev) then
@@ -827,20 +867,43 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
             ! Using non-dimensional actual chord input
             if(chord_switch.eq.1)then
+
                 xb(i) = scaled(xi, chrdx)
                 yb(i) = scaled(yi, chrdx)
 
             ! Using internally calculated chord
             else
+
                 xb(i) = scaled(xi, chrd)
                 yb(i) = scaled(yi, chrd)
+
             end if
 
             yb(i) = yb(i) + theta_offset*dtor
             xxa(i, js) = xb(i)
             yya(i, js) = yb(i)
+
         end do
         call bladesection(xb, yb, np, nbls, TE_del, sinls, sexts, chrd, fext, js, pitch, mble, mbte, airfoil)
+
+        ! Compute (m',theta) coordinates of point associated
+        ! with maximum thickness location for NACA thickness
+        if (thick_distr == 5) then
+            call rotate_point(mt_umax(1), mt_umax(2), sang)
+            call rotate_point(mt_umax(3), mt_umax(4), sang)
+
+            if (chord_switch == 1) then
+                call scale_point(mt_umax(1), mt_umax(2), chrdx)
+                call scale_point(mt_umax(3), mt_umax(4), chrdx)
+            else
+                call scale_point(mt_umax(1), mt_umax(2), chrd)
+                call scale_point(mt_umax(3), mt_umax(4), chrd)
+            end if
+
+            mt_umax(2) = mt_umax(2) + (theta_offset * dtor)
+            mt_umax(4) = mt_umax(4) + (theta_offset * dtor)
+
+        end if
 
     end if  ! if (trim(airfoil) == 'sect1')
 

@@ -22,14 +22,14 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
     ! Local variables
     integer                     :: nopen, nopen_error, n_ext = 21, n_ext_mean
-    real                        :: spl_eval, dspl_eval, xdiff, temp_1, temp_2
-    real,           allocatable :: um_spl(:), spanwise_thk(:), mhub_inf(:), &
+    real(kind = 8)              :: spl_eval, dspl_eval, xdiff, temp_1, temp_2
+    real(kind = 8), allocatable :: um_spl(:), spanwise_thk(:), mhub_inf(:), &
                                    thhub_inf(:), xhub_inf(:), yhub_inf(:), zhub_inf(:), mtip_inf(:), &
                                    thtip_inf(:), xtip_inf(:), ytip_inf(:), ztip_inf(:),              &
-                                   m_ext_mean(:,:), th_ext_mean(:,:)
+                                   m_ext_mean(:,:), th_ext_mean(:,:), mt_umax(:,:), dim_thick(:,:)
     character(256)              :: fname, temp, row_type, path
     character(:),   allocatable :: log_file, error_file, auxinput_filename, error_msg
-    logical                     :: axial_TE, radial_TE, file_open, file_exist, &
+    logical                     :: axial_TE, radial_TE, file_open, file_exist, write_csv, &
                                    initial, open_error  !axial_LE, radial_LE
 
 
@@ -1395,6 +1395,16 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
 
     !
+    ! Array to store (m',theta) coordinates of points associated
+    ! with maximum thickness location for all spanwise sections
+    !
+    if (allocated(mt_umax)) deallocate(mt_umax)
+    allocate(mt_umax(nspn, 4))
+    mt_umax                                 = 0.0
+
+
+
+    !
     ! 2D airfoil generation
     !
     do js = 1, nspn
@@ -1552,7 +1562,7 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                       sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index,n_normal_distance,casename, &
                       develop,mble,mbte,mles,mtes,i_slope,jcellblade_all,etawidth_all,BGgrid_all,thk_tm_c_spl,     &
                       theta_offset,TE_der_actual,TE_der_norm, mblade_grid(js,:),thblade_grid(js,:),spanwise_thk,   &
-                      n_ext,m_ext_mean(js,:),th_ext_mean(js,:))
+                      n_ext,m_ext_mean(js,:),th_ext_mean(js,:),mt_umax(js,:))
 
 
 
@@ -1593,7 +1603,13 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     ! Stacking 2D blade sections to create 3D blade
     !
     bladedata_before                        = bladedata
-    
+
+    ! Allocate and initialize array to store the dimensional
+    ! TE, maximum and LE thicknesses
+    if (allocated(dim_thick)) deallocate(dim_thick)
+    allocate(dim_thick(nspn,3))
+    dim_thick                               = 0.0
+
     do js = 1, nrow 
 
         nsec                                = nspn
@@ -1606,7 +1622,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                         throat_3D, mouth_3D, exit_3D, casename, nbls, LE, axchrd, mprime_ble,             &
                         mprime_bte, units, stagger, chrdsweep, chrdlean, axial_LE, radial_LE,thick_distr, &
                         transpose(mblade_grid(:,1:np)), transpose(thblade_grid(:,1:np)), n_ext_mean,      &
-                        m_ext_mean(:,1:n_ext_mean), th_ext_mean(:,1:n_ext_mean))
+                        m_ext_mean(:,1:n_ext_mean), th_ext_mean(:,1:n_ext_mean), mt_umax,                 &
+                        clustering_switch, clustering_parameter, dim_thick)
 
     end do  ! js = 1, nrow
 
@@ -1703,9 +1720,13 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     ! Write the bladedata containing throat and other info to a file
     ! outputfiledata in file_operations.f90
     !
-    call outputfiledata(bladedata, nsl, amount_data, throat_pos, casename, units)
-
-
+    write_csv = .false.
+    if (thick_distr == 5) then
+        if (clustering_switch == 4) then
+            write_csv = .true.
+        end if
+    end if
+    call outputfiledata(casename, units, nsl, amount_data, bladedata, throat_pos, chordm, write_csv, dim_thick)
 
     !
     ! Write dimensional 3D blade coordinates to separate files

@@ -2,47 +2,59 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
                       spantheta,xcpdeltheta,cpinbeta,spaninbeta,xcpinbeta,cpoutbeta,spanoutbeta,xcpoutbeta,  &
                       xm,rm,xms,rms,mp,nsp,bladedata,amount_data,intersec_coord,throat_3D,mouth_3D,exit_3D,  &
                       casename,nbls,LE,axchrd,mble,mbte,units,stagger,chrdsweep,chrdlean,axial_LE,radial_LE, &
-                      thick_distr,x_in,y_in, nmeanline, xmeanline, ymeanline)
+                      thick_distr,x_in,y_in,nmeanline,xmeanline,ymeanline,mt_umax,clustering_switch,         &
+                      clustering_parameter,dim_thick)
 
     use file_operations
     use funcNsubs
     implicit none
 
     ! Integer parameters
-    integer,    parameter                               :: nspan = 200, nx = 500, nxx = 1000, nax = 50, nbx = 500, nby = 100, nrow = 1
+    integer,    parameter                               :: nspan = 200, nx = 500, nxx = 1000, nax = 50, nbx = 500, nby = 100,   &
+                                                           nrow = 1
 
     ! Input parameters
-    integer,                            intent(in)      :: nspn, nsec, np, stack, cpdeltam, cpdeltheta, cpinbeta, cpoutbeta, nsp(nspan), amount_data,      &
-                                                           nbls, LE, chrdsweep, chrdlean, thick_distr, nmeanline
-    real,                               intent(in)      :: X_le(nspan), X_te(nspan), R_le(nspan), R_te(nspan), xm(nx,nax), rm(nx,nax), xms(nx,nax),        &
-                                                           rms(nx,nax), mp(nx,nax)
-    real,                               intent(in)      :: scf, msle(nspan), spanmp(100), xcpdelm(100), spantheta(100), xcpdeltheta(100), spaninbeta(100), &
-                                                           xcpinbeta(100), spanoutbeta(100), xcpoutbeta(100), intersec_coord(12,nspn), axchrd(nspan),      &
-                                                           mble(nspan), mbte(nspan), stagger(nspan)
-    real,                               intent(inout)   :: bladedata(amount_data,nspn), throat_3D(nspn), mouth_3D(nspn), exit_3D(nspn)
+    integer,                            intent(in)      :: nspn, nsec, np, stack, cpdeltam, cpdeltheta, cpinbeta, cpoutbeta,    &
+                                                           nsp(nspan), amount_data, nbls, chrdsweep, chrdlean, thick_distr,     &
+                                                           LE, nmeanline, clustering_switch
+    real,                               intent(in)      :: X_le(nspan), X_te(nspan), R_le(nspan), R_te(nspan), xm(nx,nax),      &
+                                                           rm(nx,nax), xms(nx,nax), rms(nx,nax), mp(nx,nax), clustering_parameter
+    real,                               intent(in)      :: scf, msle(nspan), spanmp(100), xcpdelm(100), spantheta(100),         &
+                                                           xcpdeltheta(100), spaninbeta(100), xcpinbeta(100), spanoutbeta(100), &
+                                                           xcpoutbeta(100), intersec_coord(12,nspn), axchrd(nspan), mble(nspan),&
+                                                           mbte(nspan), stagger(nspan)
     character(32),                      intent(in)      :: casename
     character(2),                       intent(in)      :: units
     logical,                            intent(in)      :: axial_LE, radial_LE
-    real,                               intent(inout)   :: x_in(np,nspn), y_in(np,nspn), xmeanline(nspn,nmeanline), ymeanline(nspn,nmeanline)
+    real,                               intent(inout)   :: bladedata(amount_data,nspn), throat_3D(nspn), mouth_3D(nspn),        &
+                                                           exit_3D(nspn)
+    real,                               intent(inout)   :: x_in(np,nspn), y_in(np,nspn), xmeanline(nspn,nmeanline),             &
+                                                           ymeanline(nspn,nmeanline), mt_umax(nspn,6), dim_thick(nspn,3)
 
     ! Local variables
     character(80)                                       :: fname1
     character(20)                                       :: temp
-    integer                                             :: na, i, ia, iap, k, ile, uplmt, nap(nspan), i_slope, ncp1, nspline, nopen
-    real,           allocatable                         :: xa(:,:), ya(:,:), xb(:,:), rb(:,:), yb(:,:), zb(:,:), xposlean(:,:), yposlean(:,:), zposlean(:,:),     &
-                                                           xneglean(:,:), yneglean(:,:), zneglean(:,:)
-    real                                                :: chord_actual(100), mps(nxx,nax), demp, spl_eval, xxa, yya, pi, dtor, dmp(nspan), mp_stack(nspan),      &
-                                                           xm_slope, rm_slope, mps_inter, inter_xb(6,nspn), inter_rb(6,nspn), inter_yb(6,nspn), inter_zb(6,nspn), &
-                                                           lref, delmp(nspan), span(nspan), mpxc(nspan), delta_theta(nspan), y_spl_end(nx), xbs(nx), ybs(nx),     &
-                                                           xc(nx), yc(nx), mp3D_meanline(nspn,nmeanline), xem(nspn,nmeanline), rem(nspn,nmeanline),               &
-                                                           yem(nspn,nmeanline), zem(nspn,nmeanline)  !stingl(nspan)
+    integer                                             :: na, i, ia, iap, k, ile, uplmt, nap(nspan), i_slope, ncp1, nspline,   &
+                                                           nopen, ntemp, nmid, temp1, temp2
+    real,           allocatable                         :: xa(:,:), ya(:,:), xb(:,:), rb(:,:), yb(:,:), zb(:,:), xposlean(:,:), &
+                                                           yposlean(:,:), zposlean(:,:), xneglean(:,:), yneglean(:,:),          &
+                                                           zneglean(:,:)
+    real                                                :: chord_actual(100), mps(nxx,nax), demp, spl_eval, xxa, yya, pi, dtor, &
+                                                           dmp(nspan), mp_stack(nspan), xm_slope, rm_slope, mps_inter,          &
+                                                           inter_xb(6,nspn), inter_rb(6,nspn), inter_yb(6,nspn),                &
+                                                           inter_zb(6,nspn), lref, delmp(nspan), span(nspan), mpxc(nspan),      &
+                                                           delta_theta(nspan), y_spl_end(nx), xbs(nx), ybs(nx), xc(nx), yc(nx), &
+                                                           mp3D_meanline(nspn,nmeanline), xem(nspn,nmeanline),                  &
+                                                           rem(nspn,nmeanline), yem(nspn,nmeanline), zem(nspn,nmeanline),       &
+                                                           xrt_umax(nspn,6), xyz_umax(nspn,6)  !stingl(nspan)
     character(:),   allocatable                         :: log_file
     logical                                             :: file_open, isquiet
     common / BladeSectionPoints /xxa(nxx,nax),yya(nxx,nax)
 
 
-    ! Initialize ile
+    ! Initialize variables
     ile = 0
+    xyz_umax = 0.0
 
 
 
@@ -327,6 +339,19 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
             mp3D_meanline(ia,i) = xmeanline(ia,i) + dmp(ia) + delmp(ia)
         end do
 
+        if (thick_distr == 5) then
+
+            ! Compute m'_3D for maximum thickness points
+            mt_umax(ia,1)           = mt_umax(ia,1) + dmp(ia) + delmp(ia)
+            mt_umax(ia,3)           = mt_umax(ia,3) + dmp(ia) + delmp(ia)
+
+            ! Theta coordinates for cylindrical version of
+            ! maximum thickness points
+            xrt_umax(ia,3)          = mt_umax(ia,2)
+            xrt_umax(ia,6)          = mt_umax(ia,4)
+
+        end if
+
     end do  ! ia = 1,na
 
 
@@ -347,6 +372,14 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
            xem(ia,i)    = spl_eval(nsp(ia), mp3D_meanline(ia,i), xm(1,ia), xms(1,ia), mp(1,ia))
            rem(ia,i)    = spl_eval(nsp(ia), mp3D_meanline(ia,i), rm(1,ia), rms(1,ia), mp(1,ia))
         end do
+
+        ! For maximum thickness points
+        if (thick_distr == 5) then
+            xrt_umax(ia,1)  = spl_eval(nsp(ia), mt_umax(ia,1), xm(1,ia), xms(1,ia), mp(1,ia))
+            xrt_umax(ia,2)  = spl_eval(nsp(ia), mt_umax(ia,1), rm(1,ia), rms(1,ia), mp(1,ia))
+            xrt_umax(ia,4)  = spl_eval(nsp(ia), mt_umax(ia,3), xm(1,ia), xms(1,ia), mp(1,ia))
+            xrt_umax(ia,5)  = spl_eval(nsp(ia), mt_umax(ia,3), rm(1,ia), rms(1,ia), mp(1,ia))
+        end if
 
     end do
 
@@ -420,6 +453,15 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
             zem(ia, i)      = rem(ia, i) * cos (ymeanline(ia, i) + delta_theta(ia))
         end do
 
+        ! Convert maximum thickness points to Cartesian coordinates
+        if (thick_distr == 5) then
+            xyz_umax(ia,1)      = scf * xrt_umax(ia,1)
+            xyz_umax(ia,2)      = scf * xrt_umax(ia,2) * sin(xrt_umax(ia,3) + delta_theta(ia))
+            xyz_umax(ia,3)      = scf * xrt_umax(ia,2) * cos(xrt_umax(ia,3) + delta_theta(ia))
+            xyz_umax(ia,4)      = scf * xrt_umax(ia,4)
+            xyz_umax(ia,5)      = scf * xrt_umax(ia,5) * sin(xrt_umax(ia,6) + delta_theta(ia))
+            xyz_umax(ia,6)      = scf * xrt_umax(ia,5) * cos(xrt_umax(ia,6) + delta_theta(ia))
+        end if
 
         ! Get (x,y,z) for the intersection point
         do k = 1, 6      
@@ -470,6 +512,38 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
         end if
 
     end do  ! ia = 1, na
+
+
+
+    !
+    ! Compute dimensional thicknesses to write out
+    ! to .csv file
+    ! TODO: Only for NACA thickness with ellipse-based clustering
+    !
+    ntemp = int(clustering_parameter)
+    nmid = (np + 1)/2
+    if (thick_distr == 5) then
+        if (clustering_switch == 4) then
+            do ia = 1, na
+
+                ! Dimensional TE thickness for all sections
+                temp1 = ntemp
+                temp2 = np - ntemp + 1
+                dim_thick(ia,1) = scf * sqrt((xb(temp1,ia) - xb(temp2,ia))**2 + (yb(temp1,ia) - yb(temp2,ia))**2 + &
+                                             (zb(temp1,ia) - zb(temp2,ia))**2)
+
+                ! Dimensional maximum thickness for all sections
+                dim_thick(ia,2) = sqrt((xyz_umax(ia,1) - xyz_umax(ia,4))**2 + (xyz_umax(ia,2) - xyz_umax(ia,5))**2 + &
+                                       (xyz_umax(ia,3) - xyz_umax(ia,6))**2)
+
+                ! Dimensional LE thickness for all sections
+                temp1 = nmid - ntemp + 1
+                temp2 = nmid + ntemp - 1
+                dim_thick(ia,3) = scf * sqrt((xb(temp1,ia) - xb(temp2,ia))**2 + (yb(temp1,ia) - yb(temp2,ia))**2 + &
+                                             (zb(temp1,ia) - zb(temp2,ia))**2)
+            end do
+        end if
+    end if
 
 
 

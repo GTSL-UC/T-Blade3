@@ -644,20 +644,20 @@ module funcNsubs
     ! Stack (m',theta) airfoils
     !
     !------------------------------------------------------------------------------------------------------
-    subroutine stacking(xb,yb,xbot,ybot,xtop,ytop,js,np,stack_switch,stack,stk_u,stk_v,area,LE)
+    subroutine stacking(xb,yb,xbot,ybot,xtop,ytop,js,np,stack_switch,stack,stk_u,stk_v,area,LE,u_stack,v_stack)
         use file_operations
 
         integer,                        intent(in)      :: js, np, LE, stack, stack_switch
         real,                           intent(in)      :: stk_u(1), stk_v(1)
         real,                           intent(inout)   :: area, xb(np), yb(np), xbot((np + 1)/2), ybot((np + 1)/2), &
-                                                           xtop((np + 1)/2), ytop((np + 1)/2)
+                                                           xtop((np + 1)/2), ytop((np + 1)/2), u_stack, v_stack
 
         ! Local variables
         integer                                         :: i, j, k, np_side, nopen
         integer,    parameter                           :: nx = 1000, ny = 300
-        real                                            :: umin, umax, sb(nx), u_stack, v_stack, vtop_stack, vbot_stack,  &
-                                                           v_zero_stack, const_stk_u, const_stk_v, stku, stkv, ucen,vcen, &
-                                                           ei11, ei22, apx1, apx2
+        real                                            :: umin, umax, sb(nx), vtop_stack, vbot_stack, v_zero_stack, &
+                                                           const_stk_u, const_stk_v, stku, stkv, ucen,vcen, ei11,    &
+                                                           ei22, apx1, apx2
         character(:),    allocatable                    :: log_file
         logical                                         :: file_open, isquiet
 
@@ -856,6 +856,33 @@ module funcNsubs
 
 
     !
+    ! Rotate a 2D point using the given angle
+    !
+    !------------------------------------------------------------------------------------------------------
+    subroutine rotate_point(x, y, angle)
+
+        real,               intent(inout)   :: x, y
+        real,               intent(in)      :: angle
+
+        ! Local variables
+        real                                :: x_temp, y_temp
+
+
+        x_temp = (x * cos(-angle)) + (y * sin(-angle))
+        y_temp = (y * cos(-angle)) - (x * sin(-angle))
+
+        x = x_temp
+        y = y_temp
+
+    end subroutine rotate_point
+    !------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
     ! Scale blade section
     !
     !------------------------------------------------------------------------------------------------------
@@ -868,6 +895,34 @@ module funcNsubs
 
 
     end function scaled
+    !------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Scale a 2D point using given scaling factor
+    !
+    !------------------------------------------------------------------------------------------------------
+    subroutine scale_point(x, y, scalefactor)
+
+        real,               intent(inout)   :: x, y
+        real,               intent(in)      :: scalefactor
+
+        ! Local variables
+        real                                :: x_temp, y_temp
+
+
+        x_temp = x * scalefactor
+        y_temp = y * scalefactor
+
+        x = x_temp
+        y = y_temp
+
+
+    end subroutine scale_point
     !------------------------------------------------------------------------------------------------------
 
 
