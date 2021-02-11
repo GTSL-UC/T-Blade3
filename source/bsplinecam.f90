@@ -154,7 +154,8 @@ end function
 !
 !----------------------------------------------------------------------------------------------------------------------------------
 subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, wing_flag, &
-                   sang, chrd, init_angles, init_cams, u_end, splinedata)
+                   sang, chrd, init_angles, init_cams, u_end, splinedata, u_max,        &
+                   cam_umax, slope_umax)
     use file_operations
     use errors
     use funcNsubs
@@ -167,18 +168,25 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
     character(*),   intent(in)          :: casename
     logical,        intent(in)          :: isdev
     integer,        intent(in)          :: ncp, np
-    real,           intent(in)          :: xcp(ncp), ycp(ncp), u(np), ainl, aext, chrdx
+    real,           intent(in)          :: xcp(ncp), ycp(ncp), u(np), ainl, aext, chrdx, u_max
     integer,        intent(in)          :: wing_flag
     real,           intent(inout)       :: sang, chrd, init_angles(ncp - 2), init_cams(ncp - 2), &
-                                           u_end(ncp - 2), splinedata(splinedata_col, np)
+                                           u_end(ncp - 2), splinedata(splinedata_col, np),       &
+                                           cam_umax, slope_umax
 
     ! Local variables    
     integer                             :: i, j, nopen, js
     real                                :: P, knew, det, k1, k2, curv(np), cam(np), cam_u(np),    &
                                            tot_cam, d1v_end(ncp - 2), v_end(ncp - 2), xcp_seg(4), &
                                            ycp_seg(4), t, angle0, camber0, intg_d2v_end(ncp - 2), &
-                                           intg_d1v_end(ncp - 2)
+                                           intg_d1v_end(ncp - 2), curv_umax, tol = 10E-8
                                            !cam_u_dev(np), sang2, sc_factor_dev, inlet_uv_dev, exit_uv_dev
+    !real                                :: P, knew, det, k1, k2, curv(np), cam(np), cam_u(np), &
+    !                                       cam_u_dev(np), tot_cam, d1v_end(ncp - 2), v_end(ncp - 2),  &
+    !                                       xcp_seg(4), ycp_seg(4), t, angle0, camber0,                &
+    !                                       intg_d2v_end(ncp - 2), intg_d1v_end(ncp - 2), sang2,       &
+    !                                       sc_factor_dev, inlet_uv_dev, exit_uv_dev, curv_umax,       &
+    !                                       tol = 10E-8
     character(:),   allocatable         :: log_file, error_msg, dev_msg
     character(10)                       :: error_arg
     logical                             :: file_open, isquiet
@@ -485,7 +493,37 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
     end do  ! i = 1, np
 
 
-    
+
+    !
+    ! Compute camber and camber slope values associated
+    ! with u location of maximum thickness
+    !
+    ! Done to facilitate computation of physical maximum
+    ! thickness for the geometry data .csv file
+    !
+    if (abs(u_max + 1.0) > tol) then
+
+        do j = 1, ncp - 3
+
+            ! Determine value of camber and camber slope
+            if ((u_max > u_end(j)) .and. (u_max < u_end(j + 1))) then
+                xcp_seg                 = xcp(j:j + 3)
+                ycp_seg                 = ycp(j:j + 3)
+                angle0                  = intg_d2v_end(j)
+                camber0                 = intg_d1v_end(j)
+                t                       = bspline_t_newton(xcp_seg, u_max)
+                curv_umax               = knew * bspline(ycp_seg, t)
+                slope_umax              = knew * (angle(ycp_seg, xcp_seg, angle0, t) - intg_d1v_end(ncp - 2))
+                cam_umax                = knew * (camber(ycp_seg, xcp_seg, angle0, camber0, t) - (u_max * intg_d1v_end(ncp - 2)))
+                exit
+            end if
+
+        end do  ! j = 1, ncp - 3
+
+    end if  ! if (abs(u_max + 1.0) > tol)
+
+
+
     !
     ! Stagger/Twist calculation
     !

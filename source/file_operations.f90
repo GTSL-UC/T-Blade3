@@ -583,16 +583,23 @@ module file_operations
     !                   units           - units for the current case
     !
     !---------------------------------------------------------------------------
-    subroutine outputfiledata(bladedata,nsl,amount_data,throat_pos,casename,units)
+    subroutine outputfiledata(casename,units,nsl,amount_data,bladedata,throat_pos,chordm, &
+                              write_csv,dim_thick)
 
+        character(32),              intent(in)          :: casename
+        character(2),               intent(in)          :: units
         integer,                    intent(in)          :: nsl, amount_data
         real,                       intent(in)          :: bladedata(amount_data,nsl)
         character(20),              intent(in)          :: throat_pos(nsl)
-        character(32),              intent(in)          :: casename
-        character(2),               intent(in)          :: units
+        real,                       intent(in)          :: chordm(nsl)
+        logical,                    intent(in)          :: write_csv
+        real,                       intent(in)          :: dim_thick(nsl,3)
 
-        integer                                         :: js
-        character(80)                                   :: file1
+        ! Local variables
+        integer                                         :: js, funit = 94, unit_ID
+        character(80)                                   :: file1, csv_file
+        character(:),   allocatable                     :: dim_chord, dim_throat, dim_thick_LE, dim_thick_max, &
+                                                           dim_thick_TE, fmt1, fmt2
 
 
         file1 = 'blade_section_data.'//trim(casename)//'.dat'
@@ -608,6 +615,7 @@ module file_operations
               
                 ! If blade scaling factor is specified in mm  
                 if (units == 'mm') then
+                    unit_ID = 1
                   if (throat_pos(nsl) == 'le') then
                     write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
                                   'chord [mm]','sweep','lean','area[mm^2]','lethk [mm]','tethk [mm]','throat [mm]', &
@@ -622,8 +630,9 @@ module file_operations
                                   '(r*delta_theta)WT','Geom Zweifel','le/te/btween/none'
                   end if
               
-               ! If blade scaling factor is specified in cm 
-               else if (units == 'cm') then
+                ! If blade scaling factor is specified in cm
+                else if (units == 'cm') then
+                    unit_ID = 2
                   if (throat_pos(nsl) == 'le') then
                     write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
                                   'chord [cm]','sweep','lean','area[cm^2]','lethk [cm]','tethk [cm]','throat [cm]', &
@@ -640,6 +649,7 @@ module file_operations
 
                 ! If blade scaling factor is specified in m
                 else if ((units == 'm ').or.(units == 'm)')) then
+                    unit_ID = 3
                   if (throat_pos(nsl) == 'le') then
                     write(100,202)'section','span','betaZ*le(deg)','betaZ*te(deg)','betaM*le(deg)','betaM*te(deg)', &
                                   'chord [ m]','sweep','lean','area[ m^2]','lethk [ m]','tethk [ m]','throat [ m]', &
@@ -666,7 +676,74 @@ module file_operations
         close(100)
 
         202 format((A7,2x),(A4,11x),4(A14,3x),(A13,1x),2(A6,5x),(A13,2x),(A10,2x),(A10,1x),(A11),2x,A17,2x,A12,2x,A17)
-        201 format(1x,I3,4x,(f11.8,4x),4(sf14.8,3x),3x,8(f11.8,1x),7x,f11.8,4x,A5)
+        201     format(1x,I3,4x,(f11.8,4x),4(sf14.8,3x),3x,8(f11.8,1x),7x,f11.8,4x,A5)
+
+
+
+        !
+        ! Write .csv file containing select geometric properties of the
+        ! blade sections
+        ! TODO: Only for NACA thickness and ellipse based clustering
+        !
+        if (write_csv) then
+
+            csv_file = 'geom_data.'//trim(casename)//'.csv'
+
+            open (funit, file = csv_file)
+
+            ! Determine format specifier for the first row containing
+            ! column descriptions based on the units being used
+            if (unit_ID == 1) then
+
+                ! Units = mm
+                dim_chord = 'Chord (mm),'
+                dim_throat = 'Throat (mm),'
+                dim_thick_LE = 'LE Thickness (mm),'
+                dim_thick_max = 'Max Thickness (mm),'
+                dim_thick_TE = 'TE Thickness (mm)'
+                fmt1 = '((a8,4x),(a16,7x),(a17,6x),(a11,13x),(a12,12x),(a18,5x),(a19,4x),a17)'
+
+            else if (unit_ID == 2) then
+
+                ! Units = cm
+                dim_chord = 'Chord (cm),'
+                dim_throat = 'Throat (cm),'
+                dim_thick_LE = 'LE Thickness (cm),'
+                dim_thick_max = 'Max Thickness (cm),'
+                dim_thick_TE = 'TE Thickness (cm)'
+                fmt1 = '((a8,4x),(a16,7x),(a17,6x),(a11,13x),(a12,12x),(a18,5x),(a19,4x),a17)'
+
+            else if (unit_ID == 3) then
+
+                ! Units = m
+                dim_chord = 'Chord (m),'
+                dim_throat = 'Throat (m),'
+                dim_thick_LE = 'LE Thickness (m)'
+                dim_thick_max = 'Max Thickness (m),'
+                dim_thick_TE = 'TE Thickness (m)'
+                fmt1 = '((a8,5x),(a16,8x),(a17,7x),(a10,14x),(a11,13x),(a17,6x),(a18,5x),a16)'
+
+            end if  ! unit_ID
+
+            ! Format specifier for the remaining rows containing
+            ! the actual values
+            fmt2 = '(i2,(a,7x),f20.16,(a,2x),f20.16,(a,3x),f20.16,(a,3x),f20.16,(a,2x),f20.16,(a,2x),f20.16,&
+                    &(a,2x),f20.16)'
+
+            ! Write first row to file
+            write(funit, fmt = fmt1) 'Section,', 'Normalized_Span,', 'Meridional_Chord,', dim_chord, dim_throat, &
+                                     dim_thick_LE, dim_thick_max, dim_thick_TE
+
+            ! Write remaining rows to file
+            do js = 1, nsl
+                write(funit, fmt = fmt2) js, ',', bladedata(1, js), ',', chordm(js), ',', bladedata(6, js), ',', &
+                                         bladedata(12, js), ',', dim_thick(js,3), ',', dim_thick(js,2), ',',     &
+                                         dim_thick(js,1)
+            end do
+
+            close (funit)
+
+        end if  ! write_csv
 
         
     end subroutine outputfiledata
