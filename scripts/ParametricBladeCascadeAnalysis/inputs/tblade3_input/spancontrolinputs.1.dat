@@ -1,0 +1,21 @@
+ Spancontrol parameters (From T_Axi version 2.5).  Casename:
+ bld
+ Blade row #:
+    1
+ Span control points, Chord & curvature control points, number span, number of curv values
+    5    7
+ Span       u2      u3      u4      u5      u6      cur1    cur2    cur3    cur4    cur5    cur6    cur7
+ 0.0000     0.15    0.25    0.50    0.75    0.95    0.00    0.00    0.50    0.30    0.15    0.00    0.00
+ 0.2500     0.15    0.25    0.50    0.75    0.95    0.00    0.00    0.50    0.30    0.15    0.00    0.00
+ 0.5000     0.15    0.25    0.50    0.75    0.95    0.00    0.00    0.50    0.30    0.15    0.00    0.00
+ 0.7500     0.15    0.25    0.50    0.75    0.95    0.00    0.00    0.50    0.30    0.15    0.00    0.00
+ 1.0000     0.15    0.25    0.50    0.75    0.95    0.00    0.00    0.50    0.30    0.15    0.00    0.00
+
+ Span control points, Chord & thickness control points
+    5    1
+ Span       LE_radius   u_max   t_max       t_TE    dy_dx_norm
+ 0.0000     5.5         0.40    0.085000    0.015   1.575
+ 0.2500     5.5         0.40    0.085000    0.015   1.575
+ 0.5000     5.5         0.40    0.085000    0.015   1.575
+ 0.7500     5.5         0.40    0.085000    0.015   1.575
+ 1.0000     5.5         0.40    0.085000    0.015   1.575
