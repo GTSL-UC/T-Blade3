@@ -6,10 +6,10 @@ sharmamm@mail.uc.edu
 
 
 
-Refer to the main documentation (T-Blade3_v1.2_ReadMe.pdf) on the T-Blade3 website (http://gtsl.ase.uc.edu/t-blade3/) to understand how to run T-Blade3 v1.2. To
-generate updated documentation for T-Blade3 v1.2, use the file T-Blade3_v1.2_ReadMe.tex in this directory.
+Refer to the main documentation (T-Blade3_v1.3_ReadMe.pdf) on the T-Blade3 website (http://gtsl.ase.uc.edu/t-blade3/) to understand how to run T-Blade3 v1.3. To
+generate updated documentation for T-Blade3 v1.3, use the file T-Blade3_v1.3_ReadMe.tex in this directory.
 
-This document details the changes made to T-Blade3 in v1.2
+This document details the changes made to T-Blade3 in v1.3
 
 --------------------------------------------------
 RUNNING T-BLADE3
@@ -55,3 +55,11 @@ CHANGES MADE IN T-BLADE3 v1.2
    errors, errors or warnings issued, the error log file is empty
 
 7) A test suite containing unit tests (presently) has been added to $TBLADEROOT/tests. Testing requires a serial installation of pFUnit
+
+--------------------------------------------------
+CHANGES MADE IN T-BLADE3 v1.3
+--------------------------------------------------
+
+1) T-Blade3 has been differentiated with respect to the control points of various input parameters. The derivatives of all spanwise (x,y,z)
+   sections with respect to control points of sweep, lean, inlet angle, exit angle, chord multiplier, second derivative of mean-line and
+   modified NACA thickness parameters are now computed and written out to files in a directory created at runtime.
