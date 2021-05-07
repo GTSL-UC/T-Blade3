@@ -12,6 +12,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     use file_operations
     use errors
     use funcNsubs
+    use derivatives,            only: compute_spanwise_xcp_ders, compute_spanwise_ycp_ders, &
+                                      in_beta_ders, sinl_ders, out_beta_ders, sext_ders
     implicit none
     
     character(*)                :: fname_in
@@ -21,16 +23,25 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     character(*)                :: arg4
 
     ! Local variables
-    integer                     :: nopen, nopen_error, n_ext = 21, n_ext_mean
-    real(kind = 8)              :: spl_eval, dspl_eval, xdiff, temp_1, temp_2
+    integer                     :: nopen, nopen_error, n_ext = 21, n_ext_mean, ichord
+    integer,        allocatable :: segment_info(:,:), cp_pos(:,:)
+    real(kind = 8)              :: spl_eval, dspl_eval, xdiff, temp_2
     real(kind = 8), allocatable :: um_spl(:), spanwise_thk(:), mhub_inf(:), &
-                                   thhub_inf(:), xhub_inf(:), yhub_inf(:), zhub_inf(:), mtip_inf(:), &
-                                   thtip_inf(:), xtip_inf(:), ytip_inf(:), ztip_inf(:),              &
-                                   m_ext_mean(:,:), th_ext_mean(:,:), mt_umax(:,:), dim_thick(:,:)
+                                   thhub_inf(:), xhub_inf(:), yhub_inf(:), zhub_inf(:), mtip_inf(:),   &
+                                   thtip_inf(:), xtip_inf(:), ytip_inf(:), ztip_inf(:),                &
+                                   m_ext_mean(:,:), th_ext_mean(:,:), mt_umax(:,:), dim_thick(:,:),    &
+                                   spline_params(:), dcpall(:,:), in_beta_xcp_ders(:,:),               &
+                                   in_beta_ycp_ders(:,:), temp_in(:), sinl_xcp_ders(:,:),              &
+                                   sinl_ycp_ders(:,:), out_beta_xcp_ders(:,:), out_beta_ycp_ders(:,:), &
+                                   sext_xcp_ders(:,:), sext_ycp_ders(:,:), chrdx_ders(:,:,:),          &
+                                   mprime_curv(:,:,:,:), theta_curv(:,:,:,:), mprime_thk(:,:,:,:),     &
+                                   theta_thk(:,:,:,:), mprime_inbeta(:,:,:,:), theta_inbeta(:,:,:,:),  &
+                                   mprime_outbeta(:,:,:,:), theta_outbeta(:,:,:,:), mprime_cm(:,:,:,:),&
+                                   theta_cm(:,:,:,:)
     character(256)              :: fname, temp, row_type, path
-    character(:),   allocatable :: log_file, error_file, auxinput_filename, error_msg
+    character(:),   allocatable :: log_file, error_file, auxinput_filename, error_msg, msg_1, msg_2
     logical                     :: axial_TE, radial_TE, file_open, file_exist, write_csv, &
-                                   initial, open_error  !axial_LE, radial_LE
+                                   initial, open_error, dir_exist  !axial_LE, radial_LE
 
 
     !
@@ -55,6 +66,15 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     dtor                                    = pi/180.
     radius_tolerance                        = 1e-05
     abs_zero                                = 0.0000000000000000
+
+
+
+    !
+    ! Specify np
+    ! TODO: Will need to be changed if np is changed in
+    !       bladegen
+    !
+    np                                      = 241
 
 
 
@@ -335,7 +355,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     end if  ! control_inp_flag
 
     call close_log_file(nopen, file_open)
-
+    !print *, 'From 3dbgb - ', ncp_span_curv, ncp_chord_curv
+    !print *, 'From 3dbgb - ', shape(cp_chord_thk)
 
 
     !
@@ -366,6 +387,17 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     write(nopen, *) 'Number of streamlines:', nsl
     write(nopen, *)
     call close_log_file(nopen, file_open)
+
+
+
+    !
+    ! Create a directory for storing files containing
+    ! derivative info
+    ! TODO: Add command line argument?
+    !
+    inquire (file = 'derivative_files', exist=dir_exist)
+    if (.not. dir_exist) &
+         call execute_command_line ('mkdir derivative_files')
 
 
 
@@ -562,7 +594,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     
 
     !
-    ! TODO: What is happening here?
+    ! Compute m'_s for all streamlines using (x, r) coordinates
+    ! dm'_s = sqrt(dx**2 + dr**2)/r
     !
     do ia = 1, nsl
 
@@ -678,8 +711,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !
     na                                      = nsl
     do ia = 1, na
-        call spl_discjoint(xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia), 999.0, -999.0)
-        call spl_discjoint(rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia), 999.0, -999.0)
+        call spl_discjoint(xm(1, ia), xms(1, ia), mp(1, ia), nsp(ia))!, 999.0, -999.0)
+        call spl_discjoint(rm(1, ia), rms(1, ia), mp(1, ia), nsp(ia))!, 999.0, -999.0)
     end do
 
 
@@ -767,8 +800,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                            rles(1), sle(1), npoints)
 
         ! spl_eval in spline.f90
-        x_le(ia)                            = spl_eval(nsp(ia), s1le(ia), xm(1, ia), xms(1, ia), mp(1, ia))
-        r_le(ia)                            = spl_eval(nsp(ia), s1le(ia), rm(1, ia), rms(1, ia), mp(1, ia))
+        x_le(ia)                            = spl_eval(nsp(ia), s1le(ia), xm(1, ia), xms(1, ia), mp(1, ia), .false.)
+        r_le(ia)                            = spl_eval(nsp(ia), s1le(ia), rm(1, ia), rms(1, ia), mp(1, ia), .false.)
 
     end do  ! ia = 1, na
 
@@ -797,8 +830,8 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
                            rtes(1), ste(1), npoints)
 
         ! spl_eval in spline.f90
-        x_te(ia)                            = spl_eval(nsp(ia), s1te(ia), xm(1, ia), xms(1, ia), mp(1, ia))
-        r_te(ia)                            = spl_eval(nsp(ia), s1te(ia), rm(1, ia), rms(1, ia), mp(1, ia))
+        x_te(ia)                            = spl_eval(nsp(ia), s1te(ia), xm(1, ia), xms(1, ia), mp(1, ia), .false.)
+        r_te(ia)                            = spl_eval(nsp(ia), s1te(ia), rm(1, ia), rms(1, ia), mp(1, ia), .false.)
 
     end do  ! ia = 1, na
 
@@ -1117,6 +1150,52 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
     !
     call log_file_exists(log_file, nopen, file_open)
 
+    ! Allocate segment_info and spline_params
+    if (allocated(segment_info)) deallocate(segment_info)
+    allocate(segment_info(na, 4))
+    if (allocated(spline_params)) deallocate(spline_params)
+    allocate(spline_params(na))
+
+    ! Allocate dcpall for inlet flow angle points
+    if (allocated(dcpall)) deallocate(dcpall)
+    allocate(dcpall(cpinbeta, cpinbeta + 2))
+
+    ! Allocate cp_pos for inlet flow angle points
+    if (allocated(cp_pos)) deallocate(cp_pos)
+    allocate(cp_pos(na, cpinbeta))
+
+    ! Allocate arrays to store sensitivities
+    if (allocated(inbeta_xcp_ders)) deallocate(inbeta_xcp_ders)
+    allocate(inbeta_xcp_ders(na, cpinbeta))
+    if (allocated(inbeta_ycp_ders)) deallocate(inbeta_ycp_ders)
+    allocate(inbeta_ycp_ders(na, cpinbeta))
+
+    ! Allocate arrays to store sensitivities of in_beta
+    if (allocated(in_beta_xcp_ders)) deallocate(in_beta_xcp_ders)
+    allocate(in_beta_xcp_ders(na, cpinbeta))
+    if (allocated(in_beta_ycp_ders)) deallocate(in_beta_ycp_ders)
+    allocate(in_beta_ycp_ders(na, cpinbeta))
+
+    ! Initialize to 0 in case no splining is required for
+    ! the inlet angles
+    if (trim(anglespline) /= 'inletspline' .and. &
+        trim(anglespline) /= 'inoutspline' .and. trim(anglespline) /= 'inci_dev_spline') then
+
+        in_beta_xcp_ders        = 0.0
+        in_beta_ycp_ders        = 0.0
+
+        ! Show warning
+        msg_1                   = "Derivatives wrt inlet angle control points set to 0."
+        msg_2                   = "Spanwise splining for inlet angle is not specified in 3dbgbinput file."
+        call warning (warning_msg = msg_1, warning_msg_1 = msg_2)
+
+    end if
+
+    ! Temporary array to store inlet flow angle if
+    ! using incidence spline
+    if (allocated(temp_in)) deallocate(temp_in)
+    allocate(temp_in(na))
+
     ! Inlet BetaZ defined as inlet flow angle
     if ((trim(anglespline) == 'inletspline') .or. (trim(anglespline) == 'inoutspline')) then
 
@@ -1131,8 +1210,14 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
         ! Generate spanwise spline for inlet BetaZ
         ! cubicspline and cubicbspline_intersec in cubicspline.f90
-        call cubicspline(cpinbeta, xcpinbeta, spaninbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
-        call cubicbspline_intersec(ncp1, xc, yc, na, span, inbeta_s, xbs, ybs, y_spl_end)
+        call cubicspline(cpinbeta, xcpinbeta, spaninbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1, .true., dcpall)
+        call cubicbspline_intersec(ncp1, xc, yc, na, span, inbeta_s, xbs, ybs, y_spl_end,.true., segment_info, spline_params, &
+                                   cp_pos)
+
+        ! Compute sensitivity of inbeta_s wrt control points
+        ! of span and in_beta* specified in 3dbgbinput
+        call compute_spanwise_xcp_ders (na, ncp1, yc, xc, cp_pos, segment_info, spline_params, inbeta_xcp_ders)
+        call compute_spanwise_ycp_ders (na, ncp1, segment_info, dcpall, spline_params, inbeta_ycp_ders)
 
         ! Store in global array
         do ia = 1, na
@@ -1142,6 +1227,10 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
             in_beta(ia)                     = inbeta_s(ia)
 
         end do  ! ia = 1, na
+
+        ! Compute sensitivities of in_beta
+        in_beta_xcp_ders                    = inbeta_xcp_ders
+        in_beta_ycp_ders                    = inbeta_ycp_ders
 
     ! Inlet BetaZ defined as incidence
     else if (trim(anglespline) == 'inci_dev_spline') then
@@ -1157,30 +1246,85 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
         ! Generate spanwise spline for inlet BetaZ
         ! cubicspline and cubicbspline_intersec in cubicspline.f90
-        call cubicspline(cpinbeta, xcpinbeta, spaninbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
-        call cubicbspline_intersec(ncp1, xc, yc, na, span, inci_s, xbs, ybs, y_spl_end)
+        call cubicspline(cpinbeta, xcpinbeta, spaninbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1, .true., dcpall)
+        call cubicbspline_intersec(ncp1, xc, yc, na, span, inci_s, xbs, ybs, y_spl_end, .true., segment_info, spline_params, &
+                                   cp_pos)
+
+        ! Compute sensitivity of inci_s wrt control points
+        ! of span and in_beta* specified in 3dbgbinput
+        call compute_spanwise_xcp_ders (na, ncp1, yc, xc, cp_pos, segment_info, spline_params, inbeta_xcp_ders)
+        call compute_spanwise_ycp_ders (na, ncp1, segment_info, dcpall, spline_params, inbeta_ycp_ders)
 
         ! Store in global array
         do ia = 1, na
 
-            temp_1                          = in_beta(ia)
+            temp_in(ia)                     = in_beta(ia)
             temp_2                          = inci_s(ia)
             in_beta(ia)                     = inBetaInci(in_beta(ia), inci_s(ia))
             if (.not. isquiet) print *, span(ia), in_beta(ia)
-            write(nopen,*) span(ia), temp_1, temp_2, in_beta(ia)
+            write(nopen,*) span(ia), temp_in(ia), temp_2, in_beta(ia)
 
         end do  ! ia = 1, na
+
+        ! Compute sensitivity of in_beta wrt control points
+        ! of span and in_beta* specified in 3dbgbinput
+        call in_beta_ders (temp_in, inbeta_xcp_ders, inbeta_ycp_ders, in_beta_xcp_ders, in_beta_ycp_ders)
 
     end if  ! anglespline
     call close_log_file(nopen, file_open)
 
 
 
-
     !
-    ! Control points for panwise outlet BetaZ
+    ! Control points for spanwise outlet BetaZ
     !
     call log_file_exists(log_file, nopen, file_open)
+
+    ! Allocate segment_info and spline_params
+    if (allocated(segment_info)) deallocate(segment_info)
+    allocate(segment_info(na, 4))
+    if (allocated(spline_params)) deallocate(spline_params)
+    allocate(spline_params(na))
+
+    ! Allocate dcpall for outlet flow angle points
+    if (allocated(dcpall)) deallocate(dcpall)
+    allocate(dcpall(cpoutbeta, cpoutbeta + 2))
+
+    ! Allocate cp_pos for outlet flow angle points
+    if (allocated(cp_pos)) deallocate(cp_pos)
+    allocate(cp_pos(na, cpoutbeta))
+
+    ! Allocate arrays to store sensitivities
+    if (allocated(outbeta_xcp_ders)) deallocate(outbeta_xcp_ders)
+    allocate(outbeta_xcp_ders(na, cpoutbeta))
+    if (allocated(outbeta_ycp_ders)) deallocate(outbeta_ycp_ders)
+    allocate(outbeta_ycp_ders(na, cpoutbeta))
+
+    ! Allocate arrays to store sensitivities of out_beta
+    if (allocated(out_beta_xcp_ders)) deallocate(out_beta_xcp_ders)
+    allocate(out_beta_xcp_ders(na, cpoutbeta))
+    if (allocated(out_beta_ycp_ders)) deallocate(out_beta_ycp_ders)
+    allocate(out_beta_ycp_ders(na, cpoutbeta))
+
+    ! Initialize to 0 in case no splining is required for
+    ! the exit angles
+    if (trim(anglespline) /= 'outletspline' .and. &
+        trim(anglespline) /= 'inoutspline' .and. trim(anglespline) /= 'inci_dev_spline') then
+
+        out_beta_xcp_ders       = 0.0
+        out_beta_ycp_ders       = 0.0
+
+        ! Show warning
+        msg_1                   = "Derivatives wrt exit angle control points set to 0."
+        msg_2                   = "Spanwise splining for exit angle is not specified in 3dbgbinput file."
+        call warning (warning_msg = msg_1, warning_msg_1 = msg_2)
+
+    end if
+
+    ! Temporary array to store exit flow angle if
+    ! using deviation spline
+    if (allocated(temp_in)) deallocate(temp_in)
+    allocate(temp_in(na))
 
     ! Outlet BetaZ defined as outlet flow angle
     if ((trim(anglespline) == 'outletspline').or.(trim(anglespline) == 'inoutspline')) then
@@ -1197,8 +1341,14 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
         ! Spanwise spline for outlet BetaZ
         ! cubicspline and cubicbspline_intersec in spline.f90
-        call cubicspline(cpoutbeta, xcpoutbeta, spanoutbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
-        call cubicbspline_intersec(ncp1, xc, yc, na, span, outbeta_s, xbs, ybs, y_spl_end)
+        call cubicspline(cpoutbeta, xcpoutbeta, spanoutbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1, .true., dcpall)
+        call cubicbspline_intersec(ncp1, xc, yc, na, span, outbeta_s, xbs, ybs, y_spl_end,.true., segment_info, &
+                                   spline_params, cp_pos)
+
+        ! Compute sensitivity of outbeta_s wrt control points
+        ! of span and out_beta* specified in 3dbgbinput file
+        call compute_spanwise_xcp_ders (na, ncp1, yc, xc, cp_pos, segment_info, spline_params, outbeta_xcp_ders)
+        call compute_spanwise_ycp_ders (na, ncp1, segment_info, dcpall, spline_params, outbeta_ycp_ders)
 
         ! Store in global array
         do ia = 1, na
@@ -1206,6 +1356,10 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
             write(nopen,*) span(ia),  outbeta_s(ia)
             out_beta(ia)                    = outbeta_s(ia)     
         end do  ! ia = 1, na
+
+        ! Compute sensitivities of out_beta
+        out_beta_xcp_ders                   = outbeta_xcp_ders
+        out_beta_ycp_ders                   = outbeta_ycp_ders
 
     ! Outlet BetaZ defined as deviation
     else if (trim(anglespline) == 'inci_dev_spline') then
@@ -1222,19 +1376,28 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
         ! Spanwise spline for outlet BetaZ
         ! cubicspline and cubicbspline_intersec in spline.f90
-        call cubicspline(cpoutbeta, xcpoutbeta, spanoutbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
-        call cubicbspline_intersec(ncp1, xc, yc, na, span, dev_s, xbs, ybs, y_spl_end)
+        call cubicspline(cpoutbeta, xcpoutbeta, spanoutbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1, .true., dcpall)
+        call cubicbspline_intersec(ncp1, xc, yc, na, span, dev_s, xbs, ybs, y_spl_end,.true., segment_info, spline_params, &
+                                   cp_pos)
+
+        ! Compute sensitivity of dev_s wrt control points
+        ! of span and out_beta* specified in 3dbgbinput file
+        call compute_spanwise_xcp_ders (na, ncp1, yc, xc, cp_pos, segment_info, spline_params, outbeta_xcp_ders)
+        call compute_spanwise_ycp_ders (na, ncp1, segment_info, dcpall, spline_params, outbeta_ycp_ders)
 
         ! Store in global array
         do ia = 1, na
 
-            temp_1                          = out_beta(ia)
+            temp_in(ia)                     = out_beta(ia)
             temp_2                          = dev_s(ia)
             out_beta(ia)                    = outBetaDevn(in_beta(ia), out_beta(ia), dev_s(ia))
             if (.not. isquiet) print *, span(ia), out_beta(ia)
-            write(nopen,*) span(ia), temp_1, temp_2, out_beta(ia)
+            write(nopen,*) span(ia), temp_in(ia), temp_2, out_beta(ia)
 
         end do  ! ia = 1, na
+
+        ! Compute derivatives of out_beta
+        call out_beta_ders (temp_in, in_beta, outbeta_xcp_ders, outbeta_ycp_ders, out_beta_xcp_ders, out_beta_ycp_ders)
 
     end if  ! anglespline
     call close_log_file(nopen, file_open)
@@ -1255,17 +1418,56 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen,*) ''
         write(nopen,*) '   span        chord_multipliers'
 
+        ! Allocate dcpall for chord multiplier points
+        if (allocated(dcpall)) deallocate(dcpall)
+        allocate(dcpall(cpchord, cpchord + 2))
+
+        ! Allocate cp_pos for chord multiplier points
+        if (allocated(cp_pos)) deallocate(cp_pos)
+        allocate(cp_pos(na, cpchord))
+
+        ! Allocate arrays for derivatives of the chord multiplier
+        ! values wrt spanwise control points
+        if (allocated(chords_xcp_ders)) deallocate(chords_xcp_ders)
+        allocate (chords_xcp_ders(na, cpchord))
+        if (allocated(chords_ycp_ders)) deallocate(chords_ycp_ders)
+        allocate (chords_ycp_ders(na, cpchord))
+
         ! Spanwise spline for chord multiplier
         ! cubicspline and cubicbspline_intersec in spline.f90
-        call cubicspline(cpchord, xcpchord, spanchord, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
-        call cubicbspline_intersec(ncp1, xc, yc, na, span, chords, xbs, ybs, y_spl_end)
+        call cubicspline(cpchord, xcpchord, spanchord, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1, .true., dcpall)
+        call cubicbspline_intersec(ncp1, xc, yc, na, span, chords, xbs, ybs, y_spl_end,.true., segment_info, spline_params, &
+                                   cp_pos)
+
+        ! Compute sensitivity of chords wrt control points
+        ! of span and chord_multiplier specified in 3dbgbinput file
+        call compute_spanwise_xcp_ders (na, ncp1, yc, xc, cp_pos, segment_info, spline_params, chords_xcp_ders)
+        call compute_spanwise_ycp_ders (na, ncp1, segment_info, dcpall, spline_params, chords_ycp_ders)
         
         ! Print spline data to screen and write to file
         do ia = 1, na
             if (.not.isquiet) print *, span(ia), chords(ia)
             write(nopen,*) span(ia), chords(ia)
-        end do  
+        end do
         call close_log_file(nopen, file_open)
+
+    else
+
+        ! Allocate arrays for derivatives of the chord multiplier
+        ! values wrt spanwise control points
+        if (allocated(chords_xcp_ders)) deallocate(chords_xcp_ders)
+        allocate (chords_xcp_ders(na, cpchord))
+        if (allocated(chords_ycp_ders)) deallocate(chords_ycp_ders)
+        allocate (chords_ycp_ders(na, cpchord))
+
+        ! Set to zero since no spanwise spline is being constructed
+        chords_xcp_ders                 = 0.0
+        chords_ycp_ders                 = 0.0
+
+        ! Show warning
+        msg_1                           = "Derivatives wrt chord multiplier control points set to 0."
+        msg_2                           = "Non-dimensional actual chord switch not set to 2 in 3dbgbinput file."
+        call warning (warning_msg = msg_1, warning_msg_1 = msg_2)
 
     end if  ! chord_switch
 
@@ -1288,10 +1490,19 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen, *)' Stagger defined spanwise by a cubic B-spline using control points.'
         write(nopen, *)'   span        stagger'
 
+        ! Allocate dcpall for stagger points
+        if (allocated(dcpall)) deallocate(dcpall)
+        allocate(dcpall(cpinbeta, cpinbeta + 2))
+
+        ! Allocate cp_pos for stagger points
+        if (allocated(cp_pos)) deallocate(cp_pos)
+        allocate(cp_pos(na, cpinbeta))
+
         ! Spanwise spline for stagger
         ! cubicspline and cubicbspline_intersec in spline.f90
-        call cubicspline(cpinbeta, xcpinbeta, spaninbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
-        call cubicbspline_intersec(ncp1, xc, yc, na, span, inbeta_s, xbs, ybs, y_spl_end)
+        call cubicspline(cpinbeta, xcpinbeta, spaninbeta, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1, .true., dcpall)
+        call cubicbspline_intersec(ncp1, xc, yc, na, span, inbeta_s, xbs, ybs, y_spl_end, .true., segment_info, &
+                                   spline_params, cp_pos)
 
         ! Print spline data to screen and write to file
         do ia = 1, na
@@ -1317,10 +1528,19 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen,*) ''
         write(nopen,*) 'tm/c thickness ratio defined radially with 2D spline using control points.'
 
+        ! Allocate dcpall for thickness multiplier points
+        if (allocated(dcpall)) deallocate(dcpall)
+        allocate(dcpall(cptm_c, cptm_c + 2))
+
+        ! Allocate cp_pos for thickness multiplier points
+        if (allocated(cp_pos)) deallocate(cp_pos)
+        allocate(cp_pos(na, cptm_c))
+
         ! Spanwise spline for thickness multiplier
         ! cubicspline and cubicbspline_intersec in spline.f90
-        call cubicspline(cptm_c, xcptm_c, spantm_c, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
-        call cubicbspline_intersec(ncp1, xc, yc, na, span, thk_tm_c_spl, xbs, ybs, y_spl_end)
+        call cubicspline(cptm_c, xcptm_c, spantm_c, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1, .true., dcpall)
+        call cubicbspline_intersec(ncp1, xc, yc, na, span, thk_tm_c_spl, xbs, ybs, y_spl_end, .true., &
+                                   segment_info, spline_params, cp_pos)
 
         ! Print spline data to screen and write to file
         do ia = 1, na
@@ -1347,10 +1567,19 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         write(nopen,*) ''
         write(nopen,*) 'Max thickness location defined spanwise by a cubic B-spline using control points'
 
+        ! Allocate dcpall for umxthk_all points
+        if (allocated(dcpall)) deallocate(dcpall)
+        allocate(dcpall(cptm_c, cptm_c + 2))
+
+        ! Allocate cp_pos for umxthk_all points
+        if (allocated(cp_pos)) deallocate(cp_pos)
+        allocate(cp_pos(na, cptm_c))
+
         ! Spanwise spline for max thickness location
         ! cubicspline and cubicbspline_intersec in spline.f90
-        call cubicspline(cptm_c, xcpumax, spantm_c, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1)
-        call cubicbspline_intersec(ncp1, xc, yc, na, span, um_spl, xbs, ybs, y_spl_end)
+        call cubicspline(cptm_c, xcpumax, spantm_c, xbs, ybs, y_spl_end, nspline, xc, yc, ncp1, .true., dcpall)
+        call cubicbspline_intersec(ncp1, xc, yc, na, span, um_spl, xbs, ybs, y_spl_end, .true., segment_info, spline_params, &
+                                   cp_pos)
         umxthk_all                          = um_spl
 
         ! Print spline data to screen and write to file
@@ -1405,6 +1634,72 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
 
     !
+    ! Allocate arrays to store derivatives of sinl
+    ! wrt control points of span and in_beta*
+    ! specified in 3dbgbinputs file
+    !
+    if (allocated(sinl_xcp_ders)) deallocate(sinl_xcp_ders)
+    allocate(sinl_xcp_ders(nspn, cpinbeta))
+    if (allocated(sinl_ycp_ders)) deallocate(sinl_ycp_ders)
+    allocate(sinl_ycp_ders(nspn, cpinbeta))
+
+    !
+    ! Allocate arrays to store derivatives of sext
+    ! wrt control points of span and out_beta*
+    ! specified in 3dbgbinputs file
+    !
+    if (allocated(sext_xcp_ders)) deallocate(sext_xcp_ders)
+    allocate(sext_xcp_ders(nspn, cpoutbeta))
+    if (allocated(sext_ycp_ders)) deallocate(sext_ycp_ders)
+    allocate(sext_ycp_ders(nspn, cpoutbeta))
+
+    !
+    ! Allocate arrays to store derivatives of chrdx
+    ! wrt control points of span and chord_multipliet
+    ! specified in 3dbgbinputs file
+    !
+    if (allocated(chrdx_ders)) deallocate (chrdx_ders)
+    allocate (chrdx_ders(nspn, 2, cpchord))
+
+
+
+    !
+    ! Allocate arrays to store derivatives of all
+    ! spanwise (m',theta) sections
+    !
+    ! Mean-line 2nd derivative
+    if (allocated(mprime_curv)) deallocate(mprime_curv)
+    allocate (mprime_curv(nspn, np, ncp_chord_curv - 1, ncp_span_curv))
+    if (allocated(theta_curv)) deallocate(theta_curv)
+    allocate (theta_curv(nspn, np, ncp_chord_curv - 1, ncp_span_curv))
+
+    ! Thickness parameters
+    if (allocated(mprime_thk)) deallocate(mprime_thk)
+    allocate(mprime_thk(nspn, np, 5, ncp_span_thk))
+    if (allocated(theta_thk)) deallocate(theta_thk)
+    allocate(theta_thk(nspn, np, 5, ncp_span_thk))
+
+    ! in_beta*
+    if (allocated(mprime_inbeta)) deallocate(mprime_inbeta)
+    allocate(mprime_inbeta(nspn, np, 2, cpinbeta))
+    if (allocated(theta_inbeta)) deallocate(theta_inbeta)
+    allocate(theta_inbeta(nspn, np, 2, cpinbeta))
+
+    ! out_beta*
+    if (allocated(mprime_outbeta)) deallocate(mprime_outbeta)
+    allocate(mprime_outbeta(nspn, np, 2, cpoutbeta))
+    if (allocated(theta_outbeta)) deallocate(theta_outbeta)
+    allocate(theta_outbeta(nspn, np, 2, cpoutbeta))
+
+    ! chord_multiplier
+    if (allocated(mprime_cm)) deallocate(mprime_cm)
+    allocate(mprime_cm(nspn, np, 2, cpchord))
+    if (allocated(theta_cm)) deallocate(theta_cm)
+    allocate(theta_cm(nspn, np, 2, cpchord))
+
+
+
+    !
     ! 2D airfoil generation
     !
     do js = 1, nspn
@@ -1445,6 +1740,16 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
         end if  ! beta_switch     
 
+        ! Compute derivatives of sinl wrt control points of
+        ! span and in_beta*
+        call sinl_ders (dtor, in_beta(js), phi_s_in(js), in_beta_xcp_ders(js,:), in_beta_ycp_ders(js,:), &
+                        sinl_xcp_ders(js,:), sinl_ycp_ders(js,:))
+
+        ! Compute derivatives of sext wrt control points of
+        ! span and out_beta*
+        call sext_ders (dtor, out_beta(js), phi_s_out(js), out_beta_xcp_ders(js,:), out_beta_ycp_ders(js,:), &
+                        sext_xcp_ders(js,:), sext_ycp_ders(js,:))
+
 
 
         !
@@ -1461,6 +1766,9 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
             chrdx                           = chord(js)
             axchrd(js)                      = chord(js)
 
+            chrdx_ders(js, 1, :)            = 0.0 ! Derivatives of chrdx wrt control points
+            chrdx_ders(js, 2, :)            = 0.0 ! of span and chord_multiplier
+
         ! Internal chord
         else if (chord_switch == 0) then
 
@@ -1468,6 +1776,9 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
             write(nopen,*) 'Internally calculated chord...'
             chrdx                           = chordm(js)
             axchrd(js)                      = chord(js)
+
+            chrdx_ders(js, 1, :)            = 0.0 ! Derivatives of chrdx wrt control points
+            chrdx_ders(js, 2, :)            = 0.0 ! of span and chord_multiplier
 
         ! Chord with spanwise chord multiplier
         else if (chord_switch == 2) then
@@ -1477,7 +1788,14 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
             chrdx                           = chordm(js) * chords(js)
             axchrd(js)                      = chord(js)
 
-        end if  ! chord_switch 
+            ! Derivatives of chrdx wrt control points of
+            ! span and chord_multiplier
+            do ichord = 1, cpchord
+                chrdx_ders(js, 1, ichord)   = chordm(js) * chords_xcp_ders(js, ichord)
+                chrdx_ders(js, 2, ichord)   = chordm(js) * chords_ycp_ders(js, ichord)
+            end do
+
+        end if  ! chord_switch
         call close_log_file(nopen, file_open)
 
 
@@ -1554,17 +1872,19 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         ! 2D blade section generation routine
         ! bladegen in bladegen.f90
         !
-        call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js),stgr,stack,chord_switch,    &
-                      stak_u,stak_v,xb_stk,yb_stk,stack_switch,clustering_switch,clustering_parameter,nsl,nbls,    &
-                      curv,thick,LE,np,ncp_curv,ncp_thk,curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,      &
-                      ee_all,thick_distr,umxthk_all, C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all,  &
-                      LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments,         &
-                      sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index,n_normal_distance,casename, &
-                      develop,mble,mbte,mles,mtes,i_slope,jcellblade_all,etawidth_all,BGgrid_all,thk_tm_c_spl,     &
-                      theta_offset,TE_der_actual,TE_der_norm, mblade_grid(js,:),thblade_grid(js,:),spanwise_thk,   &
-                      n_ext,m_ext_mean(js,:),th_ext_mean(js,:),mt_umax(js,:))
-
-
+        call bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,blext(js),xcen,ycen,airfoil(js),stgr,stack,chord_switch,        &
+                      stak_u,stak_v,xb_stk,yb_stk,stack_switch,clustering_switch,clustering_parameter,nsl,nbls,        &
+                      curv,thick,LE,np,ncp_curv,ncp_thk,curv_cp,thk_cp, wing_flag, lethk_all,tethk_all,s_all,          &
+                      ee_all,thick_distr,umxthk_all, C_le_x_top_all,C_le_x_bot_all,C_le_y_top_all,C_le_y_bot_all,      &
+                      LE_vertex_ang_all,LE_vertex_dis_all,sting_l_all,sting_h_all,LEdegree,no_LE_segments,             &
+                      sec_radius,bladedata,amount_data,scf,intersec_coord,throat_index,n_normal_distance,casename,     &
+                      develop,mble,mbte,mles,mtes,i_slope,jcellblade_all,etawidth_all,BGgrid_all,thk_tm_c_spl,         &
+                      theta_offset,TE_der_actual,TE_der_norm, mblade_grid(js,:),thblade_grid(js,:),spanwise_thk,       &
+                      n_ext,m_ext_mean(js,:),th_ext_mean(js,:),mt_umax(js,:),sinl_xcp_ders(js,:),                      &
+                      sinl_ycp_ders(js,:),sext_xcp_ders(js,:),sext_ycp_ders(js,:),chrdx_ders(js,:,:),                  &
+                      mprime_curv(js,:,:,:),theta_curv(js,:,:,:),mprime_thk(js,:,:,:),theta_thk(js,:,:,:),             &
+                      mprime_inbeta(js,:,:,:),theta_inbeta(js,:,:,:),mprime_outbeta(js,:,:,:),theta_outbeta(js,:,:,:), &
+                      mprime_cm(js,:,:,:),theta_cm(js,:,:,:))
 
         ! Store 2D quantities in global variables
         mprime_ble(js)                      = mble
@@ -1615,15 +1935,14 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
         nsec                                = nspn
 
         ! bladestack in bladestack.f90
-        call bladestack(nspn, x_le, x_te, r_le, r_te, nsec, scf, msle, np, stack,                         &
-                        cpdeltam, spanmp, xcpdelm, cpdeltheta, spantheta, xcpdeltheta,                    &
-                        cpinbeta, spaninbeta, xcpinbeta, cpoutbeta, spanoutbeta, xcpoutbeta,              &
-                        xm, rm, xms, rms, mp, nsp, bladedata, amount_data, intersec_coord,                &
-                        throat_3D, mouth_3D, exit_3D, casename, nbls, LE, axchrd, mprime_ble,             &
-                        mprime_bte, units, stagger, chrdsweep, chrdlean, axial_LE, radial_LE,thick_distr, &
-                        transpose(mblade_grid(:,1:np)), transpose(thblade_grid(:,1:np)), n_ext_mean,      &
-                        m_ext_mean(:,1:n_ext_mean), th_ext_mean(:,1:n_ext_mean), mt_umax,                 &
-                        clustering_switch, clustering_parameter, dim_thick)
+        call bladestack(nspn, x_le, x_te, r_le, r_te, nsec, scf, msle, np, stack, cpdeltam, spanmp, xcpdelm, cpdeltheta,   &
+                        spantheta, xcpdeltheta, cpinbeta, spaninbeta, xcpinbeta, cpoutbeta, spanoutbeta, xcpoutbeta, xm,   &
+                        rm, xms, rms, mp, nsp, bladedata, amount_data, intersec_coord, throat_3D, mouth_3D, exit_3D,       &
+                        casename, nbls, LE, axchrd, mprime_ble, mprime_bte, units, stagger, chrdsweep, chrdlean, axial_LE, &
+                        radial_LE,thick_distr, transpose(mblade_grid(:,1:np)), transpose(thblade_grid(:,1:np)), n_ext_mean,&
+                        m_ext_mean(:,1:n_ext_mean), th_ext_mean(:,1:n_ext_mean), mt_umax, clustering_switch,               &
+                        clustering_parameter, dim_thick, mprime_curv, theta_curv, mprime_thk, theta_thk, mprime_inbeta,    &
+                        theta_inbeta, mprime_outbeta, theta_outbeta, mprime_cm, theta_cm)
 
     end do  ! js = 1, nrow
 

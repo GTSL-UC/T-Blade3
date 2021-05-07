@@ -213,12 +213,13 @@ end subroutine spline
 !             8th Ed., John Wiley and Sons, 1999, pp. 861-866
 !
 !------------------------------------------------------------------------------------
-function spl_eval(n, tt, y, dydt, t) 
+function spl_eval(n, tt, y, dydt, t, print_from)
     use errors
     implicit none
     
     integer,        intent (in)             :: n
     real,           intent (in)             :: y(n), dydt(n), t(n), tt
+    logical                                 :: print_from
 
     ! Local variables
     integer                                 :: knt1, knt2, find_knt
@@ -370,7 +371,7 @@ subroutine spl_inv(tt,yy,y,dydt,t,n)
     
     do iter = 1, maxiter
         
-        y_newt  = spl_eval(n, tt, y, dydt, t) - yy
+        y_newt  = spl_eval(n, tt, y, dydt, t, .false.) - yy
         dy_newt = dspl_eval(tt, y, dydt, t, n)
         dt_newt = -y_newt/dy_newt
         tt      = tt + 0.8*dt_newt
@@ -648,10 +649,10 @@ subroutine spl_intersect(ia,tt1, tt2, x1, dxdt1, y1, dydt1, t1, n1, x2, dxdt2, y
             if(tt2.gt.t2(n2)) then
                 tt2 = t2(n2); trunc2kntn = .true.
             end if
-            xx1 = spl_eval(n1, tt1, x1, dxdt1, t1)
-            xx2 = spl_eval(n2, tt2, x2, dxdt2, t2)
-            yy1 = spl_eval(n1, tt1, y1, dydt1, t1)
-            yy2 = spl_eval(n2, tt2, y2, dydt2, t2)
+            xx1 = spl_eval(n1, tt1, x1, dxdt1, t1, .false.)
+            xx2 = spl_eval(n2, tt2, x2, dxdt2, t2, .false.)
+            yy1 = spl_eval(n1, tt1, y1, dydt1, t1, .false.)
+            yy2 = spl_eval(n2, tt2, y2, dydt2, t2, .false.)
             F1  = xx2 - xx1
             F2  = yy2 - yy1
             F   = (F1**2)+(F2**2)

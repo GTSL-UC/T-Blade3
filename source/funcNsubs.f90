@@ -18,8 +18,8 @@ module funcNsubs
 
 
         ! Set version IDs for both GitHub branches
-        if (present(master_ID)) master_ID   = '1.2.2'
-        if (present(develop_ID)) develop_ID = '1.2.5'
+        if (present(master_ID)) master_ID   = '1.2.5'
+        if (present(develop_ID)) develop_ID = '1.3.0'
 
 
     end subroutine current_version
@@ -225,10 +225,10 @@ module funcNsubs
 
         !Positive inlet angle
         if (inbeta(1) >= 0.) then
-          inBetaInci = inbeta(1) - inci(1)
+            inBetaInci = inbeta(1) - inci(1)
         else
           !Negative inlet angle
-          inBetaInci = inbeta(1) + inci(1) 
+            inBetaInci = inbeta(1) + inci(1)
         end if
 
 
@@ -244,7 +244,7 @@ module funcNsubs
     ! Function to calculate the exit angle including deviation
     !
     !------------------------------------------------------------------------------------------------------
-    real*8 function outBetaDevn(inbeta,outbeta,devn)
+    real function outBetaDevn(inbeta,outbeta,devn)
         
         real                    :: inbeta(1),outbeta(1),camber(1), devn(1)
 
@@ -253,10 +253,10 @@ module funcNsubs
 
         !negative camber
         if (camber(1) <= 0.) then
-          outBetaDevn = outbeta(1) - devn(1)
+            outBetaDevn = outbeta(1) - devn(1)
+        !positive camber
         else
-          !positive camber
-          outBetaDevn = outbeta(1) + devn(1)
+            outBetaDevn = outbeta(1) + devn(1)
         end if
 
 
@@ -723,7 +723,7 @@ module funcNsubs
             end if
             u_stack = xb(1)*(real(stku)/100)
         end if
-        
+
         ! Stacking on/above/below meanline
         ! Calculating vtop_stack and vbot_stack for v_stack
         j = 1
@@ -3091,6 +3091,7 @@ module funcNsubs
     !
     !------------------------------------------------------------------------------------------------------
     subroutine LE_ellipse(np,cp_LE_ellip,np_cluster,x_ellip_LE,y_ellip_LE)
+        use globvar,    only: du_ell_LE
 
         integer,                    intent(in)          :: np
         real,                       intent(in)          :: cp_LE_ellip(4,2)
@@ -3103,7 +3104,19 @@ module funcNsubs
                                                            b_LE
         real,       allocatable                         :: t_LE(:)
         real,       parameter                           :: pi = 4.0*atan(1.0)
-        integer                                         :: i
+        integer                                         :: i, j
+
+
+        !
+        ! Allocate array to store contributions of LE side
+        ! ellipse-based clustering to the sensitivities of
+        ! u wrt thickness parameters
+        !
+        if (allocated(du_ell_LE)) deallocate(du_ell_LE)
+        allocate(du_ell_LE(1:np_cluster, 5))
+
+        ! Initialize du_ell_LE
+        du_ell_LE                   = 0.0
 
 
         !
@@ -3146,6 +3159,17 @@ module funcNsubs
             x_ellip_LE(i)           = a_LE*(1.0 + cos(t_LE(i)))
             y_ellip_LE(i)           = b_LE*sin(t_LE(i))
 
+            ! Store sensitivity contributions in global array
+            ! du_ell_LE
+            if (i >= np_cluster) then
+                j                   = i - np_cluster + 1
+                du_ell_LE(j, 1)     = 1.0 + cos(t_LE(i))
+                du_ell_LE(j, 2)     = 0.0
+                du_ell_LE(j, 3)     = 1.0 + cos(t_LE(i))
+                du_ell_LE(j, 4)     = 0.0
+                du_ell_LE(j, 5)     = 0.0
+            end if
+
         end do
 
 
@@ -3175,6 +3199,7 @@ module funcNsubs
     !
     !------------------------------------------------------------------------------------------------------
     subroutine TE_ellipse(np,cp_TE_ellip,np_cluster,x_ellip_TE,y_ellip_TE)
+        use globvar,    only: du_ell_TE
 
         integer,                    intent(in)          :: np
         real,                       intent(in)          :: cp_TE_ellip(4,2)
@@ -3187,7 +3212,21 @@ module funcNsubs
                                                            b_TE
         real,       allocatable                         :: t_TE(:)
         real,       parameter                           :: pi = 4.0*atan(1.0)
-        integer                                         :: i
+        integer                                         :: i, j
+
+
+        !
+        ! Allocate array to store contributions of TE side
+        ! ellipse-based clustering to the sensitivities of
+        ! u wrt thickness parameters
+        !
+        ! First dimension index starts from np - np_cluster + 1
+        !
+        if (allocated(du_ell_TE)) deallocate(du_ell_TE)
+        allocate(du_ell_TE(np - np_cluster + 1:np, 5))
+
+        ! Initialize du_ell_TE
+        du_ell_TE                   = 0.0
 
 
         ! 
@@ -3224,12 +3263,22 @@ module funcNsubs
 
         end do
 
-
         ! Generate TE ellipse
         do i = 1,size(t_TE)
 
             x_ellip_TE(i)           = x_center_TE + (a_TE*cos(t_TE(i)))
             y_ellip_TE(i)           = b_TE*sin(t_TE(i))
+
+            ! Store sensitivity contributions in global array
+            ! du_ell_TE
+            if (i <= np_cluster) then
+                j                   = np - np_cluster + i
+                du_ell_TE(j, 1)     = 0.0
+                du_ell_TE(j, 2)     = 0.0
+                du_ell_TE(j, 3)     = 0.0
+                du_ell_TE(j, 4)     = 1.0 - cos(t_TE(i))
+                du_ell_TE(j, 5)     = 1.0 - cos(t_TE(i))
+            end if
 
         end do
 
@@ -3562,6 +3611,7 @@ module funcNsubs
     !
     !------------------------------------------------------------------------------------------------------
     subroutine mid_hyperbolic_clustering(np_cluster,np_mid,u_LE,u_TE,u_mid)
+        use globvar,    only: du_hyp_LE, du_hyp_TE
         use file_operations
 
         integer,                    intent(in)          :: np_cluster
@@ -3571,7 +3621,7 @@ module funcNsubs
         real,                       intent(inout)       :: u_mid(np_mid)
 
         ! Local variables
-        integer                                         :: i, np_mid_LE, np_mid_TE, nopen
+        integer                                         :: i, j, np_mid_LE, np_mid_TE, nopen
         real,   allocatable                             :: xi(:), u_mid_LE(:), u_mid_TE(:)
         real                                            :: du_LE, u_mid_pt, du_mid_LE, du_mid_TE, K_LE, delta_LE, &
                                                            du_TE, K_TE, delta_TE
@@ -3621,6 +3671,32 @@ module funcNsubs
 
         if (solver_flag_LE .and. solver_flag_TE) then
 
+            !
+            ! Allocate array to store contributions of LE side
+            ! hyperbolic clustering of u to the sensitivities
+            ! of u wrt thickness parameters
+            !
+            ! The first dimension index starts from np_cluster + 1
+            !
+            if (allocated(du_hyp_LE)) deallocate(du_hyp_LE)
+            allocate(du_hyp_LE(np_cluster + 1:np_cluster + np_mid_LE - 1, 5))
+
+            ! Initialize du_hyp_LE
+            du_hyp_LE   = 0.0
+
+            !
+            ! Allocate array to store contributions of TE side
+            ! hyperbolic clustering of u to the sensitivities
+            ! of u wrt thickness parameters
+            !
+            ! The first dimension index starts from np_cluster + np_mid_LE
+            !
+            if (allocated(du_hyp_TE)) deallocate(du_hyp_TE)
+            allocate(du_hyp_TE(np_cluster + np_mid_LE:np_cluster + np_mid_LE + np_mid_TE - 3, 5))
+
+            ! Initialize du_hyp_TE
+            du_hyp_TE   = 0.0
+
             call log_file_exists(log_file, nopen, file_open)
             if (.not. isquiet) then
                 print *, 'Hyperbolic midchord clustering with delta_LE = ', delta_LE
@@ -3634,9 +3710,20 @@ module funcNsubs
             if (allocated(u_mid_LE)) deallocate(u_mid_LE)
             allocate(u_mid_LE(np_mid_LE))
             u_mid_LE(1) = u_LE(np_cluster)
+
             do i = 2,np_mid_LE
 
-                u_mid_LE(i) = u_mid_LE(1) + (du_mid_LE*(1.0 + ((tanh(0.5*delta_LE*(xi(i) - 1.0)))/(tanh(0.5*delta_LE)))))
+                u_mid_LE(i)     = u_mid_LE(1) + (du_mid_LE*(1.0 + ((tanh(0.5*delta_LE*(xi(i) - 1.0)))/&
+                                  (tanh(0.5*delta_LE)))))
+
+                ! Store u sensitivity contributions in global array
+                ! du_hyp_LE
+                j               = np_cluster + i - 1
+                du_hyp_LE(j, 1) = 1.0 - (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
+                du_hyp_LE(j, 2) = 0.0
+                du_hyp_LE(j, 3) = 1.0 - (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
+                du_hyp_LE(j, 4) = 1.0 + (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
+                du_hyp_LE(j, 5) = 1.0 + (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
 
             end do
             u_mid_LE(np_mid_LE) = u_mid_pt
@@ -3646,9 +3733,21 @@ module funcNsubs
             if (allocated(u_mid_TE)) deallocate(u_mid_TE)
             allocate(u_mid_TE(np_mid_TE))
             u_mid_TE(1) = u_mid_pt
+
             do i = 2,np_mid_TE
 
                 u_mid_TE(i) = u_mid_TE(1) + (du_mid_TE*((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE))))
+
+                ! Store u sensitivity contributions in global array
+                ! du_hyp_TE
+                if (i < np_mid_TE) then
+                    j = np_cluster + np_mid_LE + i - 2
+                    du_hyp_TE(j, 1) = 1.0 - ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+                    du_hyp_TE(j, 2) = 0.0
+                    du_hyp_TE(j, 3) = 1.0 - ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+                    du_hyp_TE(j, 4) = 1.0 + ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+                    du_hyp_TE(j, 5) = 1.0 + ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+                end if
 
             end do
             u_mid_TE(np_mid_TE) = u_TE(1)
@@ -3742,13 +3841,14 @@ module funcNsubs
             u_TE(i)     = x_ellip_TE(i)
 
         end do
-        
+
 
         ! Cluster the middle part of the blade section using
         ! Use hyperbolic clustering
         np_mid  = np - (2*np_cluster) + 2
         if (allocated(u_mid)) deallocate(u_mid)
         allocate(u_mid(np_mid))
+
         call mid_hyperbolic_clustering(np_cluster,np_mid,u_LE,u_TE,u_mid)
 
         ! Initializing 'j'
@@ -4523,9 +4623,9 @@ module funcNsubs
         !
         do i = 1, np
             xbinf(i)                = spl_eval(nsp(i_section), mprime_s(i), xm(1,i_section), xms(1,i_section), &
-                                               mp(1,i_section)) 
+                                               mp(1,i_section), .false.)
             rbinf(i)                = spl_eval(nsp(i_section), mprime_s(i), rm(1,i_section), rms(1,i_section), &
-                                               mp(1,i_section)) 
+                                               mp(1,i_section), .false.)
             x_inf(i)                = scf*xbinf(i)
             y_inf(i)                = scf*rbinf(i)*sin(theta_inf(i) + bladedata(8,i_section))
             z_inf(i)                = scf*rbinf(i)*cos(theta_inf(i) + bladedata(8,i_section))

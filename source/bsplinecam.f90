@@ -153,12 +153,25 @@ end function
 ! line at the spline segment ends 'init_angles' and the camber at the spline segment ends 'init_cams'
 !
 !----------------------------------------------------------------------------------------------------------------------------------
-subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, wing_flag, &
-                   sang, chrd, init_angles, init_cams, u_end, splinedata, u_max,        &
-                   cam_umax, slope_umax)
+subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, wing_flag, sang,       &
+                   chrd, init_angles, init_cams, u_end, splinedata, u_max, cam_umax, slope_umax,    &
+                   dcam_dxcp, dcam_dycp, dcam_u, dslope_dxcp, dslope_dycp, dslope_u, dsang_dcurv,   &
+                   dchrd_dcurv, dsinl_dxcp, dsinl_dycp, dsang_dx_inbeta, dsang_dy_inbeta,           &
+                   dchrd_dx_inbeta, dchrd_dy_inbeta, dslope_dx_inbeta, dslope_dy_inbeta,            &
+                   dcam_dx_inbeta, dcam_dy_inbeta, dsext_dxcp, dsext_dycp, dslope_doutbeta,         &
+                   dcam_doutbeta, dsang_doutbeta, dchrd_doutbeta, dchrdx_dcm, dchrd_dcm)
+    use globvar,        only: clustering_switch, cpinbeta, cpoutbeta, cpchord
     use file_operations
     use errors
     use funcNsubs
+    use derivatives,    only: bspline_cp_ders, u_end_xcp_ders, angle_xcp_ders,  &
+                              angle_ycp_ders, camber_xcp_ders, camber_ycp_ders, &
+                              compute_k_ders, v_end_xcp_ders, v_end_ycp_ders,   &
+                              d1v_end_xcp_ders, d1v_end_ycp_ders, angle_u_ders, &
+                              camber_u_ders, compute_k_inbeta_ders,             &
+                              d1v_end_inbeta_ders, v_end_inbeta_ders,           &
+                              compute_k_outbeta_ders, d1v_end_outbeta_ders,     &
+                              v_end_outbeta_ders
     implicit none
 
     ! Constant parameters
@@ -168,25 +181,37 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
     character(*),   intent(in)          :: casename
     logical,        intent(in)          :: isdev
     integer,        intent(in)          :: ncp, np
-    real,           intent(in)          :: xcp(ncp), ycp(ncp), u(np), ainl, aext, chrdx, u_max
+    real,           intent(in)          :: xcp(ncp), ycp(ncp), u(np), ainl, aext, chrdx, u_max,  &
+                                           dsinl_dxcp(cpinbeta), dsinl_dycp(cpinbeta),           &
+                                           dsext_dxcp(cpoutbeta), dsext_dycp(cpoutbeta)
     integer,        intent(in)          :: wing_flag
     real,           intent(inout)       :: sang, chrd, init_angles(ncp - 2), init_cams(ncp - 2), &
                                            u_end(ncp - 2), splinedata(splinedata_col, np),       &
-                                           cam_umax, slope_umax
+                                           cam_umax, slope_umax, dcam_dxcp(np, ncp - 2),         &
+                                           dcam_dycp(np, ncp - 2), dslope_dxcp(np, ncp - 2),     &
+                                           dslope_dycp(np, ncp - 2), dcam_u(np), dslope_u(np),   &
+                                           dsang_dcurv((2*(ncp - 2)) - 2),                       &
+                                           dchrd_dcurv((2*(ncp - 2)) - 2),                       &
+                                           dsang_dx_inbeta(cpinbeta), dsang_dy_inbeta(cpinbeta), &
+                                           dchrd_dx_inbeta(cpinbeta), dchrd_dy_inbeta(cpinbeta), &
+                                           dslope_dx_inbeta(np, cpinbeta), dslope_dy_inbeta(np, cpinbeta), &
+                                           dcam_dx_inbeta(np, cpinbeta), dcam_dy_inbeta(np, cpinbeta),     &
+                                           dslope_doutbeta(np, 2, cpoutbeta), dcam_doutbeta(np, 2, cpoutbeta), &
+                                           dsang_doutbeta(2, cpoutbeta), dchrd_doutbeta(2, cpoutbeta),         &
+                                           dchrdx_dcm(2, cpchord), dchrd_dcm(2, cpchord)
 
     ! Local variables    
-    integer                             :: i, j, nopen, js
+    integer                             :: i, j, l, nopen, js
     real                                :: P, knew, det, k1, k2, curv(np), cam(np), cam_u(np),    &
                                            tot_cam, d1v_end(ncp - 2), v_end(ncp - 2), xcp_seg(4), &
                                            ycp_seg(4), t, angle0, camber0, intg_d2v_end(ncp - 2), &
                                            intg_d1v_end(ncp - 2), curv_umax, tol = 10E-8
-                                           !cam_u_dev(np), sang2, sc_factor_dev, inlet_uv_dev, exit_uv_dev
-    !real                                :: P, knew, det, k1, k2, curv(np), cam(np), cam_u(np), &
-    !                                       cam_u_dev(np), tot_cam, d1v_end(ncp - 2), v_end(ncp - 2),  &
-    !                                       xcp_seg(4), ycp_seg(4), t, angle0, camber0,                &
-    !                                       intg_d2v_end(ncp - 2), intg_d1v_end(ncp - 2), sang2,       &
-    !                                       sc_factor_dev, inlet_uv_dev, exit_uv_dev, curv_umax,       &
-    !                                       tol = 10E-8
+    real,           allocatable         :: dcpall(:,:), temp_ders(:), d_angle_xcp(:,:), d_angle_ycp(:,:),             &
+                                           d_camber_xcp(:,:), d_camber_ycp(:,:), du_end_xcp(:,:), dv_end_xcp(:,:),    &
+                                           dv_end_ycp(:,:), dk_xcp(:), dk_ycp(:), d1v_end_xcp(:,:), d1v_end_ycp(:,:), &
+                                           dk_dx_inbeta(:), dk_dy_inbeta(:), d1v_end_dx_inbeta(:,:),                  &
+                                           d1v_end_dy_inbeta(:,:), dv_end_dx_inbeta(:,:), dv_end_dy_inbeta(:,:),      &
+                                           dk_doutbeta(:,:), d1v_end_doutbeta(:,:,:), dv_end_doutbeta(:,:,:)
     character(:),   allocatable         :: log_file, error_msg, dev_msg
     character(10)                       :: error_arg
     logical                             :: file_open, isquiet
@@ -203,7 +228,15 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
     !
     call get_quiet_status(isquiet)
     call get_sec_number(js)
+
     tot_cam                             = 0.0
+    dcam_dxcp                           = 0.0
+    dcam_dycp                           = 0.0
+    dcam_u                              = 0.0
+    dslope_dxcp                         = 0.0
+    dslope_dycp                         = 0.0
+    dslope_u                            = 0.0
+    dsang_dcurv                         = 0.0
 
 
     
@@ -247,7 +280,53 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
         chrd                            = chrdx/abs(cos(sang))
     end if
 
-    
+
+
+    !
+    ! Compute the derivatives of the control points
+    ! of the mean-line second derivative B-spline
+    ! wrt themselves
+    !
+    call bspline_cp_ders (ncp - 2, dcpall)
+
+
+
+    !
+    ! Allocate and initialize array to store derivatives
+    ! of u_end wrt control points of u
+    !
+    ! First index tracks the B-spline segment index and
+    ! the second index tracks the number of control points
+    !
+    if (allocated(du_end_xcp)) deallocate(du_end_xcp)
+    allocate(du_end_xcp(ncp - 2, ncp - 2))
+
+    du_end_xcp                          = 0.0
+
+
+
+    !
+    ! Allocate and initialize arrays to store derivatives
+    ! of angle and camber wrt control points
+    !
+    ! First index tracks the B-spline segment index and
+    ! the second index tracks the number of control points
+    !
+    if (allocated(d_angle_xcp)) deallocate(d_angle_xcp)
+    allocate(d_angle_xcp(ncp - 2, ncp - 2))
+    if (allocated(d_angle_ycp)) deallocate(d_angle_ycp)
+    allocate(d_angle_ycp(ncp - 2, ncp - 2))
+    if (allocated(d_camber_xcp)) deallocate(d_camber_xcp)
+    allocate(d_camber_xcp(ncp - 2, ncp - 2))
+    if (allocated(d_camber_ycp)) deallocate(d_camber_ycp)
+    allocate(d_camber_ycp(ncp - 2, ncp - 2))
+
+    d_angle_xcp                         = 0.0
+    d_angle_ycp                         = 0.0
+    d_camber_xcp                        = 0.0
+    d_camber_ycp                        = 0.0
+
+
 
     !
     ! Initialize B-spline segments
@@ -258,15 +337,41 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
         ycp_seg                         = ycp(j:j + 3)
         
         if (j == ncp - 3) then
-           u_end(j + 1)                 = 1.0
+
+            u_end(j + 1)                 = 1.0
+
         else
-           u_end(j + 1)                 = bspline(xcp_seg, t)
+
+            u_end(j + 1)                 = bspline(xcp_seg, t)
+
+            !
+            ! Compute the derivatives of u_end wrt
+            ! control points of u
+            !
+            call u_end_xcp_ders (j, dcpall, t, du_end_xcp(j + 1,:))
+
         end if
 
         angle0                          = intg_d2v_end(j)
         camber0                         = intg_d1v_end(j)
         intg_d2v_end(j+1)               = angle(ycp_seg, xcp_seg, angle0, t)
         intg_d1v_end(j+1)               = camber(ycp_seg, xcp_seg, angle0, camber0, t)
+
+        ! Derivative of integral of v''_m(u) wrt control points of u
+        call angle_xcp_ders (js, j, dcpall, xcp, ycp, t, .false., temp_ders)
+        d_angle_xcp(j + 1,:)            = d_angle_xcp(j,:) + temp_ders
+
+        ! Derivative of integral of v''_m(u) wrt control points of v''_m(u)
+        call angle_ycp_ders (j, dcpall, xcp, t, temp_ders)
+        d_angle_ycp(j + 1,:)            = d_angle_ycp(j,:) + temp_ders
+
+        ! Derivative of integral of v'_m(u) wrt control points of u
+        call camber_xcp_ders (js, j, dcpall, xcp, ycp, t, angle0, d_angle_xcp(j,:), .false., temp_ders)
+        d_camber_xcp(j + 1,:)           = d_camber_xcp(j,:) + temp_ders
+
+        ! Derivative of integral of v'_m(u) wrt control points of v''_m(u)
+        call camber_ycp_ders (j, dcpall, xcp, t, d_angle_ycp(j,:), temp_ders)
+        d_camber_ycp(j + 1,:)           = d_camber_ycp(j,:) + temp_ders
 
     end do
 
@@ -279,8 +384,10 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
     !
     P                                   = (intg_d2v_end(ncp - 2) * intg_d1v_end(ncp - 2)) - &
                                          &(intg_d1v_end(ncp - 2)**2)
-   
-    ! Write total camber to file and print to screen 
+
+
+
+    ! Write total camber to file and print to screen
     if (.not. isquiet) write (*, '(A, F20.15)') 'Total camber is: ', tot_cam/dtor
     write (nopen, '(A, F20.15)') 'Total camber is: ', tot_cam/dtor
 
@@ -295,8 +402,8 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
     ! Write determinant to log file and print to screen
     if (.not. isquiet) write (*, '(A, F20.15)') 'Determinant is: ', det
     write (nopen, '(A, F20.15)') 'Determinant is: ', det
-   
-    ! Display error message if no real roots are found 
+
+    ! Display error message if no real roots are found
     if (det < 0.0) then 
 
         write(error_arg,'(I2)') js
@@ -315,7 +422,7 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
     !
     k1                                  = (-intg_d2v_end(ncp - 2) + sqrt(det))/(2*P*tan(tot_cam))
     k2                                  = (-intg_d2v_end(ncp - 2) - sqrt(det))/(2*P*tan(tot_cam))
-    
+
     ! Choosing appropriate root
     if (.not. isquiet) write (*, '(A, 2F25.15)') 'Possible values of scaling factor are: ', k1, k2
     write (nopen, '(A, 2F25.15)') 'Possible values of scaling factor are: ', k1, k2
@@ -401,6 +508,57 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
     end if
     v_end                               = knew*(intg_d1v_end - (u_end*intg_d1v_end(ncp - 2)))
 
+    !
+    ! Compute derivatives of the scaling factor
+    ! wrt the control points of u and v''_m(u)
+    !
+    call compute_k_ders (k1, k2, knew, intg_d2v_end(ncp - 2), intg_d1v_end(ncp - 2), P, tot_cam, det, &
+                         d_angle_xcp(ncp - 2,:), d_angle_ycp(ncp - 2,:), d_camber_xcp(ncp - 2,:),     &
+                         d_camber_ycp(ncp - 2,:), dk_xcp, dk_ycp)
+
+    !
+    ! Compute derivatives of the scaling factor
+    ! wrt the control points of Span and in_beta*/out_beta*
+    ! defined in 3dbgbinput file
+    !
+    call compute_k_inbeta_ders (k1, k2, knew, ainl, dsinl_dxcp, dsinl_dycp, tot_cam, P, det, &
+                                dk_dx_inbeta, dk_dy_inbeta)
+    call compute_k_outbeta_ders (k1, k2, knew, aext, dsext_dxcp, dsext_dycp, tot_cam, P, det, &
+                                 dk_doutbeta)
+
+
+    !
+    ! Compute the derivatives of d1v_end wrt the
+    ! control points of u and v''_m(u)
+    !
+    call d1v_end_xcp_ders (knew, intg_d2v_end, intg_d1v_end(ncp - 2), dk_xcp, &
+                           d_angle_xcp, d_camber_xcp(ncp - 2,:), d1v_end_xcp)
+    call d1v_end_ycp_ders (knew, intg_d2v_end, intg_d1v_end(ncp - 2), dk_ycp, &
+                           d_angle_ycp, d_camber_ycp(ncp - 2,:), d1v_end_ycp)
+
+    !
+    ! Compute derivatives of d1v_end wrt the
+    ! control points of Span and in_beta*/out_beta*
+    ! defined in 3dbgbinput file
+    !
+    call d1v_end_inbeta_ders (knew, d1v_end, dk_dx_inbeta, dk_dy_inbeta, d1v_end_dx_inbeta, d1v_end_dy_inbeta)
+    call d1v_end_outbeta_ders (knew, d1v_end, dk_doutbeta, d1v_end_doutbeta)
+
+
+    !
+    ! Compute the derivatives of v_end wrt the
+    ! control points of u and v''_m(u)
+    !
+    call v_end_xcp_ders (knew, intg_d1v_end, u_end, dk_xcp, d_camber_xcp, du_end_xcp, dv_end_xcp)
+    call v_end_ycp_ders (js, knew, intg_d1v_end, u_end, dk_ycp, d_camber_ycp, dv_end_ycp)
+
+    !
+    ! Compute derivatives of v_end wrt the
+    ! control points of Span and in_beta*/out_beta*
+    ! defined in 3dbgbinput file
+    !
+    call v_end_inbeta_ders (knew, v_end, dk_dx_inbeta, dk_dy_inbeta, dv_end_dx_inbeta, dv_end_dy_inbeta)
+    call v_end_outbeta_ders (knew, v_end, dk_doutbeta, dv_end_doutbeta)
 
 
     !
@@ -448,24 +606,71 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
 
         do j = 1, ncp - 3
 
-            ! At segment end     
-            if (u(i) == u_end(j)) then
+            ! At segment beginning
+            if (abs(u(i) - u_end(j)) < tol) then ! u(i) == u_end(j)
 
                 ycp_seg                 = ycp(j:j + 3)
                 t                       = 0.0
                 curv(i)                 = knew*bspline(ycp_seg, t)
                 cam_u(i)                = d1v_end(j)
                 cam(i)                  = v_end(j)
+
+                dslope_dxcp(i, :)       = d1v_end_xcp(j, :) ! Derivatives of v'_m(u) wrt
+                dslope_dycp(i, :)       = d1v_end_ycp(j, :) ! control points of u and v''_m(u)
+
+                dslope_dx_inbeta(i, :)  = d1v_end_dx_inbeta(j, :) ! Derivative of v'_m(u) wrt control
+                dslope_dy_inbeta(i, :)  = d1v_end_dy_inbeta(j, :) ! points of Span and in_beta*
+
+                dslope_doutbeta(i, 1, :)= d1v_end_doutbeta(j, 1, :) ! Derivative of v'_m(u) wrt control
+                dslope_doutbeta(i, 2, :)= d1v_end_doutbeta(j, 2, :) ! points of Span and out_beta*
+
+                if (clustering_switch == 4) then
+                    dslope_u(i)         = 0.0
+                    dcam_u(i)           = 0.0
+                end if
+
+                dcam_dxcp(i, :)         = dv_end_xcp(j, :)  ! Derivatives of v_m(u) wrt
+                dcam_dycp(i, :)         = dv_end_ycp(j, :)  ! control points of u and v''_m(u)
+
+                dcam_dx_inbeta(i, :)    = dv_end_dx_inbeta(j, :) ! Derivative of v_m(u) wrt control
+                dcam_dy_inbeta(i, :)    = dv_end_dy_inbeta(j, :) ! points of Span and in_beta*
+
+                dcam_doutbeta(i, 1, :)  = dv_end_doutbeta(j, 1, :) ! Derivatives of v_m(u) wrt control
+                dcam_doutbeta(i, 2, :)  = dv_end_doutbeta(j, 2, :) ! points of Span and out_beta*
                 exit
 
-            ! At beginning of segment
-            else if (u(i) == 1.0) then
+            ! At spline end
+            else if (abs(u(i) - 1.0) < tol) then ! u(i) == 1.0
 
                 ycp_seg                 = ycp(ncp - 3:ncp)
                 t                       = 1.0
                 curv(i)                 = knew*bspline(ycp_seg, t)
                 cam_u(i)                = d1v_end(ncp - 2)
                 cam(i)                  = v_end(ncp - 2)
+
+                dslope_dxcp(i, :)       = d1v_end_xcp(ncp - 2, :) ! Derivatives of v'_m(u) wrt
+                dslope_dycp(i, :)       = d1v_end_ycp(ncp - 2, :) ! control points of u and v''_m(u)
+
+                dslope_dx_inbeta(i, :)  = d1v_end_dx_inbeta(ncp - 2, :) ! Derivative of v'_m(u) wrt control
+                dslope_dy_inbeta(i, :)  = d1v_end_dy_inbeta(ncp - 2, :) ! points of Span and in_beta*
+
+                dslope_doutbeta(i, 1, :)= d1v_end_doutbeta(ncp - 2, 1, :) ! Derivative of v'_m(u) wrt control
+                dslope_doutbeta(i, 2, :)= d1v_end_doutbeta(ncp - 2, 2, :) ! points of Span and out_beta*
+
+                if (clustering_switch == 4) then
+                    dslope_u(i)         = 0.0
+                    dcam_u(i)           = 0.0
+                end if
+
+                dcam_dxcp(i, :)         = dv_end_xcp(ncp - 2, :)  ! Derivatives of v_m(u) wrt
+                dcam_dycp(i, :)         = dv_end_ycp(ncp - 2, :)  ! control points of u and v''_m(u)
+
+                dcam_dx_inbeta(i, :)    = dv_end_dx_inbeta(ncp - 2, :) ! Derivative of v_m(u) wrt control
+                dcam_dy_inbeta(i, :)    = dv_end_dy_inbeta(ncp - 2, :) ! points of Span and in_beta*
+
+                dcam_doutbeta(i, 1, :)  = dv_end_doutbeta(ncp - 2, 1, :) ! Derivatives of v_m(u) wrt control
+                dcam_doutbeta(i, 2, :)  = dv_end_doutbeta(ncp - 2, 2, :) ! points of Span and out_beta*
+
                 exit
 
             ! Generate segment
@@ -479,6 +684,106 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
                 curv(i)                 = knew*bspline(ycp_seg, t)
                 cam_u(i)                = knew*(angle(ycp_seg, xcp_seg, angle0, t) - intg_d1v_end(ncp - 2))
                 cam(i)                  = knew*(camber(ycp_seg, xcp_seg, angle0, camber0, t) - (u(i)*intg_d1v_end(ncp - 2)))
+
+                if (clustering_switch == 4) then
+                    call angle_u_ders (j, t, knew, xcp, ycp, dslope_u(i))
+                    call camber_u_ders (j, t, knew, xcp, ycp, angle0, intg_d1v_end(ncp - 2), dcam_u(i))
+                end if
+
+
+                ! Derivatives of angle (used to compute cam_u(i)) wrt
+                ! control points of u
+                call angle_xcp_ders (js, j, dcpall, xcp, ycp, t, .true., temp_ders)
+
+                ! Derivatives of v'_m(u) wrt control points of u
+                do l = 1, ncp - 2
+
+                    ! l tracks the control point numbers
+                    dslope_dxcp(i, l)   = (dk_xcp(l) * (angle(ycp_seg, xcp_seg, angle0, t) - intg_d1v_end(ncp - 2))) + &
+                                          (knew * ((d_angle_xcp(j, l) + temp_ders(l)) - d_camber_xcp(ncp - 2, l)))
+
+                end do
+
+
+                ! Derivatives of angle (used to compute cam_u(i)) wrt
+                ! control points of v''_m(u)
+                call angle_ycp_ders (j, dcpall, xcp, t, temp_ders)
+
+                ! Derivatives of v'_m(u) wrt control points of u
+                do l = 1, ncp - 2
+
+                    ! l tracks the control point numbers
+                    dslope_dycp(i, l)   = (dk_ycp(l) * (angle(ycp_seg, xcp_seg, angle0, t) - intg_d1v_end(ncp - 2))) + &
+                                          (knew * ((d_angle_ycp(j, l) + temp_ders(l)) - d_camber_ycp(ncp - 2, l)))
+
+                end do
+                
+
+                ! Derivatives of camber (used to compute cam(i)) wrt
+                ! control points of u
+                call camber_xcp_ders (js, j, dcpall, xcp, ycp, t, angle0, d_angle_ycp(j, :), .true., temp_ders)
+
+
+                ! Derivatives of v_m(u) wrt control points of u
+                do l = 1, ncp - 2
+
+                    ! l tracks the control point numbers
+                    dcam_dxcp(i, l)     = (dk_xcp(l) * (camber(ycp_seg, xcp_seg, angle0, camber0, t) - &
+                                           (u(i) * intg_d1v_end(ncp - 2)))) + (knew * ((d_camber_xcp(j, l) + &
+                                           temp_ders(l)) - (u(i) * d_camber_xcp(ncp - 2, l))))
+
+                end do
+
+
+                ! Derivatives of camber (used to compute cam(i)) wrt
+                ! control points of v''_m(u)
+                call camber_ycp_ders (j, dcpall, xcp, t, d_angle_ycp(j, :), temp_ders)
+
+                ! Derivatives of v_m(u) wrt control points of v''_m(u)
+                do l = 1, ncp - 2
+
+                    ! l tracks the control point numbers
+                    dcam_dycp(i,l)      = (dk_ycp(l) * (camber(ycp_seg, xcp_seg, angle0, camber0, t) -       &
+                                           (u(i) * intg_d1v_end(ncp - 2)))) + (knew * ((d_camber_ycp(j, l) + &
+                                           temp_ders(l)) - (u(i) * d_camber_ycp(ncp - 2, l))))
+
+                end do  ! l = 1, ncp - 2
+
+
+                ! Derivatives of v'_m(u) wrt control points of
+                ! Span (inlet flow angle) and in_beta*
+                do l = 1, size(dk_dx_inbeta)
+                    dslope_dx_inbeta(i,l) &
+                                        = dk_dx_inbeta(l) * (cam_u(i)/knew)
+                    dslope_dy_inbeta(i,l) &
+                                        = dk_dy_inbeta(l) * (cam_u(i)/knew)
+                end do
+
+                ! Derivatives of v_m(u) wrt control points of
+                ! Span (inlet flow angle) and in_beta*
+                do l = 1, size(dk_dx_inbeta)
+                    dcam_dx_inbeta(i,l) = dk_dx_inbeta(l) * (cam(i)/knew)
+                    dcam_dy_inbeta(i,l) = dk_dy_inbeta(l) * (cam(i)/knew)
+                end do
+
+                ! Derivatives of v'_m(u) wrt control points of
+                ! Span and out_beta*
+                do l = 1, cpoutbeta
+                    dslope_doutbeta(i, 1, l) &
+                                        = dk_doutbeta(1, l) * (cam_u(i)/knew)
+                    dslope_doutbeta(i, 2, l) &
+                                        = dk_doutbeta(2, l) * (cam_u(i)/knew)
+                end do
+
+                ! Derivatives of v_m(u) wrt control points of
+                ! Span and out_beta*
+                do l = 1, cpoutbeta
+                    dcam_doutbeta(i, 1, l) &
+                                        = dk_doutbeta(1, l) * (cam(i)/knew)
+                    dcam_doutbeta(i, 2, l) &
+                                        = dk_doutbeta(2, l) * (cam(i)/knew)
+                end do
+
                 exit
 
             end if  ! u(i)
@@ -528,8 +833,37 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
     ! Stagger/Twist calculation
     !
     if (wing_flag == 0) then
-        
+
+        ! Stagger
         sang                            = (ainl - atan(cam_u(1)))
+
+        !
+        ! Compute derivatives of stagger control
+        !
+        ! Control points of u
+        do i = 1, ncp - 4
+            dsang_dcurv(i)              = -(1.0/(1.0 + (cam_u(1)**2))) * dslope_dxcp(1, i + 1)
+        end do
+
+        ! Control points of v''_m(u)
+        do i = 1, ncp - 2
+            dsang_dcurv(i + ncp - 4)    = -(1.0/(1.0 + (cam_u(1)**2))) * dslope_dycp(1, i)
+        end do
+
+        ! Control points of Span and in_beta*
+        do i = 1, cpinbeta
+            dsang_dx_inbeta(i)          = ((1.0/(1.0 + ((tan(ainl))**2))) * dsinl_dxcp(i)) - &
+                                          ((1.0/(1.0 + (cam_u(1)**2))) * dslope_dx_inbeta(1, i))
+            dsang_dy_inbeta(i)          = ((1.0/(1.0 + ((tan(ainl))**2))) * dsinl_dycp(i)) - &
+                                          ((1.0/(1.0 + (cam_u(1)**2))) * dslope_dy_inbeta(1, i))
+        end do
+
+        ! Control points of Span and out_beta*
+        do i = 1, cpoutbeta
+            dsang_doutbeta(1, i)        = -(1.0/(1.0 + (cam_u(1)**2))) * dslope_doutbeta(1, 1, i)
+            dsang_doutbeta(2, i)        = -(1.0/(1.0 + (cam_u(1)**2))) * dslope_doutbeta(1, 2, i)
+        end do
+
         if (isdev) then
            !sang2                        = (ainl - atan(cam_u_dev(1)))
            if (.not. isquiet) write(*, '(A, 2F25.15)') 'Stagger angle in deg: ', sang/dtor!, sang2/dtor
@@ -542,6 +876,32 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
     else if (wing_flag == 1) then
 
         sang                            = ainl
+
+        !
+        ! Compute derivatives of stagger control
+        !
+        ! Control points of u
+        do i = 1, ncp - 4
+            dsang_dcurv(i)              = 0.0
+        end do
+
+        ! Control points of v''_m(u)
+        do i = 1, ncp - 2
+            dsang_dcurv(i + ncp - 4)    = 0.0
+        end do
+
+        ! Control points of Span and in_beta*
+        do i = 1, cpinbeta
+            dsang_dx_inbeta(i)          = (1.0/(1.0 + ((tan(ainl))**2))) * dsinl_dxcp(i)
+            dsang_dy_inbeta(i)          = (1.0/(1.0 + ((tan(ainl))**2))) * dsinl_dycp(i)
+        end do
+
+        ! Control points of Span and out_beta*
+        do i = 1, cpoutbeta
+            dsang_doutbeta(1, i)        = 0.0
+            dsang_doutbeta(2, i)        = 0.0
+        end do
+
         if (.not. isquiet) write (*, '(A, F20.15)') 'Twist angle in deg: ', sang/dtor
         write (nopen, '(A, F20.15)') 'Twist angle in deg: ', sang/dtor
 
@@ -556,6 +916,32 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
     ! Calculation of actual chord after stagger/twist
     !
     chrd = chrdx/abs(cos(sang))
+
+    !
+    ! Compute derivatives of chrd
+    !
+    ! Control points of u and v''_m(u)
+    do i = 1, (2 * (ncp - 2)) - 2
+        dchrd_dcurv(i)                  = chrdx * (tan(sang)/abs(cos(sang))) * dsang_dcurv(i)
+    end do
+
+    ! Control points of Span and in_beta*
+    do i = 1, cpinbeta
+        dchrd_dx_inbeta(i)              = chrdx * (tan(sang)/abs(cos(sang))) * dsang_dx_inbeta(i)
+        dchrd_dy_inbeta(i)              = chrdx * (tan(sang)/abs(cos(sang))) * dsang_dy_inbeta(i)
+    end do
+
+    ! Control points of Span and out_beta*
+    do i = 1, cpoutbeta
+        dchrd_doutbeta(1, i)            = chrdx * (tan(sang)/abs(cos(sang))) * dsang_doutbeta(1, i)
+        dchrd_doutbeta(2, i)            = chrdx * (tan(sang)/abs(cos(sang))) * dsang_doutbeta(2, i)
+    end do
+
+    ! Control points of Span and chord_multiplier
+    do i = 1, cpchord
+        dchrd_dcm(1, i)                 = (1.0/abs(cos(sang))) * dchrdx_dcm(1, i)
+        dchrd_dcm(2, i)                 = (1.0/abs(cos(sang))) * dchrdx_dcm(2, i)
+    end do
 
 
 end subroutine camline

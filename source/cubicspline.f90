@@ -7,7 +7,8 @@
 !                   ycp     - y coordinates of control points
 !                   
 !-----------------------------------------------------------------------------------
-subroutine cubicspline(ncp,xcp,ycp,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
+subroutine cubicspline(ncp,xcp,ycp,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1, &
+                       diff,dcpall)
     implicit none
 
     ! Local constants
@@ -20,6 +21,8 @@ subroutine cubicspline(ncp,xcp,ycp,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
     integer,                intent(inout)   :: nspline
     real,                   intent(inout)   :: xc(ncp + 2), yc(ncp + 2)
     integer,                intent(inout)   :: ncp1
+    logical,                intent(in)      :: diff
+    real,                   intent(inout)   :: dcpall(ncp, ncp + 2)
 
     ! Local variables
     integer                                 :: i, j, k, nbsp
@@ -60,7 +63,29 @@ subroutine cubicspline(ncp,xcp,ycp,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
     ! Include the start and end points in number of control points
     ncp1                    = ncp + 2 
     nbsp                    = (np)*(ncp1 - 3)
-    
+
+
+
+
+    !
+    ! Compute derivatives of all control points
+    ! with respect to themselves and store in an array
+    !
+    dcpall                  = 0.0
+
+    ! Derivatives related to start point
+    dcpall(1, 1)            = 2.0
+    dcpall(2, 1)            = -1.0
+
+    ! Derivatives related to end point
+    dcpall(ncp - 1,ncp1)    = -1.0
+    dcpall(ncp, ncp1)       = 2.0
+
+    ! Derivative of a control point wrt itself
+    do i = 1, ncp
+        dcpall(i, i + 1)    = 1.0
+    end do
+
 
 
     !
@@ -114,7 +139,8 @@ end subroutine cubicspline
 !                   ybs     - y coordinates of spline points
 !
 !-----------------------------------------------------------------------------------
-subroutine cubicbspline_intersec(ncp,xcp,ycp,na,xin,yout,xbs,ybs,y_spl_end)
+subroutine cubicbspline_intersec(ncp,xcp,ycp,na,xin,yout,xbs,ybs,y_spl_end,diff, &
+                                 segment_info,spline_params,cp_pos)
     implicit none
 
     ! Local constants
@@ -128,21 +154,44 @@ subroutine cubicbspline_intersec(ncp,xcp,ycp,na,xin,yout,xbs,ybs,y_spl_end)
     real,                   intent(inout)   :: yout(na)
     real,                   intent(in)      :: xbs(np * (ncp - 3)), ybs(np * (ncp - 3))
     real,                   intent(in)      :: y_spl_end(ncp - 2)
+    logical,                intent(in)      :: diff
+    integer,                intent(inout)   :: segment_info(na, 4)  ! Arrays to store B-spline coefficients and
+    real,                   intent(inout)   :: spline_params(na)    ! spline parameter values for each y_out
+    integer,                intent(inout)   :: cp_pos(na, ncp - 2)
+
 
     ! Local variables
     integer                                 :: i, j, k
     real                                    :: d1_B11, B11, d1_B22, B22, d1_B33, B33, &
                                                d1_B44, B44, ys_0, d1_ys_0, tt_0, tt
- 
+
+
+    !
+    ! Initialize differentiation arrays
+    !
+    segment_info                = 0
+    spline_params               = 0.0
+
+
 
     !
     ! Newton method to find yout corresponding to xin
     !
     ! for 1st control point
-    yout(1)                 = xbs(1)
-                           
+    yout(1)                     = xbs(1)
+
     ! for last control point
-    yout(na)                = xbs(np * (ncp - 3))
+    yout(na)                    = xbs(np * (ncp - 3))
+
+    ! Set segment information and spline parameter
+    ! values for first and last spanwise values
+    if (diff) then
+        segment_info(1, :)      = [1, 2, 3, 4]
+        spline_params(1)        = 0.0
+        segment_info(na, :)     = [ncp - 3, ncp - 2, ncp - 1, ncp]
+        spline_params(na)       = 1.0
+    end if
+
 
     do j = 1, ncp - 3
         do i = 2, na - 1
@@ -188,12 +237,38 @@ subroutine cubicbspline_intersec(ncp,xcp,ycp,na,xin,yout,xbs,ybs,y_spl_end)
 
                 end do  ! k = 1, 10
 
-    20          yout(i)     = (xcp(j)*B11) + (xcp(j + 1)*B22) + (xcp(j + 2)*B33) + (xcp(j + 3)*B44)
+20              yout(i)     = (xcp(j)*B11) + (xcp(j + 1)*B22) + (xcp(j + 2)*B33) + (xcp(j + 3)*B44)
+
+                ! Store segment information and spline parameter
+                ! value for each yout(i)
+                if (diff) then
+                    segment_info(i,:) = [j, j + 1, j + 2, j + 3]
+                    spline_params(i)  = tt
+                end if
 
             end if  ! xin(i)
 
         end do ! i = 2, na - 1
     end do    ! j = 1, ncp - 3
+
+
+    ! Fill cp_pos array
+    cp_pos = 0
+    if (diff) then
+
+        do i = 1, na
+            do j = 2, ncp - 1
+                do k = 1, 4
+
+                    if (j == segment_info(i, k)) then
+                        cp_pos(i, j - 1)    = k
+                    end if
+
+                end do  ! k
+            end do  ! j
+        end do  ! i
+
+    end if  ! diff
 
 
 end subroutine cubicbspline_intersec

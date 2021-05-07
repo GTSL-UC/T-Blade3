@@ -30,6 +30,7 @@ OBJS  =	$(ODIR)/globvar.o \
     $(ODIR)/file_operations.o\
     $(ODIR)/errors.o\
 	$(ODIR)/funcNsubs.o \
+	$(ODIR)/derivatives.o \
 	$(ODIR)/spline.o \
 	$(ODIR)/readinput.o \
 	$(ODIR)/bladegen.o \
@@ -65,6 +66,8 @@ $(ODIR)/errors.o:	errors.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) errors.f90             -o $(ODIR)/errors.o
 $(ODIR)/funcNsubs.o:	funcNsubs.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) funcNsubs.f90          -o $(ODIR)/funcNsubs.o
+$(ODIR)/derivatives.o:	derivatives.f90
+	$(FCOMP) -c $(FOPTS) $(FOPTX) derivatives.f90          -o $(ODIR)/derivatives.o
 $(ODIR)/spline.o:	spline.f90
 	$(FCOMP) -c $(FOPTS) $(FOPTX) spline.f90             -o $(ODIR)/spline.o
 $(ODIR)/readinput.o:	readinput.f90

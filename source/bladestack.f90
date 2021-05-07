@@ -3,10 +3,16 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
                       xm,rm,xms,rms,mp,nsp,bladedata,amount_data,intersec_coord,throat_3D,mouth_3D,exit_3D,  &
                       casename,nbls,LE,axchrd,mble,mbte,units,stagger,chrdsweep,chrdlean,axial_LE,radial_LE, &
                       thick_distr,x_in,y_in,nmeanline,xmeanline,ymeanline,mt_umax,clustering_switch,         &
-                      clustering_parameter,dim_thick)
+                      clustering_parameter,dim_thick,dm_dcurv,dth_dcurv,dm_dthk,dth_dthk,dm_dinbeta,         &
+                      dth_dinbeta,dm_doutbeta,dth_doutbeta,dm_dcm,dth_dcm)
 
+    use globvar,                only: delmp_xcp_ders, delmp_ycp_ders, delta_theta_xcp_ders, delta_theta_ycp_ders, &
+                                      ncp_chord_curv, ncp_span_curv, ncp_span_thk, cpchord
     use file_operations
+    use errors
     use funcNsubs
+    use derivatives,            only: compute_spanwise_xcp_ders, compute_spanwise_ycp_ders, spl_eval_ders, &
+                                      yz_sweep_ders, yz_lean_ders, yz_param_ders
     implicit none
 
     ! Integer parameters
@@ -23,6 +29,13 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
                                                            xcpdeltheta(100), spaninbeta(100), xcpinbeta(100), spanoutbeta(100), &
                                                            xcpoutbeta(100), intersec_coord(12,nspn), axchrd(nspan), mble(nspan),&
                                                            mbte(nspan), stagger(nspan)
+    real,                               intent(in)      :: dm_dcurv(nspn, np, ncp_chord_curv - 1, ncp_span_curv),               &
+                                                           dth_dcurv(nspn, np, ncp_chord_curv - 1, ncp_span_curv),              &
+                                                           dm_dthk(nspn, np, 5, ncp_span_thk),                                  &
+                                                           dth_dthk(nspn, np, 5, ncp_span_thk), dm_dinbeta(nspn,np,2,cpinbeta), &
+                                                           dth_dinbeta(nspn, np, 2, cpinbeta), dm_doutbeta(nspn,np,2,cpoutbeta),&
+                                                           dth_doutbeta(nspn, np, 2, cpoutbeta), dm_dcm(nspn, np, 2, cpchord),  &
+                                                           dth_dcm(nspn, np, 2, cpchord)
     character(32),                      intent(in)      :: casename
     character(2),                       intent(in)      :: units
     logical,                            intent(in)      :: axial_LE, radial_LE
@@ -36,9 +49,10 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     character(20)                                       :: temp
     integer                                             :: na, i, ia, iap, k, ile, uplmt, nap(nspan), i_slope, ncp1, nspline,   &
                                                            nopen, ntemp, nmid, temp1, temp2
+    integer,        allocatable                         :: segment_info(:,:), cp_pos(:,:)
     real,           allocatable                         :: xa(:,:), ya(:,:), xb(:,:), rb(:,:), yb(:,:), zb(:,:), xposlean(:,:), &
                                                            yposlean(:,:), zposlean(:,:), xneglean(:,:), yneglean(:,:),          &
-                                                           zneglean(:,:)
+                                                           zneglean(:,:), spline_params(:), dcpall(:,:)
     real                                                :: chord_actual(100), mps(nxx,nax), demp, spl_eval, xxa, yya, pi, dtor, &
                                                            dmp(nspan), mp_stack(nspan), xm_slope, rm_slope, mps_inter,          &
                                                            inter_xb(6,nspn), inter_rb(6,nspn), inter_yb(6,nspn),                &
@@ -47,9 +61,32 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
                                                            mp3D_meanline(nspn,nmeanline), xem(nspn,nmeanline),                  &
                                                            rem(nspn,nmeanline), yem(nspn,nmeanline), zem(nspn,nmeanline),       &
                                                            xrt_umax(nspn,6), xyz_umax(nspn,6)  !stingl(nspan)
-    character(:),   allocatable                         :: log_file
+    real                                                :: dm3D_dcurv(nspn, np, ncp_chord_curv - 1, ncp_span_curv),             &
+                                                           dm3D_dthk(nspn, np, 5, ncp_span_thk),                                &
+                                                           dm3D_dinbeta(nspn, np, 2, cpinbeta),                                 &
+                                                           dm3D_doutbeta(nspn, np, 2, cpoutbeta),                               &
+                                                           dm3D_dcm(nspn, np, 2, cpchord), dm3D_dsweep(nspn, np, 2, cpdeltam)
+    real                                                :: dx_dcurv(nspn, np, ncp_chord_curv - 1, ncp_span_curv),               &
+                                                           dr_dcurv(nspn, np, ncp_chord_curv - 1, ncp_span_curv),               &
+                                                           dx_dthk(nspn, np, 5, ncp_span_thk),                                  &
+                                                           dr_dthk(nspn, np, 5, ncp_span_thk), dx_dinbeta(nspn,np,2,cpinbeta),  &
+                                                           dr_dinbeta(nspn, np, 2, cpinbeta), dx_doutbeta(nspn,np,2,cpoutbeta), &
+                                                           dr_doutbeta(nspn, np, 2, cpoutbeta), dx_dcm(nspn, np, 2, cpchord),   &
+                                                           dr_dcm(nspn, np, 2, cpchord), dx_dsweep(nspn, np, 2, cpdeltam),      &
+                                                           dr_dsweep(nspn, np, 2, cpdeltam), dx_dlean(nspn, np, 2, cpdeltheta)
+    real                                                :: dy_dcurv(nspn, np, ncp_chord_curv - 1, ncp_span_curv),               &
+                                                           dz_dcurv(nspn, np, ncp_chord_curv - 1, ncp_span_curv),               &
+                                                           dy_dthk(nspn, np, 5, ncp_span_thk),                                  &
+                                                           dz_dthk(nspn, np, 5, ncp_span_thk), dy_dinbeta(nspn,np,2,cpinbeta),  &
+                                                           dz_dinbeta(nspn, np, 2, cpinbeta), dy_doutbeta(nspn,np,2,cpoutbeta), &
+                                                           dz_doutbeta(nspn, np, 2, cpoutbeta), dy_dcm(nspn, np, 2, cpchord),   &
+                                                           dz_dcm(nspn, np, 2, cpchord), dy_dsweep(nspn, np, 2, cpdeltam),      &
+                                                           dz_dsweep(nspn, np, 2, cpdeltam), dy_dlean(nspn, np, 2, cpdeltheta), &
+                                                           dz_dlean(nspn, np, 2, cpdeltheta)
+    character(:),   allocatable                         :: log_file, msg_1, msg_2, msg_3
     logical                                             :: file_open, isquiet
     common / BladeSectionPoints /xxa(nxx,nax),yya(nxx,nax)
+
 
 
     ! Initialize variables
@@ -198,20 +235,118 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
 
 
     !
+    ! Allocate segment_info and spline_params
+    !
+    if (allocated(segment_info)) deallocate(segment_info)
+    allocate(segment_info(na, 4))
+    if (allocated(spline_params)) deallocate(spline_params)
+    allocate(spline_params(na))
+
+    !
+    ! Allocate dcpall for sweep control points
+    !
+    if (allocated(dcpall)) deallocate(dcpall)
+    allocate(dcpall(cpdeltam, cpdeltam + 2))
+
+    ! Allocate cp_pos for sweep control points
+    if (allocated(cp_pos)) deallocate(cp_pos)
+    allocate(cp_pos(na, cpdeltam))
+
+    ! Allocate arrays for derivatives of delmp wrt
+    ! the control points of Span and delta_m
+    if (allocated(delmp_xcp_ders)) deallocate (delmp_xcp_ders)
+    allocate (delmp_xcp_ders(na, cpdeltam))
+    if (allocated(delmp_ycp_ders)) deallocate (delmp_ycp_ders)
+    allocate (delmp_ycp_ders(na, cpdeltam))
+
+    !
+    ! Initialize to zero if axial sweep option is not
+    ! being used
+    ! TODO: Extend to true lean and sweep after correction?
+    !
+    delmp_xcp_ders                      = 0.0
+    delmp_ycp_ders                      = 0.0
+
+    !
     ! Cubic spline for sweep control points
     ! cubicspline and cubicbspline_intersec in cubicspline.f90
     !
-    call cubicspline(cpdeltam,xcpdelm,spanmp,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
-    call cubicbspline_intersec(ncp1,xc,yc,na,span,delmp,xbs,ybs,y_spl_end)
+    call cubicspline(cpdeltam,xcpdelm,spanmp,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1,.true.,dcpall)
+    call cubicbspline_intersec(ncp1,xc,yc,na,span,delmp,xbs,ybs,y_spl_end,.true.,segment_info,spline_params,cp_pos)
+
+    !
+    ! Compute derivatives of delmp wrt the control
+    ! points of Span and delta_m
+    !
+    if (chrdsweep == 0) then    ! axial sweep
+
+        call compute_spanwise_xcp_ders (na, ncp1, yc, xc, cp_pos, segment_info, spline_params, delmp_xcp_ders)
+        call compute_spanwise_ycp_ders (na, ncp1, segment_info, dcpall, spline_params, delmp_ycp_ders)
+
+    else    ! true sweep (show warning for now)
+
+        msg_1 = "Derivatives wrt sweep control points set to 0."
+        msg_2 = "Sweep derivatives aren't computed when using true sweep option."
+        msg_3 = "See spanwise spline creation using sweep control points in bladestack.f90"
+
+        ! warning defined in errors.f90
+        call warning (warning_msg = msg_1, warning_msg_1 = msg_2, dev_msg = msg_3)
+
+    end if
 
 
+
+    !
+    ! Allocate dcpall for lean control points
+    !
+    if (allocated(dcpall)) deallocate(dcpall)
+    allocate(dcpall(cpdeltheta, cpdeltheta + 2))
+
+    ! Allocate cp_pos for sweep control points
+    if (allocated(cp_pos)) deallocate(cp_pos)
+    allocate(cp_pos(na, cpdeltheta))
+
+    ! Allocate arrays for derivatives of delta_theta wrt
+    ! the control points of Span and delta_theta
+    if (allocated(delta_theta_xcp_ders)) deallocate (delta_theta_xcp_ders)
+    allocate (delta_theta_xcp_ders(na, cpdeltheta))
+    if (allocated(delta_theta_ycp_ders)) deallocate (delta_theta_ycp_ders)
+    allocate (delta_theta_ycp_ders(na, cpdeltheta))
+
+    !
+    ! Initialize to zero if tangential lean option is
+    ! not being used
+    ! TODO: Extend to true lean after correction?
+    !
+    delta_theta_xcp_ders                = 0.0
+    delta_theta_ycp_ders                = 0.0
 
     !
     ! Cubic spline for lean control points
     ! cubicspline and cubicbspline_intersec in cubicspline.f90
     !
-    call cubicspline(cpdeltheta,xcpdeltheta,spantheta,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
-    call cubicbspline_intersec(ncp1,xc,yc,na,span,delta_theta,xbs,ybs,y_spl_end)
+    call cubicspline(cpdeltheta,xcpdeltheta,spantheta,xbs,ybs,y_spl_end,nspline,xc,yc,ncp1,.true.,dcpall)
+    call cubicbspline_intersec(ncp1,xc,yc,na,span,delta_theta,xbs,ybs,y_spl_end,.true.,segment_info,spline_params,cp_pos)
+
+    !
+    ! Compute derivatives of delmp wrt the control
+    ! points of Span and delta_theta
+    !
+    if (chrdlean == 0) then ! tangential lean
+
+        call compute_spanwise_xcp_ders (na, ncp1, yc, xc, cp_pos, segment_info, spline_params, delta_theta_xcp_ders)
+        call compute_spanwise_ycp_ders (na, ncp1, segment_info, dcpall, spline_params, delta_theta_ycp_ders)
+
+    else    ! true lean (show warning for now)
+
+        msg_1   = "Derivatives with respect to lean control points set to 0."
+        msg_2   = "Lean derivatives aren't computed when using true lean options."
+        msg_3   = "See spanwise spline creation using lean control points in bladestack.f90"
+
+        ! warning defined in errors.f90
+        call warning (warning_msg = msg_1, warning_msg_1 = msg_2, dev_msg = msg_3)
+
+    end if
 
 
     
@@ -325,30 +460,43 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     do ia = 1,na
        
         write(temp,*) ia
-        ile                     = (iap + 1)/2
-        mp_stack(ia)            = msle(ia)
-        dmp(ia)                 = mp_stack(ia) - xa(ile,ia)
+        ile                             = (iap + 1)/2
+        mp_stack(ia)                    = msle(ia)
+        dmp(ia)                         = mp_stack(ia) - xa(ile,ia)
        
         do i = 1,iap
-            demp                = delmp(ia)
-            mps(i,ia)           = xa(i,ia) + dmp(ia) + delmp(ia)
+
+            demp                        = delmp(ia)
+            mps(i,ia)                   = xa(i,ia) + dmp(ia) + delmp(ia)
+
+            ! Compute derivatives of mps wrt input parameters
+            dm3D_dcurv(ia, i, :, :)     = dm_dcurv(ia, i, :, :) - dm_dcurv(ia, ile, :, :)       ! mean-line 2nd derivative
+            dm3D_dthk(ia, i, :, :)      = dm_dthk(ia, i, :, :) - dm_dthk(ia, ile, :, :)         ! NACA thickness
+            dm3D_dinbeta(ia, i, :, :)   = dm_dinbeta(ia, i, :, :) - dm_dinbeta(ia, ile, :, :)   ! in_beta*
+            dm3D_doutbeta(ia, i, :, :)  = dm_doutbeta(ia, i, :, :) - dm_doutbeta(ia, ile, :, :) ! out_beta*
+            dm3D_dcm(ia, i, :, :)       = dm_dcm(ia, i, :, :) - dm_dcm(ia, ile, :, :)           ! chord_multiplier
+
+            ! Sweep control points
+            dm3D_dsweep(ia, i, 1, :)    = delmp_xcp_ders(ia, :)
+            dm3D_dsweep(ia, i, 2, :)    = delmp_ycp_ders(ia, :)
+
         end do
 
         ! Compute m'_3D for extended meanlines
         do i = 1, nmeanline
-            mp3D_meanline(ia,i) = xmeanline(ia,i) + dmp(ia) + delmp(ia)
+            mp3D_meanline(ia,i)         = xmeanline(ia,i) + dmp(ia) + delmp(ia)
         end do
 
         if (thick_distr == 5) then
 
             ! Compute m'_3D for maximum thickness points
-            mt_umax(ia,1)           = mt_umax(ia,1) + dmp(ia) + delmp(ia)
-            mt_umax(ia,3)           = mt_umax(ia,3) + dmp(ia) + delmp(ia)
+            mt_umax(ia,1)               = mt_umax(ia,1) + dmp(ia) + delmp(ia)
+            mt_umax(ia,3)               = mt_umax(ia,3) + dmp(ia) + delmp(ia)
 
             ! Theta coordinates for cylindrical version of
             ! maximum thickness points
-            xrt_umax(ia,3)          = mt_umax(ia,2)
-            xrt_umax(ia,6)          = mt_umax(ia,4)
+            xrt_umax(ia,3)              = mt_umax(ia,2)
+            xrt_umax(ia,6)              = mt_umax(ia,4)
 
         end if
 
@@ -363,22 +511,64 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
 
         ! For blade section
         do i = 1,iap
-            xb(i,ia)    = spl_eval(nsp(ia),mps(i,ia),xm(1,ia),xms(1,ia),mp(1,ia))
-            rb(i,ia)    = spl_eval(nsp(ia),mps(i,ia),rm(1,ia),rms(1,ia),mp(1,ia))
-        end do
+
+            xb(i,ia)    = spl_eval(nsp(ia),mps(i,ia),xm(1,ia),xms(1,ia),mp(1,ia),.false.)
+            rb(i,ia)    = spl_eval(nsp(ia),mps(i,ia),rm(1,ia),rms(1,ia),mp(1,ia),.false.)
+
+
+            !
+            ! Compute derivatives of (x,r) wrt input parameters
+            !
+            ! Sweep
+            call spl_eval_ders (nsp(ia), mps(i,ia), xm(1,ia), xms(1,ia), mp(1,ia), &
+                                dm3D_dsweep(ia,i,:,:), dx_dsweep(ia,i,:,:))
+            call spl_eval_ders (nsp(ia), mps(i,ia), rm(1,ia), rms(1,ia), mp(1,ia), &
+                                dm3D_dsweep(ia,i,:,:), dr_dsweep(ia,i,:,:))
+
+            ! in_beta*
+            call spl_eval_ders (nsp(ia), mps(i,ia), xm(1,ia), xms(1,ia), mp(1,ia), &
+                                dm3D_dinbeta(ia,i,:,:), dx_dinbeta(ia,i,:,:))
+            call spl_eval_ders (nsp(ia), mps(i,ia), rm(1,ia), rms(1,ia), mp(1,ia), &
+                                dm3D_dinbeta(ia,i,:,:), dr_dinbeta(ia,i,:,:))
+
+            ! out_beta*
+            call spl_eval_ders (nsp(ia), mps(i,ia), xm(1,ia), xms(1,ia), mp(1,ia), &
+                                dm3D_doutbeta(ia,i,:,:), dx_doutbeta(ia,i,:,:))
+            call spl_eval_ders (nsp(ia), mps(i,ia), rm(1,ia), rms(1,ia), mp(1,ia), &
+                                dm3D_doutbeta(ia,i,:,:), dr_doutbeta(ia,i,:,:))
+
+            ! Chord multiplier
+            call spl_eval_ders (nsp(ia), mps(i,ia), xm(1,ia), xms(1,ia), mp(1,ia), &
+                                dm3D_dcm(ia,i,:,:), dx_dcm(ia,i,:,:))
+            call spl_eval_ders (nsp(ia), mps(i,ia), rm(1,ia), rms(1,ia), mp(1,ia), &
+                                dm3D_dcm(ia,i,:,:), dr_dcm(ia,i,:,:))
+
+            ! Mean-line 2nd derivative
+            call spl_eval_ders (nsp(ia), mps(i,ia), xm(1,ia), xms(1,ia), mp(1,ia), &
+                                dm3D_dcurv(ia,i,:,:), dx_dcurv(ia,i,:,:))
+            call spl_eval_ders (nsp(ia), mps(i,ia), rm(1,ia), rms(1,ia), mp(1,ia), &
+                                dm3D_dcurv(ia,i,:,:), dr_dcurv(ia,i,:,:))
+
+            ! NACA thickness
+            call spl_eval_ders (nsp(ia), mps(i,ia), xm(1,ia), xms(1,ia), mp(1,ia), &
+                                dm3D_dthk(ia,i,:,:), dx_dthk(ia,i,:,:))
+            call spl_eval_ders (nsp(ia), mps(i,ia), rm(1,ia), rms(1,ia), mp(1,ia), &
+                                dm3D_dthk(ia,i,:,:), dr_dthk(ia,i,:,:))
+
+        end do  ! i = 1, iap
 
         ! For extended meanlines
         do i = 1, nmeanline
-           xem(ia,i)    = spl_eval(nsp(ia), mp3D_meanline(ia,i), xm(1,ia), xms(1,ia), mp(1,ia))
-           rem(ia,i)    = spl_eval(nsp(ia), mp3D_meanline(ia,i), rm(1,ia), rms(1,ia), mp(1,ia))
+           xem(ia,i)    = spl_eval(nsp(ia), mp3D_meanline(ia,i), xm(1,ia), xms(1,ia), mp(1,ia), .false.)
+           rem(ia,i)    = spl_eval(nsp(ia), mp3D_meanline(ia,i), rm(1,ia), rms(1,ia), mp(1,ia), .false.)
         end do
 
         ! For maximum thickness points
         if (thick_distr == 5) then
-            xrt_umax(ia,1)  = spl_eval(nsp(ia), mt_umax(ia,1), xm(1,ia), xms(1,ia), mp(1,ia))
-            xrt_umax(ia,2)  = spl_eval(nsp(ia), mt_umax(ia,1), rm(1,ia), rms(1,ia), mp(1,ia))
-            xrt_umax(ia,4)  = spl_eval(nsp(ia), mt_umax(ia,3), xm(1,ia), xms(1,ia), mp(1,ia))
-            xrt_umax(ia,5)  = spl_eval(nsp(ia), mt_umax(ia,3), rm(1,ia), rms(1,ia), mp(1,ia))
+            xrt_umax(ia,1)  = spl_eval(nsp(ia), mt_umax(ia,1), xm(1,ia), xms(1,ia), mp(1,ia), .false.)
+            xrt_umax(ia,2)  = spl_eval(nsp(ia), mt_umax(ia,1), rm(1,ia), rms(1,ia), mp(1,ia), .false.)
+            xrt_umax(ia,4)  = spl_eval(nsp(ia), mt_umax(ia,3), xm(1,ia), xms(1,ia), mp(1,ia), .false.)
+            xrt_umax(ia,5)  = spl_eval(nsp(ia), mt_umax(ia,3), rm(1,ia), rms(1,ia), mp(1,ia), .false.)
         end if
 
     end do
@@ -391,8 +581,8 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     do ia = 1,na
         do i = 1,6   
             mps_inter = intersec_coord(2*i-1,ia) + dmp(ia) + delmp(ia)
-            inter_xb(i,ia) = spl_eval(nsp(ia),mps_inter,xm(1,ia),xms(1,ia),mp(1,ia))
-            inter_rb(i,ia) = spl_eval(nsp(ia),mps_inter,rm(1,ia),rms(1,ia),mp(1,ia))
+            inter_xb(i,ia) = spl_eval(nsp(ia),mps_inter,xm(1,ia),xms(1,ia),mp(1,ia),.false.)
+            inter_rb(i,ia) = spl_eval(nsp(ia),mps_inter,rm(1,ia),rms(1,ia),mp(1,ia),.false.)
         end do
     end do
     if (.not. isquiet) print*,''
@@ -429,12 +619,54 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
             !if (LE == 2) then
             !    xb(i,ia)     = xb(i,ia) - stingl(ia)
             !else
-            xb(i,ia)     = xb(i,ia)
+            xb(i,ia)        = xb(i,ia)
             !end if
-            yb(i,ia)         = rb(i,ia)*sin(ya(i,ia) + delta_theta(ia)) 
-            zb(i,ia)         = rb(i,ia)*cos(ya(i,ia) + delta_theta(ia)) 
-            
-            ! Positive half pitch leaned coordinates 
+            yb(i,ia)        = rb(i,ia)*sin(ya(i,ia) + delta_theta(ia))
+            zb(i,ia)        = rb(i,ia)*cos(ya(i,ia) + delta_theta(ia))
+
+
+            !
+            ! Compute (y, z) derivatives wrt all parameter control points
+            !
+            ! Sweep
+            !
+            ! TODO: Include effect of stagger and delta_theta on delmp ders
+            !       when using true sweep/true lean options
+            !
+            call yz_sweep_ders (ya(i, ia), delta_theta(ia), dr_dsweep(ia, i, :, :), &
+                                dy_dsweep(ia, i, :, :), dz_dsweep(ia, i, :, :))
+
+            !
+            ! Lean
+            !
+            ! TODO: Include effect of stagger and delmp on delta_theta ders
+            !       when using true lean/true sweep options
+            !
+            dx_dlean        = 0.0
+            call yz_lean_ders (rb(i, ia), ya(i, ia), delta_theta(ia), delta_theta_xcp_ders(ia, :), &
+                               delta_theta_ycp_ders(ia, :), dy_dlean(ia, i, :, :), dz_dlean(ia, i, :, :))
+
+            ! in_beta*
+            call yz_param_ders (rb(i, ia), ya(i, ia), delta_theta(ia), dr_dinbeta(ia, i, :, :), &
+                                dth_dinbeta(ia, i, :, :), dy_dinbeta(ia, i, :, :), dz_dinbeta(ia, i, :, :))
+
+            ! out_beta*
+            call yz_param_ders (rb(i, ia), ya(i, ia), delta_theta(ia), dr_doutbeta(ia, i, :, :), &
+                                dth_doutbeta(ia, i, :, :), dy_doutbeta(ia, i, :, :), dz_doutbeta(ia, i, :, :))
+
+            ! chord multiplier
+            call yz_param_ders (rb(i, ia), ya(i, ia), delta_theta(ia), dr_dcm(ia, i, :, :), &
+                                dth_dcm(ia, i, :, :), dy_dcm(ia, i, :, :), dz_dcm(ia, i, :, :))
+
+            ! mean-line 2nd derivative
+            call yz_param_ders (rb(i, ia), ya(i, ia), delta_theta(ia), dr_dcurv(ia, i, :, :), &
+                                dth_dcurv(ia, i, :, :), dy_dcurv(ia, i, :, :), dz_dcurv(ia, i, :, :))
+
+            ! NACA thickness
+            call yz_param_ders (rb(i, ia), ya(i, ia), delta_theta(ia), dr_dthk(ia, i, :, :), &
+                                dth_dthk(ia, i, :, :), dy_dthk(ia, i, :, :), dz_dthk(ia, i, :, :))
+
+            ! Positive half pitch leaned coordinates
             xposlean(i,ia)   = xb(i,ia) 
             yposlean(i,ia)   = rb(i,ia)*sin(ya(i,ia) + (pi/nbls)) 
             zposlean(i,ia)   = rb(i,ia)*cos(ya(i,ia) + (pi/nbls)) 
@@ -624,6 +856,20 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     !call constantslopemeanline3D(xb,yb,zb,xposlean,yposlean,zposlean,xneglean,yneglean,zneglean,iap,nsec, &
     !                                 uplmt,scf,casename)
     call write_extended_meanlines (casename, nspn, nmeanline, scf*xem, scf*yem, scf*zem)
+
+
+
+    ! Write derivatives of all (x, y, z) spanwise sections
+    ! TODO: Add if-else conditions
+    call write_xyz_der_files (1, dx_dsweep, dy_dsweep, dz_dsweep)
+    call write_xyz_der_files (2, dx_dlean, dy_dlean, dz_dlean)
+    call write_xyz_der_files (3, dx_dinbeta, dy_dinbeta, dz_dinbeta)
+    call write_xyz_der_files (4, dx_doutbeta, dy_doutbeta, dz_doutbeta)
+    call write_xyz_der_files (5, dx_dcm, dy_dcm, dz_dcm)
+    call write_xyz_der_files (6, dx_dcurv, dy_dcurv, dz_dcurv)
+    call write_xyz_der_files (7, dx_dthk, dy_dthk, dz_dthk)
+
+
 
     ! format statements
     10 format(3(f25.16,1x))

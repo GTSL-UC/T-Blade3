@@ -62,8 +62,8 @@ LIBS_TEST = -L$(PFUNIT)/lib -lpfunit
 endif
 
 # Object files required for testing
-OBJS_SRC = $(SRC_DIR)/globvar.o $(SRC_DIR)/file_operations.o $(SRC_DIR)/errors.o $(SRC_DIR)/funcNsubs.o $(SRC_DIR)/spline.o $(SRC_DIR)/readinput.o \
-		   $(SRC_DIR)/3dbgb.o $(SRC_DIR)/bladegen.o $(SRC_DIR)/bladestack.o $(SRC_DIR)/bspline3.o $(SRC_DIR)/cubicspline.o \
+OBJS_SRC = $(SRC_DIR)/globvar.o $(SRC_DIR)/file_operations.o $(SRC_DIR)/errors.o $(SRC_DIR)/funcNsubs.o $(SRC_DIR)/derivatives.o $(SRC_DIR)/spline.o \
+		   $(SRC_DIR)/readinput.o $(SRC_DIR)/3dbgb.o $(SRC_DIR)/bladegen.o $(SRC_DIR)/bladestack.o $(SRC_DIR)/bspline3.o $(SRC_DIR)/cubicspline.o \
 		   $(SRC_DIR)/bsplinecam.o $(SRC_DIR)/splinethick.o $(SRC_DIR)/airfoiltypes.o $(SRC_DIR)/spanwise_variation.o \
 
 # Rule for 'make tests'

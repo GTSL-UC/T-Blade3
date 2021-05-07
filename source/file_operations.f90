@@ -1734,6 +1734,262 @@ module file_operations
 
 
 
+    !
+    ! Write the derivatives of a given spanwise (u, v) blade
+    ! section with respect to the spanwise control points of
+    ! a given NACA thickness parameter
+    !
+    ! Input parameters: js      - spanwise section index
+    !                   iparam  - NACA thickness parameter index
+    !                             (1 = I, 2 = u_max, 3 = t_max,
+    !                              4 = t_TE, 5 = t'_TE)
+    !                   np      - number of control points around
+    !                             the top and bottom surfaces of
+    !                             the blade section
+    !                   ncp     - number of spanwise control points
+    !                             for the given thickness parameter
+    !                   dutdt   - array containing derivatives of
+    !                             top surface 'u' (np x ncp)
+    !                   dubdt   - array containing derivatives of
+    !                             bottom surface 'u' (np x ncp)
+    !                   dvtdt   - array containing derivatives of
+    !                             top surface 'v' (np x ncp)
+    !                   dvbdt   - array containing derivatives of
+    !                             bottom surface 'u' (np x ncp)
+    !
+    !---------------------------------------------------------------------------
+    subroutine write_thk_der_files (js, iparam, np, ncp, dutdt, dubdt, dvtdt, dvbdt)
+
+        integer,                intent(in)          :: js
+        integer,                intent(in)          :: iparam
+        integer,                intent(in)          :: np
+        integer,                intent(in)          :: ncp
+        real,                   intent(in)          :: dutdt(np, ncp)
+        real,                   intent(in)          :: dubdt(np, ncp)
+        real,                   intent(in)          :: dvtdt(np, ncp)
+        real,                   intent(in)          :: dvbdt(np, ncp)
+
+        ! Local variables
+        integer                                     :: i, k, funit = 134
+        character(256)                              :: filename
+
+
+        ! Construct name of output file
+        write(filename, '(A21,I0,A4,I0,A4)') &
+             'derivative_files/duv_', js, '_dt_', iparam, '.dat'
+
+
+        !
+        ! Write derivatives of (u, v) section wrt all
+        ! control points of a thickness parameter to a file
+        !
+        open (funit, file = filename)
+
+        ! Concatenate top and bottom surface arrays
+        do k = 1, ncp
+            do i = 1, np
+                write(funit, '(2F30.16)') dutdt(np - i + 1, k), dvtdt(np - i + 1, k)
+            end do
+            do i = 2, np
+                write(funit, '(2F30.16)') dubdt(i, k), dvbdt(i, k)
+            end do
+        end do
+
+        close (funit)
+
+
+    end subroutine write_thk_der_files
+    !---------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Write the derivatives of a (u, v) blade section
+    ! wrt the spanwise control points of a mean-line
+    ! second derivative parameter
+    !
+    ! Input parameters: js      - spanwise section index
+    !                   iparam  - mean-line second derivative parameter
+    !                             index
+    !                   np      - number of points along blade surface
+    !                   ncp     - number of spanwise control points
+    !                   dutdc   - array containing derivatives of top
+    !                             surface 'u' (np x ncp)
+    !                   dvtdc   - array containing derivatives of top
+    !                             surface 'v' (np x ncp)
+    !                   dubdc   - array containing derivatives of bottom
+    !                             surface 'u' (np x ncp)
+    !                   dvbdc   - array containing derivatives of bottom
+    !                             surface 'v' (np x ncp)
+    !
+    !---------------------------------------------------------------------------
+    subroutine write_curv_der_files (js, iparam, np, ncp, dutdc, dubdc, dvtdc, dvbdc)
+
+        integer,                intent(in)      :: js
+        integer,                intent(in)      :: iparam
+        integer,                intent(in)      :: np
+        integer,                intent(in)      :: ncp
+        real,                   intent(in)      :: dutdc(np, ncp)
+        real,                   intent(in)      :: dubdc(np, ncp)
+        real,                   intent(in)      :: dvtdc(np, ncp)
+        real,                   intent(in)      :: dvbdc(np, ncp)
+
+        ! Local variables
+        character(256)                          :: filename
+        integer                                 :: i, k, funit = 236
+
+
+        ! Construct name of output file
+        write (filename, '(A21,I0,A6,I0,A4)') &
+            'derivative_files/duv_', js, '_dcur_', iparam, '.dat'
+
+
+
+        !
+        ! Write derivatives of (u, v) section wrt spanwise
+        ! control pts of mean-line second derivative to a file
+        !
+        open (funit, file = filename)
+
+        ! Concatenate top and bottom arrays
+        do k = 1, ncp
+            do i = 1, np
+                write (funit, '(2F30.16)') dutdc(np - i + 1, k), dvtdc(np - i + 1, k)
+            end do
+            do i = 2, np
+                write (funit, '(2F30.16)') dubdc(i, k), dvbdc(i, k)
+            end do
+        end do
+
+        close (funit)
+
+
+    end subroutine write_curv_der_files
+    !---------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Write the derivatives wrt all control points
+    ! of all components of a given input parameter
+    ! for all spanwise sections
+    !
+    ! Input parameters: iparam  - index for each parameter (1 = sweep,
+    !                             2 = lean, 3 = in_beta*, 4 = out_beta*,
+    !                             5 = chord_multiplier, 6 = cur,
+    !                             7 = NACA thickness)
+    !                   dx      - derivatives of x
+    !                   dy      - derivatives of y
+    !                   dz      - derivatives of z
+    !
+    !---------------------------------------------------------------------------
+    subroutine write_xyz_der_files (iparam, dx, dy, dz)
+        use globvar,            only: scf
+
+        integer,                intent(in)      :: iparam
+        real,                   intent(in)      :: dx(:,:,:,:)
+        real,                   intent(in)      :: dy(:,:,:,:)
+        real,                   intent(in)      :: dz(:,:,:,:)
+
+        ! Local variables
+        integer                                 :: nspan, np, nparams, ncp, i, j, k, l, funit = 838
+        character(256), allocatable             :: filename(:,:)
+
+
+        ! Array sizes
+        nspan                           = size(dx, 1)
+        np                              = size(dx, 2)
+        nparams                         = size(dx, 3)
+        ncp                             = size(dx, 4)
+
+
+        ! Allocate array to store filenames
+        if (allocated(filename)) deallocate(filename)
+        if (iparam == 6) then
+            allocate(filename((nparams/2) + 1, ncp))    ! For mean-line 2nd derivatives, only write cur files
+        else
+            allocate(filename(nparams, ncp))
+        end if
+
+
+        !
+        ! Write output to files
+        !
+        if (iparam == 6) then   ! mean-line 2nd derivative
+
+            do k = 1, (nparams/2) + 1
+                do l = 1, ncp
+
+                    !
+                    ! Generate filenames for each component
+                    ! and each control point
+                    !
+                    write (filename(k, l), '(a26, i0, a1, i0, a1, i0, a4)') &
+                         'derivative_files/xyz_ders_', iparam, '_', k + (nparams/2) - 1, '_', l, '.dat'
+
+
+                    !
+                    ! Write derivatives wrt to the (k, l) control point
+                    ! for all spanwise sections to the corresponding file
+                    !
+                    open (funit, file = filename(k, l))
+                    do i = 1, nspan
+                        do j = 1, np
+                            write(funit, '(3F22.16)') scf * dx(i, j, k + (nparams/2) - 1, l), &
+                                                      scf * dy(i, j, k + (nparams/2) - 1, l), &
+                                                      scf * dz(i, j, k + (nparams/2) - 1, l)
+                        end do
+                    end do
+                    close (funit)
+
+                end do  ! l
+            end do  ! k
+
+        else    ! all other parameters
+
+            do k = 1, nparams
+                do l = 1, ncp
+
+                    !
+                    ! Generate filenames for each component
+                    ! and each control point
+                    !
+                    write (filename(k, l), '(a26, i0, a1, i0, a1, i0, a4)') &
+                         'derivative_files/xyz_ders_', iparam, '_', k, '_', l, '.dat'
+
+
+                    !
+                    ! Write derivatives wrt to the (k, l) control point
+                    ! for all spanwise sections to the corresponding file
+                    !
+                    open (funit, file = filename(k, l))
+                    do i = 1, nspan
+                        do j = 1, np
+                            write(funit, '(3F22.16)') scf * dx(i, j, k, l), scf * dy(i, j, k, l), scf * dz(i, j, k, l)
+                        end do
+                    end do
+                    close (funit)
+
+                end do  ! l
+            end do  ! k
+
+        end if  ! iparam
+
+
+    end subroutine write_xyz_der_files
+    !---------------------------------------------------------------------------
+
+
+
+
+
+
 
 
 

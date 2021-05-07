@@ -212,11 +212,14 @@ subroutine span_variation()
     use file_operations
     use globvar
     use funcNsubs
+    use derivatives,    only: compute_spanwise_xcp_ders, compute_spanwise_ycp_ders
     implicit none
 
     ! Local variables
     integer                         :: np_fine, nopen
-    real,           allocatable     :: span_fine(:), out_coord_u_fine(:,:), out_coord_v_fine(:,:)
+    integer,        allocatable     :: segment_info(:,:), cp_pos(:,:)
+    real,           allocatable     :: span_fine(:), out_coord_u_fine(:,:), out_coord_v_fine(:,:), &
+                                       spline_params(:), dcpall(:,:)
     real                            :: intersec_u(nspan)
     character(:),   allocatable     :: log_file
     logical                         :: file_open, isquiet_local
@@ -267,6 +270,16 @@ subroutine span_variation()
 
 
     !
+    ! Allocate differentiation info arrays
+    !
+    if (allocated(segment_info)) deallocate(segment_info)
+    allocate(segment_info(na, 4))
+    if (allocated(spline_params)) deallocate(spline_params)
+    allocate(spline_params(na))
+
+
+
+    !
     ! Print message to screen and write to log file
     !
     call log_file_exists(log_file, nopen, file_open)
@@ -293,11 +306,45 @@ subroutine span_variation()
         bspline_chord_curv(j,1) = span(j)
     end do
 
+    !
+    ! Array to store sensitivities of spanwise values
+    ! of the camber-line curvature parameters wrt the
+    ! non-dimensional span control points
+    !
+    if (allocated(curv_xcp_ders)) deallocate(curv_xcp_ders)
+    allocate(curv_xcp_ders(ncp_chord_curv - 1, na, ncp_span_curv))
+
+    !
+    ! Array to store sensitivities of spanwise values
+    ! of the camber-line curvature parameters wrt the
+    ! spanwise cubic B-spline control points
+    !
+    if (allocated(curv_ycp_ders)) deallocate(curv_ycp_ders)
+    allocate(curv_ycp_ders(2:ncp_chord_curv, na, ncp_span_curv))
+
+    ! Allocate dcpall for curvature points
+    if (allocated(dcpall)) deallocate(dcpall)
+    allocate(dcpall(ncp_span_curv, ncp_span_curv + 2))
+
+    ! Allocate cp_pos for curvature points
+    if (allocated(cp_pos)) deallocate(cp_pos)
+    allocate(cp_pos(na, ncp_span_curv))
+
     ! Spanwise distribution of "u" and "cur" control points
     do i = 2,ncp_chord_curv
 
-        call cubicspline(ncp_span_curv,cp_chord_curv(:,i),cp_chord_curv(:,1),xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
-        call cubicbspline_intersec(ncp1,xc,yc,na,span,intersec,xbs,ybs,y_spl_end)
+        call cubicspline(ncp_span_curv,cp_chord_curv(:,i),cp_chord_curv(:,1),xbs,ybs,y_spl_end,nspline,xc,yc,ncp1,  &
+                         .true.,dcpall)
+        call cubicbspline_intersec(ncp1,xc,yc,na,span,intersec,xbs,ybs,y_spl_end,.true.,segment_info,spline_params, &
+                                   cp_pos)
+
+        !
+        ! Compute sensitivities of the spanwise mean-line
+        ! 2nd derivative values wrt to the control points
+        ! of the non-dimensional span and the u/cur
+        !
+        call compute_spanwise_xcp_ders (na, ncp1, yc, xc, cp_pos, segment_info, spline_params, curv_xcp_ders(i - 1,:,:))
+        call compute_spanwise_ycp_ders (na, ncp1, segment_info, dcpall, spline_params, curv_ycp_ders(i,:,:))
 
         do j = 1,na
             bspline_chord_curv(j,i) = intersec(j)
@@ -305,7 +352,11 @@ subroutine span_variation()
 
     end do  ! i = 2,ncp_chord_curv
 
+
+
+    !
     ! Write curvature spanwise spline data to a file, if command line option "dev" is used
+    !
     if (isdev) then
 
         if (.not. isquiet_local) print *, 'Writing spanwise curvature variation data to file'
@@ -324,6 +375,14 @@ subroutine span_variation()
     ! Create spanwise cubic spline for thickness
     ! Generate cubic splines for quartic spline thickness distribution or direct thickness distribution
     !
+    ! Allocate dcpall for thickness points
+    if (allocated(dcpall)) deallocate(dcpall)
+    allocate(dcpall(ncp_span_thk, ncp_span_thk + 2))
+
+    ! Allocate cp_pos for thickness points
+    if (allocated(cp_pos)) deallocate(cp_pos)
+    allocate(cp_pos(na, ncp_span_thk))
+
     if (thick /= 0) then
         
         ! Spanwise distribution of "Span" control points
@@ -334,8 +393,10 @@ subroutine span_variation()
         ! Spanwise distribution of "u" and "thk" control points
         do i = 2,ncp_chord_thk
 
-            call cubicspline(ncp_span_thk,cp_chord_thk(:,i),cp_chord_thk(:,1),xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
-            call cubicbspline_intersec(ncp1,xc,yc,na,span,intersec,xbs,ybs,y_spl_end)
+            call cubicspline(ncp_span_thk,cp_chord_thk(:,i),cp_chord_thk(:,1),xbs,ybs,y_spl_end,nspline,xc,yc,ncp1, &
+                             .false.,dcpall)
+            call cubicbspline_intersec(ncp1,xc,yc,na,span,intersec,xbs,ybs,y_spl_end,.false.,segment_info,spline_params, &
+                                       cp_pos)
 
             do j = 1,na
                 bspline_thk(j,i) = intersec(j)
@@ -354,19 +415,51 @@ subroutine span_variation()
         ! Spanwise distribution of "Span" control points
         bspline_thk(:,1) = span(1:nsl)
 
+        !
+        ! Allocate array to store sensitivities of spanwise values
+        ! wrt the control points of the non-dimensional span
+        ! for thickness distribution
+        !
+        if (allocated(thk_xcp_ders)) deallocate(thk_xcp_ders)
+        allocate(thk_xcp_ders(size(cp_chord_thk,2) - 1, na, ncp_span_thk))
+
+        ! Array to store sensitivities of spanwise values
+        ! wrt the spanwise cubic B-spline control points
+        !
+        ! TODO: The first array index start from 2
+        if (allocated(thk_ycp_ders)) deallocate(thk_ycp_ders)
+        allocate(thk_ycp_ders(2:size(cp_chord_thk,2), na, ncp_span_thk))
+
         ! Spanwise distribution of "LE_radius", "u_max", "t_max" and "t_TE"
         do i = 2,size(cp_chord_thk,2)
 
             ! For "t_max" and "t_TE", store as half thickness
             if (i == 4 .or. i == 5) then
 
-                call cubicspline(ncp_span_thk,0.5*cp_chord_thk(:,i),cp_chord_thk(:,1),xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
-                call cubicbspline_intersec(ncp1,xc,yc,na,span,intersec_u,xbs,ybs,y_spl_end)
+
+                call cubicspline(ncp_span_thk,0.5*cp_chord_thk(:,i),cp_chord_thk(:,1),xbs,ybs,y_spl_end,nspline, &
+                                 xc,yc,ncp1,.true.,dcpall)
+                call cubicbspline_intersec(ncp1,xc,yc,na,span,intersec_u,xbs,ybs,y_spl_end,.true.,segment_info,spline_params, &
+                                           cp_pos)
+
+                ! Compute sensitivities of spanwise values of t_max/t_TE
+                ! wrt to the control points of non-dimensional span and
+                ! control points of t_max/t_TE
+                call compute_spanwise_xcp_ders (na, ncp1, yc, xc, cp_pos, segment_info, spline_params, thk_xcp_ders(i - 1,:,:))
+                call compute_spanwise_ycp_ders(na, ncp1, segment_info, dcpall, spline_params, thk_ycp_ders(i,:,:))
 
             else
 
-                call cubicspline(ncp_span_thk,cp_chord_thk(:,i),cp_chord_thk(:,1),xbs,ybs,y_spl_end,nspline,xc,yc,ncp1)
-                call cubicbspline_intersec(ncp1,xc,yc,na,span,intersec_u,xbs,ybs,y_spl_end)
+                call cubicspline(ncp_span_thk,cp_chord_thk(:,i),cp_chord_thk(:,1),xbs,ybs,y_spl_end,nspline,xc,yc,ncp1, &
+                                 .true.,dcpall)
+                call cubicbspline_intersec(ncp1,xc,yc,na,span,intersec_u,xbs,ybs,y_spl_end,.true.,segment_info,spline_params, &
+                                           cp_pos)
+
+                ! Compute sensitivities of spanwise values of r_LE/u_max/t'_TE
+                ! wrt to the control points of non-dimensional span and
+                ! control points of r_LE/u_max/t'_TE
+                call compute_spanwise_xcp_ders (na, ncp1, yc, xc, cp_pos, segment_info, spline_params, thk_xcp_ders(i - 1,:,:))
+                call compute_spanwise_ycp_ders(na,ncp1,segment_info, dcpall, spline_params, thk_ycp_ders(i,:,:))
 
             end if
 

@@ -6,76 +6,81 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                     sting_h_all,LEdegree,no_LE_segments,sec_radius,bladedata,amount_data,scf,             &
                     intersec_coord,throat_index, n_normal_distance,casename,develop,mble,mbte,msle,       &
                     mste,i_slope,jcellblade_all, etawidth_all,BGgrid_all,thk_tm_c_spl, theta_offset,      &
-                    TE_der_actual,TE_der_norm,m_prime,theta,spanwise_thk,n_ext,m_mean,th_mean,mt_umax)
+                    TE_der_actual,TE_der_norm,m_prime,theta,spanwise_thk,n_ext,m_mean,th_mean,mt_umax,    &
+                    dsinl_dxcp,dsinl_dycp,dsext_dxcp,dsext_dycp,chrdx_ders,dmprime_dcurv,dtheta_dcurv,    &
+                    dmprime_dt,dtheta_dt,dmprime_dinbeta,dtheta_dinbeta,dmprime_doutbeta,dtheta_doutbeta, &
+                    dmprime_dcm,dtheta_dcm)
 
+    use globvar,                only: ncp_span_curv, ncp_chord_curv, ncp_span_thk, cpinbeta, cpoutbeta, cpchord
     use file_operations
     use errors
     use funcNsubs
+    use derivatives
     implicit none
 
-    integer,                                intent(in)          :: nspn, js, stack, stack_switch, chord_switch, nsl, nbls,    &
-                                                                   curv_camber, thick, LE, ncp_curv(nsl), ncp_thk(nsl),       &
-                                                                   wing_flag, thick_distr, LEdegree, no_LE_segments,          &
-                                                                   amount_data, i_slope, n_ext, clustering_switch
-    integer,                                intent(inout)       :: np, throat_index(nspn), n_normal_distance
-    real,                                   intent(in)          :: thkc, mr1, chrdx, xcen, ycen, stk_u(1), stk_v(1), xb_stk,  &
-                                                                   yb_stk, clustering_parameter, curv_cp(20,2*nsl),           &
-                                                                   thk_cp(20,2*nsl), lethk_all(nsl), tethk_all(nsl),          &
-                                                                   s_all(nsl), ee_all(nsl), umxthk_all(nsl),                  &
-                                                                   C_le_x_top_all(nsl), C_le_x_bot_all(nsl),                  &
-                                                                   C_le_y_top_all(nsl), C_le_y_bot_all(nsl),                  &
-                                                                   LE_vertex_ang_all(nsl), LE_vertex_dis_all(nsl),            &
-                                                                   sting_l_all(nsl), sting_h_all(nsl), sec_radius(nsl,2),     &
-                                                                   scf, msle, mste, jcellblade_all(nspn), etawidth_all(nspn), &
-                                                                   BGgrid_all(nspn), thk_tm_c_spl(nsl), theta_offset
-    real,                                   intent(inout)       :: sinl, sext, stagger, bladedata(amount_data,nsl),           &
-                                                                   m_prime(500), theta(500), spanwise_thk(nspn), mble, mbte,  &
-                                                                   intersec_coord(12,nsl), m_mean(200), th_mean(200), mt_umax(4)
-    character(*),                           intent(in)          :: fext, airfoil, casename, develop
-    logical                                                     :: TE_der_actual, TE_der_norm
+    integer,                    intent(in)      :: nspn, js, stack, stack_switch, chord_switch, nsl, nbls, curv_camber, thick, &
+                                                   LE, ncp_curv(nsl), ncp_thk(nsl), wing_flag, thick_distr, LEdegree,          &
+                                                   no_LE_segments, amount_data, i_slope, n_ext, clustering_switch
+    integer,                    intent(inout)   :: np, throat_index(nspn), n_normal_distance
+    real,                       intent(in)      :: thkc, mr1, chrdx, xcen, ycen, stk_u(1), stk_v(1), xb_stk, yb_stk,            &
+                                                   clustering_parameter, curv_cp(20,2*nsl), thk_cp(20,2*nsl), lethk_all(nsl),   &
+                                                   tethk_all(nsl), s_all(nsl), ee_all(nsl), umxthk_all(nsl),                    &
+                                                   C_le_x_top_all(nsl), C_le_x_bot_all(nsl), C_le_y_top_all(nsl),               &
+                                                   C_le_y_bot_all(nsl), LE_vertex_ang_all(nsl), LE_vertex_dis_all(nsl),         &
+                                                   sting_l_all(nsl), sting_h_all(nsl), sec_radius(nsl,2), scf, msle, mste,      &
+                                                   jcellblade_all(nspn), etawidth_all(nspn), BGgrid_all(nspn),                  &
+                                                   thk_tm_c_spl(nsl), theta_offset, dsinl_dxcp(cpinbeta), dsinl_dycp(cpinbeta), &
+                                                   dsext_dxcp(cpoutbeta), dsext_dycp(cpoutbeta), chrdx_ders(2, cpchord)
+    real,                       intent(inout)   :: sinl, sext, stagger, bladedata(amount_data,nsl), m_prime(500), theta(500),   &
+                                                   spanwise_thk(nspn), mble, mbte, intersec_coord(12,nsl), m_mean(200),         &
+                                                   th_mean(200), mt_umax(4)
+    real,                       intent(inout)   :: dmprime_dcurv(np, ncp_chord_curv - 1, ncp_span_curv),                        &
+                                                   dtheta_dcurv(np, ncp_chord_curv - 1, ncp_span_curv),                         &
+                                                   dmprime_dt(np, 5, ncp_span_thk), dtheta_dt(np, 5, ncp_span_thk),             &
+                                                   dmprime_dinbeta(np, 2, cpinbeta), dtheta_dinbeta(np, 2, cpinbeta),           &
+                                                   dmprime_doutbeta(np, 2, cpoutbeta), dtheta_doutbeta(np, 2, cpoutbeta),       &
+                                                   dmprime_dcm(np, 2, cpchord), dtheta_dcm(np, 2, cpchord)
+    character(*),               intent(in)      :: fext, airfoil, casename, develop
+    logical                                     :: TE_der_actual, TE_der_norm
 
     ! Local variables
-    integer                                                     :: np_side, i, naca, np_cluster, ncp, i_le, i_te, oo, nopen
-!    integer,    parameter                                       :: nspan = 200, nx = 500, nxx = 1000, nrow = 1, nax = 50, nb = 300, spline_data = 6, interval = 6, &
-!                                                                   pt2 = 1, TE_del = 0
-!    real                                                        :: chrd, pitch, radius_pitch, scaling, lethk, thkmultip, aext, ainl, area, cam, cam_u, dtor, pi,   &
-!                                                                   flex, flin, fmxthk, rr1, rr2, sang, sexts, sinls, tethk, thk, ui, umxthk, xi, yi, xxa, yya,     &
-!                                                                   u_le, uin_le, Zweifel(nsl), ucp_top(11), vcp_top(11), ucp_bot(11), vcp_bot(11), xcp_LE, ycp_LE, &
-!                                                                   xcp_TE, ycp_TE, cp_LE(4,2), cp_TE(4,2), a_NACA(4), d_NACA(4), t_max, u_max, t_TE, dy_dx_TE,     &
-!                                                                   LE_round, min_throat_2D, u_translation, camber_trans, u_rot, camber_rot, u_TE_quadratic_a,      &
-!                                                                   u_TE_quadratic_b, u_TE_quadratic_c, u_TE, u_center, TE_radius, dddtmax(4), A(3, 3), dadtmax(4)
-!    real,                   allocatable                         :: init_angles(:), init_cambers(:), x_spl_end_curv(:), xcp_curv(:), ycp_curv(:), xcp_thk(:), &
-!                                                                   ycp_thk(:), ueq(:), xmean(:), ymean(:), xtop(:), ytop(:), xbot(:), ybot(:), u(:), xb(:),  &
-!                                                                   yb(:), u_new(:), splthick(:), thickness(:), angle(:), camber(:), slope(:),                &
-!                                                                   thickness_data(:,:), splinedata(:,:), dtdtmax(:), dubdthubmax(:), dvbdthubmax(:),         &
-!                                                                   dutdthubmax(:), dvtdthubmax(:)
-    integer,    parameter                                       :: nspan = 200, nx = 500, nxx = 1000, nrow = 1, nax = 50,     &
-                                                                   nb = 300, spline_data = 6, interval = 6, pt2 = 1, TE_del = 0
-    real(kind = 8)                                              :: chrd, pitch, radius_pitch, scaling, lethk, thkmultip, aext,&
-                                                                   ainl, area, cam, cam_u, dtor, pi, flex, flin, fmxthk, rr1, &
-                                                                   rr2, sang, sexts, sinls, tethk, thk, ui, umxthk, xi, yi,   &
-                                                                   xxa, yya, u_le, uin_le, Zweifel(nsl), ucp_top(11),         &
-                                                                   vcp_top(11), ucp_bot(11), vcp_bot(11), xcp_LE, ycp_LE,     &
-                                                                   xcp_TE, ycp_TE, cp_LE(4,2), cp_TE(4,2), a_NACA(4),         &
-                                                                   d_NACA(4), t_max, u_max, t_TE, dy_dx_TE, LE_round,         &
-                                                                   min_throat_2D, u_translation, camber_trans, u_rot,         &
-                                                                   camber_rot, u_TE_quadratic_a, u_TE_quadratic_b,            &
-                                                                   u_TE_quadratic_c, u_TE, u_center, TE_radius, cam_umax,     &
-                                                                   slope_umax, u_stack, v_stack, dddtmax(4), A(3, 3),         &
-                                                                   dadtmax(4)
-    real,                   allocatable                         :: init_angles(:), init_cambers(:), x_spl_end_curv(:),        &
-                                                                   xcp_curv(:), ycp_curv(:), xcp_thk(:), ycp_thk(:), ueq(:),  &
-                                                                   xmean(:), ymean(:), xtop(:), ytop(:), xbot(:), ybot(:),    &
-                                                                   u(:), xb(:), yb(:), u_new(:), splthick(:), thickness(:),   &
-                                                                   angle(:), camber(:), slope(:), thickness_data(:,:),        &
-                                                                   splinedata(:,:), dtdtmax(:), dubdthubmax(:),               &
-                                                                   dvbdthubmax(:), dutdthubmax(:), dvtdthubmax(:)
-    character(80)                                               :: file1, file7
-    character(20)                                               :: sec
-    character(:),           allocatable                         :: log_file, error_msg, dev_msg, stagger_file
-    logical                                                     :: ellip, file_open, isdev, isquiet, monotonic = .true.,      &
-                                                                   write_to_file = .true., exist
+    integer                                     :: np_side, i, naca, np_cluster, ncp, i_le, i_te, oo, nopen
+    integer,    parameter                       :: nspan = 200, nx = 500, nxx = 1000, nrow = 1, nax = 50, nb = 300,             &
+                                                   spline_data = 6, interval = 6, pt2 = 1, TE_del = 0
+    real                                        :: chrd, pitch, radius_pitch, scaling, lethk, thkmultip, aext, ainl, area, cam, &
+                                                   cam_u, dtor, pi, flex, flin, fmxthk, rr1, rr2, sang, sexts, sinls, tethk,    &
+                                                   thk, ui, umxthk, xi, yi, xxa, yya, u_le, uin_le, Zweifel(nsl), ucp_top(11),  &
+                                                   vcp_top(11), ucp_bot(11), vcp_bot(11), xcp_LE, ycp_LE, xcp_TE, ycp_TE,       &
+                                                   cp_LE(4,2), cp_TE(4,2), a_NACA(4), d_NACA(4), t_max, u_max, t_TE, dy_dx_TE,  &
+                                                   LE_round, min_throat_2D, u_translation, camber_trans, u_rot, camber_rot,     &
+                                                   u_TE_quadratic_a, u_TE_quadratic_b, u_TE_quadratic_c, u_TE, u_center,        &
+                                                   TE_radius, cam_umax, slope_umax, u_stack, v_stack
+    real,                   allocatable         :: init_angles(:), init_cambers(:), x_spl_end_curv(:), xcp_curv(:), ycp_curv(:),&
+                                                   xcp_thk(:), ycp_thk(:), ueq(:), xmean(:), ymean(:), xtop(:), ytop(:),        &
+                                                   xbot(:), ybot(:), u(:), xb(:), yb(:), u_new(:), splthick(:), thickness(:),   &
+                                                   angle(:), camber(:), slope(:), thickness_data(:,:), splinedata(:,:),         &
+                                                   u_ders(:,:), NACA_ders(:,:), dcam_dxcp(:,:),  dcam_dycp(:,:),                &
+                                                   dslope_dxcp(:,:), dslope_dycp(:,:), dcam_u(:), dslope_u(:), cam_ders(:,:),   &
+                                                   slope_ders(:,:), dsang_dcurv(:), dchrd_dcurv(:), dsang_dx_inbeta(:),         &
+                                                   dsang_dy_inbeta(:), dchrd_dx_inbeta(:), dchrd_dy_inbeta(:),                  &
+                                                   dslope_dx_inbeta(:,:), dslope_dy_inbeta(:,:), dcam_dx_inbeta(:,:),           &
+                                                   dcam_dy_inbeta(:,:), dslope_doutbeta(:,:,:), dcam_doutbeta(:,:,:),           &
+                                                   dsang_doutbeta(:,:), dchrd_doutbeta(:,:), dchrd_dcm(:,:)
+    real,                   allocatable         :: dxbot_dt(:,:,:), dybot_dt(:,:,:), dxtop_dt(:,:,:), dytop_dt(:,:,:),          &
+                                                   dxbot_dcurv(:,:,:), dybot_dcurv(:,:,:), dxtop_dcurv(:,:,:),                  &
+                                                   dytop_dcurv(:,:,:), du_dt(:,:,:), dv_dt(:,:,:), du_dcurv(:,:,:),             &
+                                                   dv_dcurv(:,:,:), dxbot_dinbeta(:,:,:), dybot_dinbeta(:,:,:),                 &
+                                                   dxtop_dinbeta(:,:,:), dytop_dinbeta(:,:,:), du_dinbeta(:,:,:),               &
+                                                   dv_dinbeta(:,:,:), dxbot_doutbeta(:,:,:), dybot_doutbeta(:,:,:),             &
+                                                   dxtop_doutbeta(:,:,:), dytop_doutbeta(:,:,:), du_doutbeta(:,:,:),            &
+                                                   dv_doutbeta(:,:,:)
+    character(80)                               :: file1, file7
+    character(20)                               :: sec
+    character(:),           allocatable         :: log_file, error_msg, dev_msg, stagger_file, msg_1, msg_2
+    logical                                     :: ellip, file_open, isdev, isquiet, monotonic = .true., write_to_file = .true.,&
+                                                   exist
     common / BladeSectionPoints /xxa(nxx, nax), yya(nxx, nax) 
+
 
 
     !
@@ -134,6 +139,25 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     call close_log_file(nopen, file_open)
 
 
+
+    !
+    ! Initialize derivatives of (m',theta) sections to 0
+    ! These are changed only when using 'sect1' airfoil,
+    ! and curv_camber
+    !
+    dmprime_dinbeta     = 0.0
+    dmprime_doutbeta    = 0.0
+    dmprime_dcm         = 0.0
+    dmprime_dcurv       = 0.0
+    dmprime_dt          = 0.0
+
+    dtheta_dinbeta      = 0.0
+    dtheta_doutbeta     = 0.0
+    dtheta_dcm          = 0.0
+    dtheta_dcurv        = 0.0
+    dtheta_dt           = 0.0
+
+
     
     !
     ! Number of coordinates for the airfoil
@@ -149,43 +173,136 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     if (allocated(splinedata    )) deallocate(splinedata    )
     allocate(splinedata(spline_data,np_side))
 
+    ! Top and bottom blade surface points
     if (allocated(xtop          )) deallocate(xtop          )
     if (allocated(ytop          )) deallocate(ytop          )
     if (allocated(xbot          )) deallocate(xbot          )
     if (allocated(ybot          )) deallocate(ybot          )
     allocate(xtop(np),ytop(np),xbot(np),ybot(np))
 
+    ! Non-dimensional u
     if (allocated(u             )) deallocate(u             )
     if (allocated(u_new         )) deallocate(u_new         )
     allocate(u(np),u_new(np)) 
-                                                      
+
+    ! Thickness arrays
     if (allocated(splthick      )) deallocate(splthick      )
     if (allocated(thickness     )) deallocate(thickness     )
     if (allocated(thickness_data)) deallocate(thickness_data)
     allocate(splthick(np),thickness(np), &
          thickness_data(np,12))
 
-    if (allocated(dtdtmax))        deallocate(dtdtmax       )
-    if (allocated(dubdthubmax))    deallocate(dubdthubmax   )
-    if (allocated(dvbdthubmax))    deallocate(dvbdthubmax   )
-    if (allocated(dutdthubmax))    deallocate(dutdthubmax   )
-    if (allocated(dvtdthubmax))    deallocate(dvtdthubmax   )
-    allocate(dtdtmax(np), dubdthubmax(np), dvbdthubmax(np), &
-             dutdthubmax(np), dvtdthubmax(np))
-
+    ! Mean-line arrays
     if (allocated(angle         )) deallocate(angle         )
     if (allocated(camber        )) deallocate(camber        )
     if (allocated(slope         )) deallocate(slope         )
     allocate(angle(np),camber(np),slope(np))
 
+    ! (m',theta) blade surface points
     if (allocated(xb            )) deallocate(xb            )
     if (allocated(yb            )) deallocate(yb            )
     allocate(xb(2*np - 1),yb(2*np - 1))
 
+    ! (m', theta) meanline points
     if (allocated(ueq           )) deallocate(ueq           )
     if (allocated(xmean         )) deallocate(xmean         )
     if (allocated(ymean         )) deallocate(ymean         )
     allocate(ueq(np_side),xmean(np_side),ymean(np_side))
+
+    ! Derivatives of u wrt parameters (ellipse-based clustering)
+    if (allocated(u_ders        )) deallocate(u_ders        )
+    allocate(u_ders(np, 5))
+
+    ! Derivatives of NACA thickness wrt parameters
+    if (allocated(NACA_ders     )) deallocate(NACA_ders     )
+    allocate(NACA_ders(np, 5))
+
+    ! Sensitivity of mean-line wrt chordwise control points
+    if (allocated(dcam_dxcp)) deallocate(dcam_dxcp)
+    allocate(dcam_dxcp(np, ncp_curv(js) - 2))
+    if (allocated(dcam_dycp)) deallocate(dcam_dycp)
+    allocate(dcam_dycp(np, ncp_curv(js) - 2))
+
+    ! Sensitivity of mean-line 1st derivative wrt chordwise
+    ! control points
+    if (allocated(dslope_dxcp)) deallocate(dslope_dxcp)
+    allocate(dslope_dxcp(np, ncp_curv(js) - 2))
+    if (allocated(dslope_dycp)) deallocate(dslope_dycp)
+    allocate(dslope_dycp(np, ncp_curv(js) - 2))
+
+    ! Sensitivity of mean-line wrt u (ellipse-based clustering)
+    ! and thickness parameters
+    if (allocated(dcam_u)) deallocate(dcam_u)
+    allocate(dcam_u(np))
+    if (allocated(cam_ders)) deallocate(cam_ders)
+    allocate(cam_ders(np, 5))
+
+    ! Sensitivity of mean-line 1st derivatives wrt u
+    ! (ellipse based clustering) and thickness parameters
+    if (allocated(dslope_u)) deallocate(dslope_u)
+    allocate(dslope_u(np))
+    if (allocated(slope_ders)) deallocate(slope_ders)
+    allocate(slope_ders(np, 5))
+
+    ! Sensitivity of the stagger angle to the mean-line
+    ! second derivative control points
+    if (allocated(dsang_dcurv)) deallocate(dsang_dcurv)
+    allocate(dsang_dcurv((2 * (ncp_curv(js) - 2)) - 2))
+    if (allocated(dchrd_dcurv)) deallocate(dchrd_dcurv)
+    allocate(dchrd_dcurv((2 * (ncp_curv(js) - 2)) - 2))
+
+    ! Sensitivity of the stagger to the control points
+    ! of span and in_beta* specified in 3dbgbinputs file
+    if (allocated(dsang_dx_inbeta)) deallocate(dsang_dx_inbeta)
+    allocate(dsang_dx_inbeta(size(dsinl_dxcp)))
+    if (allocated(dsang_dy_inbeta)) deallocate(dsang_dy_inbeta)
+    allocate(dsang_dy_inbeta(size(dsinl_dycp)))
+
+    ! Sensitivity of the stagger to the control points
+    ! of span and in_beta* specified in 3dbgbinputs file
+    if (allocated(dchrd_dx_inbeta)) deallocate(dchrd_dx_inbeta)
+    allocate(dchrd_dx_inbeta(size(dsinl_dxcp)))
+    if (allocated(dchrd_dy_inbeta)) deallocate(dchrd_dy_inbeta)
+    allocate(dchrd_dy_inbeta(size(dsinl_dycp)))
+
+    ! Sensitivity of the mean-line derivatives wrt control
+    ! points of Span (inlet flow angle) and in_beta*
+    if (allocated(dslope_dx_inbeta)) deallocate(dslope_dx_inbeta)
+    allocate(dslope_dx_inbeta(np, cpinbeta))
+    if (allocated(dslope_dy_inbeta)) deallocate(dslope_dy_inbeta)
+    allocate(dslope_dy_inbeta(np, cpinbeta))
+
+    ! Sensitivity of the mean-line wrt control
+    ! points of Span (inlet flow angle) and in_beta*
+    if (allocated(dcam_dx_inbeta)) deallocate(dcam_dx_inbeta)
+    allocate(dcam_dx_inbeta(np, cpinbeta))
+    if (allocated(dcam_dy_inbeta)) deallocate(dcam_dy_inbeta)
+    allocate(dcam_dy_inbeta(np, cpinbeta))
+
+    ! Sensitivity of the mean-line 1st derivative wrt control
+    ! points of Span (exit flow angle) and out_beta*
+    if (allocated(dslope_doutbeta)) deallocate(dslope_doutbeta)
+    allocate(dslope_doutbeta(np, 2, cpoutbeta))
+
+    ! Sensitivity of the mean-line wrt control
+    ! points of Span (exit flow angle) and out_beta*
+    if (allocated(dcam_doutbeta)) deallocate(dcam_doutbeta)
+    allocate(dcam_doutbeta(np, 2, cpoutbeta))
+
+    ! Sensitivity of the stagger to the control points
+    ! of span and out_beta* specified in 3dbgbinputs file
+    if (allocated(dsang_doutbeta)) deallocate(dsang_doutbeta)
+    allocate(dsang_doutbeta(2, cpoutbeta))
+
+    ! Sensitivity of the chord to the control points
+    ! of span and out_beta* specified in 3dbgbinputs file
+    if (allocated(dchrd_doutbeta)) deallocate(dchrd_doutbeta)
+    allocate(dchrd_doutbeta(2, cpoutbeta))
+
+    ! Sensitivity of the chord to the control points
+    ! of span and chord_multiplier
+    if (allocated(dchrd_dcm)) deallocate(dchrd_dcm)
+    allocate(dchrd_dcm(2, cpchord))
 
 
 
@@ -230,6 +347,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             dy_dx_te    = thk_cp(5,js)
         else if (.not. TE_der_actual .and. TE_der_norm) then
             dy_dx_te    = -2.0 * t_max * thk_cp(5,js)
+            print *, 'From bladegen - ', dy_dx_te
         end if
 
         ! Compute u_TE and u_center for the modified four digit NACA
@@ -243,29 +361,9 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         TE_radius           = sqrt((u_TE - u_center)**2 + (t_TE)**2)
         u_center            = 1.0 - TE_radius
 
-        call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,u_TE,t_TE,dy_dx_TE,LE_round,a_NACA,d_NACA)
+        call modified_NACA_four_digit_thickness_coeffs_2(t_max,u_max,u_TE,t_TE,dy_dx_te,LE_round,a_NACA,d_NACA)
 
     end if
-
-    ! Sensitivities of NACA thickness coefficients d wrt t_max
-    dddtmax(1) = (3.0 * (1.0 - u_max) * ((1.0 - u_TE)**2))/((u_TE - u_max)**3)
-    dddtmax(2) = (-6.0 * (1.0 - u_max) * (1.0 - u_TE))/((u_TE - u_max)**3)
-    dddtmax(3) = (3.0 * (2.0 - u_max - u_TE))/((u_TE - u_max)**3)
-    dddtmax(4) = -2.0/((u_TE - u_max)**3)
-
-    ! Matrix needed to compute coefficient sensitivities
-    A(1, :) = [3.0/u_max, -2.0, u_max/2.0]
-    A(2, :) = [-3.0/(u_max**2), 3.0/u_max, -1.0]
-    A(3, :) = [1.0/(u_max**3), -1.0/(u_max**2), 1.0/(2.0 * u_max)]
-
-    ! Sensitivities of NACA thickness coefficients a wrt t_max
-    dadtmax(1) = (sqrt(2.2038) * LE_round)/6.0
-    dadtmax(2) = (A(1, 1) * (1.0 - (dadtmax(1) * sqrt(u_max)))) - ((A(1, 2) * dadtmax(1))/(2.0 * sqrt(u_max))) + &
-                 (A(1, 3) * ((2.0 * dddtmax(3)) + (6.0 * dddtmax(4) * (1.0 - u_max)) + (dadtmax(1)/(4.0 * (sqrt(u_max)**3)))))
-    dadtmax(3) = (A(2, 1) * (1.0 - (dadtmax(1) * sqrt(u_max)))) - ((A(2, 2) * dadtmax(1))/(2.0 * sqrt(u_max))) + &
-                 (A(2, 3) * ((2.0 * dddtmax(3)) + (6.0 * dddtmax(4) * (1.0 - u_max)) + (dadtmax(1)/(4.0 * (sqrt(u_max)**3)))))
-    dadtmax(4) = (A(3, 1) * (1.0 - (dadtmax(1) * sqrt(u_max)))) - ((A(3, 2) * dadtmax(1))/(2.0 * sqrt(u_max))) + &
-                 (A(3, 3) * ((2.0 * dddtmax(3)) + (6.0 * dddtmax(4) * (1.0 - u_max)) + (dadtmax(1)/(4.0 * (sqrt(u_max)**3)))))
 
 
 
@@ -308,17 +406,6 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             call fatal_error(error_msg, dev_msg = dev_msg)
         end if
     end if
-
-    ! Sensitivity of thickness to maximum thickness
-    do i = 1, np
-        if (u(i) < u_max) then
-            dtdtmax(i) = (dadtmax(1) * sqrt(u(i))) + (dadtmax(2) * u(i)) + (dadtmax(3) * (u(i)**2)) + &
-                         (dadtmax(4) * (u(i)**3))
-        else
-            dtdtmax(i) = dddtmax(1) + (dddtmax(2) * (1.0 - u(i))) + (dddtmax(3) * ((1.0 - u(i))**2)) + &
-                         (dddtmax(4) * ((1.0 - u(i))**3))
-        end if
-    end do
 
 
 
@@ -601,12 +688,22 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         ! Get camber line from the spline curvature:
         ! TODO: Why aren't optional arguments working?
         if (thick_distr == 5) then
-            call camline(casename, isdev, ncp, np, xcp_curv, ycp_curv, u, ainl, aext, chrdx, wing_flag, &
-                        sang, chrd, init_angles, init_cambers, x_spl_end_curv, splinedata, u_max,       &
-                        cam_umax, slope_umax)
+            call camline(casename, isdev, ncp, np, xcp_curv, ycp_curv, u, ainl,    &
+                         aext, chrdx, wing_flag, sang, chrd, init_angles, init_cambers, x_spl_end_curv, &
+                         splinedata, u_max, cam_umax, slope_umax, dcam_dxcp, dcam_dycp, dcam_u,         &
+                         dslope_dxcp, dslope_dycp, dslope_u, dsang_dcurv, dchrd_dcurv, dsinl_dxcp,      &
+                         dsinl_dycp, dsang_dx_inbeta, dsang_dy_inbeta, dchrd_dx_inbeta, dchrd_dy_inbeta,&
+                         dslope_dx_inbeta, dslope_dy_inbeta, dcam_dx_inbeta, dcam_dy_inbeta, dsext_dxcp,&
+                         dsext_dycp, dslope_doutbeta, dcam_doutbeta, dsang_doutbeta, dchrd_doutbeta,    &
+                         chrdx_ders, dchrd_dcm)
         else
-            call camline(casename, isdev, ncp, np, xcp_curv, ycp_curv, u, ainl, aext, chrdx, wing_flag, &
-                        sang, chrd, init_angles, init_cambers, x_spl_end_curv, splinedata, -1.0, 0.0, 0.0)
+            call camline(casename, isdev, ncp, np, xcp_curv, ycp_curv, u, ainl, aext,    &
+                         chrdx, wing_flag, sang, chrd, init_angles, init_cambers, x_spl_end_curv, splinedata, &
+                         -1.0, 0.0, 0.0, dcam_dxcp, dcam_dycp, dcam_u, dslope_dxcp, dslope_dycp, dslope_u,    &
+                         dsang_dcurv, dchrd_dcurv, dsinl_dxcp, dsinl_dycp, dsang_dx_inbeta, dsang_dy_inbeta,  &
+                         dchrd_dx_inbeta, dchrd_dy_inbeta, dslope_dx_inbeta, dslope_dy_inbeta, dcam_dx_inbeta,&
+                         dcam_dy_inbeta, dsext_dxcp, dsext_dycp, dslope_doutbeta, dcam_doutbeta, dsang_doutbeta, &
+                         dchrd_doutbeta, chrdx_ders, dchrd_dcm)
         end if
         camber = splinedata(2, :)
         slope  = splinedata(3, :)
@@ -730,6 +827,16 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
             call close_log_file(nopen, file_open)
 
+
+            !
+            ! Compute the sensitivity of the NACA thickness distribution
+            ! wrt to its thickness parameters
+            !
+            call NACA_thickness_derivatives (js, np, np_cluster, u, thickness, thk_cp(1:5, js), u_TE, u_center, TE_radius, &
+                                             a_NACA, d_NACA, u_ders, NACA_ders)
+            if (clustering_switch == 4) &
+                 call meanline_thickness_derivatives (dslope_u, dcam_u, u_ders, slope_ders, cam_ders)
+
         !
         ! Spline thickness distribution with LE control
         !
@@ -816,17 +923,6 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         xtop  = u   - thickness*sin(angle)
         ytop  = camber + thickness*cos(angle)
 
-        ! Sensitivty of geometry to thickness
-        do i = 1, np
-            dubdthubmax(i) = sin(angle(i)) * dtdtmax(i)
-            dvbdthubmax(i) = -cos(angle(i)) * dtdtmax(i)
-            dutdthubmax(i) = -sin(angle(i)) * dtdtmax(i)
-            dvtdthubmax(i) = cos(angle(i)) * dtdtmax(i)
-
-            !if (js == 1) print *, dubdthubmax(i), dvbdthubmax(i), &
-            !                      dutdthubmax(i), dvtdthubmax(i)
-        end do
-
         ! Airfoil coordinates associated with maximum thickness
         ! location for NACA thickness
         if (thick_distr == 5) then
@@ -835,6 +931,29 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             mt_umax(3) = u_max    - (t_max * sin(atan(slope_umax)))
             mt_umax(4) = cam_umax + (t_max * cos(atan(slope_umax)))
         end if
+
+
+        !
+        ! Compute sensitivities of the (u, v) blade sections
+        ! wrt the mean-line second derivative and the thickness
+        ! distribution parameter control pts.
+        !
+        if (trim(airfoil) == 'sect1') then
+            if (curv_camber == 1) then
+
+                call uv_curv_derivatives (thickness, slope, dslope_dxcp, dslope_dycp, dcam_dxcp, dcam_dycp, &
+                                          dxbot_dcurv, dxtop_dcurv, dybot_dcurv, dytop_dcurv)
+                call uv_thk_derivatives (np, u_ders, NACA_ders, slope_ders, cam_ders, thickness, &
+                                         angle, slope, dxbot_dt, dybot_dt, dxtop_dt, dytop_dt)
+                call uv_inbeta_derivatives (thickness, slope, dslope_dx_inbeta, dslope_dy_inbeta, dcam_dx_inbeta, &
+                                            dcam_dy_inbeta, dxbot_dinbeta, dybot_dinbeta, dxtop_dinbeta,          &
+                                            dytop_dinbeta)
+                call uv_outbeta_derivatives (thickness, slope, dslope_doutbeta, dcam_doutbeta, &
+                                             dxbot_doutbeta, dybot_doutbeta, dxtop_doutbeta, dytop_doutbeta)
+
+            end if  ! curv_camber
+        end if  ! trim(airfoil)
+
 
         ! Write the top and bottom curve coordinates to a file in developer mode
         if (isdev) then
@@ -867,9 +986,29 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             yb(i + np - 1) = ybot(i)
         end do
 
+        ! Combine top and bottom surface derivatives
+        if (trim(airfoil) == 'sect1') then
+            if (curv_camber == 1) then
+
+                ! Mean-line 2nd derivative control points
+                call combine_uv_derivatives (dxbot_dcurv, dybot_dcurv, dxtop_dcurv, dytop_dcurv, du_dcurv, dv_dcurv)
+
+                ! NACA thickness control points
+                call combine_uv_derivatives (dxbot_dt, dybot_dt, dxtop_dt, dytop_dt, du_dt, dv_dt)
+
+                ! in_beta* control points
+                call combine_uv_derivatives (dxbot_dinbeta, dybot_dinbeta, dxtop_dinbeta, dytop_dinbeta, &
+                                             du_dinbeta, dv_dinbeta)
+
+                ! out_beta* control points
+                call combine_uv_derivatives (dxbot_doutbeta, dybot_doutbeta, dxtop_doutbeta, dytop_doutbeta, &
+                                             du_doutbeta, dv_doutbeta)
+
+            end if
+        end if
+
         ! New number of points for the entire blade section
         np = 2*np-1
-
 
 
         !
@@ -922,6 +1061,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         write(903,'(F20.16)') sang
         close(903)
 
+
         ! Add stagger and scale the airfoil
         do i = 1, np
             
@@ -952,6 +1092,8 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         end do
         call bladesection(xb, yb, np, nbls, TE_del, sinls, sexts, chrd, fext, js, pitch, mble, mbte, airfoil)
 
+
+
         ! Compute (m',theta) coordinates of point associated
         ! with maximum thickness location for NACA thickness
         if (thick_distr == 5) then
@@ -959,6 +1101,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             call rotate_point(mt_umax(3), mt_umax(4), sang)
 
             if (chord_switch == 1) then
+
                 call scale_point(mt_umax(1), mt_umax(2), chrdx)
                 call scale_point(mt_umax(3), mt_umax(4), chrdx)
             else
@@ -975,6 +1118,48 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
     m_prime(1:np) = xb
     theta(1:np)   = yb
+
+
+
+    !
+    ! Derivatives of (m',theta) blade section
+    !
+    if (trim(airfoil) == 'sect1') then
+        if (curv_camber == 1) then
+
+            ! NACA thickness distribution control points
+            call mprime_theta_thk_derivatives (du_dt, dv_dt, chrdx, chrd, sang, dmprime_dt, dtheta_dt)
+
+            ! Mean-line second derivative control points
+            call mprime_theta_curv_derivatives (du_dcurv, dv_dcurv, xb, yb, chrdx, chrd, sang, dchrd_dcurv, &
+                                                dsang_dcurv, dmprime_dcurv, dtheta_dcurv)
+
+            ! in_beta* control points
+            call mprime_theta_inbeta_derivatives (xb, yb, chrdx, chrd, sang, dchrd_dx_inbeta, dchrd_dy_inbeta, &
+                                                  dsang_dx_inbeta, dsang_dy_inbeta, du_dinbeta, dv_dinbeta,    &
+                                                  dmprime_dinbeta, dtheta_dinbeta)
+
+            ! out_beta* control points
+            call mprime_theta_outbeta_ders (xb, yb, chrdx, chrd, sang, du_doutbeta, dv_doutbeta, &
+                                            dsang_doutbeta, dchrd_doutbeta, dmprime_doutbeta, dtheta_doutbeta)
+
+            ! chord_multiplier control points
+            call mprime_theta_cm_ders (xb, yb, chrdx, chrd, chrdx_ders, dchrd_dcm, dmprime_dcm, dtheta_dcm)
+
+        end if
+    end if
+
+    ! Show warning if NACA thickness or mean-line second derivative
+    ! control points are not being used
+    if (trim(airfoil) /= 'sect1' .or. curv_camber /= 1) then
+
+        msg_1   = "(m',theta) derivatives wrt curvature and thickness control points set to 0."
+        msg_2   = "Either the mean-line second derivative or the NACA thickness options are not being used &
+                  &in the spancontrolinputs file."
+        call warning (warning_msg = msg_1, warning_msg_1 = msg_2)
+
+    end if
+
 
 
     !

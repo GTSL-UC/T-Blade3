@@ -111,7 +111,14 @@ module globvar
     real,               allocatable :: bladedata(:,:), bladedata_before(:,:), splinedata(:,:), curv_cp(:,:), thk_cp(:,:),   &
                                        sec_radius(:,:), sting_h_all(:,:), intersec_coord(:,:), mblade_grid(:,:),            &
                                        thblade_grid(:,:), cp_chord_curv(:,:), bspline_chord_curv(:,:), cp_chord_thk(:,:),   &
-                                       bspline_thk(:,:), cp_LE(:,:), bspline_LE(:,:)
+                                       bspline_thk(:,:), cp_LE(:,:), bspline_LE(:,:), du_ell_LE(:,:), du_ell_TE(:,:),       &
+                                       du_hyp_LE(:,:), du_hyp_TE(:,:)
+
+    ! Global 3D real allocatable arrays
+    real,               allocatable :: thk_xcp_ders(:,:,:), thk_ycp_ders(:,:,:), curv_xcp_ders(:,:,:), curv_ycp_ders(:,:,:),   &
+                                       inbeta_xcp_ders(:,:), inbeta_ycp_ders(:,:), outbeta_xcp_ders(:,:),                      &
+                                       outbeta_ycp_ders(:,:), chords_xcp_ders(:,:), chords_ycp_ders(:,:), delmp_xcp_ders(:,:), &
+                                       delmp_ycp_ders(:,:), delta_theta_xcp_ders(:,:), delta_theta_ycp_ders(:,:)
 
     ! Global logical variables
     logical                         :: hub_inflate = .false., tip_inflate = .false.
