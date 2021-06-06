@@ -145,17 +145,17 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     ! These are changed only when using 'sect1' airfoil,
     ! and curv_camber
     !
-    dmprime_dinbeta     = 0.0
-    dmprime_doutbeta    = 0.0
-    dmprime_dcm         = 0.0
-    dmprime_dcurv       = 0.0
-    dmprime_dt          = 0.0
+    !dmprime_dinbeta     = 0.0
+    !dmprime_doutbeta    = 0.0
+    !dmprime_dcm         = 0.0
+    !dmprime_dcurv       = 0.0
+    !dmprime_dt          = 0.0
 
-    dtheta_dinbeta      = 0.0
-    dtheta_doutbeta     = 0.0
-    dtheta_dcm          = 0.0
-    dtheta_dcurv        = 0.0
-    dtheta_dt           = 0.0
+    !dtheta_dinbeta      = 0.0
+    !dtheta_doutbeta     = 0.0
+    !dtheta_dcm          = 0.0
+    !dtheta_dcurv        = 0.0
+    !dtheta_dt           = 0.0
 
 
     
@@ -347,7 +347,6 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             dy_dx_te    = thk_cp(5,js)
         else if (.not. TE_der_actual .and. TE_der_norm) then
             dy_dx_te    = -2.0 * t_max * thk_cp(5,js)
-            print *, 'From bladegen - ', dy_dx_te
         end if
 
         ! Compute u_TE and u_center for the modified four digit NACA
@@ -986,6 +985,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             yb(i + np - 1) = ybot(i)
         end do
 
+
         ! Combine top and bottom surface derivatives
         if (trim(airfoil) == 'sect1') then
             if (curv_camber == 1) then
@@ -1006,6 +1006,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
 
             end if
         end if
+
 
         ! New number of points for the entire blade section
         np = 2*np-1
