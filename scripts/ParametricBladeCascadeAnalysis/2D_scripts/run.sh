@@ -3,9 +3,9 @@
 
 
 
-/home/hamw/Documents/SCO2/Programs/T-Blade3-master/bin/tblade3 3dbgbinput.ZZZ.dat > tblade_optimized.log
-/home/hamw/Documents/SCO2/Programs/T-Blade3-master/bin/techop blade.XXXX 20 > techop_optimized.log
-/home/hamw/Documents/SCO2/Programs/Mises2.70/bin/iset XXXX << EOF > iset_optimized.log
+TBLADE_PATH/tblade3 3dbgbinput.ZZZ.dat > tblade_optimized.log
+TBLADE_PATH/techop blade.XXXX 20 > techop_optimized.log
+ISES_PATH/iset_noplt XXXX << EOF > iset_optimized.log
 1
 
 2
@@ -15,17 +15,17 @@
 0
 EOF
 cp ises.YYYY_inv ises.XXXX
-/home/hamw/Documents/SCO2/Programs/Mises2.70/bin/ises XXXX << EOF > ises_inv_optimized_dp.log
+ISES_PATH/ises XXXX << EOF > ises_inv_optimized_dp.log
 15
 0
 EOF
 cp ises.YYYY_Re ises.XXXX
-/home/hamw/Documents/SCO2/Programs/Mises2.70/bin/ises XXXX << EOF > ises_visc_optimized_dp.log
+ISES_PATH/ises XXXX << EOF > ises_visc_optimized_dp.log
 45
 0
 EOF
-/home/hamw/Documents/SCO2/Programs/Mises2.70/bin/iprint XXXX  > iprint_optimized_dp.log
-/home/hamw/Documents/SCO2/Programs/Mises2.70/bin/iplot XXXX << EOF > iplot_optimized_dp.log
+ISES_PATH/iprint XXXX  > iprint_optimized_dp.log
+ISES_PATH/iplot XXXX << EOF > iplot_optimized_dp.log
 1
 1
 14
@@ -56,17 +56,17 @@ grep S1 iprint_dp.log | awk {'print $3'} > S1_dp.dat
 grep S1 iprint_dp.log | awk {'print $5'} > S1.dat
 
 cp ises.YYYY_offd_inv ises.XXXX
-/home/hamw/Documents/SCO2/Programs/Mises2.70/bin/ises XXXX << EOF > ises_inv_optimized_offd.log
+ISES_PATH/ises XXXX << EOF > ises_inv_optimized_offd.log
 15
 0
 EOF
 cp ises.YYYY_offd_Re ises.XXXX
-/home/hamw/Documents/SCO2/Programs/Mises2.70/bin/ises XXXX << EOF > ises_visc_optimized_offd.log
+ISES_PATH/ises XXXX << EOF > ises_visc_optimized_offd.log
 45
 0
 EOF
-/home/hamw/Documents/SCO2/Programs/Mises2.70/bin/iprint XXXX  > iprint_optimized_offd.log
-/home/hamw/Documents/SCO2/Programs/Mises2.70/bin/iplot XXXX << EOF > iplot_optimized_offd.log
+ISES_PATH/iprint XXXX  > iprint_optimized_offd.log
+ISES_PATH/iplot XXXX << EOF > iplot_optimized_offd.log
 1
 1
 14

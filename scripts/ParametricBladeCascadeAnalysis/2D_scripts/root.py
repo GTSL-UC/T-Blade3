@@ -8,7 +8,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 import openmdao.api as om
 from openmdao.utils.file_wrap import InputFileGenerator
 writeParser = InputFileGenerator()
-from mpi4py import MPI
+
 
 class ParametricBladeCascadeAnalysis:
     "Parametric Blade Analysis Machine using T-Blade3, Mises, OpenMDAO, and Python3"
@@ -16,8 +16,9 @@ class ParametricBladeCascadeAnalysis:
     "Developed and Designed by Matthew Ha"
     
     
-    def __init__(self,spans,blades,RE,offd_deg=7,step_up=0):
+    def __init__(self,spans,blades,RE,MISES_path,Tblade3_path,offd_deg=7,step_up=0):
             
+            self.spans = spans
             self.blades = blades
             self.RE = RE
             self.offd_deg = offd_deg
@@ -30,10 +31,11 @@ class ParametricBladeCascadeAnalysis:
             self.path_tblade = self.path + 'inputs/tblade3_input/'
             self.path_blades = self.path + 'CFD/'
             self.path_results = self.path + 'results/'
+            self.path_ISES = MISES_path
+            self.path_tblade3 = Tblade3_path
             
             ## TBLADE3 CLEANUP
             os.chdir(self.path_tblade)
-            # subprocess.run("rm -f !(*input*)",shell=True)
         
             ## COUNTING NUMBER OF ROWS TO OPTIMIZE
             _rows = sorted(os.listdir())
@@ -73,11 +75,11 @@ class ParametricBladeCascadeAnalysis:
                     span_loc.append(span)
                     span_loc_ises.append(span_loc_ises_T[4])
                     span_loc_tblade.append(span_loc_tblade_T[4])
-            self.span = [(span_loc[i], span_loc_ises[i], span_loc_tblade[i]) for i in range(0, len(span_loc))] #************** _self_
+            self.span = [(span_loc[i], span_loc_ises[i], span_loc_tblade[i]) for i in range(0, len(span_loc))]
 
             ## REYNOLDS NUMBER CHECK
             if len(RE) != len(self.blades):
-                print('Reynolds Numbers are incorrectly defined.\nCheck that 1 Reynolds Number is assigned to each row')
+                print('Reynolds Numbers are improperly assigned.\nCheck that 1 Reynolds Number is assigned to each row')
                 sys.exit()
             
             ## MAKEDIRECTORY FOR CFD
@@ -122,8 +124,10 @@ class ParametricBladeCascadeAnalysis:
                 for x in blades:
                     row = x[0].split('_')
                     for y,z,v in self.span:
+
+                        
                         ## SETUP OPTIMIZATION INITALIZATION W/O MACH STEP-UP
-                        working_file = self.path_blades +'/'+ str(x) +'/'+ str(y)
+                        working_file = self.path_blades + str(x) +'/'+ str(y)
                         os.chdir(working_file)
                         
                         ## IMPORT MISES AND BASH SCRIPTS
@@ -138,74 +142,238 @@ class ParametricBladeCascadeAnalysis:
                             for line in inv:
                                 for word, replacement in keyword.items():
                                     Re.write(line.replace(word,replacement))
-                                    
-                        ## OFF DESIGN POINT INITALIZATION
-                        with open(ises_inv,'r') as inv:
-                            for line in inv:
-                                if 'S1' in line:
-                                    line = line.split()
-                                    S1_dp = line[2]
-                        S1 = float(S1_dp)
-                        beta_in = np.arctan(S1)
         
-                        if beta_in > 0: # *************************************************** Currently using beta_in from S1. Should be beta_in*
-                            beta_in_offd = beta_in + np.radians(offd_deg)
-                        elif beta_in < 0:
-                            beta_in_offd = beta_in - np.radians(offd_deg)
-        
-                        S1_offd = np.tan(beta_in_offd)
-                        S1_offd = str(S1_offd)
-                        offd_inv = 'ises.'+ str(z) +'.'+ str(row[0]) +'.'+ str(case_name[0]) +'_offd_inv'
-                        offd_Re = 'ises.'+ str(z) +'.'+ str(row[0]) +'.'+ str(case_name[0]) +'_offd_Re'
-        
-                        with open(ises_inv, 'r') as file :
-                            filedata = file.read()
-                        filedata = filedata.replace(S1_dp, S1_offd)
-                        with open(offd_inv, 'w') as file:
-                            file.write(filedata)
-                        with open(ises_Re, 'r') as file :
-                            filedata = file.read()
-                        filedata = filedata.replace(S1_dp, S1_offd)
-                        with open(offd_Re, 'w') as file:
-                            file.write(filedata)
+                                ## OFF DESIGN POINT INITALIZATION
+                                tblade_fname = '3dbgbinput.' +str(row[0])+ '.dat'
+                                with open(self.path_tblade+ '/' +tblade_fname,'r') as tbld3:
+                                    for i, line in enumerate(tbld3):
+                                        if i == 27 + int(v):
+                                            line = line.split()
+                                            beta_in = np.radians(float(line[1]))
+                                
+                                S1_dp = str(np.tan(beta_in))
+                                S1 = float(S1_dp)
+
+                                with open(ises_inv,'r') as inv:
+                                    for line in inv:
+                                        if 'S1' in line:
+                                            line = line.split()
+                                            S1_dp_ises = line[2]
+                                            
+                                if beta_in > 0:
+                                    beta_in_offd = beta_in + np.radians(offd_deg)
+                                elif beta_in < 0:
+                                    beta_in_offd = beta_in - np.radians(offd_deg)
+                
+                                S1_offd = np.tan(beta_in_offd)
+                                S1_offd = str(S1_offd)
+                                dp_inv = 'ises.'+ str(z) +'.'+ str(row[0]) +'.'+ str(case_name[0]) +'_inv'
+                                dp_Re = 'ises.'+ str(z) +'.'+ str(row[0]) +'.'+ str(case_name[0]) +'_Re'
+
+
+                                with open(ises_inv, 'r') as file :
+                                    filedata = file.read()
+                                filedata = filedata.replace(S1_dp_ises, S1_dp)
+                                with open(dp_inv, 'w') as file:
+                                    file.write(filedata)
+                                with open(ises_Re, 'r') as file :
+                                    filedata = file.read()
+                                filedata = filedata.replace(S1_dp_ises, S1_dp)
+                                with open(dp_Re, 'w') as file:
+                                    file.write(filedata)
+
+                                S1_offd = np.tan(beta_in_offd)
+                                S1_offd = str(S1_offd)
+                                offd_inv = 'ises.'+ str(z) +'.'+ str(row[0]) +'.'+ str(case_name[0]) +'_offd_inv'
+                                offd_Re = 'ises.'+ str(z) +'.'+ str(row[0]) +'.'+ str(case_name[0]) +'_offd_Re'
+                
+                                with open(ises_inv, 'r') as file :
+                                    filedata = file.read()
+                                filedata = filedata.replace(S1_dp, S1_offd)
+                                with open(offd_inv, 'w') as file:
+                                    file.write(filedata)
+                                with open(ises_Re, 'r') as file :
+                                    filedata = file.read()
+                                filedata = filedata.replace(S1_dp, S1_offd)
+                                with open(offd_Re, 'w') as file:
+                                    file.write(filedata)
         
                         ## SETUP LINUX BASH.SH FILES FILE
                         tblade_name = str(v) + '.' + str(row[0]) + '.' + str(case_name[0])
                         blade_name = str(z) + '.' + str(row[0]) + '.' + str(case_name[0])
                         sh_dp = 'run_dp.sh'
                         sh_offd = 'run_offd.sh'
-                        with open(sh_dp,'r') as old:
-                            newlines1 = []
-                            newlines2 = []
-                            newlines3 = []
-                            for line in old.readlines():
-                                newlines1.append(line.replace('XXXX', tblade_name))
-                            for line in newlines1:
-                                newlines2.append(line.replace('YYYY', blade_name))
-                            for line in newlines2:
-                                newlines3.append(line.replace('ZZZ', str(row[0])))
-                        with open(sh_dp, 'w') as f:
-                            for line in newlines3:
-                                f.write(line)
-                        with open(sh_offd,'r') as old:
-                            newlines1 = []
-                            newlines2 = []
-                            for line in old.readlines():
-                                newlines1.append(line.replace('XXXX', tblade_name))
-                            for line in newlines1:
-                                newlines2.append(line.replace('YYYY', blade_name))
-                        with open(sh_offd, 'w') as f:
-                            for line in newlines2:
-                                f.write(line)
+                        
+                        with open(sh_dp,'r') as file:
+                            filedata = file.read()
+                        filedata = filedata.replace('XXXX',tblade_name)
+                        filedata = filedata.replace('YYYY',blade_name)
+                        filedata = filedata.replace('ZZZ',str(row[0]))
+                        filedata = filedata.replace('ISES_PATH', self.path_ISES)
+                        filedata = filedata.replace('TBLADE_PATH', self.path_tblade3)
+                        with open(sh_dp, 'w') as file:
+                            file.write(filedata)
+                                
+                        with open(sh_offd,'r') as file:
+                            filedata = file.read()
+                        filedata = filedata.replace('XXXX',tblade_name)
+                        filedata = filedata.replace('YYYY',blade_name)
+                        filedata = filedata.replace('ISES_PATH', self.path_ISES)
+                        filedata = filedata.replace('TBLADE_PATH', self.path_tblade3)
+                        with open(sh_offd, 'w') as file:
+                            file.write(filedata)
+                                
                         with open('run.sh','r') as file:
                             filedata = file.read()
                         filedata = filedata.replace('XXXX',tblade_name)
                         filedata = filedata.replace('YYYY',blade_name)
                         filedata = filedata.replace('ZZZ',str(row[0]))
+                        filedata = filedata.replace('ISES_PATH', self.path_ISES)
+                        filedata = filedata.replace('TBLADE_PATH', self.path_tblade3)
                         with open('run.sh','w') as file:
                             file.write(filedata)
-                    ct+=1 
+                    ct+=1
                     
+            elif step_up == 1:
+                for x in blades:
+                        row = x[0].split('_')
+                        for y,z,v in self.span:
+                            self.machstep =[]
+                            with open(self.path_ises +'ises.'+ str(z) +'.'+ str(row[0]) +'.'+ str(case_name[0])) as ises_file:
+                                for i, line in enumerate(ises_file):
+                                    if i == 2:
+                                        line = line.split()
+                                        self.tg_mach = line[0]
+                                        
+                                        start=float(self.tg_mach)
+    
+                                        small_step = start - 0.05
+                                        large_step = small_step - 0.1
+                                        
+                                        
+                                        machstep1 = (np.linspace(small_step,start,num=6))
+                                        machstep2 = (np.linspace(large_step,small_step-0.02,num=3))
+    
+                                        self.machstep.append(np.round(np.concatenate([machstep2,machstep1]),5))
+                                    
+                            os.chdir(self.path_blades +'/'+ str(x) +'/'+ str(y))
+                            for p in self.machstep[0]:
+                                os.chdir(self.path_blades + str(x) +'/'+ str(y))
+                                os.mkdir(str(p))
+
+                            ## SETUP OPTIMIZATION INITALIZATION W/O MACH STEP-UP
+                                working_file = self.path_blades + str(x) +'/'+ str(y) + '/' + str(p)
+                                os.chdir(working_file)
+                                
+                                ## IMPORT MISES AND BASH SCRIPTS
+                                ises_inv = 'ises.'+ str(z) +'.'+ str(row[0]) +'.'+ str(case_name[0]) +'_inv'
+                                ises_Re = 'ises.'+ str(z) +'.'+ str(row[0]) +'.'+ str(case_name[0]) +'_Re'
+                                subprocess.run('cp ' + self.path_bin + '*.sh .', shell=True)
+                                subprocess.run('cp ' + self.path_ises +'ises.'+ str(z) +'.'+ str(row[0]) +'.'+ str(case_name[0]) +' ./'+ ises_inv, shell=True)
+                                
+                                with open(ises_inv, 'r') as file :
+                                    filedata = file.read()
+                                filedata = filedata.replace(self.tg_mach, str(p))
+                                with open(ises_inv, 'w') as file:
+                                    file.write(filedata)
+                
+                                ## MAKE VISCOUS ISES FILE USING USER INPUT REYNOLDS NUMBER
+                                keyword = {"0.0000e6":str(RE[ct])}
+                                with open(ises_inv,'r') as inv, open(ises_Re,'w+') as Re:
+                                    for line in inv:
+                                        for word, replacement in keyword.items():
+                                            Re.write(line.replace(word,replacement))
+                                            
+                                ## OFF DESIGN POINT INITALIZATION
+                                tblade_fname = '3dbgbinput.' +str(row[0])+ '.dat'
+                                with open(self.path_tblade+ '/' +tblade_fname,'r') as tbld3:
+                                    for i, line in enumerate(tbld3):
+                                        if i == 27 + int(v):
+                                            line = line.split()
+                                            beta_in = np.radians(float(line[1]))
+                                
+                                S1_dp = str(np.tan(beta_in))
+                                S1 = float(S1_dp)
+
+                                with open(ises_inv,'r') as inv:
+                                    for line in inv:
+                                        if 'S1' in line:
+                                            line = line.split()
+                                            S1_dp_ises = line[2]
+                                            
+                                if beta_in > 0:
+                                    beta_in_offd = beta_in + np.radians(offd_deg)
+                                elif beta_in < 0:
+                                    beta_in_offd = beta_in - np.radians(offd_deg)
+                
+                                S1_offd = np.tan(beta_in_offd)
+                                S1_offd = str(S1_offd)
+                                dp_inv = 'ises.'+ str(z) +'.'+ str(row[0]) +'.'+ str(case_name[0]) +'_inv'
+                                dp_Re = 'ises.'+ str(z) +'.'+ str(row[0]) +'.'+ str(case_name[0]) +'_Re'
+
+
+                                with open(ises_inv, 'r') as file :
+                                    filedata = file.read()
+                                filedata = filedata.replace(S1_dp_ises, S1_dp)
+                                with open(dp_inv, 'w') as file:
+                                    file.write(filedata)
+                                with open(ises_Re, 'r') as file :
+                                    filedata = file.read()
+                                filedata = filedata.replace(S1_dp_ises, S1_dp)
+                                with open(dp_Re, 'w') as file:
+                                    file.write(filedata)
+
+                                S1_offd = np.tan(beta_in_offd)
+                                S1_offd = str(S1_offd)
+                                offd_inv = 'ises.'+ str(z) +'.'+ str(row[0]) +'.'+ str(case_name[0]) +'_offd_inv'
+                                offd_Re = 'ises.'+ str(z) +'.'+ str(row[0]) +'.'+ str(case_name[0]) +'_offd_Re'
+                
+                                with open(ises_inv, 'r') as file :
+                                    filedata = file.read()
+                                filedata = filedata.replace(S1_dp, S1_offd)
+                                with open(offd_inv, 'w') as file:
+                                    file.write(filedata)
+                                with open(ises_Re, 'r') as file :
+                                    filedata = file.read()
+                                filedata = filedata.replace(S1_dp, S1_offd)
+                                with open(offd_Re, 'w') as file:
+                                    file.write(filedata)
+
+                                ## SETUP LINUX BASH.SH FILES FILE
+                                tblade_name = str(v) + '.' + str(row[0]) + '.' + str(case_name[0])
+                                blade_name = str(z) + '.' + str(row[0]) + '.' + str(case_name[0])
+                                sh_dp = 'run_dp.sh'
+                                sh_offd = 'run_offd.sh'
+                                
+                                with open(sh_dp,'r') as file:
+                                    filedata = file.read()
+                                filedata = filedata.replace('XXXX',tblade_name)
+                                filedata = filedata.replace('YYYY',blade_name)
+                                filedata = filedata.replace('ZZZ',str(row[0]))
+                                filedata = filedata.replace('ISES_PATH', self.path_ISES)
+                                filedata = filedata.replace('TBLADE_PATH', self.path_tblade3)
+                                with open(sh_dp, 'w') as file:
+                                    file.write(filedata)
+                                        
+                                with open(sh_offd,'r') as file:
+                                    filedata = file.read()
+                                filedata = filedata.replace('XXXX',tblade_name)
+                                filedata = filedata.replace('YYYY',blade_name)
+                                filedata = filedata.replace('ISES_PATH', self.path_ISES)
+                                filedata = filedata.replace('TBLADE_PATH', self.path_tblade3)
+                                with open(sh_offd, 'w') as file:
+                                    file.write(filedata)
+                                        
+                                with open('run.sh','r') as file:
+                                    filedata = file.read()
+                                filedata = filedata.replace('XXXX',tblade_name)
+                                filedata = filedata.replace('YYYY',blade_name)
+                                filedata = filedata.replace('ZZZ',str(row[0]))
+                                filedata = filedata.replace('ISES_PATH', self.path_ISES)
+                                filedata = filedata.replace('TBLADE_PATH', self.path_tblade3)
+                                with open('run.sh','w') as file:
+                                    file.write(filedata)
+                        ct+=1
           
     def optimizer(self):
         "Optiomization Tool: T-Blade3, Mises2.70, OpenMDAO"
@@ -427,11 +595,16 @@ class ParametricBladeCascadeAnalysis:
                     if os.path.getsize(self.omegadpfile) > 0:
                         with open(self.omegadpfile, 'r') as output_file:
                             omegabar_dp=output_file.read()
-                            substring = "NaN"
-                            if substring in omegabar_dp:
+                            substring = ["NaN","=>"]
+                            if substring[0] in omegabar_dp:
+                                omegabar_dp = 99
+                            elif substring[1] in omegabar_dp:
                                 omegabar_dp = 99
                             else:
                                 omegabar_dp = float(omegabar_dp)
+                            if omegabar_dp < 0:
+                                omegabar_dp = 99
+                                
                             output_file.close()
                             
                     omegabar_offd=99
@@ -533,9 +706,9 @@ class ParametricBladeCascadeAnalysis:
             
             prob.model.add_objective('runblade.f')
         
-            prob.driver.options['tol'] = 1e-4
+            prob.driver.options['tol'] = 1e-3
             prob.driver.options['disp'] = True
-            prob.driver.options['maxiter'] = 2
+            prob.driver.options['maxiter'] = 10
                 
             prob.setup()
             # prob.run_model()
@@ -604,10 +777,10 @@ class ParametricBladeCascadeAnalysis:
                 df.plot(y=["ibeta*", "obeta*"], use_index=True)
                 pdf.savefig()
                 
-                _ = plt.figure()
-                _ = plt.clf()
-                df.plot(y=["S2_dp"], use_index=True)
-                pdf.savefig()
+                # _ = plt.figure()
+                # _ = plt.clf()
+                # df.plot(y=["S2_dp"], use_index=True)
+                # pdf.savefig()
                 
     ##            _ = plt.figure()
     ##            _ = plt.clf()
@@ -619,10 +792,10 @@ class ParametricBladeCascadeAnalysis:
     ##            df.plot(y=["dev"], use_index=True)
     ##            pdf.savefig()
                 
-                _ = plt.figure()
-                _ = plt.clf()
-                df.plot(y=["le_r"], use_index=True)
-                pdf.savefig()
+                # _ = plt.figure()
+                # _ = plt.clf()
+                # df.plot(y=["le_r"], use_index=True)
+                # pdf.savefig()
                 
     ##            _ = plt.figure()
     ##            _ = plt.clf()
@@ -705,7 +878,9 @@ class ParametricBladeCascadeAnalysis:
             writeParser.generate()
             
             subprocess.run('sh run.sh', shell=True)
-        
+            
+            subprocess.run('mv *.pdf ' + self.path_results, shell=True)
+            
         if self.step_up == 0:
             for x in self.blades:
                 row = x[0].split('_')
@@ -732,8 +907,40 @@ class ParametricBladeCascadeAnalysis:
                     init_optimization(tblade_fname,spancont_fname,z)
                     run_optimization(self.data,z,tblade_fnamebase, tblade_fname, spancont_fnamebase, spancont_fname,v)
                     postprocess_optimization(tblade_fname,spancont_fname,z)
+                    old_working = working_file
                     
-                    old_working = working_file                 
+        elif self.step_up == 1:
+            for x in self.blades:
+                row = x[0].split('_')
+                for y,z,v in self.span:
+                    
+                    os.chdir(self.path_blades + str(x) +'/'+ str(y))
+                    machs = os.listdir()
+                    for h in machs:
+                    
+                        working_file = self.path_blades + str(x) +'/'+ str(y) +'/'+ str(h)
+                        os.chdir(working_file)
+                        tblade_fname = '3dbgbinput.' +str(row[0])+ '.dat'
+                        spancont_fname = 'spancontrolinputs.' +str(row[0])+ '.dat'
+                        tblade_fnamebase = '3dbgbinput.' +str(row[0])+ '.base'
+                        spancont_fnamebase = 'spancontrolinputs.' +str(row[0])+ '.base'
+    
+                        if y == self.span[0][0] and h == machs[0]:
+                            subprocess.run('cp ' +self.path_tblade+ '/' +tblade_fname+ ' .', shell=True)
+                            subprocess.run('cp ' +self.path_tblade+ '/' +spancont_fname+ ' .', shell=True)
+                            subprocess.run('cp ' +self.path_tblade+ '/' +tblade_fname+ ' ./' +tblade_fnamebase, shell=True)
+                            subprocess.run('cp ' +self.path_tblade+ '/' +spancont_fname+ ' ./' +spancont_fnamebase, shell=True)
+                            
+                        else:
+                            subprocess.run('cp ' +old_working+ '/' +tblade_fname+ ' .', shell=True)
+                            subprocess.run('cp ' +old_working+ '/' +spancont_fname+ ' .', shell=True)
+                            subprocess.run('cp ' +old_working+ '/' +tblade_fname+ ' ./' +tblade_fnamebase, shell=True)
+                            subprocess.run('cp ' +old_working+ '/' +spancont_fname+ ' ./' +spancont_fnamebase, shell=True)
+        
+                        init_optimization(tblade_fname,spancont_fname,z)
+                        run_optimization(self.data,z,tblade_fnamebase, tblade_fname, spancont_fnamebase, spancont_fname,v)
+                        postprocess_optimization(tblade_fname,spancont_fname,z)
+                        old_working = working_file
 
     
     def sweep(self):
