@@ -7,7 +7,7 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
                       dth_dinbeta,dm_doutbeta,dth_doutbeta,dm_dcm,dth_dcm)
 
     use globvar,                only: delmp_xcp_ders, delmp_ycp_ders, delta_theta_xcp_ders, delta_theta_ycp_ders, &
-                                      ncp_chord_curv, ncp_span_curv, ncp_span_thk, cpchord
+                                      ncp_chord_curv, ncp_span_curv, ncp_span_thk, ncp_chord_thk, cpchord
     use file_operations
     use errors
     use funcNsubs
@@ -31,9 +31,10 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
                                                            mbte(nspan), stagger(nspan)
     real,                               intent(in)      :: dm_dcurv(nspn, np, ncp_chord_curv - 1, ncp_span_curv),               &
                                                            dth_dcurv(nspn, np, ncp_chord_curv - 1, ncp_span_curv),              &
-                                                           dm_dthk(nspn, np, 5, ncp_span_thk),                                  &
-                                                           dth_dthk(nspn, np, 5, ncp_span_thk), dm_dinbeta(nspn,np,2,cpinbeta), &
-                                                           dth_dinbeta(nspn, np, 2, cpinbeta), dm_doutbeta(nspn,np,2,cpoutbeta),&
+                                                           dm_dthk(nspn, np, ncp_chord_thk - 1, ncp_span_thk),                  &
+                                                           dth_dthk(nspn, np, ncp_chord_thk - 1, ncp_span_thk),                 &
+                                                           dm_dinbeta(nspn,np,2,cpinbeta), dth_dinbeta(nspn, np, 2, cpinbeta),  &
+                                                           dm_doutbeta(nspn,np,2,cpoutbeta),                                    &
                                                            dth_doutbeta(nspn, np, 2, cpoutbeta), dm_dcm(nspn, np, 2, cpchord),  &
                                                            dth_dcm(nspn, np, 2, cpchord)
     character(32),                      intent(in)      :: casename
@@ -62,23 +63,25 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
                                                            rem(nspn,nmeanline), yem(nspn,nmeanline), zem(nspn,nmeanline),       &
                                                            xrt_umax(nspn,6), xyz_umax(nspn,6)  !stingl(nspan)
     real                                                :: dm3D_dcurv(nspn, np, ncp_chord_curv - 1, ncp_span_curv),             &
-                                                           dm3D_dthk(nspn, np, 5, ncp_span_thk),                                &
+                                                           dm3D_dthk(nspn, np, ncp_chord_thk - 1, ncp_span_thk),                &
                                                            dm3D_dinbeta(nspn, np, 2, cpinbeta),                                 &
                                                            dm3D_doutbeta(nspn, np, 2, cpoutbeta),                               &
                                                            dm3D_dcm(nspn, np, 2, cpchord), dm3D_dsweep(nspn, np, 2, cpdeltam)
     real                                                :: dx_dcurv(nspn, np, ncp_chord_curv - 1, ncp_span_curv),               &
                                                            dr_dcurv(nspn, np, ncp_chord_curv - 1, ncp_span_curv),               &
-                                                           dx_dthk(nspn, np, 5, ncp_span_thk),                                  &
-                                                           dr_dthk(nspn, np, 5, ncp_span_thk), dx_dinbeta(nspn,np,2,cpinbeta),  &
+                                                           dx_dthk(nspn, np, ncp_chord_thk - 1, ncp_span_thk),                  &
+                                                           dr_dthk(nspn, np, ncp_chord_thk - 1, ncp_span_thk),                  &
+                                                           dx_dinbeta(nspn,np,2,cpinbeta),                                      &
                                                            dr_dinbeta(nspn, np, 2, cpinbeta), dx_doutbeta(nspn,np,2,cpoutbeta), &
                                                            dr_doutbeta(nspn, np, 2, cpoutbeta), dx_dcm(nspn, np, 2, cpchord),   &
                                                            dr_dcm(nspn, np, 2, cpchord), dx_dsweep(nspn, np, 2, cpdeltam),      &
                                                            dr_dsweep(nspn, np, 2, cpdeltam), dx_dlean(nspn, np, 2, cpdeltheta)
     real                                                :: dy_dcurv(nspn, np, ncp_chord_curv - 1, ncp_span_curv),               &
                                                            dz_dcurv(nspn, np, ncp_chord_curv - 1, ncp_span_curv),               &
-                                                           dy_dthk(nspn, np, 5, ncp_span_thk),                                  &
-                                                           dz_dthk(nspn, np, 5, ncp_span_thk), dy_dinbeta(nspn,np,2,cpinbeta),  &
-                                                           dz_dinbeta(nspn, np, 2, cpinbeta), dy_doutbeta(nspn,np,2,cpoutbeta), &
+                                                           dy_dthk(nspn, np, ncp_chord_thk - 1, ncp_span_thk),                  &
+                                                           dz_dthk(nspn, np, ncp_chord_thk - 1, ncp_span_thk),                  &
+                                                           dy_dinbeta(nspn,np,2,cpinbeta), dz_dinbeta(nspn, np, 2, cpinbeta),   &
+                                                           dy_doutbeta(nspn,np,2,cpoutbeta),                                    &
                                                            dz_doutbeta(nspn, np, 2, cpoutbeta), dy_dcm(nspn, np, 2, cpchord),   &
                                                            dz_dcm(nspn, np, 2, cpchord), dy_dsweep(nspn, np, 2, cpdeltam),      &
                                                            dz_dsweep(nspn, np, 2, cpdeltam), dy_dlean(nspn, np, 2, cpdeltheta), &

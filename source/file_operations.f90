@@ -1990,6 +1990,82 @@ module file_operations
 
 
 
+    !
+    ! Write the sensitivities of the stagger or the
+    ! minimum throat wrt all spanwise control points
+    ! of an input parameter in the same file. Takes
+    ! values of sensitivities one section at a time
+    ! and appends to the file.
+    !
+    ! Input parameters: iquant  - index referring to either stagger or
+    !                             minimum throat
+    !                   append  - variable to determine if file is to
+    !                             created/overwritten or appended to
+    !                   iparam  - index for relevant parameters (follows
+    !                             convention established in write_xyz_der_files)
+    !                   ifield  - index for field within a parameter
+    !                   ders    - values of the sensitivities to be written out;
+    !                             the size of this array equals the number of
+    !                             spanwise control points for each parameter field
+    !
+    !---------------------------------------------------------------------------
+    subroutine write_physical_ders(iquant, append, iparam, ifield, ders)
+
+        integer,                intent(in)      :: iquant
+        logical,                intent(in)      :: append
+        integer,                intent(in)      :: iparam
+        integer,                intent(in)      :: ifield
+        real,                   intent(in)      :: ders(:)
+
+        ! Local variables
+        integer                                 :: nopen = 184, nders
+        character(256)                          :: filename, fmt_str
+        logical                                 :: exist
+
+
+        ! Construct filenames
+        if (iquant == 1) write (filename, '(a30, i0, a1, i0, a4)') &
+             'derivative_files/stagger_ders_', iparam, '_', ifield, '.dat'
+        if (iquant == 2) write (filename, '(a29, i0, a1, i0, a4)') &
+             'derivative_files/throat_ders_', iparam, '_', ifield, '.dat'
+
+
+        ! For the hub section, either create the file or overwrite
+        if (.not. append) then
+
+            inquire(file = trim(filename), exist=exist)
+            if (exist) then
+                open (nopen, file = trim(filename), status = 'old', action = 'write')
+            else
+                open (nopen, file = trim(filename), status = 'new', action = 'write')
+            end if
+
+        ! For all other sections, append to existing files
+        else
+
+            open (nopen, file = trim(filename), status = 'old', position = 'append', action = 'write')
+
+        end if
+
+        ! Construct format specifier string
+        nders = size(ders)
+        write(fmt_str, '( "(", i0, "F22.16)" )') nders
+
+        ! Write sensitivities to file
+        write(nopen, trim(fmt_str)) ders
+
+        ! Close the open file
+        close(nopen)
+
+
+    end subroutine write_physical_ders
+    !---------------------------------------------------------------------------
+
+
+
+
+
+
 
 
 

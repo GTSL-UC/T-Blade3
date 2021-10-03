@@ -153,12 +153,12 @@ end function
 ! line at the spline segment ends 'init_angles' and the camber at the spline segment ends 'init_cams'
 !
 !----------------------------------------------------------------------------------------------------------------------------------
-subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, wing_flag, sang,       &
-                   chrd, init_angles, init_cams, u_end, splinedata, u_max, cam_umax, slope_umax,    &
-                   dcam_dxcp, dcam_dycp, dcam_u, dslope_dxcp, dslope_dycp, dslope_u, dsang_dcurv,   &
-                   dchrd_dcurv, dsinl_dxcp, dsinl_dycp, dsang_dx_inbeta, dsang_dy_inbeta,           &
-                   dchrd_dx_inbeta, dchrd_dy_inbeta, dslope_dx_inbeta, dslope_dy_inbeta,            &
-                   dcam_dx_inbeta, dcam_dy_inbeta, dsext_dxcp, dsext_dycp, dslope_doutbeta,         &
+subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, wing_flag, sang,          &
+                   chrd, init_angles, init_cams, u_end, splinedata, dcur_du, u_max, cam_umax,          &
+                   slope_umax, dcam_dxcp, dcam_dycp, dcam_u, dslope_dxcp, dslope_dycp, dslope_u,       &
+                   dsang_dcurv, dchrd_dcurv, dsinl_dxcp, dsinl_dycp, dsang_dx_inbeta, dsang_dy_inbeta, &
+                   dchrd_dx_inbeta, dchrd_dy_inbeta, dslope_dx_inbeta, dslope_dy_inbeta,               &
+                   dcam_dx_inbeta, dcam_dy_inbeta, dsext_dxcp, dsext_dycp, dslope_doutbeta,            &
                    dcam_doutbeta, dsang_doutbeta, dchrd_doutbeta, dchrdx_dcm, dchrd_dcm)
     use globvar,        only: clustering_switch, cpinbeta, cpoutbeta, cpchord
     use file_operations
@@ -171,7 +171,8 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
                               camber_u_ders, compute_k_inbeta_ders,             &
                               d1v_end_inbeta_ders, v_end_inbeta_ders,           &
                               compute_k_outbeta_ders, d1v_end_outbeta_ders,     &
-                              v_end_outbeta_ders
+                              v_end_outbeta_ders, dt_dx, final_stagger_ders,    &
+                              final_chrd_ders
     implicit none
 
     ! Constant parameters
@@ -187,9 +188,10 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
     integer,        intent(in)          :: wing_flag
     real,           intent(inout)       :: sang, chrd, init_angles(ncp - 2), init_cams(ncp - 2), &
                                            u_end(ncp - 2), splinedata(splinedata_col, np),       &
-                                           cam_umax, slope_umax, dcam_dxcp(np, ncp - 2),         &
-                                           dcam_dycp(np, ncp - 2), dslope_dxcp(np, ncp - 2),     &
-                                           dslope_dycp(np, ncp - 2), dcam_u(np), dslope_u(np),   &
+                                           dcur_du(np), cam_umax, slope_umax,                    &
+                                           dcam_dxcp(np, ncp - 2), dcam_dycp(np, ncp - 2),       &
+                                           dslope_dxcp(np, ncp - 2), dslope_dycp(np, ncp - 2),   &
+                                           dcam_u(np), dslope_u(np),                             &
                                            dsang_dcurv((2*(ncp - 2)) - 2),                       &
                                            dchrd_dcurv((2*(ncp - 2)) - 2),                       &
                                            dsang_dx_inbeta(cpinbeta), dsang_dy_inbeta(cpinbeta), &
@@ -219,7 +221,7 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
     ! Functions used by this subroutine
     ! bspline_t_newton in bspline3.f90
     ! bspline in bspline3.f90
-    real                                :: bspline_t_newton, camber, angle, bspline
+    real                                :: bspline_t_newton, camber, angle, bspline, d_bspline
 
 
     !
@@ -614,6 +616,7 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
                 curv(i)                 = knew*bspline(ycp_seg, t)
                 cam_u(i)                = d1v_end(j)
                 cam(i)                  = v_end(j)
+                dcur_du(i)              = knew * d_bspline(ycp_seg, t) * dt_dx(t, xcp(j:j + 3))
 
                 dslope_dxcp(i, :)       = d1v_end_xcp(j, :) ! Derivatives of v'_m(u) wrt
                 dslope_dycp(i, :)       = d1v_end_ycp(j, :) ! control points of u and v''_m(u)
@@ -647,6 +650,7 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
                 curv(i)                 = knew*bspline(ycp_seg, t)
                 cam_u(i)                = d1v_end(ncp - 2)
                 cam(i)                  = v_end(ncp - 2)
+                dcur_du(i)              = knew * d_bspline(ycp_seg, t) * dt_dx(t, xcp(j:j + 3))
 
                 dslope_dxcp(i, :)       = d1v_end_xcp(ncp - 2, :) ! Derivatives of v'_m(u) wrt
                 dslope_dycp(i, :)       = d1v_end_ycp(ncp - 2, :) ! control points of u and v''_m(u)
@@ -684,6 +688,7 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
                 curv(i)                 = knew*bspline(ycp_seg, t)
                 cam_u(i)                = knew*(angle(ycp_seg, xcp_seg, angle0, t) - intg_d1v_end(ncp - 2))
                 cam(i)                  = knew*(camber(ycp_seg, xcp_seg, angle0, camber0, t) - (u(i)*intg_d1v_end(ncp - 2)))
+                dcur_du(i)              = knew * d_bspline(ycp_seg, t) * dt_dx(t, xcp(j:j + 3))
 
                 if (clustering_switch == 4) then
                     call angle_u_ders (j, t, knew, xcp, ycp, dslope_u(i))
@@ -795,6 +800,7 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
         splinedata(3, i)                = cam_u(i)
         splinedata(4, i)                = curv(i) 
 
+        !if (js == 11) print *, u(i), cam(i), cam_u(i), curv(i), dcur_du(i)
     end do  ! i = 1, np
 
 
@@ -836,6 +842,7 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
 
         ! Stagger
         sang                            = (ainl - atan(cam_u(1)))
+        !print *, sang
 
         !
         ! Compute derivatives of stagger control
@@ -850,6 +857,7 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
             dsang_dcurv(i + ncp - 4)    = -(1.0/(1.0 + (cam_u(1)**2))) * dslope_dycp(1, i)
         end do
 
+
         ! Control points of Span and in_beta*
         do i = 1, cpinbeta
             dsang_dx_inbeta(i)          = ((1.0/(1.0 + ((tan(ainl))**2))) * dsinl_dxcp(i)) - &
@@ -858,11 +866,32 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
                                           ((1.0/(1.0 + (cam_u(1)**2))) * dslope_dy_inbeta(1, i))
         end do
 
+        ! Write sensitivities to output files
+        if (js == 1) then
+            call write_physical_ders (1, .false., 3, 1, dsang_dx_inbeta)
+            call write_physical_ders (1, .false., 3, 2, dsang_dy_inbeta)
+        else
+            call write_physical_ders (1, .true., 3, 1, dsang_dx_inbeta)
+            call write_physical_ders (1, .true., 3, 2, dsang_dy_inbeta)
+        end if
+
+
         ! Control points of Span and out_beta*
         do i = 1, cpoutbeta
             dsang_doutbeta(1, i)        = -(1.0/(1.0 + (cam_u(1)**2))) * dslope_doutbeta(1, 1, i)
             dsang_doutbeta(2, i)        = -(1.0/(1.0 + (cam_u(1)**2))) * dslope_doutbeta(1, 2, i)
         end do
+
+        ! Write sensitivities to output files
+        if (js == 1) then
+            call write_physical_ders (1, .false., 4, 1, dsang_doutbeta(1, :))
+            call write_physical_ders (1, .false., 4, 2, dsang_doutbeta(2, :))
+        else
+            call write_physical_ders (1, .true., 4, 1, dsang_doutbeta(1, :))
+            call write_physical_ders (1, .true., 4, 2, dsang_doutbeta(2, :))
+        end if
+        call final_stagger_ders (dsang_dx_inbeta, dsang_dy_inbeta, dsang_doutbeta)
+
 
         if (isdev) then
            !sang2                        = (ainl - atan(cam_u_dev(1)))
@@ -942,6 +971,7 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
         dchrd_dcm(1, i)                 = (1.0/abs(cos(sang))) * dchrdx_dcm(1, i)
         dchrd_dcm(2, i)                 = (1.0/abs(cos(sang))) * dchrdx_dcm(2, i)
     end do
+    call final_chrd_ders (dchrd_dx_inbeta, dchrd_dy_inbeta, dchrd_doutbeta, dchrd_dcm, dchrd_dcurv)
 
 
 end subroutine camline

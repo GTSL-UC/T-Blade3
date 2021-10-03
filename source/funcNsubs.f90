@@ -3,6 +3,14 @@ module funcNsubs
 
 
 
+    !
+    ! Module global variable to store intersection points
+    ! data for throat calculation
+    !
+    real                                :: interup_pts(8), interdwn_pts(8)
+
+
+
     contains
 
 
@@ -1015,15 +1023,31 @@ module funcNsubs
     ! Find straight line intersection points
     !
     !------------------------------------------------------------------------------------------------------
-    subroutine st_line_intersection(xa,ya,xb,yb,xc,yc,xd,yd,xint,yint)
+    subroutine st_line_intersection(xa, ya, xb, yb, xc, yc, xd, yd, xint, yint)
 
-        real,                   intent(in)      :: xa,ya,xb,yb,xc,yc,xd,yd
-        real,                   intent(out)     :: xint,yint
+        real,                   intent(in)      :: xa, ya, xb, yb, xc, yc, xd, yd
+        real,                   intent(inout)   :: xint, yint
+
+        ! Local variables
+        real                                    :: x1, x2, x3, x4, x5, x6, y1, y2, y3
 
 
-        xint = (xa*(yb - ya)+yc*(xb - xa) - ((yd - yc)/(xd - xc))*xc*(xb - xa) - ya*(xb - xa))/ &
-               ((yb - ya) - (((yd - yc)*(xb - xa))/(xd - xc)))
-        yint = yc + ((xint - xc)/(xd - xc))*(yd - yc)
+        x1                              = xa * (yb - ya)
+        x2                              = yc * (xb - xa)
+        x3                              = ((yd - yc)/(xd - xc)) * xc * (xb - xa)
+        x4                              = ya * (xb - xa)
+        x5                              = yb - ya
+        x6                              = ((yd - yc) * (xb - xa))/(xd - xc)
+        xint                            = (x1 + x2 - x3 - x4)/(x5 - x6)
+
+        y1                              = yc
+        y2                              = (xint - xc)/(xd - xc)
+        y3                              = yd - yc
+        yint                            = y1 + (y2 * y3)
+
+        !xint = (xa*(yb - ya)+yc*(xb - xa) - ((yd - yc)/(xd - xc))*xc*(xb - xa) - ya*(xb - xa))/ &
+        !       ((yb - ya) - (((yd - yc)*(xb - xa))/(xd - xc)))
+        !yint = yc + (((xint - xc)/(xd - xc)) * (yd - yc))
 
 
     end subroutine st_line_intersection
@@ -1040,23 +1064,26 @@ module funcNsubs
     ! calculating the throat from bottom point on the blade 
     !
     !------------------------------------------------------------------------------------------------------
-    subroutine throat_calc_pitch_line(xb,yb,np,camber,angle,sang,u,pi,pitch,throat_coord, mouth_coord,exit_coord, &
-                                      min_throat_2D,throat_index,n_normal_distance,casename,js,nsl,develop)
+    subroutine throat_calc_pitch_line(xb, yb, np, camber, angle, sang, u, pi, pitch, throat_coord, mouth_coord, &
+                                      exit_coord, min_throat_2D, throat_index, n_normal_distance, casename, js, &
+                                      nsl,develop, j_throat, iup_throat, idwn_throat)
         use file_operations
         use errors
 
         integer,                    intent(in)          :: np, js, nsl
-        integer,                    intent(inout)       :: throat_index, n_normal_distance
+        integer,                    intent(inout)       :: throat_index, n_normal_distance, j_throat, iup_throat, idwn_throat
         real,                       intent(in)          :: xb(np), yb(np), camber((np + 1)/2), angle((np + 1)/2), &
                                                            sang, u((np + 1)/2), pi, pitch
         real,                       intent(inout)       :: throat_coord(4), mouth_coord(4), exit_coord(4), min_throat_2D
         character(*),               intent(in)          :: casename, develop
 
         ! Local variables
-        integer                                         :: i, j, k, np_sidee, i_interup1, i_interup2, i_interdwn1, i_interdwn2, nopen
-        real                                            :: v1_top((np+1)/2), u1_top((np+1)/2), v2_bot((np+1)/2), u2_bot((np+1)/2),         &
-                                                           yb_upper(np), xint_up, yint_up, xint_dwn, yint_dwn, inter_coord(4,((np+1)/2)),  &
-                                                           pitch_line((np+1)/2), camber_upper((np+1)/2), x_interup, y_interup, x_interdwn, &
+        integer                                         :: i, j, k, np_sidee, i_interup1, i_interup2, i_interdwn1, i_interdwn2, &
+                                                           nopen, index(3, (np + 1)/2)
+        real                                            :: v1_top((np + 1)/2), u1_top((np + 1)/2), v2_bot((np + 1)/2),    &
+                                                           u2_bot((np + 1)/2), yb_upper(np), xint_up, yint_up, xint_dwn,  &
+                                                           yint_dwn, inter_coord(4,((np + 1)/2)), pitch_line((np + 1)/2), &
+                                                           camber_upper((np + 1)/2), x_interup, y_interup, x_interdwn,    &
                                                            y_interdwn
         real,           allocatable                     :: throat(:)
         character(80)                                   :: file4
@@ -1070,95 +1097,112 @@ module funcNsubs
         call get_quiet_status(isquiet)
 
         ! Initializing variables
-        x_interup   = 0.0
-        y_interup   = 0.0
-        x_interdwn  = 0.0
-        y_interdwn  = 0.0
+        x_interup                       = 0.0
+        y_interup                       = 0.0
+        x_interdwn                      = 0.0
+        y_interdwn                      = 0.0
+        n_normal_distance               = 0
+        throat_index                    = 0
+        inter_coord                     = 0.
+        throat_coord                    = 0.
+        mouth_coord                     = 0.
+        exit_coord                      = 0.
+        index                           = 0
 
         ! Number of points along bottom and top curves
-        if (mod(np,2) == 0) then
+        if (mod(np, 2) == 0) then
           np_sidee = np/2 
         else
-          np_sidee = (np+1)/2
+          np_sidee = (np + 1)/2
         end if
         
         call log_file_exists(log_file, nopen, file_open)
         if (.not. isquiet) print*,'np_sidee',np_sidee
         write(nopen,*) 'np_sidee', np_sidee
         
-        ! Intialize variables
-        n_normal_distance   = 0
-        throat_index        = 0
-        inter_coord         = 0.
-        throat_coord        = 0.
-        mouth_coord         = 0.
-        exit_coord          = 0.
 
         ! Calculating the pitch line mid way between 2 blades:
-        pitch_line = camber + (0.5*pitch)
+        pitch_line                      = camber + (0.5*pitch)
 
         ! Create the upper blade:
-        yb_upper     = yb + pitch
-        camber_upper = camber + pitch
+        yb_upper                        = yb + pitch
+        camber_upper                    = camber + pitch
 
         ! Finding the upper point using the point and angle:
         ! After rotation by stagger, 'sang' should be taking into consideration,
         do i = 1, np_sidee
-           v1_top(i) = pitch_line(i)+ 0.5*pitch
-           u1_top(i) = 1/tan(angle(i)+sang+pi/2.)*(v1_top(i)-pitch_line(i))+u(i)
-           v2_bot(i) = pitch_line(i)- 0.5*pitch
-           u2_bot(i) = 1/tan(angle(i)+sang-pi/2.)*(v2_bot(i)-pitch_line(i))+u(i)
+
+            v1_top(i)                   = pitch_line(i) + 0.5 * pitch
+            u1_top(i)                   = ((0.5 * pitch)/tan(angle(i) + sang + pi/2.0)) + u(i)
+            v2_bot(i)                   = pitch_line(i)- 0.5 * pitch
+            u2_bot(i)                   = (-(0.5 * pitch)/tan(angle(i) + sang - pi/2.0)) + u(i)
+
         end do
+
 
         ! Identify the throat by intersection point with upper surface of the blade:
         k = 1
         do j = 1, np_sidee
-            i_interup1 = 0
-            i_interdwn1 = 0
+            i_interup1                  = 0
+            i_interdwn1                 = 0
 
             ! Intersection with upper airfoil
-            do i = np_sidee,np - 1  
-                call st_line_intersection(u(j),pitch_line(j),u1_top(j),v1_top(j),xb(i),yb_upper(i),xb(i + 1), &
-                                          yb_upper(i+1),xint_up,yint_up)
-                if ((xint_up >= xb(i) ) .and. (xint_up <= xb(i+1))) then
-                  x_interup  = xint_up 
-                  y_interup  = yint_up
-                  i_interup1 = i 
-                  i_interup2 = i+1
+            do i = np_sidee, np - 1
+
+                call st_line_intersection(u(j), pitch_line(j), u1_top(j), v1_top(j), xb(i), yb_upper(i), xb(i + 1), &
+                                          yb_upper(i + 1), xint_up, yint_up)
+
+                if ( (xint_up >= xb(i)) .and. (xint_up <= xb(i + 1)) ) then
+                    x_interup           = xint_up
+                    y_interup           = yint_up
+                    i_interup1          = i
+                    i_interup2          = i + 1
                 end if
-            end do      
+
+            end do
 
             ! Intersection with lower airfoil 
-            do i = 1,np_sidee - 1       
-                call st_line_intersection(u(j),pitch_line(j),u2_bot(j),v2_bot(j),xb(i),yb(i),xb(i + 1),yb(i + 1), &
-                                          xint_dwn,yint_dwn)
-                if ((xint_dwn <= xb(i) ).and.(xint_dwn >= xb(i+1))) then
-                  x_interdwn = xint_dwn ;y_interdwn = yint_dwn
-                  i_interdwn1 = i ;i_interdwn2 = i+1
+            do i = 1, np_sidee - 1
+
+                call st_line_intersection(u(j), pitch_line(j), u2_bot(j), v2_bot(j), xb(i), yb(i), xb(i + 1), yb(i + 1), &
+                                          xint_dwn, yint_dwn)
+
+                if ( (xint_dwn <= xb(i)) .and. (xint_dwn >= xb(i + 1)) ) then
+                    x_interdwn          = xint_dwn
+                    y_interdwn          = yint_dwn
+                    i_interdwn1         = i
+                    i_interdwn2         = i + 1
                 end if
+
             end do
 
             if ((i_interup1 /= 0) .and. (i_interdwn1 /= 0)) then
 
+                index(1, k)             = j
+                index(2, k)             = i_interup1
+                index(3, k)             = i_interdwn1
+
                 ! First intersection point
-                inter_coord(1,k) = x_interup
-                inter_coord(2,k) = y_interup
+                inter_coord(1,k)        = x_interup
+                inter_coord(2,k)        = y_interup
 
                 ! Second intersection point
-                inter_coord(3,k) = x_interdwn 
-                inter_coord(4,k) = y_interdwn 
+                inter_coord(3,k)        = x_interdwn
+                inter_coord(4,k)        = y_interdwn
                 
                 ! Number of throats for each section
-                n_normal_distance = k  
-                k = k + 1
+                n_normal_distance       = k
+                k                       = k + 1
+
             end if
 
         end do  ! j = 1,np_sidee
 
+
         ! Warn if no throat is found
         if (.not. isquiet) print*, 'n_normal_distance =',n_normal_distance
         write(nopen,*) 'n_normal_distance = ', n_normal_distance
-        if(n_normal_distance == 0) then
+        if (n_normal_distance == 0) then
           write(warning_arg,'(I2)') js
           warning_msg   = 'No throats found because of low number of blades for section '//trim(adjustl(warning_arg)) 
           dev_msg       = 'Check subroutine throat_calc_pitch_line in funcNsubs.f90'
@@ -1166,46 +1210,83 @@ module funcNsubs
           return
         end if
 
-        ! Writing the mouth and exit areas:
-        mouth_coord = inter_coord(:,1)
-        exit_coord = inter_coord(:,n_normal_distance)
 
-        if (.not. isquiet) print*,'number of intersection points (k) =',k-1,'from np_side of',np_sidee
-        write(nopen,*) 'Number of intersection points (k) = ',k-1,'from np_side of',np_sidee
+        ! Writing the mouth and exit areas:
+        mouth_coord                     = inter_coord(:,1)
+        exit_coord                      = inter_coord(:,n_normal_distance)
+
+        if (.not. isquiet) print*,'number of intersection points (k) = ', k - 1,' from np_side of', np_sidee
+        write(nopen,*) 'Number of intersection points (k) = ', k - 1,' from np_side of', np_sidee
 
         if (allocated(throat)) deallocate(throat)
-        Allocate (throat(n_normal_distance))
-        
+        allocate (throat(n_normal_distance))
+
+
         ! Calculation of the throat
-        throat(1)     = sqrt((inter_coord(1,1)-inter_coord(3,1))**2+(inter_coord(2,1)-inter_coord(4,1))**2) 
-        min_throat_2D = throat(1)
-        throat_index  = 1
+        throat(1)                       = sqrt((inter_coord(1, 1) - inter_coord(3, 1))**2 + &
+                                               (inter_coord(2, 1) - inter_coord(4, 1))**2)
+        min_throat_2D                   = throat(1)
+        throat_index                    = 1
+        throat_coord                    = inter_coord(:, 1)
         do k = 2,n_normal_distance
 
-           throat(k) = sqrt((inter_coord(1,k)-inter_coord(3,k))**2+(inter_coord(2,k)-inter_coord(4,k))**2) 
-           if (throat(k) < min_throat_2D) then
-              min_throat_2D = throat(k)
-              throat_index  = k
-              throat_coord  = inter_coord(:,k)
-           end if
+            throat(k)                   = sqrt((inter_coord(1, k) - inter_coord(3, k))**2 + &
+                                               (inter_coord(2, k)  -inter_coord(4, k))**2)
+            if (throat(k) < min_throat_2D) then
+                min_throat_2D           = throat(k)
+                throat_index            = k
+                throat_coord            = inter_coord(:, k)
+            end if
 
         end do
 
+
+        ! Store the j and i indices of the throat - these indices
+        ! follow from the loop used for computing intersection points
+        j_throat                        = index(1, throat_index)
+        iup_throat                      = index(2, throat_index)
+        idwn_throat                     = index(3, throat_index)
+
+
+        ! Store the points needed to compute throat(1) and throat(2)
+        ! in module global array
+        interup_pts(1)                  = u(j_throat)
+        interup_pts(2)                  = pitch_line(j_throat)
+        interup_pts(3)                  = u1_top(j_throat)
+        interup_pts(4)                  = v1_top(j_throat)
+        interup_pts(5)                  = xb(iup_throat)
+        interup_pts(6)                  = yb_upper(iup_throat)
+        interup_pts(7)                  = xb(iup_throat + 1)
+        interup_pts(8)                  = yb_upper(iup_throat + 1)
+
+
+        ! Store the points needed to compute throat(3) and throat(4)
+        ! in module global array
+        interdwn_pts(1)                 = u(j_throat)
+        interdwn_pts(2)                 = pitch_line(j_throat)
+        interdwn_pts(3)                 = u2_bot(j_throat)
+        interdwn_pts(4)                 = v2_bot(j_throat)
+        interdwn_pts(5)                 = xb(idwn_throat)
+        interdwn_pts(6)                 = yb(idwn_throat)
+        interdwn_pts(7)                 = xb(idwn_throat + 1)
+        interdwn_pts(8)                 = yb(idwn_throat + 1)
+
+
         ! Writing to a file for debugging
         if (isdev) then   
-            if (.not. isquiet) then          
-                print*,""
+            if (.not. isquiet) then
+                print*,''
                 print*,'Writing non-dimensional throat points to a file for debugging...'
-                print*,""
+                print*,''
             end if
             write(nopen,*) ''
             write(nopen,*) 'Writing non-dimensional throat points to a file for debugging...'
             write(nopen,*) ''
             
             if (js == 1) then 
-              file4 = 'throat_points.'//trim(casename)//'.txt'
-              open(unit = 85, file = file4, form = "formatted")
-              write(85,*)'pitch',pitch
+                file4 = 'throat_points.'//trim(casename)//'.txt'
+                open(unit = 85, file = file4, form = "formatted")
+                write(85, *) 'pitch', pitch
             end if
         
             ! write_2D_throat_data in file_operations
@@ -3091,7 +3172,7 @@ module funcNsubs
     !
     !------------------------------------------------------------------------------------------------------
     subroutine LE_ellipse(np,cp_LE_ellip,np_cluster,x_ellip_LE,y_ellip_LE)
-        use globvar,    only: du_ell_LE
+        use globvar,    only: js, ncp_thk, TE_der_actual, TE_der_norm, du_ell_LE
 
         integer,                    intent(in)          :: np
         real,                       intent(in)          :: cp_LE_ellip(4,2)
@@ -3113,7 +3194,7 @@ module funcNsubs
         ! u wrt thickness parameters
         !
         if (allocated(du_ell_LE)) deallocate(du_ell_LE)
-        allocate(du_ell_LE(1:np_cluster, 5))
+        allocate(du_ell_LE(1:np_cluster, ncp_thk(js) - 1))
 
         ! Initialize du_ell_LE
         du_ell_LE                   = 0.0
@@ -3162,13 +3243,39 @@ module funcNsubs
             ! Store sensitivity contributions in global array
             ! du_ell_LE
             if (i >= np_cluster) then
-                j                   = i - np_cluster + 1
-                du_ell_LE(j, 1)     = 1.0 + cos(t_LE(i))
-                du_ell_LE(j, 2)     = 0.0
-                du_ell_LE(j, 3)     = 1.0 + cos(t_LE(i))
-                du_ell_LE(j, 4)     = 0.0
-                du_ell_LE(j, 5)     = 0.0
-            end if
+
+                ! Actual TE derivative
+                if (TE_der_actual .and. .not. TE_der_norm) then
+
+                    j               = i - np_cluster + 1
+                    du_ell_LE(j, 1) = 1.0 + cos(t_LE(i))
+                    du_ell_LE(j, 2) = 0.0
+                    du_ell_LE(j, 3) = 1.0 + cos(t_LE(i))
+                    du_ell_LE(j, 4) = 0.0
+                    du_ell_LE(j, 5) = 0.0
+
+                ! Normalized TE derivative
+                else if (.not. TE_der_actual .and. TE_der_norm) then
+
+                    j               = i - np_cluster + 1
+                    du_ell_LE(j, 1) = 1.0 + cos(t_LE(i))
+                    du_ell_LE(j, 2) = 0.0
+                    du_ell_LE(j, 3) = 1.0 + cos(t_LE(i))
+                    du_ell_LE(j, 4) = 0.0
+                    du_ell_LE(j, 5) = 0.0
+
+                ! Implicit TE derivative
+                else
+
+                    j               = i - np_cluster + 1
+                    du_ell_LE(j, 1) = 1.0 + cos(t_LE(i))
+                    du_ell_LE(j, 2) = 0.0
+                    du_ell_LE(j, 3) = 1.0 + cos(t_LE(i))
+                    du_ell_LE(j, 4) = 0.0
+
+                end if
+
+            end if ! i >= np_cluster
 
         end do
 
@@ -3199,7 +3306,7 @@ module funcNsubs
     !
     !------------------------------------------------------------------------------------------------------
     subroutine TE_ellipse(np,cp_TE_ellip,np_cluster,x_ellip_TE,y_ellip_TE)
-        use globvar,    only: du_ell_TE
+        use globvar,    only: js, ncp_thk, TE_der_actual, TE_der_norm, du_ell_TE
 
         integer,                    intent(in)          :: np
         real,                       intent(in)          :: cp_TE_ellip(4,2)
@@ -3223,7 +3330,7 @@ module funcNsubs
         ! First dimension index starts from np - np_cluster + 1
         !
         if (allocated(du_ell_TE)) deallocate(du_ell_TE)
-        allocate(du_ell_TE(np - np_cluster + 1:np, 5))
+        allocate(du_ell_TE(np - np_cluster + 1:np, ncp_thk(js) - 1))
 
         ! Initialize du_ell_TE
         du_ell_TE                   = 0.0
@@ -3269,16 +3376,44 @@ module funcNsubs
             x_ellip_TE(i)           = x_center_TE + (a_TE*cos(t_TE(i)))
             y_ellip_TE(i)           = b_TE*sin(t_TE(i))
 
+            !
             ! Store sensitivity contributions in global array
             ! du_ell_TE
+            !
             if (i <= np_cluster) then
-                j                   = np - np_cluster + i
-                du_ell_TE(j, 1)     = 0.0
-                du_ell_TE(j, 2)     = 0.0
-                du_ell_TE(j, 3)     = 0.0
-                du_ell_TE(j, 4)     = 1.0 - cos(t_TE(i))
-                du_ell_TE(j, 5)     = 1.0 - cos(t_TE(i))
-            end if
+
+                ! Actual TE derivative
+                if (TE_der_actual .and. .not. TE_der_norm) then
+
+                    j                   = np - np_cluster + i
+                    du_ell_TE(j, 1)     = 0.0
+                    du_ell_TE(j, 2)     = 0.0
+                    du_ell_TE(j, 3)     = 0.0
+                    du_ell_TE(j, 4)     = 1.0 - cos(t_TE(i))
+                    du_ell_TE(j, 5)     = 1.0 - cos(t_TE(i))
+
+                ! Normalized TE derivative
+                else if (.not. TE_der_actual .and. TE_der_norm) then
+
+                    j                   = np - np_cluster + i
+                    du_ell_TE(j, 1)     = 0.0
+                    du_ell_TE(j, 2)     = 0.0
+                    du_ell_TE(j, 3)     = 1.0 - cos(t_TE(i))
+                    du_ell_TE(j, 4)     = 1.0 - cos(t_TE(i))
+                    du_ell_TE(j, 5)     = 1.0 - cos(t_TE(i))
+
+                ! Implicit TE derivative
+                else
+
+                    j                   = np - np_cluster + i
+                    du_ell_TE(j, 1)     = 0.0
+                    du_ell_TE(j, 2)     = 1.0 - cos(t_TE(i))
+                    du_ell_TE(j, 3)     = 1.0 - cos(t_TE(i))
+                    du_ell_TE(j, 4)     = 1.0 - cos(t_TE(i))
+
+                end if
+
+            end if  ! i <= np_cluster
 
         end do
 
@@ -3611,7 +3746,7 @@ module funcNsubs
     !
     !------------------------------------------------------------------------------------------------------
     subroutine mid_hyperbolic_clustering(np_cluster,np_mid,u_LE,u_TE,u_mid)
-        use globvar,    only: du_hyp_LE, du_hyp_TE
+        use globvar,    only: js, ncp_thk, TE_der_actual, TE_der_norm, du_hyp_LE, du_hyp_TE
         use file_operations
 
         integer,                    intent(in)          :: np_cluster
@@ -3679,7 +3814,7 @@ module funcNsubs
             ! The first dimension index starts from np_cluster + 1
             !
             if (allocated(du_hyp_LE)) deallocate(du_hyp_LE)
-            allocate(du_hyp_LE(np_cluster + 1:np_cluster + np_mid_LE - 1, 5))
+            allocate(du_hyp_LE(np_cluster + 1:np_cluster + np_mid_LE - 1, ncp_thk(js) - 1))
 
             ! Initialize du_hyp_LE
             du_hyp_LE   = 0.0
@@ -3692,7 +3827,7 @@ module funcNsubs
             ! The first dimension index starts from np_cluster + np_mid_LE
             !
             if (allocated(du_hyp_TE)) deallocate(du_hyp_TE)
-            allocate(du_hyp_TE(np_cluster + np_mid_LE:np_cluster + np_mid_LE + np_mid_TE - 3, 5))
+            allocate(du_hyp_TE(np_cluster + np_mid_LE:np_cluster + np_mid_LE + np_mid_TE - 3, ncp_thk(js) - 1))
 
             ! Initialize du_hyp_TE
             du_hyp_TE   = 0.0
@@ -3716,14 +3851,39 @@ module funcNsubs
                 u_mid_LE(i)     = u_mid_LE(1) + (du_mid_LE*(1.0 + ((tanh(0.5*delta_LE*(xi(i) - 1.0)))/&
                                   (tanh(0.5*delta_LE)))))
 
+                !
                 ! Store u sensitivity contributions in global array
                 ! du_hyp_LE
+                !
                 j               = np_cluster + i - 1
-                du_hyp_LE(j, 1) = 1.0 - (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
-                du_hyp_LE(j, 2) = 0.0
-                du_hyp_LE(j, 3) = 1.0 - (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
-                du_hyp_LE(j, 4) = 1.0 + (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
-                du_hyp_LE(j, 5) = 1.0 + (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
+
+                ! Actual TE derivative
+                if (TE_der_actual .and. .not. TE_der_norm) then
+
+                    du_hyp_LE(j, 1) = 1.0 - (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
+                    du_hyp_LE(j, 2) = 0.0
+                    du_hyp_LE(j, 3) = 1.0 - (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
+                    du_hyp_LE(j, 4) = 1.0 + (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
+                    du_hyp_LE(j, 5) = 1.0 + (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
+
+                ! Normalized TE derivative
+                else if (.not. TE_der_actual .and. TE_der_norm) then
+
+                    du_hyp_LE(j, 1) = (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
+                    du_hyp_LE(j, 2) = 0.0
+                    du_hyp_LE(j, 3) = (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
+                    du_hyp_LE(j, 4) = (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
+                    du_hyp_LE(j, 5) = (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
+
+                ! Implicit TE derivative
+                else
+
+                    du_hyp_LE(j, 1) = (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
+                    du_hyp_LE(j, 2) = (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
+                    du_hyp_LE(j, 3) = (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
+                    du_hyp_LE(j, 4) = (tanh(0.5 * delta_LE * (xi(i) - 1.0))/(tanh(0.5 * delta_LE)))
+
+                end if
 
             end do
             u_mid_LE(np_mid_LE) = u_mid_pt
@@ -3738,15 +3898,42 @@ module funcNsubs
 
                 u_mid_TE(i) = u_mid_TE(1) + (du_mid_TE*((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE))))
 
+                !
                 ! Store u sensitivity contributions in global array
                 ! du_hyp_TE
+                !
                 if (i < np_mid_TE) then
+
                     j = np_cluster + np_mid_LE + i - 2
-                    du_hyp_TE(j, 1) = 1.0 - ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
-                    du_hyp_TE(j, 2) = 0.0
-                    du_hyp_TE(j, 3) = 1.0 - ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
-                    du_hyp_TE(j, 4) = 1.0 + ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
-                    du_hyp_TE(j, 5) = 1.0 + ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+
+                    ! Actual TE derivative
+                    if (TE_der_actual .and. .not. TE_der_norm) then
+
+                        du_hyp_TE(j, 1) = 1.0 - ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+                        du_hyp_TE(j, 2) = 0.0
+                        du_hyp_TE(j, 3) = 1.0 - ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+                        du_hyp_TE(j, 4) = 1.0 + ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+                        du_hyp_TE(j, 5) = 1.0 + ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+
+                    ! Normalized TE derivative
+                    else if (.not. TE_der_actual .and. TE_der_norm) then
+
+                        du_hyp_TE(j, 1) = ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+                        du_hyp_TE(j, 2) = 0.0
+                        du_hyp_TE(j, 3) = ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+                        du_hyp_TE(j, 4) = ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+                        du_hyp_TE(j, 5) = ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+
+                    ! Implicit TE derivative
+                    else
+
+                        du_hyp_TE(j, 1) = ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+                        du_hyp_TE(j, 2) = ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+                        du_hyp_TE(j, 3) = ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+                        du_hyp_TE(j, 4) = ((tanh(0.5*delta_TE*xi(i)))/(tanh(0.5*delta_TE)))
+
+                    end if
+
                 end if
 
             end do
@@ -3884,21 +4071,23 @@ module funcNsubs
     !
     ! Interpolate trailing edge angle
     !
-    ! Input parameters: u_max - chordwise location of max. thickness for the blade section
+    ! Input parameters: u_max - chordwise location of maximum thickness
+    !                   t_max - maximum thickness
     !
     ! Reference: Abbott, I.H., van Doenhoff, A.E., "Families of Wing Sections", Theory of Wing
     !            Sections, Dover Publications, New York, 1999, pp. 116-118
     !
     !------------------------------------------------------------------------------------------------------
-    subroutine compute_TE_angle(u_max,trail_angle)
+    subroutine compute_TE_angle (u_max, t_max, trail_angle)
         use file_operations
 
         real,                       intent(in)      :: u_max
+        real,                       intent(in)      :: t_max
         real,                       intent(inout)   :: trail_angle
 
 
-        trail_angle = 0.775 + (2.51666667*u_max) + (-13.625*(u_max**2)) + (35.83333333*(u_max**3)) &
-                      + (-12.5*(u_max**4))
+        trail_angle = -2.0 * t_max * (0.775 + (2.51666667*u_max) + (-13.625*(u_max**2)) + &
+                       (35.83333333*(u_max**3)) + (-12.5*(u_max**4)))
 
 
     end subroutine compute_TE_angle
@@ -4297,7 +4486,7 @@ module funcNsubs
 
         ! Local variables
         integer                                 :: i, counter, i_sec
-        real                                    :: tol = 10E-8, t
+        real                                    :: tol = 10E-8, t, u_temp, t_temp
 
 
 
@@ -4362,12 +4551,18 @@ module funcNsubs
             if (i < np) then
                 t                   = acos((u(i) - u_center)/(1.0 - u_center))
                 thk_data(i,1)       = (1.0 - u_center)*sin(t)
+                thk_data(i, 2)      = -(u(i) - u_center)/thk_data(i, 1)
+                thk_data(i, 3)      = -((1.0 - u_center)**2)/(thk_data(i, 1)**3)
                 !thk_data(i,2)       = -(u(i) - u_TE)/(sqrt(t_TE**2 - ((u(i) - u_TE)**2)))
                 !thk_data(i,3)       = -t_TE/((sqrt(t_TE**2 - ((u(i) - u_TE)**2)))**3)
             else
                 if (t_TE**2 - ((u(np) - u_TE)**2) < tol) then
                     thk_data(i,1)   = 0.0
                 end if
+                u_temp              = 1.0 - tol - u_center
+                t_temp              = sqrt((1.0 - u_center)**2 - (u_temp)**2)
+                thk_data(i, 2)      = -u_temp/t_temp
+                thk_data(i, 3)      = -((1.0 - u_center)**2)/(t_temp**3)
             end if
 
         end do
@@ -4641,6 +4836,96 @@ module funcNsubs
 
 
     end subroutine get_inflated_3D_section
+    !------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !------------------------------------------------------------------------------------------------------
+    subroutine blade_surface_curvatures (np, splinedata, d3v, thk_data, curv)
+        !use globvar,    only: js
+
+        integer,                    intent(in)          :: np
+        real,                       intent(in)          :: splinedata(4, np)
+        real,                       intent(in)          :: d3v(np)
+        real,                       intent(in)          :: thk_data(np, 3)
+        real,                       intent(inout)       :: curv(4, np)
+
+        ! Local variables
+        real                                            :: u(np), v(np), dv(np), d2v(np), t(np), dt(np), d2t(np)
+        real                                            :: dutop(np), dvtop(np), d2utop(np), d2vtop(np)
+        real                                            :: dubot(np), dvbot(np), d2ubot(np), d2vbot(np)
+        integer                                         :: i
+        real                                            :: temp, temp_1, temp_2, temp_3
+
+
+        curv                        = 0.0
+
+        ! Array shorthands for derivatives of mean-line and
+        ! thickness distribution
+        u                           = splinedata(1, :)
+        v                           = splinedata(2, :)
+        dv                          = splinedata(3, :)
+        d2v                         = splinedata(4, :)
+        t                           = thk_data(:, 1)
+        dt                          = thk_data(:, 2)
+        d2t                         = thk_data(:, 3)
+
+
+        !
+        ! Compute the first and second derivatives of the top
+        ! and bottom surface (u_b, v_b) with respect to u
+        !
+        do i = 1, np
+
+            ! First derivatives of top and bottom u_b
+            temp                    = sqrt(1.0 + (dv(i)**2))
+            temp_1                  = dt(i) * dv(i)
+            temp_2                  = t(i) * d2v(i)
+            dutop(i)                = 1.0 - (temp_1/temp) - (temp_2/(temp**3))
+            dubot(i)                = 1.0 + (temp_1/temp) + (temp_2/(temp**3))
+
+            ! First derivatives of top and bottom v_b
+            temp                    = sqrt(1.0 + (dv(i)**2))
+            temp_1                  = dt(i)
+            temp_2                  = t(i) * dv(i) * d2v(i)
+            dvtop(i)                = 1.0 + (temp_1/temp) - (temp_2/(temp**3))
+            dvbot(i)                = 1.0 - (temp_1/temp) + (temp_2/(temp**3))
+
+            ! Second derivatives of top and bottom u_b
+            temp                    = sqrt(1.0 + (dv(i)**2))
+            temp_1                  = (d2t(i) * dv(i)) + (dt(i) * d2v(i))
+            temp_2                  = (dt(i) * (dv(i)**2) * d2v(i)) - (dt(i) * d2v(i)) - (t(i) * d3v(i))
+            temp_3                  = 3.0 * t(i) * dv(i) * (d2v(i)**2)
+            d2utop(i)               = (-temp_1/temp) + (temp_2/(temp**3)) + (temp_3/(temp**5))
+            d2ubot(i)               = -d2utop(i)
+
+            ! Second derivatives of top and bottom v_b
+            temp_1                  = d2t(i)
+            temp_2                  = (2.0 * dt(i) * dv(i) * d2v(i)) + (t(i) * (d2v(i)**2)) + &
+                                      (t(i) * dv(i) * d2v(i))
+            temp_3                  = (3.0 * t(i) * (dv(i)**2) * (d2v(i)**2))
+            d2vtop(i)               = (temp_1/temp) - (temp_2/(temp**3)) + (temp_3/(temp**5))
+            d2vbot(i)               = -d2vtop(i)
+
+            ! Curvature of top surface
+            temp_1                  = (dutop(i) * d2vtop(i)) - (dvtop(i) * d2utop(i))
+            temp_2                  = sqrt((dutop(i))**2 + (dvtop(i))**2)
+            curv(1, i)              = (abs(temp_1))/(temp_2**3)
+
+            ! Curvature of bottom surface
+            temp_1                  = (dubot(i) * d2vbot(i)) - (dvbot(i) * d2ubot(i))
+            temp_2                  = sqrt((dubot(i))**2 + (dvbot(i))**2)
+            curv(3, i)              = (abs(temp_1))/(temp_2**3)
+
+            !if (js == 11) print *, u(i), curv(1, i), curv(3, i)
+        end do
+
+
+
+    end subroutine blade_surface_curvatures
     !------------------------------------------------------------------------------------------------------
 
 

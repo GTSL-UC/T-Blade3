@@ -1675,9 +1675,9 @@ subroutine bgb3d_sub(fname_in, aux_in, arg2, arg3, arg4)
 
     ! Thickness parameters
     if (allocated(mprime_thk)) deallocate(mprime_thk)
-    allocate(mprime_thk(nspn, np, 5, ncp_span_thk))
+    allocate(mprime_thk(nspn, np, ncp_chord_thk - 1, ncp_span_thk))
     if (allocated(theta_thk)) deallocate(theta_thk)
-    allocate(theta_thk(nspn, np, 5, ncp_span_thk))
+    allocate(theta_thk(nspn, np, ncp_chord_thk - 1, ncp_span_thk))
 
     ! in_beta*
     if (allocated(mprime_inbeta)) deallocate(mprime_inbeta)

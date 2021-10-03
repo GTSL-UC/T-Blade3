@@ -2847,21 +2847,24 @@ subroutine read_spanwise_NACA_input(row_type,path)
 
             TE_der_actual  = .false.
             TE_der_norm    = .false.
-            allocate( cp_chord_thk(ncp_span_thk,5) )
+            ncp_chord_thk = 5
+            allocate( cp_chord_thk(ncp_span_thk, ncp_chord_thk) )
 
         ! Actual TE derivative definition
         else if (n_temp /= 0 .and. n_temp_1 == 0) then
 
             TE_der_actual  = .true.
             TE_der_norm    = .false.
-            allocate( cp_chord_thk(ncp_span_thk,6) )
+            ncp_chord_thk = 6
+            allocate( cp_chord_thk(ncp_span_thk, ncp_chord_thk) )
 
         ! Normalized TE derivative definition
         else if (n_temp == 0 .and. n_temp_1 /= 0) then
 
             TE_der_actual  = .false.
             TE_der_norm    = .true.
-            allocate ( cp_chord_thk(ncp_span_thk,6) )
+            ncp_chord_thk = 6
+            allocate ( cp_chord_thk(ncp_span_thk, ncp_chord_thk) )
 
         ! Raise an error if TE derivative is defined both directly
         ! and as a normalized quantity
@@ -2888,6 +2891,17 @@ subroutine read_spanwise_NACA_input(row_type,path)
         end do  ! ncp_span_thk
 
     end if  ! thick_distr
+
+
+
+    !
+    ! Assign array ncp_thk for bladegen subroutine
+    !
+    if (allocated(ncp_thk)) deallocate(ncp_thk)
+    allocate (ncp_thk(nsl))
+    do i = 1, nsl
+        ncp_thk(i) = size(cp_chord_thk, 2)
+    end do
 
 
 

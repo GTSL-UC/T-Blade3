@@ -3,14 +3,43 @@ module derivatives
 
 
 
-    real,             parameter                 :: ZERO = 0.0, ONE = 1.0, TWO = 2.0, THREE = 3.0,  &
+    real,               parameter               :: ZERO = 0.0, ONE = 1.0, TWO = 2.0, THREE = 3.0,  &
                                                    FOUR = 4.0, FIVE = 5.0, SIX = 6.0, SEVEN = 7.0, &
-                                                   EIGHT = 8.0, NINE = 9.0, TEN = 10.0
+                                                   EIGHT = 8.0, NINE = 9.0, TEN = 10.0, HALF = 0.5
+    real                                        :: zero_2D(1, 1) = 0, zero_3D(1, 1, 1) = 0
+
+    !
+    ! Derived data type to store derivatives wrt
+    ! spanwise control points of in_beta, out_beta,
+    ! chord multiplier, mean-line 2nd derivative and
+    ! NACA thickness
+    !
+    ! For single values (sang and chrd for a given section)
+    type throat_ders_1
+        real,   allocatable                     :: dinbeta(:,:)
+        real,   allocatable                     :: doutbeta(:,:)
+        real,   allocatable                     :: dcm(:,:)
+        real,   allocatable                     :: dcurv(:,:)
+        real,   allocatable                     :: dt(:,:)
+    end type throat_ders_1
+
+    ! For arrays (mean-line, m', theta for a given section)
+    type throat_ders_2
+        real,   allocatable                     :: dinbeta(:,:,:)
+        real,   allocatable                     :: doutbeta(:,:,:)
+        real,   allocatable                     :: dcm(:,:,:)
+        real,   allocatable                     :: dcurv(:,:,:)
+        real,   allocatable                     :: dt(:,:,:)
+    end type throat_ders_2
+
+    real,   allocatable                         :: sec_u_ders(:,:), dudt(:,:,:)
+    type(throat_ders_1)                         :: dsang, dchrd, dxiup, dyiup, dxidwn, dyidwn, dthr
+    type(throat_ders_2)                         :: dangle, dcam, dm, dth, du3, dvm3, dp_line, dyb_upper, &
+                                                   dcam_upper, dv1_top, du1_top, dv2_bot, du2_bot
 
 
 
     contains
-
 
 
 
@@ -123,6 +152,90 @@ module derivatives
 
     end function find_knt_copy
     !------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Interpolate trailing edge angle
+    !
+    ! Input parameters: u_max - chordwise location of maximum thickness
+    !                   t_max - maximum thickness
+    !
+    ! Reference: Abbott, I.H., van Doenhoff, A.E., "Families of Wing Sections", Theory of Wing
+    !            Sections, Dover Publications, New York, 1999, pp. 116-118
+    !
+    !------------------------------------------------------------------------------------------------------
+    subroutine compute_TE_angle_copy (u_max, t_max, trail_angle)
+        use file_operations
+
+        real,                       intent(in)      :: u_max
+        real,                       intent(in)      :: t_max
+        real,                       intent(inout)   :: trail_angle
+
+
+        trail_angle = -2.0 * t_max * (0.775 + (2.51666667*u_max) + (-13.625*(u_max**2)) + &
+                       (35.83333333*(u_max**3)) + (-12.5*(u_max**4)))
+
+
+    end subroutine compute_TE_angle_copy
+    !------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Function to compute the sensitivity of the TE thickness
+    ! derivative with respect to the maximum thickness location
+    ! for a given spanwise section when using an implicit TE
+    ! thickness derivative computed in compute_TE_angle
+    !
+    ! Input parameters: u_max - maximum thickness location
+    !                   t_max - maximum thickness
+    !
+    !-----------------------------------------------------------------------------------------------
+    real function dtte_umax_der (u_max, t_max)
+
+        real,                       intent(in)      :: u_max
+        real,                       intent(in)      :: t_max
+
+
+        dtte_umax_der = -2.0 * t_max * (2.51666667 - (2.0 * 13.625 * u_max) + &
+                        (3.0 * 35.83333333 * (u_max**2)) - (4.0 * 12.5 * (u_max**3)))
+
+
+    end function dtte_umax_der
+    !-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Function to compute the sensitivity of the TE thickness
+    ! derivative with respect to the maximum thickness
+    ! for a given spanwise section when using an implicit TE
+    ! thickness derivative computed in compute_TE_angle
+    !
+    ! Input parameters: u_max - maximum thickness location
+    !
+    !-----------------------------------------------------------------------------------------------
+    real function dtte_tmax_der (u_max)
+
+        real,                       intent(in)      :: u_max
+
+
+        dtte_tmax_der = -(0.775 + (2.51666667*u_max) - (13.625*(u_max**2)) + &
+                         (35.83333333*(u_max**3)) - (12.5*(u_max**4)))
+
+
+    end function dtte_tmax_der
+    !-----------------------------------------------------------------------------------------------
 
 
 
@@ -1166,32 +1279,71 @@ module derivatives
     ! with respect to NACA thickness parameters for a
     ! particular spanwise section
     !
-    ! Input parameters: t_TE    - TE thickness
-    !                   dt_TE   - TE thickness derivative
+    ! Input parameters: thk_params  - array containing TE thickness parameter
+    !                                 values for a given spanwise section
     !
     !-----------------------------------------------------------------------------------------------
-    subroutine u_TE_derivatives (t_TE, dt_TE, du_TE)
-        use globvar
+    subroutine u_TE_derivatives (thk_params, du_TE)
+        use globvar,    only: js, ncp_thk, TE_der_actual, TE_der_norm
 
-        real,                   intent(in)      :: t_TE
-        real,                   intent(in)      :: dt_TE
-        real,                   intent(inout)   :: du_TE(5)
+        real,                   intent(in)      :: thk_params(ncp_thk(js) - 1)
+        real,                   intent(inout)   :: du_TE(ncp_thk(js) - 1)
+
+        ! Local variables
+        real                                    :: u_max, t_max, t_TE, dt_TE, norm, temp
 
 
         !
         ! Compute derivatives of u_TE wrt to I, u_max, t_max
         ! t_TE and dt_TE
         !
-        ! TODO: Only for explicit definition of TE thickness
-        !       derivative
+        ! Actual TE derivative
         !
-        if (TE_der_actual) then
+        if (TE_der_actual .and. .not. TE_der_norm) then
+
+            ! TE thickness and thickness derivative
+            t_TE                        = thk_params(4)
+            dt_TE                       = thk_params(5)
 
             du_TE(1)                    = 0
             du_TE(2)                    = 0
             du_TE(3)                    = 0
             du_TE(4)                    = -(dt_TE + sqrt((dt_TE)**2 + 1))
             du_TE(5)                    = -t_TE * (1 + (dt_TE/sqrt((dt_TE)**2 + 1)))
+
+        ! Normalized TE derivative
+        else if (.not. TE_der_actual .and. TE_der_norm) then
+
+            ! TE thickness parameters
+            t_max                       = thk_params(3)
+            t_TE                        = thk_params(4)
+            norm                        = thk_params(5)
+            dt_TE                       = -(TWO * norm * t_max)
+
+            temp                        = ONE + (dt_TE**2)
+            !if (js == 11) print *, 'From derivatives - ', ONE - (t_TE * (dt_TE + sqrt(temp)))
+
+            du_TE(1)                    = ZERO
+            du_TE(2)                    = ZERO
+            du_TE(3)                    = t_TE * (ONE + (dt_TE/sqrt(temp))) * norm
+            du_TE(4)                    = (-(dt_TE + sqrt(temp)))/TWO
+            du_TE(5)                    = t_TE * (ONE + (dt_TE/sqrt(temp))) * TWO * t_max
+
+        ! Implicit TE derivative
+        else
+
+            ! Thickness parameters
+            u_max                       = thk_params(2)
+            t_max                       = thk_params(3)
+            t_TE                        = thk_params(4)
+            call compute_TE_angle_copy (u_max, t_max, dt_TE)
+
+            du_TE(1)                    = 0
+            du_TE(2)                    = -t_TE * (ONE + (dt_TE/sqrt(ONE + (dt_TE)**2))) * &
+                                           dtte_umax_der(u_max, t_max)
+            du_TE(3)                    = -t_TE * (ONE + (dt_TE/sqrt(ONE + (dt_TE)**2))) * &
+                                           dtte_tmax_der(u_max)
+            du_TE(4)                    = -(dt_TE + sqrt(ONE + (dt_TE)**2))
 
         end if
 
@@ -1210,32 +1362,69 @@ module derivatives
     ! respect to NACA thickness parameters for a particular
     ! spanwise section
     !
-    ! Input parameters: t_TE    - TE thickness
-    !                   dt_TE   - TE thickness derivatives
+    ! Input parameters: thk_params  - array containing TE thickness parameter
+    !                                 values for a given spanwise section
     !
     !-----------------------------------------------------------------------------------------------
-    subroutine r_TE_derivatives (t_TE, dt_TE, dr_TE)
-        use globvar
+    subroutine r_TE_derivatives (thk_params, dr_TE)
+        use globvar,    only: js, ncp_thk, TE_der_actual, TE_der_norm
 
-        real,                   intent(in)      :: t_TE
-        real,                   intent(in)      :: dt_TE
-        real,                   intent(inout)   :: dr_TE(5)
+        real,                   intent(in)      :: thk_params(ncp_thk(js) - 1)
+        real,                   intent(inout)   :: dr_TE(ncp_thk(js) - 1)
+
+        ! Local variables
+        real                                    :: u_max, t_max, dt_TE, t_TE, norm, temp
 
 
         !
         ! Compute derivatives of r_TE wrt to I, u_max, t_max,
         ! t_TE and dt_TE
         !
-        ! TODO: Only for explicit definition of TE thickness
-        !       derivative
+        ! Actual derivative
         !
-        if (TE_der_actual) then
+        if (TE_der_actual .and. .not. TE_der_norm) then
 
-            dr_TE(1)                    = 0
-            dr_TE(2)                    = 0
-            dr_TE(3)                    = 0
+            ! TE thickness and thickness derivative
+            t_TE                        = thk_params(4)
+            dt_TE                       = thk_params(5)
+
+            dr_TE(1)                    = ZERO
+            dr_TE(2)                    = ZERO
+            dr_TE(3)                    = ZERO
             dr_TE(4)                    = sqrt((dt_TE)**2 + 1)
             dr_TE(5)                    = (t_TE * dt_TE)/sqrt((dt_TE)**2 + 1)
+
+        ! Normalized TE derivative
+        else if (.not. TE_der_actual .and. TE_der_norm) then
+
+            ! Thickness parameters
+            t_max                       = thk_params(3)
+            t_TE                        = thk_params(4)
+            norm                        = thk_params(5)
+
+            temp                        = sqrt(ONE + (TWO * t_max * norm)**2)
+
+            dr_TE(1)                    = ZERO
+            dr_TE(2)                    = ZERO
+            dr_TE(3)                    = ((t_TE * t_max * (norm**2))/temp) * TWO
+            dr_TE(4)                    = temp/TWO
+            dr_TE(5)                    = ((t_TE * (t_max**2) * norm)/temp) * FOUR
+
+        ! Implicit TE derivative
+        else
+
+            ! Thickness parameters
+            u_max                       = thk_params(2)
+            t_max                       = thk_params(3)
+            t_TE                        = thk_params(4)
+            call compute_TE_angle_copy (u_max, t_max, dt_TE)
+
+            dr_TE(1)                    = ZERO
+            dr_TE(2)                    = ((t_TE * dt_TE)/sqrt(ONE + (dt_TE)**2)) * &
+                                          dtte_umax_der(u_max, t_max)
+            dr_TE(3)                    = ((t_TE * dt_TE)/sqrt(ONE + (dt_TE)**2)) * &
+                                          dtte_tmax_der(u_max)
+            dr_TE(4)                    = sqrt(ONE + (dt_TE)**2)
 
         end if
 
@@ -1253,32 +1442,69 @@ module derivatives
     ! circle, u_center, with respect to NACA thickness parameters
     ! for a particular spanwise section
     !
-    ! Input parameters: t_TE    - TE thickness
-    !                   dt_TE   - TE thickness derivatives
+    ! Input parameters: thk_params  - array containing TE thickness parameter
+    !                                 values for a given spanwise section
     !
     !-----------------------------------------------------------------------------------------------
-    subroutine u_center_derivatives (t_TE, dt_TE, duc_TE)
-        use globvar
+    subroutine u_center_derivatives (thk_params, duc_TE)
+        use globvar,    only: js, ncp_thk, TE_der_actual, TE_der_norm
 
-        real,                   intent(in)      :: t_TE
-        real,                   intent(in)      :: dt_TE
-        real,                   intent(inout)   :: duc_TE(5)
+        real,                   intent(in)      :: thk_params(ncp_thk(js) - 1)
+        real,                   intent(inout)   :: duc_TE(ncp_thk(js) - 1)
+
+        ! Local variables
+        real                                    :: u_max, t_max, dt_TE, t_TE, norm, temp
 
 
         !
         ! Compute derivatives of u_center wrt to I, u_max, t_max,
         ! t_TE and dt_TE
         !
-        ! TODO: Only for explicit definition of TE thickness
-        !       derivative
+        ! Actual derivative
         !
-        if (TE_der_actual) then
+        if (TE_der_actual .and. .not. TE_der_norm) then
 
-            duc_TE(1)                   = 0
-            duc_TE(2)                   = 0
-            duc_TE(3)                   = 0
+            ! TE thickness and thickness derivative
+            t_TE                        = thk_params(4)
+            dt_TE                       = thk_params(5)
+
+            duc_TE(1)                   = ZERO
+            duc_TE(2)                   = ZERO
+            duc_TE(3)                   = ZERO
             duc_TE(4)                   = -sqrt((dt_TE)**2 + 1)
             duc_TE(5)                   = -(t_TE * dt_TE)/sqrt((dt_TE)**2 + 1)
+
+        ! Normalized TE derivative
+        else if (.not. TE_der_actual .and. TE_der_norm) then
+
+            ! Thickness parameters
+            t_max                       = thk_params(3)
+            t_TE                        = thk_params(4)
+            norm                        = thk_params(5)
+
+            temp                        = sqrt(ONE + (TWO * t_max * norm)**2)
+
+            duc_TE(1)                   = ZERO
+            duc_TE(2)                   = ZERO
+            duc_TE(3)                   = -((t_TE * t_max * (norm**2))/temp) * TWO
+            duc_TE(4)                   = -temp/TWO
+            duc_TE(5)                   = -((t_TE * (t_max**2) * norm)/temp) * FOUR
+
+        ! Implicit TE derivative
+        else
+
+            ! Thickness parameters
+            u_max                       = thk_params(2)
+            t_max                       = thk_params(3)
+            t_TE                        = thk_params(4)
+            call compute_TE_angle_copy (u_max, t_max, dt_TE)
+
+            duc_TE(1)                   = ZERO
+            duc_TE(2)                   = -((t_TE * dt_TE)/sqrt(ONE + (dt_TE)**2)) * &
+                                          dtte_umax_der(u_max, t_max)
+            duc_TE(3)                   = -((t_TE * dt_TE)/sqrt(ONE + (dt_TE)**2)) * &
+                                          dtte_tmax_der(u_max)
+            duc_TE(4)                   = -sqrt(ONE + (dt_TE)**2)
 
         end if
 
@@ -1367,23 +1593,19 @@ module derivatives
 
 
     !
-    ! Compute the derivatives of M wrt the NACA thickness
-    ! parameters for a particular spanwise section
+    ! Compute quantities l1 and l2 which are used in
+    ! the subroutine M_derivatives
     !
     ! Input parameters: u_max   - location of the maximum thickness
     !                   u_TE    - location of the TE thickness
     !                   du_TE   - derivatives of u_TE
     !
-    ! TODO: Only for explicit definition of TE thickness derivative
-    !
     !-----------------------------------------------------------------------------------------------
-    subroutine M_derivatives (u_max, u_TE, du_TE, dM)
-        use globvar
+    subroutine compute_l1_l2 (u_max, u_TE, l)
 
         real,                   intent(in)      :: u_max
         real,                   intent(in)      :: u_TE
-        real,                   intent(in)      :: du_TE(5)
-        real,                   intent(inout)   :: dM(4, 4, 5)
+        real,                   intent(inout)   :: l(4, 4, 2)
 
         ! Local variables
         real                                    :: temp_1, temp_2, temp_3
@@ -1394,125 +1616,146 @@ module derivatives
         temp_2                          = ONE - u_TE
         temp_3                          = u_TE - u_max
 
-        ! M_00 derivatives
-        dM(1, 1, 1)                     = ZERO
-        dM(1, 1, 2)                     = (SIX * temp_1 * (temp_2**2))/(temp_3**4)
-        dM(1, 1, 3)                     = ZERO
-        dM(1, 1, 4)                     = -((SIX * (temp_1**2) * temp_2)/(temp_3**4)) * du_TE(4)
-        dM(1, 1, 5)                     = -((SIX * (temp_1**2) * temp_2)/(temp_3**4)) * du_TE(5)
+        ! For M_00
+        l(1, 1, 1)                     = (SIX * temp_1 * (temp_2**2))/(temp_3**4)
+        l(1, 1, 2)                     = -(SIX * (temp_1**2) * temp_2)/(temp_3**4)
 
-        ! M_01 derivatives
-        dM(1, 2, 1)                     = ZERO
-        dM(1, 2, 2)                     = -(SIX * temp_1 * (temp_2**2))/(temp_3**4)
-        dM(1, 2, 3)                     = ZERO
-        dM(1, 2, 4)                     = ((SIX * (temp_1**2) * temp_2)/(temp_3**4)) * du_TE(4)
-        dM(1, 2, 5)                     = ((SIX * (temp_1**2) * temp_2)/(temp_3**4)) * du_TE(5)
+        ! For M_01
+        l(1, 2, 1)                     = -(SIX * temp_1 * (temp_2**2))/(temp_3**4)
+        l(1, 2, 2)                     = (SIX * (temp_1**2) * temp_2)/(temp_3**4)
 
-        ! M_02 derivatives
-        dM(1, 3, 1)                     = ZERO
-        dM(1, 3, 2)                     = ((TWO - u_max - u_TE) * (temp_2**2))/(temp_3**3)
-        dM(1, 3, 3)                     = ZERO
-        dM(1, 3, 4)                     = -((TWO * (temp_1**2) * temp_2)/(temp_3**3)) * du_TE(4)
-        dM(1, 3, 5)                     = -((TWO * (temp_1**2) * temp_2)/(temp_3**3)) * du_TE(5)
+        ! For M_02
+        l(1, 3, 1)                     = ((TWO - u_max - u_TE) * (temp_2**2))/(temp_3**3)
+        l(1, 3, 2)                     = -(TWO * (temp_1**2) * temp_2)/(temp_3**3)
 
-        ! M_03 derivatives
-        dM(1, 4, 1)                     = ZERO
-        dM(1, 4, 2)                     = (TWO * temp_1 * (temp_2**2))/(temp_3**3)
-        dM(1, 4, 3)                     = ZERO
-        dM(1, 4, 4)                     = -(((TWO - u_max - u_TE) * (temp_1**2))/(temp_3**3)) * du_TE(4)
-        dM(1, 4, 5)                     = -(((TWO - u_max - u_TE) * (temp_1**2))/(temp_3**3)) * du_TE(5)
+        ! For M_03
+        l(1, 4, 1)                     = (TWO * temp_1 * (temp_2**2))/(temp_3**3)
+        l(1, 4, 2)                     = -((TWO - u_max - u_TE) * (temp_1**2))/(temp_3**3)
 
-        ! M_10 derivatives
-        dM(2, 1, 1)                     = ZERO
-        dM(2, 1, 2)                     = -(SIX * (THREE - (TWO * u_max) - u_TE) * temp_2)/(temp_3**4)
-        dM(2, 1, 3)                     = ZERO
-        dM(2, 1, 4)                     = ((SIX * (THREE - u_max - (TWO * u_TE)) * temp_1)/(temp_3**4)) * &
-                                          du_TE(4)
-        dM(2, 1, 5)                     = ((SIX * (THREE - u_max - (TWO * u_TE)) * temp_1)/(temp_3**4)) * &
-                                          du_TE(5)
+        ! For M_10
+        l(2, 1, 1)                     = -(SIX * (THREE - (TWO * u_max) - u_TE) * temp_2)/(temp_3**4)
+        l(2, 1, 2)                     = (SIX * (THREE - u_max - (TWO * u_TE)) * temp_1)/(temp_3**4)
 
-        ! M_11 derivatives
-        dM(2, 2, 1)                     = ZERO
-        dM(2, 2, 2)                     = (SIX * (THREE - (TWO * u_max) - u_TE) * temp_2)/(temp_3**4)
-        dM(2, 2, 3)                     = ZERO
-        dM(2, 2, 4)                     = -((SIX * (THREE - u_max - (TWO * u_TE)) * temp_1)/(temp_3**4)) * &
-                                           du_TE(4)
-        dM(2, 2, 5)                     = -((SIX * (THREE - u_max - (TWO * u_TE)) * temp_1)/(temp_3**4)) * &
-                                           du_TE(5)
+        ! For M_11
+        l(2, 2, 1)                     = (SIX * (THREE - (TWO * u_max) - u_TE) * temp_2)/(temp_3**4)
+        l(2, 2, 2)                     = -(SIX * (THREE - u_max - (TWO * u_TE)) * temp_1)/(temp_3**4)
 
-        ! M_12 derivatives
-        dM(2, 3, 1)                     = ZERO
-        dM(2, 3, 2)                     = -(TWO * (THREE - u_max - (TWO * u_TE) * temp_2))/(temp_3**3)
-        dM(2, 3, 3)                     = ZERO
-        dM(2, 3, 4)                     = ((TWO * (THREE - u_max - (TWO * u_TE) * temp_1))/(temp_3**3)) * &
-                                          du_TE(4)
-        dM(2, 3, 5)                     = ((TWO * (THREE - u_max - (TWO * u_TE) * temp_1))/(temp_3**3)) * &
-                                          du_TE(5)
+        ! For M_12
+        l(2, 3, 1)                     = -(TWO * (THREE - u_max - (TWO * u_TE)) * temp_2)/(temp_3**3)
+        l(2, 3, 2)                     = (TWO * (THREE - u_max - (TWO * u_TE)) * temp_1)/(temp_3**3)
 
-        ! M_13 derivatives
-        dM(2, 4, 1)                     = ZERO
-        dM(2, 4, 2)                     = -(TWO * (THREE - (TWO * u_max) - u_TE) * temp_2)/(temp_3**3)
-        dM(2, 4, 3)                     = ZERO
-        dM(2, 4, 4)                     = ((TWO * (THREE - (TWO * u_max) - u_TE) * temp_1)/(temp_3**3)) * &
-                                          du_TE(4)
-        dM(2, 4, 5)                     = ((TWO * (THREE - (TWO * u_max) - u_TE) * temp_1)/(temp_3**3)) * &
-                                          du_TE(5)
+        ! For M_13
+        l(2, 4, 1)                     = -(TWO * (THREE - (TWO * u_max) - u_TE) * temp_2)/(temp_3**3)
+        l(2, 4, 2)                     = (TWO * (THREE - (TWO * u_max) - u_TE) * temp_1)/(temp_3**3)
 
-        ! M_20 derivatives
-        dM(3, 1, 1)                     = ZERO
-        dM(3, 1, 2)                     = (SIX * (THREE - u_max - (TWO * u_TE)))/(temp_3**4)
-        dM(3, 1, 3)                     = ZERO
-        dM(3, 1, 4)                     = -((SIX * (THREE - (TWO * u_max) - u_TE))/(temp_3**4)) * du_TE(4)
-        dM(3, 1, 5)                     = -((SIX * (THREE - (TWO * u_max) - u_TE))/(temp_3**4)) * du_TE(5)
+        ! For M_20
+        l(3, 1, 1)                     = (SIX * (THREE - u_max - (TWO * u_TE)))/(temp_3**4)
+        l(3, 1, 2)                     = -(SIX * (THREE - (TWO * u_max) - u_TE))/(temp_3**4)
 
-        ! M_21 derivatives
-        dM(3, 2, 1)                     = ZERO
-        dM(3, 2, 2)                     = -(SIX * (THREE - u_max - (TWO * u_TE)))/(temp_3**4)
-        dM(3, 2, 3)                     = ZERO
-        dM(3, 2, 4)                     = ((SIX * (THREE - (TWO * u_max) - u_TE))/(temp_3**4)) * du_TE(4)
-        dM(3, 2, 5)                     = ((SIX * (THREE - (TWO * u_max) - u_TE))/(temp_3**4)) * du_TE(5)
+        ! For M_21
+        l(3, 2, 1)                     = -(SIX * (THREE - u_max - (TWO * u_TE)))/(temp_3**4)
+        l(3, 2, 2)                     = (SIX * (THREE - (TWO * u_max) - u_TE))/(temp_3**4)
 
-        ! M_22 derivatives
-        dM(3, 3, 1)                     = ZERO
-        dM(3, 3, 2)                     = (SIX - u_max - (FIVE * u_TE))/(temp_3**3)
-        dM(3, 3, 3)                     = ZERO
-        dM(3, 3, 4)                     = -((TWO * (THREE - (TWO * u_max) - u_TE))/(temp_3**3)) * du_TE(4)
-        dM(3, 3, 5)                     = -((TWO * (THREE - (TWO * u_max) - u_TE))/(temp_3**3)) * du_TE(5)
+        ! For M_22
+        l(3, 3, 1)                     = (SIX - u_max - (FIVE * u_TE))/(temp_3**3)
+        l(3, 3, 2)                     = -(TWO * (THREE - (TWO * u_max) - u_TE))/(temp_3**3)
 
-        ! M_23 derivatives
-        dM(3, 4, 1)                     = ZERO
-        dM(3, 4, 2)                     = (TWO * (THREE - u_max - (TWO * u_TE)))/(temp_3**3)
-        dM(3, 4, 3)                     = ZERO
-        dM(3, 4, 4)                     = -((SIX - (FIVE * u_max) - u_TE)/(temp_3**3)) * du_TE(4)
-        dM(3, 4, 5)                     = -((SIX - (FIVE * u_max) - u_TE)/(temp_3**3)) * du_TE(5)
+        ! For M_23
+        l(3, 4, 1)                     = (TWO * (THREE - u_max - (TWO * u_TE)))/(temp_3**3)
+        l(3, 4, 2)                     = -(SIX - (FIVE * u_max) - u_TE)/(temp_3**3)
 
-        ! M_30 derivatives
-        dM(4, 1, 1)                     = ZERO
-        dM(4, 1, 2)                     = -SIX/(temp_3**4)
-        dM(4, 1, 3)                     = ZERO
-        dM(4, 1, 4)                     = (SIX/(temp_3**4)) * du_TE(4)
-        dM(4, 1, 5)                     = (SIX/(temp_3**4)) * du_TE(5)
+        ! For M_30
+        l(4, 1, 1)                     = -SIX/(temp_3**4)
+        l(4, 1, 2)                     = SIX/(temp_3**4)
 
-        ! M_31 derivatives
-        dM(4, 2, 1)                     = ZERO
-        dM(4, 2, 2)                     = SIX/(temp_3**4)
-        dM(4, 2, 3)                     = ZERO
-        dM(4, 2, 4)                     = -(SIX/(temp_3**4)) * du_TE(4)
-        dM(4, 2, 5)                     = -(SIX/(temp_3**4)) * du_TE(5)
+        ! For M_31
+        l(4, 2, 1)                     = SIX/(temp_3**4)
+        l(4, 2, 2)                     = -SIX/(temp_3**4)
 
-        ! M_32 derivatives
-        dM(4, 3, 1)                     = ZERO
-        dM(4, 3, 2)                     = -TWO/(temp_3**3)
-        dM(4, 3, 3)                     = ZERO
-        dM(4, 3, 4)                     = (TWO/(temp_3**3)) * du_TE(4)
-        dM(4, 3, 5)                     = (TWO/(temp_3**3)) * du_TE(5)
+        ! For M_32
+        l(4, 3, 1)                     = -TWO/(temp_3**3)
+        l(4, 3, 2)                     = TWO/(temp_3**3)
 
-        ! M_33 derivatives
-        dM(4, 4, 1)                     = ZERO
-        dM(4, 4, 2)                     = -TWO/(temp_3**3)
-        dM(4, 4, 3)                     = ZERO
-        dM(4, 4, 4)                     = (TWO/(temp_3**3)) * du_TE(4)
-        dM(4, 4, 5)                     = (TWO/(temp_3**3)) * du_TE(5)
+        ! For M_33
+        l(4, 4, 1)                     = -TWO/(temp_3**3)
+        l(4, 4, 2)                     = TWO/(temp_3**3)
+
+
+    end subroutine compute_l1_l2
+    !-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Compute the derivatives of M wrt the NACA thickness
+    ! parameters for a particular spanwise section
+    !
+    ! Input parameters: u_max   - location of the maximum thickness
+    !                   u_TE    - location of the TE thickness
+    !                   du_TE   - derivatives of u_TE
+    !
+    !-----------------------------------------------------------------------------------------------
+    subroutine M_derivatives (u_max, u_TE, du_TE, dM)
+        use globvar,    only: js, ncp_thk, TE_der_actual, TE_der_norm
+
+        real,                   intent(in)      :: u_max
+        real,                   intent(in)      :: u_TE
+        real,                   intent(in)      :: du_TE(ncp_thk(js) - 1)
+        real,                   intent(inout)   :: dM(4, 4, ncp_thk(js) - 1)
+
+        ! Local variables
+        integer                                 :: i, j
+        real                                    :: l(4, 4, 2)
+
+
+        ! Compute l1 and l2 which are used to compute derivative
+        ! of M below
+        call compute_l1_l2 (u_max, u_TE, l)
+
+
+        ! Compute derivatives of M
+        ! Actual TE derivative
+        if (TE_der_actual .and. .not. TE_der_norm) then
+
+            do i = 1, 4
+                do j = 1, 4
+                    dM(i, j, 1)             = ZERO
+                    dM(i, j, 2)             = l(i, j, 1)
+                    dM(i, j, 3)             = ZERO
+                    dM(i, j, 4)             = l(i, j, 2) * du_TE(4)
+                    dM(i, j, 5)             = l(i, j, 2) * du_TE(5)
+                end do
+            end do
+
+        ! Normalized TE derivative
+        else if (.not. TE_der_actual .and. TE_der_norm) then
+
+            do i = 1, 4
+                do j = 1, 4
+                    dM(i, j, 1)             = ZERO
+                    dM(i, j, 2)             = l(i, j, 1)
+                    dM(i, j, 3)             = l(i, j, 2) * du_TE(3)
+                    dM(i, j, 4)             = l(i, j, 2) * du_TE(4)
+                    dM(i, j, 5)             = l(i, j, 2) * du_TE(5)
+                end do
+            end do
+
+        ! Implicit TE derivative
+        else
+
+            do i = 1, 4
+                do j = 1, 4
+                    dM(i, j, 1)             = ZERO
+                    dM(i, j, 2)             = l(i, j, 1) + (l(i, j, 2) * du_TE(2))
+                    dM(i, j, 3)             = l(i, j, 2) * du_TE(3)
+                    dM(i, j, 4)             = l(i, j, 2) * du_TE(4)
+                end do
+            end do
+
+        end if
 
 
     end subroutine M_derivatives
@@ -1528,29 +1771,25 @@ module derivatives
     ! d_i for u_max =< u < u_TE for a particular spanwise
     ! section
     !
-    ! Input parameters: u_max   - location of maximum thickness
-    !                   u_TE    - location of TE thickness
-    !                   du_TE   - derivatives of u_TE wrt thickness
-    !                             parameters
-    !                   t_max   - maximum thickness
-    !                   t_TE    - TE thickness
-    !                   dt_TE   - TE thickness derivative
+    ! Input parameters: thk_params  - array containing TE thickness parameter
+    !                                 values for a given spanwise section
+    !                   u_TE        - location of TE thickness
+    !                   du_TE       - derivatives of u_TE wrt thickness
+    !                                 parameters
     !
     !-----------------------------------------------------------------------------------------------
-    subroutine d_derivatives (u_max, u_TE, du_TE, t_max, t_TE, dt_TE, dd)
-        use globvar,    only: TE_der_actual
+    subroutine d_derivatives (thk_params, u_TE, du_TE, dd)
+        use globvar,    only: js, ncp_thk, TE_der_actual, TE_der_norm
 
-        real,                   intent(in)      :: u_max
+        real,                   intent(in)      :: thk_params(ncp_thk(js) - 1)
         real,                   intent(in)      :: u_TE
-        real,                   intent(in)      :: du_TE(5)
-        real,                   intent(in)      :: t_max
-        real,                   intent(in)      :: t_TE
-        real,                   intent(in)      :: dt_TE
-        real,                   intent(inout)   :: dd(4, 5)
+        real,                   intent(in)      :: du_TE(ncp_thk(js) - 1)
+        real,                   intent(inout)   :: dd(4, ncp_thk(js) - 1)
 
         ! Local variables
         integer                                 :: i
-        real                                    :: MM(4, 4), dMM(4, 4, 5)
+        real                                    :: MM(4, 4), dMM(4, 4, ncp_thk(js) - 1), &
+                                                   u_max, t_max, t_TE, dt_TE, norm
 
 
         ! Initialize d_ders
@@ -1560,10 +1799,16 @@ module derivatives
 
         !
         ! Compute sensitivities of d wrt thickness parameters
-        ! TODO: Only for explicit specification of TE thickness
-        !       derivative
         !
-        if (TE_der_actual) then
+        ! Actual TE derivative
+        !
+        if (TE_der_actual .and. .not. TE_der_norm) then
+
+            ! Thickness distribution parameters
+            u_max                           = thk_params(2)
+            t_max                           = thk_params(3)
+            t_TE                            = thk_params(4)
+            dt_TE                           = thk_params(5)
 
             !
             ! Compute elements of matrix M as well as their
@@ -1580,12 +1825,77 @@ module derivatives
             do i = 1, 4
                 dd(i, 1)                    = ZERO
                 dd(i, 2)                    = (dMM(i, 1, 2) * t_max) + (dMM(i, 2, 2) * t_TE) + &
-                                            (dMM(i, 4, 2) * dt_TE)
+                                              (dMM(i, 4, 2) * dt_TE)
                 dd(i, 3)                    = MM(i, 1)
                 dd(i, 4)                    = (dMM(i, 1, 4) * t_max) + MM(i, 2) + (dMM(i, 2, 4) * &
-                                            t_TE) + (dMM(i, 4, 4) * dt_TE)
+                                               t_TE) + (dMM(i, 4, 4) * dt_TE)
                 dd(i, 5)                    = (dMM(i, 1, 5) * t_max) + (dMM(i, 2, 5) * t_TE) + &
-                                            MM(i, 4) + (dMM(i, 4, 5) * dt_TE)
+                                               MM(i, 4) + (dMM(i, 4, 5) * dt_TE)
+            end do
+
+        ! Normalized TE derivative
+        else if (.not. TE_der_actual .and. TE_der_norm) then
+
+            ! Thickness distribution parameters
+            u_max                           = thk_params(2)
+            t_max                           = thk_params(3)
+            t_TE                            = thk_params(4)
+            norm                            = thk_params(5)
+            dt_TE                           = -TWO * t_max * norm
+
+            !
+            ! Compute elements of matrix M as well as their
+            ! sensitivities wrt thickness parameters
+            !
+            call M_elements (u_max, u_TE, MM)
+            call M_derivatives (u_max, u_TE, du_TE, dMM)
+
+
+            !
+            ! Compute sensitivities of d_i wrt thickness
+            ! parameters
+            !
+            do i = 1, 4
+                dd(i, 1)                    = ZERO
+                dd(i, 2)                    = (dMM(i, 1, 2) * t_max) + (dMM(i, 2, 2) * t_TE) + &
+                                              (dMM(i, 4, 2) * dt_TE)
+                dd(i, 3)                    = (dMM(i, 1, 3) * t_max) + (MM(i, 1)/TWO) + (dMM(i, 2, 3) * t_TE) + &
+                                              (dMM(i, 4, 3) * dt_TE) - (MM(i, 4) * norm)
+                dd(i, 4)                    = (dMM(i, 1, 4) * t_max) + (dMM(i, 2, 4) * t_TE) + (MM(i, 2)/TWO) + &
+                                              (dMM(i, 4, 4) * dt_TE)
+                dd(i, 5)                    = (dMM(i, 1, 5) * t_max) + (dMM(i, 2, 5) * t_TE) + (dMM(i, 4, 5) * &
+                                               dt_TE) - (MM(i, 4) * TWO * t_max)
+            end do
+
+        ! Implicit TE derivative
+        else
+
+            ! Thickness distribution parameters
+            u_max                           = thk_params(2)
+            t_max                           = thk_params(3)
+            t_TE                            = thk_params(4)
+            call compute_TE_angle_copy (u_max, t_max, dt_TE)
+
+            !
+            ! Compute elements of matrix M as well as their
+            ! sensitivities wrt thickness parameters
+            !
+            call M_elements (u_max, u_TE, MM)
+            call M_derivatives (u_max, u_TE, du_TE, dMM)
+
+            !
+            ! Compute sensitivities of d_i wrt thickness
+            ! parameters
+            !
+            do i = 1, 4
+                dd(i, 1)                    = ZERO
+                dd(i, 2)                    = (dMM(i, 1, 2) * t_max) + (dMM(i, 2, 2) * t_TE) + &
+                                              (dMM(i, 4, 2) * dt_TE) + (MM(i, 4) * dtte_umax_der(u_max, t_max))
+                dd(i, 3)                    = ((dMM(i, 1, 3) * t_max) + MM(i, 1) + (dMM(i, 2, 3) * t_TE) + &
+                                              (dMM(i, 4, 3) * dt_TE)) + (TWO * MM(i, 4) * dtte_tmax_der(u_max))
+                dd(i, 4)                    = (dMM(i, 1, 4) * t_max) + (dMM(i, 2, 4) * t_TE) + &
+                                              MM(i, 2) + (dMM(i, 4, 4) * dt_TE)
+                !if (js == 11) write(*, '(F22.16)') dd(i, 3)
             end do
 
         end if  ! TE_der_actual
@@ -1700,9 +2010,8 @@ module derivatives
     ! Compute sensitivities of the coefficients of the a_i
     ! for 0 =< u < u_max for a particular spanwise section
     !
-    ! Input parameters: LE_radius   - LE radius parameter
-    !                   u_max       - location of maximum thickness
-    !                   t_max       - maximum thickness
+    ! Input parameters: thk_params  - array containing TE thickness parameter
+    !                                 values for a given spanwise section
     !                   a_0         - first a coefficient
     !                   d_2         - third d coefficient
     !                   d_3         - fourth d coefficient
@@ -1711,21 +2020,19 @@ module derivatives
     !                                 thickness parameters
     !
     !-----------------------------------------------------------------------------------------------
-    subroutine a_derivatives (LE_radius, u_max, t_max, a_0, d_2, d_3, d_ders, a_ders)
-        use globvar,    only: TE_der_actual
+    subroutine a_derivatives (thk_params, a_0, d_2, d_3, d_ders, a_ders)
+        use globvar,    only: js, ncp_thk, TE_der_actual, TE_der_norm
 
-        real,                   intent(in)      :: LE_radius
-        real,                   intent(in)      :: u_max
-        real,                   intent(in)      :: t_max
+        real,                   intent(in)      :: thk_params(ncp_thk(js) - 1)
         real,                   intent(in)      :: a_0
         real,                   intent(in)      :: d_2
         real,                   intent(in)      :: d_3
-        real,                   intent(in)      :: d_ders(4, 5)
-        real,                   intent(inout)   :: a_ders(4, 5)
+        real,                   intent(in)      :: d_ders(4, ncp_thk(js) - 1)
+        real,                   intent(inout)   :: a_ders(4, ncp_thk(js) - 1)
 
         ! Local variables
         integer                                 :: i
-        real                                    :: NN(3, 3), dNN(3, 3)
+        real                                    :: NN(3, 3), dNN(3, 3), LE_radius, u_max, t_max, temp
 
 
         ! Initialize a_ders
@@ -1735,10 +2042,15 @@ module derivatives
 
         !
         ! Compute sensitivities of a wrt thickness parameters
-        ! TODO: Only for explicit specification of TE thickness
-        !       derivative
         !
-        if (TE_der_actual) then
+        ! Actual TE derivative
+        !
+        if (TE_der_actual .and. .not. TE_der_norm) then
+
+            ! Thickness parameters
+            LE_radius                       = thk_params(1)
+            u_max                           = thk_params(2)
+            t_max                           = thk_params(3)
 
             !
             ! Compute elements of matrix N and their
@@ -1758,21 +2070,104 @@ module derivatives
             ! Sensitivities of a_1, a_2 and a_3
             do i = 1, 3
                 a_ders(i + 1, 1)            = -((NN(i, 1) * sqrt(u_max)) + (NN(i, 2)/(TWO * sqrt(u_max))) - &
-                                                (NN(i, 3)/(FOUR * sqrt(u_max**3)))) * a_ders(1, 1)
+                                              (NN(i, 3)/(FOUR * sqrt(u_max**3)))) * a_ders(1, 1)
                 a_ders(i + 1, 2)            = (dNN(i, 1) * (t_max - (a_0 * sqrt(u_max)))) - ((NN(i, 1) + &
-                                            dNN(i,2)) * (a_0/(TWO * sqrt(u_max)))) + ((NN(i, 2) + &
-                                            dNN(i, 3)) * (a_0/(FOUR * sqrt(u_max**3)))) + (dNN(i, 3) * &
-                                            ((TWO * d_2) + (SIX * d_3 * (ONE - u_max)))) + (NN(i, 3) * &
-                                            ((TWO * d_ders(3, 2)) + (SIX * d_ders(4, 2) * (ONE - u_max)) - &
-                                            (SIX * d_3) - ((THREE * a_0)/(EIGHT * sqrt(u_max**5)))))
+                                              dNN(i,2)) * (a_0/(TWO * sqrt(u_max)))) + ((NN(i, 2) + &
+                                              dNN(i, 3)) * (a_0/(FOUR * sqrt(u_max**3)))) + (dNN(i, 3) * &
+                                              ((TWO * d_2) + (SIX * d_3 * (ONE - u_max)))) + (NN(i, 3) * &
+                                              ((TWO * d_ders(3, 2)) + (SIX * d_ders(4, 2) * (ONE - u_max)) - &
+                                              (SIX * d_3) - ((THREE * a_0)/(EIGHT * sqrt(u_max**5)))))
                 a_ders(i + 1, 3)            = NN(i, 1) + (NN(i, 3) * ((TWO * d_ders(3, 3)) + (SIX * (ONE - &
-                                            u_max) * d_ders(4, 3)))) - (((NN(i, 1) * sqrt(u_max)) + &
-                                            (NN(i, 2)/(TWO * sqrt(u_max))) - (NN(i, 3)/(FOUR * &
-                                            sqrt(u_max**3)))) * a_ders(1, 3))
+                                              u_max) * d_ders(4, 3)))) - (((NN(i, 1) * sqrt(u_max)) + &
+                                              (NN(i, 2)/(TWO * sqrt(u_max))) - (NN(i, 3)/(FOUR * &
+                                              sqrt(u_max**3)))) * a_ders(1, 3))
                 a_ders(i + 1, 4)            = NN(i, 3) * ((TWO * d_ders(3, 4)) + (SIX * (ONE - u_max) * &
-                                            d_ders(4, 4)))
+                                              d_ders(4, 4)))
                 a_ders(i + 1, 5)            = NN(i, 3) * ((TWO * d_ders(3, 5)) + (SIX * (ONE - u_max) * &
-                                            d_ders(4, 5)))
+                                              d_ders(4, 5)))
+            end do
+
+        ! Normalized TE derivative
+        else if (.not. TE_der_actual .and. TE_der_norm) then
+
+            ! Thickness parameters
+            LE_radius                       = thk_params(1)
+            u_max                           = thk_params(2)
+            t_max                           = thk_params(3)
+
+            !
+            ! Compute elements of matrix N and their
+            ! corresponding derivatives
+            !
+            call N_elements (u_max, NN)
+            call N_derivatives (u_max, dNN)
+
+            a_ders                          = 0
+            ! Sensitivities of a_0
+            a_ders(1, 1)                    = (sqrt(2.2038) * t_max)/THREE
+            a_ders(1, 2)                    = ZERO
+            a_ders(1, 3)                    = (sqrt(2.2038) * LE_radius)/SIX
+            a_ders(1, 4)                    = ZERO
+            a_ders(1, 5)                    = ZERO
+
+            ! Sensitivities of a_1, a_2 and a_3
+            do i = 1, 3
+                temp                        = sqrt(u_max)
+                a_ders(i + 1, 1)            = -((NN(i, 1) * temp) + (NN(i, 2)/(TWO * temp)) - &
+                                              (NN(i, 3)/(FOUR * (temp**3)))) * a_ders(1, 1)
+                a_ders(i + 1, 2)            = (dNN(i, 1) * (t_max - (a_0 * temp))) - ((NN(i, 1) + &
+                                              dNN(i,2)) * (a_0/(TWO * temp))) + ((NN(i, 2) + &
+                                              dNN(i, 3)) * (a_0/(FOUR * (temp**3)))) + (dNN(i, 3) * &
+                                              ((TWO * d_2) + (SIX * d_3 * (ONE - u_max)))) + (NN(i, 3) * &
+                                              ((TWO * d_ders(3, 2)) + (SIX * d_ders(4, 2) * (ONE - u_max)) - &
+                                              (SIX * d_3) - ((THREE * a_0)/(EIGHT * (temp**5)))))
+                a_ders(i + 1, 3)            = (NN(i, 1)/TWO) + (NN(i, 3) * ((TWO * d_ders(3, 3)) + (SIX * &
+                                              (ONE - u_max) * d_ders(4, 3)))) - (((NN(i, 1) * temp) + &
+                                              (NN(i, 2)/(TWO * temp)) - (NN(i, 3)/(FOUR * &
+                                              (temp**3))))  * a_ders(1, 3))
+                a_ders(i + 1, 4)            = NN(i, 3) * ((TWO * d_ders(3, 4)) + (SIX * (ONE - u_max) * &
+                                              d_ders(4, 4)))
+                a_ders(i + 1, 5)            = NN(i, 3) * ((TWO * d_ders(3, 5)) + (SIX * (ONE - u_max) * &
+                                              d_ders(4, 5)))
+            end do
+
+        ! Implicit TE derivative
+        else
+
+            ! Thickness parameters
+            LE_radius                       = thk_params(1)
+            u_max                           = thk_params(2)
+            t_max                           = thk_params(3)
+
+            !
+            ! Compute elemets of matrix N and their
+            ! corresponding derivatives
+            !
+            call N_elements (u_max, NN)
+            call N_derivatives (u_max, dNN)
+
+            ! Sensitivities of a_0
+            a_ders(1, 1)                    = (sqrt(2.2038) * t_max)/THREE
+            a_ders(1, 2)                    = ZERO
+            a_ders(1, 3)                    = (sqrt(2.2038) * LE_radius)/THREE
+            a_ders(1, 4)                    = ZERO
+
+            ! Sensitivities of a_1, a_2 and a_3
+            do i = 1, 3
+                a_ders(i + 1, 1)            = -((NN(i, 1) * sqrt(u_max)) + (NN(i, 2)/(TWO * sqrt(u_max))) - &
+                                              (NN(i, 3)/(FOUR * sqrt(u_max**3)))) * a_ders(1, 1)
+                a_ders(i + 1, 2)            = (dNN(i, 1) * (t_max - (a_0 * sqrt(u_max)))) - ((NN(i, 1) + &
+                                              dNN(i,2)) * (a_0/(TWO * sqrt(u_max)))) + ((NN(i, 2) + &
+                                              dNN(i, 3)) * (a_0/(FOUR * sqrt(u_max**3)))) + (dNN(i, 3) * &
+                                              ((TWO * d_2) + (SIX * d_3 * (ONE - u_max)))) + (NN(i, 3) * &
+                                              ((TWO * d_ders(3, 2)) + (SIX * d_ders(4, 2) * (ONE - u_max)) - &
+                                              (SIX * d_3) - ((THREE * a_0)/(EIGHT * sqrt(u_max**5)))))
+                a_ders(i + 1, 3)            = NN(i, 1) + (NN(i, 3) * ((TWO * d_ders(3, 3)) + (SIX * (ONE - &
+                                              u_max) * d_ders(4, 3)))) - (((NN(i, 1) * sqrt(u_max)) + &
+                                              (NN(i, 2)/(TWO * sqrt(u_max))) - (NN(i, 3)/(FOUR * &
+                                              sqrt(u_max**3)))) * a_ders(1, 3))
+                a_ders(i + 1, 4)            = NN(i, 3) * ((TWO * d_ders(3, 4)) + (SIX * (ONE - u_max) * &
+                                              d_ders(4, 4)))
             end do
 
         end if  ! TE_der_actual
@@ -1790,41 +2185,52 @@ module derivatives
     ! Compute the derivatives of u wrt thickness parameters
     ! This is only necessary for ellipse-based clustering
     !
+    ! Input parameters: np          - number of points along chord-line
+    !                   np_cluster  - number of points in the clustered LE and TE regions
+    !                   thk_params  - NACA thickness sectionwise parameters
+    !                   du_TE       - derivatives of u_TE wrt thickness parameter values
+    !
     !-----------------------------------------------------------------------------------------------
-    subroutine u_derivatives (np, np_cluster, LE_radius, t_max, duTE_t_TE, duTE_dt_TE, u_ders)
-        use globvar, only: TE_der_actual, du_ell_LE, du_hyp_LE, du_hyp_TE, du_ell_TE
+    subroutine u_derivatives (np, np_cluster, thk_params, du_TE, u_ders)
+        use globvar, only: js, TE_der_actual, TE_der_norm, du_ell_LE, du_hyp_LE, du_hyp_TE, &
+                           du_ell_TE, ncp_thk
 
         integer,                intent(in)      :: np
         integer,                intent(in)      :: np_cluster
-        real,                   intent(in)      :: LE_radius
-        real,                   intent(in)      :: t_max
-        real,                   intent(in)      :: duTE_t_TE
-        real,                   intent(in)      :: duTE_dt_TE
-        real,                   intent(inout)   :: u_ders(np, 5)
+        real,                   intent(in)      :: thk_params(ncp_thk(js) - 1)
+        real,                   intent(in)      :: du_TE(ncp_thk(js) - 1)
+        real,                   intent(inout)   :: u_ders(np, ncp_thk(js) - 1)
 
         ! Local variables
         integer                                 :: i, np_mid, np_mid_LE, np_mid_TE
-        real                                    :: duLE_I, duLE_t_max
+        real                                    :: LE_radius, t_max, duLE_I, duLE_t_max, &
+                                                   duTE_u_max, duTE_t_max, duTE_t_TE,    &
+                                                   duTE_dt_TE, duTE_norm
 
 
         ! Compute value of n_mid
-        np_mid                          = np - (2 * np_cluster) + 2
-        np_mid_LE                       = (np_mid - 1)/2
-        np_mid_TE                       = ((np_mid - 1)/2) - 1
-
-
-
-        ! Sensitivities of u_LE wrt I and t_max
-        duLE_I                          = (2.2038/NINE) * LE_radius * (t_max**2)
-        duLE_t_max                      = (2.2038/NINE) * (LE_radius**2) * t_max
+        np_mid                              = np - (2 * np_cluster) + 2
+        np_mid_LE                           = (np_mid - 1)/2
+        np_mid_TE                           = ((np_mid - 1)/2) - 1
 
 
 
         !
-        ! Compute sensitivities of u wrt thickness parameters
-        ! TODO: Only for specification of TE thickness derivative
+        ! Actual TE derivative
         !
-        if (TE_der_actual) then
+        if (TE_der_actual .and. .not. TE_der_norm) then
+
+            ! Thickness parameters
+            LE_radius                       = thk_params(1)
+            t_max                           = thk_params(3)
+
+            ! Sensitivities of u_LE wrt I and t_max
+            duLE_I                          = (2.2038/NINE) * LE_radius * (t_max**2)
+            duLE_t_max                      = (2.2038/NINE) * (LE_radius**2) * t_max
+
+            ! Sensitivities of u_TE wrt t_TE and dt_TE
+            duTE_t_TE                       = du_TE(4)
+            duTE_dt_TE                      = du_TE(5)
 
             ! For 0 <= u <= u_LE
             do i = 1, np_cluster
@@ -1862,6 +2268,110 @@ module derivatives
                 u_ders(i, 5)                = duTE_dt_TE * du_ell_TE(i, 5)
             end do
 
+        ! Normalized TE derivative
+        else if (.not. TE_der_actual .and. TE_der_norm) then
+
+            ! Thickness parameters
+            LE_radius                       = thk_params(1)
+            t_max                           = thk_params(3)
+
+            ! Sensitivities of u_LE wrt I and t_max
+            duLE_I                          = (2.2038/NINE) * LE_radius * (t_max**2)
+            duLE_t_max                      = (2.2038/18.0) * (LE_radius**2) * t_max
+
+            ! Sensitivities of u_TE
+            duTE_t_max                      = du_TE(3)
+            duTE_t_TE                       = du_TE(4)
+            duTE_norm                       = du_TE(5)
+
+            ! For 0 <= u <= u_LE
+            do i = 1, np_cluster
+                u_ders(i, 1)                = duLE_I * du_ell_LE(i, 1)
+                u_ders(i, 2)                = ZERO
+                u_ders(i, 3)                = duLE_t_max * du_ell_LE(i, 3)
+                u_ders(i, 4)                = ZERO
+                u_ders(i, 5)                = ZERO
+            end do
+
+            ! For u_LE < u <= u_mid
+            do i = np_cluster + 1, np_cluster + np_mid_LE
+                u_ders(i, 1)                = HALF * duLE_I * (ONE - du_hyp_LE(i, 1))
+                u_ders(i, 2)                = ZERO
+                u_ders(i, 3)                = HALF * ((duLE_t_max * (ONE - du_hyp_LE(i, 3))) + &
+                                              (duTE_t_max * (ONE + du_hyp_LE(i, 3))))
+                u_ders(i, 4)                = HALF * duTE_t_TE * (ONE + du_hyp_LE(i, 4))
+                u_ders(i, 5)                = HALF * duTE_norm * (ONE + du_hyp_LE(i, 5))
+            end do
+
+            ! For u_mid < u < u_TE
+            do i = np_cluster + np_mid_LE + 1, np_cluster + np_mid_LE + np_mid_TE
+                u_ders(i, 1)                = HALF * duLE_I * (ONE - du_hyp_TE(i, 1))
+                u_ders(i, 2)                = ZERO
+                u_ders(i, 3)                = HALF * ((duLE_t_max * (ONE - du_hyp_TE(i, 3))) + &
+                                              (duTE_t_max * (ONE + du_hyp_TE(i, 3))))
+                u_ders(i, 4)                = HALF * duTE_t_TE * (ONE + du_hyp_TE(i, 4))
+                u_ders(i, 5)                = HALF * duTE_norm * (ONE + du_hyp_TE(i, 5))
+            end do
+
+            ! For u_TE <= u <= 1
+            do i = np - np_cluster + 1, np
+                u_ders(i, 1)                = ZERO
+                u_ders(i, 2)                = ZERO
+                u_ders(i, 3)                = duTE_t_max * du_ell_TE(i, 3)
+                u_ders(i, 4)                = duTE_t_TE * du_ell_TE(i, 4)
+                u_ders(i, 5)                = duTE_norm * du_ell_TE(i, 5)
+            end do
+
+        ! Implicit TE derivative
+        else
+
+            ! Thickness parameters
+            LE_radius                       = thk_params(1)
+            t_max                           = thk_params(3)
+
+            ! Sensitivities of u_LE wrt I and t_max
+            duLE_I                          = (2.2038/NINE) * LE_radius * (t_max**2)
+            duLE_t_max                      = (2.2038/18.0) * (LE_radius**2) * t_max
+
+            ! Sensitivities of u_TE
+            duTE_u_max                      = du_TE(2)
+            duTE_t_max                      = du_TE(3)
+            duTE_t_TE                       = du_TE(4)
+
+            ! For 0 <= u <= u_LE
+            do i = 1, np_cluster
+                u_ders(i, 1)                = duLE_I * du_ell_LE(i, 1)
+                u_ders(i, 2)                = ZERO
+                u_ders(i, 3)                = duLE_t_max * du_ell_LE(i, 3)
+                u_ders(i, 4)                = ZERO
+            end do
+
+            ! For u_LE < u <= u_mid
+            do i = np_cluster + 1, np_cluster + np_mid_LE
+                u_ders(i, 1)                = 0.5 * duLE_I * (ONE - du_hyp_LE(i, 1))
+                u_ders(i, 2)                = (0.5 * duTE_u_max * (ONE + du_hyp_LE(i, 2)))
+                u_ders(i, 3)                = 0.5 * ((duLE_t_max * (ONE - du_hyp_LE(i, 3))) + &
+                                              (duTE_t_max * (ONE + du_hyp_LE(i, 3))))
+                u_ders(i, 4)                = (0.5 * duTE_t_TE * (ONE + du_hyp_LE(i, 4)))/TWO
+            end do
+
+            ! For u_mid < u < u_TE
+            do i = np_cluster + np_mid_LE + 1, np_cluster + np_mid_LE + np_mid_TE
+                u_ders(i, 1)                = 0.5 * duLE_I * (ONE - du_hyp_TE(i, 1))
+                u_ders(i, 2)                = 0.5 * duTE_u_max * (ONE + du_hyp_TE(i, 2))
+                u_ders(i, 3)                = 0.5 * ((duLE_t_max * (ONE - du_hyp_TE(i, 3))) + &
+                                              (duTE_t_max * (ONE + du_hyp_TE(i, 3))))
+                u_ders(i, 4)                = (0.5 * duTE_t_TE * (ONE + du_hyp_TE(i, 4)))/TWO
+            end do
+
+            ! For u_TE <= u <= 1
+            do i = np - np_cluster + 1, np
+                u_ders(i, 1)                = ZERO
+                u_ders(i, 2)                = du_ell_TE(i, 2) * duTE_u_max
+                u_ders(i, 3)                = du_ell_TE(i, 3) * duTE_t_max
+                u_ders(i, 4)                = (du_ell_TE(i, 4) * duTE_t_TE)/TWO
+            end do
+
         end if
 
 
@@ -1886,29 +2396,28 @@ module derivatives
     !                   d_NACA      - NACA thickness coefficients for u >= u_max
     !
     !-----------------------------------------------------------------------------------------------
-    subroutine NACA_thickness_derivatives (js, np, np_cluster, u, thk, thk_cp, u_TE, uc, r_TE, &
+    subroutine NACA_thickness_derivatives (np, np_cluster, u, thk, thk_cp, u_TE, uc, r_TE, &
                                            a_NACA, d_NACA, u_ders, NACA_ders)
-        use globvar,    only: TE_der_actual, clustering_switch
+        use globvar,    only: js, TE_der_actual, TE_der_norm, clustering_switch, ncp_thk
 
-        integer,                intent(in)      :: js
         integer,                intent(in)      :: np
         integer,                intent(in)      :: np_cluster
         real,                   intent(in)      :: u(np)
         real,                   intent(in)      :: thk(np)
-        real,                   intent(in)      :: thk_cp(5)
+        real,                   intent(in)      :: thk_cp(ncp_thk(js) - 1)
         real,                   intent(in)      :: u_TE
         real,                   intent(in)      :: uc
         real,                   intent(in)      :: r_TE
         real,                   intent(in)      :: a_NACA(4)
         real,                   intent(in)      :: d_NACA(4)
-        real,                   intent(inout)   :: u_ders(np, 5)
-        real,                   intent(inout)   :: NACA_ders(np, 5)
+        real,                   intent(inout)   :: u_ders(np, ncp_thk(js) - 1)
+        real,                   intent(inout)   :: NACA_ders(np, ncp_thk(js) - 1)
 
         ! Local variables
         integer                                 :: i
         real,   parameter                       :: tol = 10E-8
-        real                                    :: du_TE(5), dr_TE(5), duc(5), d_ders(4, 5), &
-                                                   a_ders(4, 5)
+        real                                    :: du_TE(ncp_thk(js) - 1), dr_TE(ncp_thk(js) - 1), duc(ncp_thk(js) - 1), &
+                                                   d_ders(4, ncp_thk(js) - 1), a_ders(4, ncp_thk(js) - 1), temp, u_temp
 
 
         ! Initialize output arrays
@@ -1920,30 +2429,35 @@ module derivatives
         ! Compute derivatives of u_TE, r_TE and u_center
         ! wrt the thickness parameters
         !
-        call u_TE_derivatives (thk_cp(4), thk_cp(5), du_TE)
-        call r_TE_derivatives (thk_cp(4), thk_cp(5), dr_TE)
-        call u_center_derivatives (thk_cp(4), thk_cp(5), duc)
+        call u_TE_derivatives (thk_cp, du_TE)
+        call r_TE_derivatives (thk_cp, dr_TE)
+        call u_center_derivatives (thk_cp, duc)
 
 
         !
         ! Compute sensitivities of thickness coefficients
         ! wrt the thickness distribution parameters
         !
-        call d_derivatives (thk_cp(2), u_TE, du_TE, thk_cp(3), thk_cp(4), thk_cp(5), d_ders)
-        call a_derivatives (thk_cp(1), thk_cp(2), thk_cp(3), a_NACA(1), d_NACA(3), d_NACA(4), d_ders, a_ders)
+        call d_derivatives (thk_cp, u_TE, du_TE, d_ders)
+        call a_derivatives (thk_cp, a_NACA(1), d_NACA(3), d_NACA(4), d_ders, a_ders)
 
 
         ! Compute derivatives of u wrt the thickness parameters
         ! for ellipse-based clustering
         if (clustering_switch == 4) &
-             call u_derivatives (np, np_cluster, thk_cp(1), thk_cp(3), du_TE(4), du_TE(5), u_ders)
+             call u_derivatives (np, np_cluster, thk_cp, du_TE, u_ders)
+
+        ! Store derivatives of u wrt the thickness parameters
+        ! in module global array
+        if (allocated(sec_u_ders)) deallocate(sec_u_ders)
+        allocate (sec_u_ders(np, ncp_thk(js) - 1))
+        sec_u_ders                      = u_ders
 
 
         !
-        ! TODO: Derivatives available only for explicit specification
-        !       of the TE thickness derivative
+        ! Actual TE derivative
         !
-        if (TE_der_actual) then
+        if (TE_der_actual .and. .not. TE_der_norm) then
 
             ! Thickness derivatives for clustering methods
             ! other than the ellipse-based one
@@ -2074,15 +2588,249 @@ module derivatives
 
             end if  ! clustering_switch
 
-        end if  ! TE_der_actual
+        ! Normalized TE derivative
+        else if (.not. TE_der_actual .and. TE_der_norm) then
 
-        !if (clustering_switch == 4) then
-        !    if (js == 21) then
-        !        do i = 1, np
-        !            print *, NACA_ders(i, 3)
-        !        end do
-        !    end if
-        !end if
+            ! Thickness derivatives for clustering methods
+            ! other than the ellipse-based one
+            if (clustering_switch /= 4) then
+
+                do i = 1, np
+
+                    ! u < u_max
+                    if (u(i) < thk_cp(2)) then
+
+                        NACA_ders(i, 1) = (a_ders(1, 1) * sqrt(u(i))) + (a_ders(2, 1) * u(i)) + &
+                                          (a_ders(3, 1) * (u(i)**2)) + (a_ders(4, 1) * (u(i)**3))
+                        NACA_ders(i, 2) = (a_ders(1, 2) * sqrt(u(i))) + (a_ders(2, 2) * u(i)) + &
+                                          (a_ders(3, 2) * (u(i)**2)) + (a_ders(4, 2) * (u(i)**3))
+                        NACA_ders(i, 3) = (a_ders(1, 3) * sqrt(u(i))) + (a_ders(2, 3) * u(i)) + &
+                                          (a_ders(3, 3) * (u(i)**2)) + (a_ders(4, 3) * (u(i)**3))
+                        NACA_ders(i, 4) = (a_ders(1, 4) * sqrt(u(i))) + (a_ders(2, 4) * u(i)) + &
+                                          (a_ders(3, 4) * (u(i)**2)) + (a_ders(4, 4) * (u(i)**3))
+                        NACA_ders(i, 5) = (a_ders(1, 5) * sqrt(u(i))) + (a_ders(2, 5) * u(i)) + &
+                                          (a_ders(3, 5) * (u(i)**2)) + (a_ders(4, 5) * (u(i)**3))
+
+                    ! u >= u_max
+                    else if ((abs(u(i) - thk_cp(2)) < tol) .or. (u(i) > thk_cp(2))) then
+
+                        ! u_max <= u < u_TE
+                        if (u(i) < u_TE) then
+
+                            NACA_ders(i, 2) &
+                                        = d_ders(1, 2) + (d_ders(2, 2) * (ONE - u(i))) + (d_ders(3, 2) * &
+                                          ((ONE - u(i))**2)) + (d_ders(4, 2) * ((ONE - u(i))**3))
+                            NACA_ders(i, 3) &
+                                        = d_ders(1, 3) + (d_ders(2, 3) * (ONE - u(i))) + (d_ders(3, 3) * &
+                                          ((ONE - u(i))**2)) + (d_ders(4, 3) * ((ONE - u(i))**3))
+                            NACA_ders(i, 4) &
+                                        = d_ders(1, 4) + (d_ders(2, 4) * (ONE - u(i))) + (d_ders(3, 4) * &
+                                          ((ONE - u(i))**2)) + (d_ders(4, 4) * ((ONE - u(i))**3))
+                            NACA_ders(i, 5) &
+                                        = d_ders(1, 5) + (d_ders(2, 5) * (ONE - u(i))) + (d_ders(3, 5) * &
+                                          ((ONE - u(i))**2)) + (d_ders(4, 5) * ((ONE - u(i))**3))
+
+                        ! u_TE <= u <= 1
+                        else
+
+                            if (abs(ONE - u(i)) > tol) then
+                                NACA_ders(i, 3) &
+                                        = (ONE/thk(i)) * ((r_TE * dr_TE(3)) + ((u(i) - uc) * duc(3)))
+                                NACA_ders(i, 4) &
+                                        = (ONE/thk(i)) * ((r_TE * dr_TE(4)) + ((u(i) - uc) * duc(4)))
+                                NACA_ders(i, 5) &
+                                        = (ONE/thk(i)) * ((r_TE * dr_TE(5)) + ((u(i) - uc) * duc(5)))
+                            end if
+
+                        end if  ! u(i) < u_TE
+
+                    end if  ! u(i) < thk_cp(2)
+
+                end do  ! i = 1, np
+
+            else    ! ellipse-based clustering
+
+                do i = 1, np
+
+                    ! if u < u_max
+                    if (u(i) < thk_cp(2)) then
+
+                        ! 0 < u < u_max
+                        if (u(i) > tol) then
+                            temp            = (a_NACA(1)/(TWO * sqrt(u(i)))) + a_NACA(2) + (TWO * a_NACA(3) * u(i)) + &
+                                              (THREE * a_NACA(4) * (u(i)**2))
+                            NACA_ders(i, 1) = ((a_ders(1, 1) * sqrt(u(i))) + (a_ders(2, 1) * u(i)) + (a_ders(3, 1) * &
+                                              (u(i)**2)) + (a_ders(4, 1) * (u(i)**3))) + (temp * u_ders(i, 1))
+                            NACA_ders(i, 2) = (a_ders(1, 2) * sqrt(u(i))) + (a_ders(2, 2) * u(i)) + (a_ders(3, 2) * &
+                                              (u(i)**2)) + (a_ders(4, 2) * (u(i)**3))
+                            NACA_ders(i, 3) = (((a_ders(1, 3) * sqrt(u(i))) + (a_ders(2, 3) * u(i)) + (a_ders(3, 3) * &
+                                              (u(i)**2)) + (a_ders(4, 3) * (u(i)**3))))/ONE + (temp * u_ders(i, 3))
+                            NACA_ders(i, 4) = (((a_ders(1, 4) * sqrt(u(i))) + (a_ders(2, 4) * u(i)) + (a_ders(3, 4) * &
+                                              (u(i)**2)) + (a_ders(4, 4) * (u(i)**3))))/ONE + (temp * u_ders(i, 4))
+                            NACA_ders(i, 5) = ((a_ders(1, 5) * sqrt(u(i))) + (a_ders(2, 5) * u(i)) + (a_ders(3, 5) * &
+                                              (u(i)**2)) + (a_ders(4, 5) * (u(i)**3))) + (temp * u_ders(i, 5))
+                        end if
+
+                    ! u >= u_max
+                    else if ((abs(u(i) - thk_cp(2)) < tol) .or. (u(i) > thk_cp(2))) then
+
+                        ! u_max <= u < u_TE
+                        if (u(i) < u_TE) then
+
+                            u_temp      = ONE - u(i)
+                            temp        = d_NACA(2) + (TWO * d_NACA(3) * u_temp) + (THREE * d_NACA(4) * (u_temp**2))
+                            NACA_ders(i, 1) &
+                                        = -temp * u_ders(i, 1)
+                            NACA_ders(i, 2) &
+                                        = d_ders(1, 2) + (d_ders(2, 2) * u_temp) + (d_ders(3, 2) * (u_temp**2)) + &
+                                          (d_ders(4, 2) * (u_temp**3))
+                            NACA_ders(i, 3) &
+                                        = (d_ders(1, 3) + (d_ders(2, 3) * u_temp) + (d_ders(3, 3) * (u_temp**2)) + &
+                                          (d_ders(4, 3) * (u_temp**3))) - (temp * u_ders(i, 3))
+                            NACA_ders(i, 4) &
+                                        = (d_ders(1, 4) + (d_ders(2, 4) * u_temp) + (d_ders(3, 4) * (u_temp**2)) + &
+                                          (d_ders(4, 4) * (u_temp**3))) - (temp * u_ders(i, 4))
+                            NACA_ders(i, 5) &
+                                        = (d_ders(1, 5) + (d_ders(2, 5) * u_temp) + (d_ders(3, 5) * (u_temp**2)) + &
+                                          (d_ders(4, 5) * (u_temp**3))) - (temp * u_ders(i, 5))
+                        ! u_TE <= u <= 1
+                        else
+
+                            if (abs(ONE - u(i)) > tol) then
+                                NACA_ders(i, 3) &
+                                        = (ONE/thk(i)) * ((r_TE * dr_TE(3)) - ((u(i) - uc) * (u_ders(i, 3) - duc(3))))
+                                NACA_ders(i, 4) &
+                                        = (ONE/thk(i)) * ((r_TE * dr_TE(4)) - ((u(i) - uc) * (u_ders(i, 4) - duc(4))))
+                                NACA_ders(i, 5) &
+                                        = (ONE/thk(i)) * ((r_TE * dr_TE(5)) - ((u(i) - uc) * (u_ders(i, 5) - duc(5))))
+                            end if
+
+                        end if  ! u(i) < u_TE
+
+                    end if  ! u(i) < thk_cp(2)
+
+                end do  ! i = 1, np
+
+            end if  ! clustering_switch
+
+        ! Implicit TE derivative
+        else
+
+            ! Thickness derivatives for clustering methods
+            ! other than the ellipse-based one
+            if (clustering_switch /= 4) then
+
+                do i = 1, np
+
+                    ! u < u_max
+                    if (u(i) < thk_cp(2)) then
+
+                        NACA_ders(i, 1) = (a_ders(1, 1) * sqrt(u(i))) + (a_ders(2, 1) * u(i)) + &
+                                          (a_ders(3, 1) * (u(i)**2)) + (a_ders(4, 1) * (u(i)**3))
+                        NACA_ders(i, 2) = (a_ders(1, 2) * sqrt(u(i))) + (a_ders(2, 2) * u(i)) + &
+                                          (a_ders(3, 2) * (u(i)**2)) + (a_ders(4, 2) * (u(i)**3))
+                        NACA_ders(i, 3) = ((a_ders(1, 3) * sqrt(u(i))) + (a_ders(2, 3) * u(i)) + &
+                                          (a_ders(3, 3) * (u(i)**2)) + (a_ders(4, 3) * (u(i)**3)))/TWO
+                        NACA_ders(i, 4) = ((a_ders(1, 4) * sqrt(u(i))) + (a_ders(2, 4) * u(i)) + &
+                                          (a_ders(3, 4) * (u(i)**2)) + (a_ders(4, 4) * (u(i)**3)))/TWO
+
+                    ! u >= u_max
+                    else if ((abs(u(i) - thk_cp(2)) < tol) .or. (u(i) > thk_cp(2))) then
+
+                        ! u_max <= u < u_TE
+                        if (u(i) < u_TE) then
+
+                            NACA_ders(i, 2) &
+                                        = d_ders(1, 2) + (d_ders(2, 2) * (ONE - u(i))) + (d_ders(3, 2) * &
+                                          ((ONE - u(i))**2)) + (d_ders(4, 2) * ((ONE - u(i))**3))
+                            NACA_ders(i, 3) &
+                                        = (d_ders(1, 3) + (d_ders(2, 3) * (ONE - u(i))) + (d_ders(3, 3) * &
+                                          ((ONE - u(i))**2)) + (d_ders(4, 3) * ((ONE - u(i))**3)))/TWO
+                            NACA_ders(i, 4) &
+                                        = (d_ders(1, 4) + (d_ders(2, 4) * (ONE - u(i))) + (d_ders(3, 4) * &
+                                          ((ONE - u(i))**2)) + (d_ders(4, 4) * ((ONE - u(i))**3)))/TWO
+
+                        ! u_TE <= u <= 1
+                        else
+
+                            if (abs(ONE - u(i)) > tol) then
+                                NACA_ders(i, 2) &
+                                        = (ONE/thk(i)) * ((r_TE * dr_TE(2)) + ((u(i) - uc) * duc(2)))
+                                NACA_ders(i, 3) &
+                                        = ((ONE/thk(i)) * ((r_TE * dr_TE(3)) + ((u(i) - uc) * duc(3))))/TWO
+                                NACA_ders(i, 4) &
+                                        = ((ONE/thk(i)) * ((r_TE * dr_TE(4)) + ((u(i) - uc) * duc(4))))/TWO
+                            end if
+
+                        end if  ! u(i) < u_TE
+
+                    end if  ! u(i) < thk_cp(2)
+
+                end do  ! i = 1, np
+
+            else    ! ellipse-based clustering
+
+                do i = 1, np
+
+                    ! if u < u_max
+                    if (u(i) < thk_cp(2)) then
+
+                        ! 0 < u < u_max
+                        if (u(i) > tol) then
+                            temp            = (a_NACA(1)/(TWO * sqrt(u(i)))) + a_NACA(2) + (TWO * a_NACA(3) * u(i)) + &
+                                              (THREE * a_NACA(4) * (u(i)**2))
+                            NACA_ders(i, 1) = ((a_ders(1, 1) * sqrt(u(i))) + (a_ders(2, 1) * u(i)) + (a_ders(3, 1) * &
+                                              (u(i)**2)) + (a_ders(4, 1) * (u(i)**3))) + (temp * u_ders(i, 1))
+                            NACA_ders(i, 2) = ((a_ders(1, 2) * sqrt(u(i))) + (a_ders(2, 2) * u(i)) + (a_ders(3, 2) * &
+                                              (u(i)**2)) + (a_ders(4, 2) * (u(i)**3))) + (temp * u_ders(i, 2))
+                            NACA_ders(i, 3) = (((a_ders(1, 3) * sqrt(u(i))) + (a_ders(2, 3) * u(i)) + (a_ders(3, 3) * &
+                                              (u(i)**2)) + (a_ders(4, 3) * (u(i)**3))))/TWO + (temp * u_ders(i, 3))
+                            NACA_ders(i, 4) = (((a_ders(1, 4) * sqrt(u(i))) + (a_ders(2, 4) * u(i)) + (a_ders(3, 4) * &
+                                              (u(i)**2)) + (a_ders(4, 4) * (u(i)**3))))/TWO + (temp * u_ders(i, 4))
+                        end if
+
+                    ! u >= u_max
+                    else if ((abs(u(i) - thk_cp(2)) < tol) .or. (u(i) > thk_cp(2))) then
+
+                        ! u_max <= u < u_TE
+                        if (u(i) < u_TE) then
+
+                            u_temp      = ONE - u(i)
+                            temp        = d_NACA(2) + (TWO * d_NACA(3) * u_temp) + (THREE * d_NACA(4) * (u_temp**2))
+                            NACA_ders(i, 1) &
+                                        = -temp * u_ders(i, 1)
+                            NACA_ders(i, 2) &
+                                        = (d_ders(1, 2) + (d_ders(2, 2) * u_temp) + (d_ders(3, 2) * (u_temp**2)) + &
+                                          (d_ders(4, 2) * (u_temp**3))) - (temp * u_ders(i, 2))
+                            NACA_ders(i, 3) &
+                                        = ((d_ders(1, 3) + (d_ders(2, 3) * u_temp) + (d_ders(3, 3) * (u_temp**2)) + &
+                                           (d_ders(4, 3) * (u_temp**3))))/TWO - (temp * u_ders(i, 3))
+                            NACA_ders(i, 4) &
+                                        = ((d_ders(1, 4) + (d_ders(2, 4) * u_temp) + (d_ders(3, 4) * (u_temp**2)) + &
+                                           (d_ders(4, 4) * (u_temp**3))))/TWO - (temp * u_ders(i, 4))
+                        ! u_TE <= u <= 1
+                        else
+
+                            if (abs(ONE - u(i)) > tol) then
+                                NACA_ders(i, 2) &
+                                        = (ONE/thk(i)) * ((r_TE * dr_TE(2)) - ((u(i) - uc) * (u_ders(i, 2) - duc(2))))
+                                NACA_ders(i, 3) &
+                                        = ((ONE/thk(i)) * ((r_TE * dr_TE(3)) - ((u(i) - uc) * ((TWO * u_ders(i, 3)) - &
+                                           duc(3)))))/TWO
+                                NACA_ders(i, 4) &
+                                        = ((ONE/thk(i)) * ((r_TE * dr_TE(4)) - ((u(i) - uc) * ((TWO * u_ders(i, 4)) - &
+                                           duc(4)))))/TWO
+                            end if
+
+                        end if  ! u(i) < u_TE
+
+                    end if  ! u(i) < thk_cp(2)
+
+                end do  ! i = 1, np
+
+            end if  ! clustering_switch
+
+        end if  ! TE_der_actual
 
 
     end subroutine NACA_thickness_derivatives
@@ -2109,6 +2857,7 @@ module derivatives
     !
     !-----------------------------------------------------------------------------------------------
     subroutine meanline_thickness_derivatives (dslope_du, dcam_du, u_ders, slope_ders, cam_ders)
+        use globvar,    only: js, ncp_thk
 
         real,                   intent(in)      :: dslope_du(:)
         real,                   intent(in)      :: dcam_du(:)
@@ -2126,7 +2875,7 @@ module derivatives
 
         ! Compute derivatives
         do i = 1, np
-            do j = 1, 5
+            do j = 1, ncp_thk(js) - 1
                 slope_ders(i, j)        = dslope_du(i) * u_ders(i, j)
                 cam_ders(i, j)          = dcam_du(i) * u_ders(i, j)
             end do
@@ -3458,8 +4207,7 @@ module derivatives
     !-----------------------------------------------------------------------------------------------
     subroutine uv_curv_derivatives (thickness, slope, dslope_dxcp, dslope_dycp, dcam_dxcp, &
                                     dcam_dycp, dub_dcurv, dut_dcurv, dvb_dcurv, dvt_dcurv)
-        use globvar,            only: curv_ycp_ders
-        use funcNsubs,          only: get_sec_number
+        use globvar,            only: js, curv_ycp_ders
 
         real,                   intent(in)      :: thickness(:)
         real,                   intent(in)      :: slope(:)
@@ -3473,7 +4221,7 @@ module derivatives
         real,   allocatable,    intent(inout)   :: dvt_dcurv(:,:,:)
 
         ! Local variables
-        integer                                 :: np, nparams, ncp, js, i, j, k
+        integer                                 :: np, nparams, ncp, i, j, k
         real,   allocatable                     :: dub_dc(:,:), dut_dc(:,:), dvb_dc(:,:), dvt_dc(:,:)
 
 
@@ -3496,9 +4244,6 @@ module derivatives
         dut_dcurv                       = 0.0
         dvb_dcurv                       = 0.0
         dvt_dcurv                       = 0.0
-
-        ! Get the current spanwise section index
-        call get_sec_number (js)
 
 
         !
@@ -3551,14 +4296,13 @@ module derivatives
     !-----------------------------------------------------------------------------------------------
     subroutine uv_thk_derivatives (np, u_ders, NACA_ders, slope_ders, cam_ders, thickness, &
                                    angle, slope, dubot_dt, dvbot_dt, dutop_dt, dvtop_dt)
-        use globvar,            only: thk_ycp_ders, clustering_switch
-        use funcNsubs,          only: get_sec_number
+        use globvar,            only: js, thk_ycp_ders, clustering_switch, ncp_thk, TE_der_actual, TE_der_norm
 
         integer,                intent(in)      :: np
-        real,                   intent(in)      :: u_ders(np, 5)
-        real,                   intent(in)      :: NACA_ders(np, 5)
-        real,                   intent(in)      :: slope_ders(np, 5)
-        real,                   intent(in)      :: cam_ders(np, 5)
+        real,                   intent(in)      :: u_ders(np, ncp_thk(js) - 1)
+        real,                   intent(in)      :: NACA_ders(np, ncp_thk(js) - 1)
+        real,                   intent(in)      :: slope_ders(np, ncp_thk(js) - 1)
+        real,                   intent(in)      :: cam_ders(np, ncp_thk(js) - 1)
         real,                   intent(in)      :: thickness(np)
         real,                   intent(in)      :: angle(np)
         real,                   intent(in)      :: slope(np)
@@ -3568,12 +4312,9 @@ module derivatives
         real,   allocatable,    intent(inout)   :: dvtop_dt(:,:,:)
 
         ! Local variables
-        integer                                 :: nparams, ncp, i, j, k, js
-        real                                    :: temp, dubot(np, 5), dvbot(np, 5), dutop(np, 5), dvtop(np, 5)
-
-
-        ! Get the current spanwise section index
-        call get_sec_number (js)
+        integer                                 :: nparams, ncp, i, j, k
+        real                                    :: temp, dubot(np, ncp_thk(js) - 1), dvbot(np, ncp_thk(js) - 1), &
+                                                   dutop(np, ncp_thk(js) - 1), dvtop(np, ncp_thk(js) - 1)
 
 
         !
@@ -3581,49 +4322,79 @@ module derivatives
         ! sections wrt the thickness distribution
         ! parameters
         !
-        if (clustering_switch == 4) then    ! Ellipse-based clustering
+        ! Actual specification of TE derivative
+        !
+        if (TE_der_actual .and. .not. TE_der_norm) then
 
-            do i = 1, np
+            if (clustering_switch == 4) then    ! Ellipse-based clustering
+                do i = 1, np
+                    temp                = sqrt((ONE + (slope(i))**2)**3)    ! Temporary term
+                    do j = 1, ncp_thk(js) - 1
 
-                ! Temporary term
-                temp                        = sqrt((ONE + (slope(i))**2)**3)
+                        dubot(i, j)     = u_ders(i, j) + (0.5 * NACA_ders(i, j) * sin(angle(i))) + &
+                                          ((thickness(i)/temp) * slope_ders(i, j))
+                        dvbot(i, j)     = cam_ders(i, j) - (0.5 * NACA_ders(i, j) * cos(angle(i))) + &
+                                          (((thickness(i) * slope(i))/temp) * slope_ders(i, j))
+                        dutop(i, j)     = u_ders(i, j) - (0.5 * NACA_ders(i, j) * sin(angle(i))) - &
+                                          ((thickness(i)/temp) * slope_ders(i, j))
+                        dvtop(i, j)     = cam_ders(i, j) + (0.5 * NACA_ders(i, j) * cos(angle(i))) - &
+                                          (((thickness(i) * slope(i))/temp) * slope_ders(i, j))
 
-                do j = 1, 5
-                    dubot(i, j)             = u_ders(i, j) + (0.5 * NACA_ders(i, j) * sin(angle(i))) + &
-                                              ((thickness(i)/temp) * slope_ders(i, j))
-                    dvbot(i, j)             = cam_ders(i, j) - (0.5 * NACA_ders(i, j) * cos(angle(i))) + &
-                                              (((thickness(i) * slope(i))/temp) * slope_ders(i, j))
-                    dutop(i, j)             = u_ders(i, j) - (0.5 * NACA_ders(i, j) * sin(angle(i))) - &
-                                              ((thickness(i)/temp) * slope_ders(i, j))
-                    dvtop(i, j)             = cam_ders(i, j) + (0.5 * NACA_ders(i, j) * cos(angle(i))) - &
-                                              (((thickness(i) * slope(i))/temp) * slope_ders(i, j))
+                    end do
                 end do
+            else    ! Without ellipse-based clustering
+                do i = 1, np
+                    do j = 1, ncp_thk(js) - 1
 
-            end do
+                        if (j == 3 .or. j == 4) then
+                            dubot(i, j)         =  0.5 * sin(angle(i)) * NACA_ders(i, j)
+                            dvbot(i, j)         = -0.5 * cos(angle(i)) * NACA_ders(i, j)
+                            dutop(i, j)         = -0.5 * sin(angle(i)) * NACA_ders(i, j)
+                            dvtop(i, j)         =  0.5 * cos(angle(i)) * NACA_ders(i, j)
+                        else
+                            dubot(i, j)         =  sin(angle(i)) * NACA_ders(i, j)
+                            dvbot(i, j)         = -cos(angle(i)) * NACA_ders(i, j)
+                            dutop(i, j)         = -sin(angle(i)) * NACA_ders(i, j)
+                            dvtop(i, j)         =  cos(angle(i)) * NACA_ders(i, j)
+                        end if
 
-        else    ! Without ellipse-based clustering
+                    end do
+                end do
+            end if
 
-            do i = 1, np
+        ! Normalized/Implicit TE derivative
+        else
 
-                do j = 1, 5
+            if (clustering_switch == 4) then    ! Ellipse-based clustering
+                do i = 1, np
+                    temp                = sqrt((ONE + (slope(i))**2)**3)    ! Temporary term
+                    do j = 1, ncp_thk(js) - 1
 
-                    if (j == 3 .or. j == 4) then
-                        dubot(i, j)         =  0.5 * sin(angle(i)) * NACA_ders(i, j)
-                        dvbot(i, j)         = -0.5 * cos(angle(i)) * NACA_ders(i, j)
-                        dutop(i, j)         = -0.5 * sin(angle(i)) * NACA_ders(i, j)
-                        dvtop(i, j)         =  0.5 * cos(angle(i)) * NACA_ders(i, j)
-                    else
+                        dubot(i, j)     = u_ders(i, j) + (NACA_ders(i, j) * sin(angle(i))) + &
+                                          ((thickness(i)/temp) * slope_ders(i, j))
+                        dvbot(i, j)     = cam_ders(i, j) - (NACA_ders(i, j) * cos(angle(i))) + &
+                                          (((thickness(i) * slope(i))/temp) * slope_ders(i, j))
+                        dutop(i, j)     = u_ders(i, j) - (NACA_ders(i, j) * sin(angle(i))) - &
+                                          ((thickness(i)/temp) * slope_ders(i, j))
+                        dvtop(i, j)     = cam_ders(i, j) + (NACA_ders(i, j) * cos(angle(i))) - &
+                                          (((thickness(i) * slope(i))/temp) * slope_ders(i, j))
+
+                    end do
+                end do
+            else    ! Without ellipse-based clustering
+                do i = 1, np
+                    do j = 1, ncp_thk(js) - 1
+
                         dubot(i, j)         =  sin(angle(i)) * NACA_ders(i, j)
                         dvbot(i, j)         = -cos(angle(i)) * NACA_ders(i, j)
                         dutop(i, j)         = -sin(angle(i)) * NACA_ders(i, j)
                         dvtop(i, j)         =  cos(angle(i)) * NACA_ders(i, j)
-                    end if
 
+                    end do
                 end do
+            end if
 
-            end do
-
-        end if
+        end if  ! TE_der
 
 
         ! Number of thickness distribution parameters and
@@ -3794,6 +4565,15 @@ module derivatives
         end do
 
 
+        ! Store (m',theta) derivatives in module global arrays
+        if (allocated(dm%dt)) deallocate(dm%dt)
+        allocate (dm%dt(np, nparams, ncp))
+        if (allocated(dth%dt)) deallocate(dth%dt)
+        allocate (dth%dt(np, nparams, ncp))
+        dm%dt                           = dm_dt
+        dth%dt                          = dth_dt
+
+
     end subroutine mprime_theta_thk_derivatives
     !-----------------------------------------------------------------------------------------------
 
@@ -3820,8 +4600,8 @@ module derivatives
     !-----------------------------------------------------------------------------------------------
     subroutine mprime_theta_curv_derivatives (du_dcurv, dv_dcurv, mprime, theta, chrdx, chrd, sang, &
                                               dchrd_dcurv, dsang_dcurv, dm_dcurv, dth_dcurv)
-        use globvar,            only: chord_switch, curv_ycp_ders
-        use funcNsubs,          only: get_sec_number
+        use globvar,            only: js, chord_switch, curv_ycp_ders
+        use file_operations,    only: write_physical_ders
 
         real,                   intent(in)      :: du_dcurv(:,:,:)
         real,                   intent(in)      :: dv_dcurv(:,:,:)
@@ -3836,12 +4616,8 @@ module derivatives
         real,                   intent(inout)   :: dth_dcurv(:,:,:)
 
         ! Local variables
-        integer                                 :: js, np, nparams, ncp, i, j, k
+        integer                                 :: np, nparams, ncp, i, j, k
         real,   allocatable                     :: dchrd_span(:,:), dsang_span(:,:)
-
-
-        ! Get spanwise section index
-        call get_sec_number (js)
 
 
         ! Input array dimensions
@@ -3866,7 +4642,22 @@ module derivatives
                 dchrd_span(j, k)        = dchrd_dcurv(j) * curv_ycp_ders(j + 1, js, k)
                 dsang_span(j, k)        = dsang_dcurv(j) * curv_ycp_ders(j + 1, js, k)
             end do
+
+            ! Write sensitivities to output files
+            if (js == 1) then
+                call write_physical_ders (1, .false., 6, j, dsang_span(j, :))
+            else
+                call write_physical_ders (1, .true., 6, j, dsang_span(j, :))
+            end if
+
         end do
+
+
+        ! Store stagger and non-dimensional chord
+        ! derivatives in module global arrays
+        if (allocated(dsang%dcurv)) deallocate(dsang%dcurv)
+        allocate (dsang%dcurv(nparams, ncp))
+        dsang%dcurv                     = dsang_span
 
 
         ! Compute derivatives
@@ -3901,6 +4692,15 @@ module derivatives
             end do
 
         end if
+
+
+        ! Store (m',theta) derivatives in module global arrays
+        if (allocated(dm%dcurv)) deallocate(dm%dcurv)
+        allocate(dm%dcurv(np, nparams, ncp))
+        if (allocated(dth%dcurv)) deallocate(dth%dcurv)
+        allocate(dth%dcurv(np, nparams, ncp))
+        dm%dcurv                        = dm_dcurv
+        dth%dcurv                       = dth_dcurv
 
 
     end subroutine mprime_theta_curv_derivatives
@@ -4290,7 +5090,6 @@ module derivatives
     subroutine uv_inbeta_derivatives (thickness, slope, dslope_dx_inbeta, dslope_dy_inbeta, dcam_dx_inbeta, &
                                       dcam_dy_inbeta, dxbot_dinbeta, dybot_dinbeta, dxtop_dinbeta,          &
                                       dytop_dinbeta)
-        use funcNsubs,          only: get_sec_number
 
         real,                   intent(in)      :: thickness(:)
         real,                   intent(in)      :: slope(:)
@@ -4304,11 +5103,8 @@ module derivatives
         real,   allocatable,    intent(inout)   :: dytop_dinbeta(:,:,:)
 
         ! Local variables
-        integer                                 :: js, np, cpinbeta, i, j
+        integer                                 :: np, cpinbeta, i, j
 
-
-        ! Spanwise section index
-        call get_sec_number (js)
 
         ! Number of points
         np                              = size(dslope_dx_inbeta, 1)
@@ -4390,7 +5186,6 @@ module derivatives
                                                 dsang_dx_inbeta, dsang_dy_inbeta, du_dinbeta, dv_dinbeta,           &
                                                 dm_dinbeta, dth_dinbeta)
         use globvar,            only: chord_switch
-        use funcNsubs,          only: get_sec_number
 
         real,                   intent(in)      :: mprime(:)
         real,                   intent(in)      :: theta(:)
@@ -4407,11 +5202,8 @@ module derivatives
         real,                   intent(inout)   :: dth_dinbeta(:,:,:)
 
         ! Local variables
-        integer                                 :: js, np, cpinbeta, i, j
+        integer                                 :: np, cpinbeta, i, j
 
-
-        ! Get spanwise section index
-        call get_sec_number (js)
 
         ! Number of points along blade section
         np                              = size(mprime)
@@ -4468,6 +5260,15 @@ module derivatives
             end do
 
         end if  ! chord_switch
+
+
+        ! Store (m', theta) derivatives in module global arrays
+        if (allocated(dm%dinbeta)) deallocate(dm%dinbeta)
+        allocate (dm%dinbeta(np, 2, cpinbeta))
+        if (allocated(dth%dinbeta)) deallocate(dth%dinbeta)
+        allocate (dth%dinbeta(np, 2, cpinbeta))
+        dm%dinbeta                      = dm_dinbeta
+        dth%dinbeta                     = dth_dinbeta
 
 
     end subroutine mprime_theta_inbeta_derivatives
@@ -4821,7 +5622,6 @@ module derivatives
     subroutine uv_outbeta_derivatives (thickness, slope, dslope_doutbeta, dcam_doutbeta, &
                                       dxbot_doutbeta, dybot_doutbeta, dxtop_doutbeta, dytop_doutbeta)
         use globvar,            only: cpoutbeta
-        use funcNsubs,          only: get_sec_number
 
         real,                   intent(in)      :: thickness(:)
         real,                   intent(in)      :: slope(:)
@@ -4833,11 +5633,8 @@ module derivatives
         real,   allocatable,    intent(inout)   :: dytop_doutbeta(:,:,:)
 
         ! Local variables
-        integer                                 :: js, np, i, j
+        integer                                 :: np, i, j
 
-
-        ! Spanwise section index
-        call get_sec_number (js)
 
         ! Number of points
         np                              = size(dslope_doutbeta, 1)
@@ -4989,6 +5786,15 @@ module derivatives
         end if  ! chord_switch
 
 
+        ! Store (m',theta) derivatives in module global arrays
+        if (allocated(dm%doutbeta)) deallocate(dm%doutbeta)
+        allocate (dm%doutbeta(np, 2, cpoutbeta))
+        if (allocated(dth%doutbeta)) deallocate(dth%doutbeta)
+        allocate (dth%doutbeta(np, 2, cpoutbeta))
+        dm%doutbeta                     = dm_doutbeta
+        dth%doutbeta                    = dth_doutbeta
+
+
     end subroutine mprime_theta_outbeta_ders
     !-----------------------------------------------------------------------------------------------
 
@@ -5065,6 +5871,15 @@ module derivatives
             end do
 
         end if  ! chord_switch
+
+
+        ! Store (m',theta) derivatives in module global arrays
+        if (allocated(dm%dcm)) deallocate(dm%dcm)
+        allocate (dm%dcm(np, 2, cpchord))
+        if (allocated(dth%dcm)) deallocate(dth%dcm)
+        allocate (dth%dcm(np, 2, cpchord))
+        dm%dcm                          = dm_dcm
+        dth%dcm                         = dth_dcm
 
 
     end subroutine mprime_theta_cm_ders
@@ -5305,6 +6120,2135 @@ module derivatives
 
 
     end subroutine yz_param_ders
+    !-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Compute the derivatives of u wrt the NACA
+    ! thickness distribution parameter control
+    ! points using a chain rule with the derivatives
+    ! wrt to the thickness parameter values
+    !
+    !-----------------------------------------------------------------------------------------------
+    subroutine compute_final_u_ders ()
+        use globvar,    only: js, thk_ycp_ders
+
+        ! Local variables
+        integer                                 :: np, nparams, ncp, i, j, k
+
+
+        ! Array sizes
+        np                              = size(sec_u_ders, 1)
+        nparams                         = size(sec_u_ders, 2)
+        ncp                             = size(thk_ycp_ders, 3)
+
+
+        ! Store derivatives in a module global array
+        if (allocated(dudt)) deallocate(dudt)
+        allocate (dudt(np, nparams, ncp))
+
+        !
+        ! Compute derivatives
+        ! sec_u_ders = du/dt, thk_ycp_ders = dt/dtcp
+        !
+        do i = 1, np
+            do j = 1, nparams
+                do k = 1, ncp
+                    dudt(i, j, k)       = sec_u_ders(i, j) * thk_ycp_ders(j + 1, js, k)
+                end do
+            end do
+        end do
+
+
+    end subroutine compute_final_u_ders
+    !-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Store the derivatives of stagger wrt the control
+    ! points of in_beta and out_beta in module global
+    ! arrays. This subroutine is called in bsplinecam.f90
+    ! where the derivatives are computed
+    !
+    ! Input parameters: dsang_dx_inbeta - derivatives of stagger wrt control points
+    !                                     of inbeta span
+    !                   dsang_dy_inbeta - derivatives of stagger wrt control points
+    !                                     of inbeta
+    !                   dsang_doutbeta  - derivatives of stagger wrt control points
+    !                                     of outbeta
+    !
+    !-----------------------------------------------------------------------------------------------
+    subroutine final_stagger_ders (dsang_dx_inbeta, dsang_dy_inbeta, dsang_doutbeta)
+        use globvar,    only: cpinbeta, cpoutbeta, cpchord, thk_ycp_ders
+
+        real,                   intent(in)      :: dsang_dx_inbeta(:)
+        real,                   intent(in)      :: dsang_dy_inbeta(:)
+        real,                   intent(in)      :: dsang_doutbeta(:,:)
+
+
+        ! Store derivatives in module global array
+        if (allocated(dsang%dinbeta)) deallocate(dsang%dinbeta)
+        allocate (dsang%dinbeta(2, cpinbeta))
+        if (allocated(dsang%doutbeta)) deallocate(dsang%doutbeta)
+        allocate (dsang%doutbeta(2, cpoutbeta))
+        dsang%dinbeta(1, :)             = dsang_dx_inbeta
+        dsang%dinbeta(2, :)             = dsang_dy_inbeta
+        dsang%doutbeta                  = dsang_doutbeta
+
+
+        ! Stagger doesn't depend on the chord multiplier
+        if (allocated(dsang%dcm)) deallocate(dsang%dcm)
+        allocate (dsang%dcm(2, cpchord))
+        dsang%dcm                       = 0
+
+
+        ! Stagger doesn't depend on the NACA thickness distribution
+        if (allocated(dsang%dt)) deallocate(dsang%dt)
+        allocate (dsang%dt(size(thk_ycp_ders, 1), size(thk_ycp_ders, 3)))
+        dsang%dt                        = 0
+
+
+    end subroutine final_stagger_ders
+    !-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    !
+    !
+    !-----------------------------------------------------------------------------------------------
+    subroutine final_angle_ders (slope, dslope_dx_inbeta, dslope_dy_inbeta, dslope_doutbeta, &
+                                 dslope_dxcp, dslope_dycp, slope_ders)
+        use globvar,    only: js, cpinbeta, cpoutbeta, cpchord, curv_ycp_ders, thk_ycp_ders
+
+        real,                   intent(in)      :: slope(:)
+        real,                   intent(in)      :: dslope_dx_inbeta(:,:)
+        real,                   intent(in)      :: dslope_dy_inbeta(:,:)
+        real,                   intent(in)      :: dslope_doutbeta(:,:,:)
+        real,                   intent(in)      :: dslope_dxcp(:,:)
+        real,                   intent(in)      :: dslope_dycp(:,:)
+        real,                   intent(in)      :: slope_ders(:,:)
+
+        ! Local variables
+        integer                                 :: np, nparams, ncp, i, j, k
+        real,   allocatable                     :: der_mult(:), sec_slope_ders(:,:)
+
+
+        ! Number of points along the mean-line
+        np                              = size(slope)
+
+        ! Terms used in chain-rule to compute angle derivatives
+        if (allocated(der_mult)) deallocate(der_mult)
+        allocate (der_mult(np))
+        do i = 1, np
+            der_mult(i)                 = ONE/(ONE + (slope(i))**2)
+        end do
+
+
+        !
+        ! Store derivatives of angle wrt control points
+        ! of in_beta and out_beta in module global arrays
+        !
+        if (allocated(dangle%dinbeta)) deallocate(dangle%dinbeta)
+        allocate (dangle%dinbeta(np, 2, cpinbeta))
+        if (allocated(dangle%doutbeta)) deallocate(dangle%doutbeta)
+        allocate (dangle%doutbeta(np, 2, cpoutbeta))
+
+        ! Control points of in_beta
+        do i = 1, np
+            do k = 1, cpinbeta
+                dangle%dinbeta(i, 1, k) = der_mult(i) * dslope_dx_inbeta(i, k)
+                dangle%dinbeta(i, 2, k) = der_mult(i) * dslope_dy_inbeta(i, k)
+            end do
+        end do
+
+        ! Control points of out_beta
+        do i = 1, np
+            do j = 1, 2
+                do k = 1, cpoutbeta
+                    dangle%doutbeta(i, j, k) &
+                                        = der_mult(i) * dslope_doutbeta(i, j, k)
+                end do
+            end do
+        end do
+
+
+        ! angle doesn't depend on the chord multiplier
+        if (allocated(dangle%dcm)) deallocate(dangle%dcm)
+        allocate (dangle%dcm(np, 2, cpchord))
+        dangle%dcm                      = 0
+
+
+        !
+        ! Combine slope derivatives wrt chordwise
+        ! control points of u and v''_m(u)
+        !
+        nparams                         = size(curv_ycp_ders, 1)
+        ncp                             = size(curv_ycp_ders, 3)
+        if (allocated(sec_slope_ders)) deallocate(sec_slope_ders)
+        allocate (sec_slope_ders(np, nparams))
+
+        ! Control points of u
+        do j = 1, (nparams/2) - 1
+            sec_slope_ders(:, j)        = dslope_dxcp(:, j + 1)
+        end do
+
+        ! Control points of v''_m(u)
+        do j = (nparams/2), nparams
+            sec_slope_ders(:, j)        = dslope_dycp(:, j - (nparams/2) + 1)
+        end do
+
+        !
+        ! Store derivatives of angle wrt spanwise control
+        ! points of u and v''_m(u) in module global arrays
+        !
+        if (allocated(dangle%dcurv)) deallocate(dangle%dcurv)
+        allocate (dangle%dcurv(np, nparams, ncp))
+
+        do i = 1, np
+            do j = 1, nparams
+                do k = 1, ncp
+                    dangle%dcurv(i, j, k) &
+                                        = der_mult(i) * sec_slope_ders(i, j) * curv_ycp_ders(j + 1, js, k)
+                end do
+            end do
+        end do
+
+
+        ! Thickness derivatives array sizes
+        nparams                         = size(thk_ycp_ders, 1)
+        ncp                             = size(thk_ycp_ders, 3)
+
+        !
+        ! Compute and store derivatives of angle wrt control
+        ! points of thickness parameters
+        !
+        if (allocated(dangle%dt)) deallocate(dangle%dt)
+        allocate (dangle%dt(np, nparams, ncp))
+
+        do i = 1, np
+            do j = 1, nparams
+                do k = 1, ncp
+                    dangle%dt(i, j, k)  = der_mult(i) * slope_ders(i, j) * thk_ycp_ders(j + 1, js, k)
+                end do
+            end do
+        end do
+
+
+    end subroutine final_angle_ders
+    !-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Compute the derivatives of the meanline wrt spanwise
+    ! control points of in_beta, out_beta, u and v''_m(u)
+    ! and store them in module global arrays. This subroutine
+    ! is called in bsplinecam.f90
+    !
+    ! Input parameters: dcam_dx_inbeta  - derivatives of meanline wrt spanwise
+    !                                     control points of in_beta span
+    !                   dcam_dy_inbeta  - derivatives of meanline wrt spanwise
+    !                                     control points of in_beta
+    !                   dcam_doutbeta   - derivatives of meanline wrt spanwise
+    !                                     control points of out_beta
+    !                   dcam_dxcp       - derivatives of meanline wrt chordwise
+    !                                     control points of u
+    !                   dcam_dycp       - derivatives of meanline wrt chordwise
+    !                                     control points of v''_m(u)
+    !
+    !-----------------------------------------------------------------------------------------------
+    subroutine final_cam_ders (dcam_dx_inbeta, dcam_dy_inbeta, dcam_doutbeta, dcam_dxcp, dcam_dycp, cam_ders)
+        use globvar,    only: js, cpinbeta, cpoutbeta, cpchord, curv_ycp_ders, thk_ycp_ders
+
+        real,                   intent(in)      :: dcam_dx_inbeta(:,:)
+        real,                   intent(in)      :: dcam_dy_inbeta(:,:)
+        real,                   intent(in)      :: dcam_doutbeta(:,:,:)
+        real,                   intent(in)      :: dcam_dxcp(:,:)
+        real,                   intent(in)      :: dcam_dycp(:,:)
+        real,                   intent(in)      :: cam_ders(:,:)
+
+        ! Local variables
+        integer                                 :: np, nparams, ncp, i, j, k
+        real,   allocatable                     :: sec_cam_ders(:,:)
+
+
+        ! Number of points along meanline
+        np                              = size(dcam_dx_inbeta, 1)
+        nparams                         = size(curv_ycp_ders, 1)
+        ncp                             = size(curv_ycp_ders, 3)
+
+
+        !
+        ! Store derivatives of meanline wrt control points
+        ! of in_beta and out_beta in module global arrays
+        !
+        if (allocated(dcam%dinbeta)) deallocate(dcam%dinbeta)
+        allocate (dcam%dinbeta(np, 2, cpinbeta))
+        if (allocated(dcam%doutbeta)) deallocate(dcam%doutbeta)
+        allocate (dcam%doutbeta(np, 2, cpoutbeta))
+        dcam%dinbeta(:, 1, :)           = dcam_dx_inbeta
+        dcam%dinbeta(:, 2, :)           = dcam_dy_inbeta
+        dcam%doutbeta                   = dcam_doutbeta
+
+
+        ! mean-line doesn't depend on the chord multiplier
+        if (allocated(dcam%dcm)) deallocate(dcam%dcm)
+        allocate (dcam%dcm(np, 2, cpchord))
+        dcam%dcm                        = 0
+
+
+        !
+        ! Combine meanline derivatives wrt chordwise
+        ! control points of u and v''_m(u)
+        !
+        if (allocated(sec_cam_ders)) deallocate(sec_cam_ders)
+        allocate (sec_cam_ders(np, nparams))
+
+        ! Control points of u
+        do j = 1, (nparams/2) - 1
+            sec_cam_ders(:, j)          = dcam_dxcp(:, j + 1)
+        end do
+
+        ! Control points of v''_m(u)
+        do j = (nparams/2), nparams
+            sec_cam_ders(:, j)          = dcam_dycp(:, j - (nparams/2) + 1)
+        end do
+
+
+        !
+        ! Store derivatives of meanline wrt control points
+        ! of u and v''_m(u) in module global arrays
+        !
+        if (allocated(dcam%dcurv)) deallocate(dcam%dcurv)
+        allocate (dcam%dcurv(np, nparams, ncp))
+
+        do i = 1, np
+            do j = 1, nparams
+                do k = 1, ncp
+                    dcam%dcurv(i, j, k) = sec_cam_ders(i, j) * curv_ycp_ders(j + 1, js, k)
+                end do
+            end do
+        end do
+
+
+        ! Thickness derivative sizes
+        nparams                         = size(thk_ycp_ders, 1)
+        ncp                             = size(thk_ycp_ders, 3)
+
+        !
+        ! Compute and store derivatives of meanline wrt control
+        ! points of thickness parameters
+        !
+        if (allocated(dcam%dt)) deallocate(dcam%dt)
+        allocate (dcam%dt(np, nparams, ncp))
+
+        do i = 1, np
+            do j = 1, nparams
+                do k = 1, ncp
+                    dcam%dt(i, j, k)    = cam_ders(i, j) * thk_ycp_ders(j + 1, js, k)
+                end do
+            end do
+        end do
+
+
+    end subroutine final_cam_ders
+    !-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Store the derivatives of chrd wrt spanwise control
+    ! points in module global arrays. This subroutine is
+    ! called in bsplinecam.f90 where the derivatives are
+    ! computed
+    !
+    ! Input parameters: dchrd_dx_inbeta - derivatives of chrd wrt control points
+    !                                     of inbeta span
+    !                   dchrd_dy_inbeta - derivatives of chrd wrt control points
+    !                                     of inbeta
+    !                   dchrd_doutbeta  - derivatives of chrd wrt control points
+    !                                     of outbeta
+    !                   dchrd_dcm       - derivatives of chrd wrt control points
+    !                                     of chord multiplier
+    !                   dchrd_dcurv     - derivatives of chrd wrt control points
+    !                                     of mean-line second derivative
+    !
+    !-----------------------------------------------------------------------------------------------
+    subroutine final_chrd_ders (dchrd_dx_inbeta, dchrd_dy_inbeta, dchrd_doutbeta, dchrd_dcm, dchrd_dcurv)
+        use globvar,    only: js, cpinbeta, cpoutbeta, cpchord, curv_ycp_ders, thk_ycp_ders
+
+        real,                   intent(in)      :: dchrd_dx_inbeta(:)
+        real,                   intent(in)      :: dchrd_dy_inbeta(:)
+        real,                   intent(in)      :: dchrd_doutbeta(:,:)
+        real,                   intent(in)      :: dchrd_dcm(:,:)
+        real,                   intent(in)      :: dchrd_dcurv(:)
+
+        ! Local variables
+        integer                                 :: nparams, ncp, j, k
+
+
+        !
+        ! Store derivatives wrt control points of
+        ! in_beta and out_beta in module global arrays
+        !
+        if (allocated(dchrd%dinbeta)) deallocate(dchrd%dinbeta)
+        allocate (dchrd%dinbeta(2, cpinbeta))
+        if (allocated(dchrd%doutbeta)) deallocate(dchrd%doutbeta)
+        allocate (dchrd%doutbeta(2, cpoutbeta))
+        dchrd%dinbeta(1, :)             = dchrd_dx_inbeta
+        dchrd%dinbeta(2, :)             = dchrd_dy_inbeta
+        dchrd%doutbeta                  = dchrd_doutbeta
+
+        !
+        ! Store derivatives wrt control points of
+        ! chord multiplier in module global array
+        !
+        if (allocated(dchrd%dcm)) deallocate(dchrd%dcm)
+        allocate (dchrd%dcm(2, cpchord))
+        dchrd%dcm                       = dchrd_dcm
+
+        !
+        ! Compute and store derivatives wrt control points
+        ! of mean-line second derivative
+        !
+        nparams                         = size(curv_ycp_ders, 1)
+        ncp                             = size(curv_ycp_ders, 3)
+
+        if (allocated(dchrd%dcurv)) deallocate(dchrd%dcurv)
+        allocate (dchrd%dcurv(nparams, ncp))
+        do j = 1, nparams
+            do k = 1, ncp
+                dchrd%dcurv(j, k)       = dchrd_dcurv(j) * curv_ycp_ders(j + 1, js, k)
+            end do
+        end do
+
+        ! chrd doesn't depend on the NACA thickness distribution
+        nparams                         = size(thk_ycp_ders, 1)
+        ncp                             = size(thk_ycp_ders, 3)
+        if (allocated(dchrd%dt)) deallocate(dchrd%dt)
+        allocate (dchrd%dt(nparams, ncp))
+        dchrd%dt                        = 0
+
+
+    end subroutine final_chrd_ders
+    !-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Compute the derivatives of rotated and scaled
+    ! u and camber wrt the control points of in_beta,
+    ! out_beta, chord multiplier, mean-line second
+    ! derivative and NACA thickness. The chordline
+    ! and the mean-line are rotated by the stagger
+    ! and scaled by the chord multiplier - this process
+    ! occurs in bladegen.f90 where this subroutine is
+    ! called
+    !
+    ! Input parameters: chrdx   - non-dimensional actual chord
+    !                   chrd    - chord with spanwise chord multiplier
+    !                   u       - chordline
+    !                   camber  - mean-line
+    !
+    !-----------------------------------------------------------------------------------------------
+    subroutine compute_u3_ders (chrdx, chrd, sang, u, camber)
+        use globvar,    only: cpinbeta, cpoutbeta, cpchord
+
+        real,                   intent(in)      :: chrdx
+        real,                   intent(in)      :: chrd
+        real,                   intent(in)      :: sang
+        real,                   intent(in)      :: u(:)
+        real,                   intent(in)      :: camber(:)
+
+        ! Local variables
+        integer                                 :: np, nparams, ncp, i, j, k, i_LE
+        real                                    :: temp_1, temp_2
+
+
+        ! Number of points
+        np                              = size(u)
+        i_LE                            = np    ! LE index
+
+
+        ! in_beta control points
+        nparams                         = 2
+        ncp                             = cpinbeta
+
+        ! Store derivatives in module global arrays
+        if (allocated(du3%dinbeta)) deallocate(du3%dinbeta)
+        allocate (du3%dinbeta(np, nparams, ncp))
+        if (allocated(dvm3%dinbeta)) deallocate(dvm3%dinbeta)
+        allocate (dvm3%dinbeta(np, nparams, ncp))
+
+        do i = 1, np
+            do j = 1, nparams
+                do k = 1, ncp
+
+                    temp_1              = (u(i) * dchrd%dinbeta(j, k)) - (chrd * camber(i) * dsang%dinbeta(j, k))
+                    temp_2              = (camber(i) * dchrd%dinbeta(j, k)) + (chrd * u(i) * dsang%dinbeta(j, k)) + &
+                                          (chrd * dcam%dinbeta(i, j, k))
+                    du3%dinbeta(i, j, k)= (temp_1 * cos(sang)) - (temp_2 * sin(sang)) + dm%dinbeta(i_LE, j, k)
+                    dvm3%dinbeta(i, j, k) &
+                                        = (temp_1 * sin(sang)) + (temp_2 * cos(sang)) + dth%dinbeta(i_LE, j, k) - &
+                                          dcam%dinbeta(1, j, k)
+
+                end do
+            end do
+        end do
+
+
+        ! out_beta control points
+        nparams                         = 2
+        ncp                             = cpoutbeta
+
+        ! Store derivatives in module global arrays
+        if (allocated(du3%doutbeta)) deallocate(du3%doutbeta)
+        allocate (du3%doutbeta(np, nparams, ncp))
+        if (allocated(dvm3%doutbeta)) deallocate(dvm3%doutbeta)
+        allocate (dvm3%doutbeta(np, nparams, ncp))
+
+        do i = 1, np
+            do j = 1, nparams
+                do k = 1, ncp
+
+                    temp_1              = (u(i) * dchrd%doutbeta(j, k)) - (chrd * camber(i) * dsang%doutbeta(j, k))
+                    temp_2              = (camber(i) * dchrd%doutbeta(j, k)) + (chrd * u(i) * dsang%doutbeta(j, k)) + &
+                                          (chrd * dcam%doutbeta(i, j, k))
+                    du3%doutbeta(i, j, k) &
+                                        = (temp_1 * cos(sang)) - (temp_2 * sin(sang)) + dm%doutbeta(i_LE, j, k)
+                    dvm3%doutbeta(i, j, k) &
+                                        = (temp_1 * sin(sang)) + (temp_2 * cos(sang)) + dth%doutbeta(i_LE, j, k) - &
+                                          dcam%doutbeta(1, j, k)
+
+                end do
+            end do
+        end do
+
+
+        ! Chord multiplier control points
+        nparams                         = 2
+        ncp                             = cpchord
+
+        ! Store derivatives in module global arrays
+        if (allocated(du3%dcm)) deallocate(du3%dcm)
+        allocate (du3%dcm(np, nparams, ncp))
+        if (allocated(dvm3%dcm)) deallocate(dvm3%dcm)
+        allocate (dvm3%dcm(np, nparams, ncp))
+
+        do i = 1, np
+            do j = 1, nparams
+                do k = 1, ncp
+
+                    temp_1              = u(i) * dchrd%dcm(j, k)
+                    temp_2              = camber(i) * dchrd%dcm(j, k)
+                    du3%dcm(i, j, k)    = (temp_1 * cos(sang)) - (temp_2 * sin(sang)) + dm%dcm(i_LE, j, k)
+                    dvm3%dcm(i, j, k)   = (temp_1 * sin(sang)) + (temp_2 * cos(sang)) + dth%dcm(i_LE, j, k)
+
+                end do
+            end do
+        end do
+
+
+        ! Mean-line second derivative control points
+        nparams                         = size(dm%dcurv, 2)
+        ncp                             = size(dm%dcurv, 3)
+
+        ! Store derivatives in module global arrays
+        if (allocated(du3%dcurv)) deallocate(du3%dcurv)
+        allocate (du3%dcurv(np, nparams, ncp))
+        if (allocated(dvm3%dcurv)) deallocate(dvm3%dcurv)
+        allocate (dvm3%dcurv(np, nparams, ncp))
+
+        do i = 1, np
+            do j = 1, nparams
+                do k = 1, ncp
+
+                    temp_1              = (u(i) * dchrd%dcurv(j, k)) - (chrd * camber(i) * dsang%dcurv(j, k))
+                    temp_2              = (camber(i) * dchrd%dcurv(j, k)) + (chrd * u(i) * dsang%dcurv(j, k)) + &
+                                          (chrd * dcam%dcurv(i, j, k))
+                    du3%dcurv(i, j, k)  = (temp_1 * cos(sang)) - (temp_2 * sin(sang)) + dm%dcurv(i_LE, j, k)
+                    dvm3%dcurv(i, j, k) = (temp_1 * sin(sang)) + (temp_2 * cos(sang)) + dth%dcurv(i_LE, j, k) - &
+                                          dcam%dcurv(1, j, k)
+
+                end do
+            end do
+        end do
+
+
+        ! Thickness distribution control points
+        nparams                         = size(dm%dt, 2)
+        ncp                             = size(dm%dt, 3)
+
+        ! Store derivatives in module global arrays
+        if (allocated(du3%dt)) deallocate(du3%dt)
+        allocate (du3%dt(np, nparams, ncp))
+        if (allocated(dvm3%dt)) deallocate(dvm3%dt)
+        allocate (dvm3%dt(np, nparams, ncp))
+
+        do i = 1, np
+            do j = 1, nparams
+                do k = 1, ncp
+
+                    temp_1              = chrd * dudt(i, j, k)
+                    temp_2              = chrd * dcam%dt(i, j, k)
+                    du3%dt(i, j, k)     = (temp_1 * cos(sang)) - (temp_2 * sin(sang)) + dm%dt(i_LE, j, k) - dudt(1, j, k)
+                    dvm3%dt(i, j, k)    = (temp_1 * sin(sang)) + (temp_2 * cos(sang)) + dth%dt(i_LE, j, k) - dcam%dt(1, j, k)
+
+                end do
+            end do
+        end do
+
+
+    end subroutine compute_u3_ders
+    !-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Compute the derivatives of the quantities pitch_line,
+    ! yb_upper, camber_upper, v1_top, u1_top, v2_top and
+    ! u2_top which are used to compute the 2D minimum throat
+    ! in the subroutine throat_calc_pitch_line in funcNsubs.f90.
+    ! The derivatives are computed wrt the spanwise control
+    ! points of in_beta, out_beta, chord multiplier, mean-line
+    ! 2nd derivative and NACA thickness distribution. The
+    ! derivatives are stored in module global arrays.
+    !
+    ! Input parameters: pitch   - pitch for the current bladerow (= 2pi/nbls)
+    !                   angle   - array containing values of arctan(v'_m(u))
+    !                   sang    - stagger for the current spanwise section
+    !
+    !-----------------------------------------------------------------------------------------------
+    subroutine throat_ders (pitch, angle, sang)
+
+        real,                   intent(in)      :: pitch
+        real,                   intent(in)      :: angle(:)
+        real,                   intent(in)      :: sang
+
+        ! Local variables
+        integer                                 :: np, nparams, ncp, i, j, k
+        real                                    :: temp
+        real,   parameter                       :: pi = FOUR * atan(ONE)
+
+
+        ! Number of points along mean-line
+        np                              = size(angle)
+
+
+        !
+        ! Derivatives of pitch_line, yb_upper and camber_upper
+        !
+        dp_line                         = dvm3
+        dyb_upper                       = dth
+        dcam_upper                      = dcam
+
+
+        !
+        ! Derivatives of v1_top and v2_bot
+        !
+        dv1_top                         = dp_line
+        dv2_bot                         = dp_line
+
+
+        !
+        ! Derivatives of u1_top and u2_bot
+        !
+        ! in_beta control points
+        !
+        nparams                         = size(dv1_top%dinbeta, 2)
+        ncp                             = size(dv1_top%dinbeta, 3)
+        if (allocated(du1_top%dinbeta)) deallocate(du1_top%dinbeta)
+        allocate (du1_top%dinbeta(np, nparams, ncp))
+        if (allocated(du2_bot%dinbeta)) deallocate(du2_bot%dinbeta)
+        allocate (du2_bot%dinbeta(np, nparams, ncp))
+
+        do i = 1, np
+            do j = 1, nparams
+                do k = 1, ncp
+
+                    ! u1_top
+                    temp                = angle(i) + sang + (pi/TWO)
+                    du1_top%dinbeta(i, j, k) &
+                                        = ((-(HALF * pitch)/((cos(temp) * tan(temp))**2)) * &
+                                           (dangle%dinbeta(i, j, k) + dsang%dinbeta(j, k))) + du3%dinbeta(i, j, k)
+
+                    ! u2_bot
+                    temp                = angle(i) + sang - (pi/TWO)
+                    du2_bot%dinbeta(i, j, k) &
+                                        = (((HALF * pitch)/((cos(temp) * tan(temp))**2)) * &
+                                           (dangle%dinbeta(i, j, k) + dsang%dinbeta(j, k))) + du3%dinbeta(i, j, k)
+                end do
+            end do
+        end do
+
+
+        ! out_beta control points
+        nparams                         = size(dv1_top%doutbeta, 2)
+        ncp                             = size(dv1_top%doutbeta, 3)
+        if (allocated(du1_top%doutbeta)) deallocate(du1_top%doutbeta)
+        allocate (du1_top%doutbeta(np, nparams, ncp))
+        if (allocated(du2_bot%doutbeta)) deallocate(du2_bot%doutbeta)
+        allocate (du2_bot%doutbeta(np, nparams, ncp))
+
+        do i = 1, np
+            do j = 1, nparams
+                do k = 1, ncp
+
+                    ! u1_top
+                    temp                = angle(i) + sang + (pi/TWO)
+                    du1_top%doutbeta(i, j, k) &
+                                        = ((-(HALF * pitch)/((cos(temp) * tan(temp))**2)) * &
+                                           (dangle%doutbeta(i, j, k) + dsang%doutbeta(j, k))) + du3%doutbeta(i, j, k)
+
+                    ! u2_bot
+                    temp                = angle(i) + sang - (pi/TWO)
+                    du2_bot%doutbeta(i, j, k) &
+                                        = (((HALF * pitch)/((cos(temp) * tan(temp))**2)) * &
+                                           (dangle%doutbeta(i, j, k) + dsang%doutbeta(j, k))) + du3%doutbeta(i, j, k)
+                end do
+            end do
+        end do
+
+
+        ! Chord multiplier beta control points
+        nparams                         = size(dv1_top%dcm, 2)
+        ncp                             = size(dv1_top%dcm, 3)
+        if (allocated(du1_top%dcm)) deallocate(du1_top%dcm)
+        allocate (du1_top%dcm(np, nparams, ncp))
+        if (allocated(du2_bot%dcm)) deallocate(du2_bot%dcm)
+        allocate (du2_bot%dcm(np, nparams, ncp))
+
+        do i = 1, np
+            do j = 1, nparams
+                do k = 1, ncp
+
+                    ! u1_top
+                    temp                = angle(i) + sang + (pi/TWO)
+                    du1_top%dcm(i, j, k)= ((-(HALF * pitch)/((cos(temp) * tan(temp))**2)) * &
+                                           (dangle%dcm(i, j, k) + dsang%dcm(j, k))) + du3%dcm(i, j, k)
+
+                    ! u2_bot
+                    temp                = angle(i) + sang - (pi/TWO)
+                    du2_bot%dcm(i, j, k)= (((HALF * pitch)/((cos(temp) * tan(temp))**2)) * &
+                                           (dangle%dcm(i, j, k) + dsang%dcm(j, k))) + du3%dcm(i, j, k)
+                end do
+            end do
+        end do
+
+
+        ! Chord multiplier control points
+        nparams                         = size(dv1_top%dcurv, 2)
+        ncp                             = size(dv1_top%dcurv, 3)
+        if (allocated(du1_top%dcurv)) deallocate(du1_top%dcurv)
+        allocate (du1_top%dcurv(np, nparams, ncp))
+        if (allocated(du2_bot%dcurv)) deallocate(du2_bot%dcurv)
+        allocate (du2_bot%dcurv(np, nparams, ncp))
+
+        do i = 1, np
+            do j = 1, nparams
+                do k = 1, ncp
+
+                    ! u1_top
+                    temp                = angle(i) + sang + (pi/TWO)
+                    du1_top%dcurv(i, j, k) &
+                                        = ((-(HALF * pitch)/((cos(temp) * tan(temp))**2)) * &
+                                           (dangle%dcurv(i, j, k) + dsang%dcurv(j, k))) + du3%dcurv(i, j, k)
+
+                    ! u2_bot
+                    temp                = angle(i) + sang - (pi/TWO)
+                    du2_bot%dcurv(i, j, k) &
+                                        = (((HALF * pitch)/((cos(temp) * tan(temp))**2)) * &
+                                           (dangle%dcurv(i, j, k) + dsang%dcurv(j, k))) + du3%dcurv(i, j, k)
+                end do
+            end do
+        end do
+
+
+        ! NACA thickness control points
+        nparams                         = size(dv1_top%dt, 2)
+        ncp                             = size(dv1_top%dt, 3)
+        if (allocated(du1_top%dt)) deallocate(du1_top%dt)
+        allocate (du1_top%dt(np, nparams, ncp))
+        if (allocated(du2_bot%dt)) deallocate(du2_bot%dt)
+        allocate (du2_bot%dt(np, nparams, ncp))
+
+        do i = 1, np
+            do j = 1, nparams
+                do k = 1, ncp
+
+                    ! u1_top
+                    temp                = angle(i) + sang + (pi/TWO)
+                    du1_top%dt(i, j, k) = ((-(HALF * pitch)/((cos(temp) * tan(temp))**2)) * &
+                                           (dangle%dt(i, j, k) + dsang%dt(j, k))) + du3%dt(i, j, k)
+
+                    ! u2_bot
+                    temp                = angle(i) + sang - (pi/TWO)
+                    du2_bot%dt(i, j, k) = (((HALF * pitch)/((cos(temp) * tan(temp))**2)) * &
+                                           (dangle%dt(i, j, k) + dsang%dt(j, k))) + du3%dt(i, j, k)
+                end do
+            end do
+        end do
+
+
+    end subroutine throat_ders
+    !-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Compute the derivatives of throat_coord(1) and
+    ! throat_coord(2). The derivatives are stored in
+    ! module global arrays.
+    !
+    ! Input parameters: j_thr   - index used in intersection point computation
+    !                             (for u, pitch_line, u1_top and v1_top)
+    !                   i_up    - index used in intersection point computation
+    !                             (for xb and yb_upper)
+    !
+    !-----------------------------------------------------------------------------------------------
+    subroutine interup_ders (j_thr, i_up)
+        use globvar,        only: cpinbeta, cpoutbeta, cpchord, curv_ycp_ders, thk_ycp_ders!, js
+        use funcNsubs,      only: interup_pts
+
+        integer,                intent(in)      :: j_thr
+        integer,                intent(in)      :: i_up
+
+        ! Local variables
+        real                                    :: xa, ya, xb, yb, xc, yc, xd, yd
+        real                                    :: x1, x2, x3, x4, x5, x6, xint, y1, y2, y3
+        real                                    :: temp1, temp2, temp3, temp4
+        integer                                 :: nparams, ncp, i, j
+        type(throat_ders_1)                     :: dx1, dx2, dx3, dx4, dx5, dx6, dy1, dy2, dy3
+
+
+        !
+        ! Shorthands for points used to compute
+        ! intersection points
+        !
+        xa                              = interup_pts(1)    ! u(j_thr)
+        ya                              = interup_pts(2)    ! pitch_line(j_thr)
+        xb                              = interup_pts(3)    ! u1_top(j_thr)
+        yb                              = interup_pts(4)    ! v1_top(j_thr)
+        xc                              = interup_pts(5)    ! xb(i_up)
+        yc                              = interup_pts(6)    ! yb_upper(i_up)
+        xd                              = interup_pts(7)    ! xb(i_up + 1)
+        yd                              = interup_pts(8)    ! yb_upper(i_up + 1)
+
+        ! Groupings of terms used to compute x_int
+        x1                              = xa * (yb - ya)
+        x2                              = yc * (xb - xa)
+        x3                              = ((yd - yc)/(xd - xc)) * (xb - xa) * xc
+        x4                              = ya * (xb - xa)
+        x5                              = yb - ya
+        x6                              = ((yd - yc) * (xb - xa))/(xd - xc)
+        xint                            = (x1 + x2 - x3 - x4)/(x5 - x6)
+
+        ! Groupings of terms used to compute y_int
+        y1                              = yc
+        y2                              = (xint - xc)/(xd - xc)
+        y3                              = yd - yc
+
+
+        !
+        ! Derivatives of x_{i} with i = 1, 6
+        !
+        ! in_beta control points
+        !
+        nparams                         = 2
+        ncp                             = cpinbeta
+        if (allocated(dx1%dinbeta)) deallocate(dx1%dinbeta)
+        allocate (dx1%dinbeta(nparams, ncp))
+        if (allocated(dx2%dinbeta)) deallocate(dx2%dinbeta)
+        allocate (dx2%dinbeta(nparams, ncp))
+        if (allocated(dx3%dinbeta)) deallocate(dx3%dinbeta)
+        allocate (dx3%dinbeta(nparams, ncp))
+        if (allocated(dx4%dinbeta)) deallocate(dx4%dinbeta)
+        allocate (dx4%dinbeta(nparams, ncp))
+        if (allocated(dx5%dinbeta)) deallocate(dx5%dinbeta)
+        allocate (dx5%dinbeta(nparams, ncp))
+        if (allocated(dx6%dinbeta)) deallocate(dx6%dinbeta)
+        allocate (dx6%dinbeta(nparams, ncp))
+        if (allocated(dxiup%dinbeta)) deallocate(dxiup%dinbeta)
+        allocate (dxiup%dinbeta(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                ! x1
+                temp1                   = du3%dinbeta(j_thr, i, j)
+                temp2                   = dv1_top%dinbeta(j_thr, i, j) - dp_line%dinbeta(j_thr, i, j)
+                dx1%dinbeta(i, j)       = (temp1 * (yb - ya)) + (xa * temp2)
+
+                ! x2
+                temp1                   = dyb_upper%dinbeta(i_up, i, j)
+                temp2                   = du1_top%dinbeta(j_thr, i, j) - du3%dinbeta(j_thr, i, j)
+                dx2%dinbeta(i, j)       = (temp1 * (xb - xa)) + (yc * temp2)
+
+                ! x3
+                temp1                   = dyb_upper%dinbeta(i_up + 1, i, j) - dyb_upper%dinbeta(i_up, i, j)
+                temp2                   = dm%dinbeta(i_up + 1, i, j) - dm%dinbeta(i_up, i, j)
+                temp3                   = du1_top%dinbeta(j_thr, i, j) - du3%dinbeta(j_thr, i, j)
+                temp4                   = dm%dinbeta(i_up, i, j)
+                dx3%dinbeta(i, j)       = (((temp1/(xd - xc)) - (((yd - yc)/((xd - xc)**2)) * temp2)) * (xb - xa) * &
+                                           xc) + (((yd - yc)/(xd - xc)) * temp3 * xc) + (((yd - yc)/(xd - xc)) *    &
+                                           (xb - xa) * temp4)
+
+                ! x4
+                temp1                   = dp_line%dinbeta(j_thr, i, j)
+                temp2                   = du1_top%dinbeta(j_thr, i, j) - du3%dinbeta(j_thr, i, j)
+                dx4%dinbeta(i, j)       = (temp1 * (xb - xa)) + (ya * temp2)
+
+                ! x5
+                dx5%dinbeta(i, j)       = dv1_top%dinbeta(j_thr, i, j) - dp_line%dinbeta(j_thr, i, j)
+
+                ! x6
+                temp1                   = dyb_upper%dinbeta(i_up + 1, i, j) - dyb_upper%dinbeta(i_up, i, j)
+                temp2                   = du1_top%dinbeta(j_thr, i, j) - du3%dinbeta(j_thr, i, j)
+                temp3                   = dm%dinbeta(i_up + 1, i, j) - dm%dinbeta(i_up, i, j)
+                dx6%dinbeta(i, j)       = (((temp1 * (xb - xa)) + ((yd - yc) * temp2))/(xd - xc)) - &
+                                          (((yd - yc) * (xb - xa) * temp3)/((xd - xc)**2))
+
+                ! xint
+                temp1                   = dx1%dinbeta(i, j) + dx2%dinbeta(i, j) - dx3%dinbeta(i, j) - &
+                                          dx4%dinbeta(i, j)
+                temp2                   = dx5%dinbeta(i, j) - dx6%dinbeta(i, j)
+                dxiup%dinbeta(i, j)     = (temp1/(x5 - x6)) - (((x1 + x2 - x3 - x4)/((x5 - x6)**2)) * temp2)
+
+            end do
+        end do
+
+
+        !
+        ! out_beta control points
+        !
+        nparams                         = 2
+        ncp                             = cpoutbeta
+        if (allocated(dx1%doutbeta)) deallocate(dx1%doutbeta)
+        allocate (dx1%doutbeta(nparams, ncp))
+        if (allocated(dx2%doutbeta)) deallocate(dx2%doutbeta)
+        allocate (dx2%doutbeta(nparams, ncp))
+        if (allocated(dx3%doutbeta)) deallocate(dx3%doutbeta)
+        allocate (dx3%doutbeta(nparams, ncp))
+        if (allocated(dx4%doutbeta)) deallocate(dx4%doutbeta)
+        allocate (dx4%doutbeta(nparams, ncp))
+        if (allocated(dx5%doutbeta)) deallocate(dx5%doutbeta)
+        allocate (dx5%doutbeta(nparams, ncp))
+        if (allocated(dx6%doutbeta)) deallocate(dx6%doutbeta)
+        allocate (dx6%doutbeta(nparams, ncp))
+        if (allocated(dxiup%doutbeta)) deallocate(dxiup%doutbeta)
+        allocate (dxiup%doutbeta(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                ! x1
+                temp1                   = du3%doutbeta(j_thr, i, j)
+                temp2                   = dv1_top%doutbeta(j_thr, i, j) - dp_line%doutbeta(j_thr, i, j)
+                dx1%doutbeta(i, j)      = (temp1 * (yb - ya)) + (xa * temp2)
+
+                ! x2
+                temp1                   = dyb_upper%doutbeta(i_up, i, j)
+                temp2                   = du1_top%doutbeta(j_thr, i, j) - du3%doutbeta(j_thr, i, j)
+                dx2%doutbeta(i, j)      = (temp1 * (xb - xa)) + (yc * temp2)
+
+                ! x3
+                temp1                   = dyb_upper%doutbeta(i_up + 1, i, j) - dyb_upper%doutbeta(i_up, i, j)
+                temp2                   = dm%doutbeta(i_up + 1, i, j) - dm%doutbeta(i_up, i, j)
+                temp3                   = du1_top%doutbeta(j_thr, i, j) - du3%doutbeta(j_thr, i, j)
+                temp4                   = dm%doutbeta(i_up, i, j)
+                dx3%doutbeta(i, j)      = (((temp1/(xd - xc)) - (((yd - yc)/((xd - xc)**2)) * temp2)) * (xb - xa) * &
+                                           xc) + (((yd - yc)/(xd - xc)) * temp3 * xc) + (((yd - yc)/(xd - xc)) *    &
+                                           (xb - xa) * temp4)
+
+                ! x4
+                temp1                   = dp_line%doutbeta(j_thr, i, j)
+                temp2                   = du1_top%doutbeta(j_thr, i, j) - du3%doutbeta(j_thr, i, j)
+                dx4%doutbeta(i, j)      = (temp1 * (xb - xa)) + (ya * temp2)
+
+                ! x5
+                dx5%doutbeta(i, j)       = dv1_top%doutbeta(j_thr, i, j) - dp_line%doutbeta(j_thr, i, j)
+
+                ! x6
+                temp1                   = dyb_upper%doutbeta(i_up + 1, i, j) - dyb_upper%doutbeta(i_up, i, j)
+                temp2                   = du1_top%doutbeta(j_thr, i, j) - du3%doutbeta(j_thr, i, j)
+                temp3                   = dm%doutbeta(i_up + 1, i, j) - dm%doutbeta(i_up, i, j)
+                dx6%doutbeta(i, j)      = (((temp1 * (xb - xa)) + ((yd - yc) * temp2))/(xd - xc)) - &
+                                          (((yd - yc) * (xb - xa) * temp3)/((xd - xc)**2))
+
+                ! xint
+                temp1                   = dx1%doutbeta(i, j) + dx2%doutbeta(i, j) - dx3%doutbeta(i, j) - &
+                                          dx4%doutbeta(i, j)
+                temp2                   = dx5%doutbeta(i, j) - dx6%doutbeta(i, j)
+                dxiup%doutbeta(i, j)    = (temp1/(x5 - x6)) - (((x1 + x2 - x3 - x4)/((x5 - x6)**2)) * temp2)
+
+            end do
+        end do
+
+
+        !
+        ! Chord multiplier control points
+        !
+        nparams                         = 2
+        ncp                             = cpchord
+        if (allocated(dx1%dcm)) deallocate(dx1%dcm)
+        allocate (dx1%dcm(nparams, ncp))
+        if (allocated(dx2%dcm)) deallocate(dx2%dcm)
+        allocate (dx2%dcm(nparams, ncp))
+        if (allocated(dx3%dcm)) deallocate(dx3%dcm)
+        allocate (dx3%dcm(nparams, ncp))
+        if (allocated(dx4%dcm)) deallocate(dx4%dcm)
+        allocate (dx4%dcm(nparams, ncp))
+        if (allocated(dx5%dcm)) deallocate(dx5%dcm)
+        allocate (dx5%dcm(nparams, ncp))
+        if (allocated(dx6%dcm)) deallocate(dx6%dcm)
+        allocate (dx6%dcm(nparams, ncp))
+        if (allocated(dxiup%dcm)) deallocate(dxiup%dcm)
+        allocate (dxiup%dcm(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                ! x1
+                temp1                   = du3%dcm(j_thr, i, j)
+                temp2                   = dv1_top%dcm(j_thr, i, j) - dp_line%dcm(j_thr, i, j)
+                dx1%dcm(i, j)           = (temp1 * (yb - ya)) + (xa * temp2)
+
+                ! x2
+                temp1                   = dyb_upper%dcm(i_up, i, j)
+                temp2                   = du1_top%dcm(j_thr, i, j) - du3%dcm(j_thr, i, j)
+                dx2%dcm(i, j)           = (temp1 * (xb - xa)) + (yc * temp2)
+
+                ! x3
+                temp1                   = dyb_upper%dcm(i_up + 1, i, j) - dyb_upper%dcm(i_up, i, j)
+                temp2                   = dm%dcm(i_up + 1, i, j) - dm%dcm(i_up, i, j)
+                temp3                   = du1_top%dcm(j_thr, i, j) - du3%dcm(j_thr, i, j)
+                temp4                   = dm%dcm(i_up, i, j)
+                dx3%dcm(i, j)           = (((temp1/(xd - xc)) - (((yd - yc)/((xd - xc)**2)) * temp2)) * (xb - xa) * &
+                                           xc) + (((yd - yc)/(xd - xc)) * temp3 * xc) + (((yd - yc)/(xd - xc)) *    &
+                                           (xb - xa) * temp4)
+
+                ! x4
+                temp1                   = dp_line%dcm(j_thr, i, j)
+                temp2                   = du1_top%dcm(j_thr, i, j) - du3%dcm(j_thr, i, j)
+                dx4%dcm(i, j)           = (temp1 * (xb - xa)) + (ya * temp2)
+
+                ! x5
+                dx5%dcm(i, j)           = dv1_top%dcm(j_thr, i, j) - dp_line%dcm(j_thr, i, j)
+
+                ! x6
+                temp1                   = dyb_upper%dcm(i_up + 1, i, j) - dyb_upper%dcm(i_up, i, j)
+                temp2                   = du1_top%dcm(j_thr, i, j) - du3%dcm(j_thr, i, j)
+                temp3                   = dm%dcm(i_up + 1, i, j) - dm%dcm(i_up, i, j)
+                dx6%dcm(i, j)           = (((temp1 * (xb - xa)) + ((yd - yc) * temp2))/(xd - xc)) - &
+                                          (((yd - yc) * (xb - xa) * temp3)/((xd - xc)**2))
+
+                ! xint
+                temp1                   = dx1%dcm(i, j) + dx2%dcm(i, j) - dx3%dcm(i, j) - &
+                                          dx4%dcm(i, j)
+                temp2                   = dx5%dcm(i, j) - dx6%dcm(i, j)
+                dxiup%dcm(i, j)         = (temp1/(x5 - x6)) - (((x1 + x2 - x3 - x4)/((x5 - x6)**2)) * temp2)
+
+            end do
+        end do
+
+
+        !
+        ! Mean-line second derivative control points
+        !
+        nparams                         = size(curv_ycp_ders, 1)
+        ncp                             = size(curv_ycp_ders, 3)
+        if (allocated(dx1%dcurv)) deallocate(dx1%dcurv)
+        allocate (dx1%dcurv(nparams, ncp))
+        if (allocated(dx2%dcurv)) deallocate(dx2%dcurv)
+        allocate (dx2%dcurv(nparams, ncp))
+        if (allocated(dx3%dcurv)) deallocate(dx3%dcurv)
+        allocate (dx3%dcurv(nparams, ncp))
+        if (allocated(dx4%dcurv)) deallocate(dx4%dcurv)
+        allocate (dx4%dcurv(nparams, ncp))
+        if (allocated(dx5%dcurv)) deallocate(dx5%dcurv)
+        allocate (dx5%dcurv(nparams, ncp))
+        if (allocated(dx6%dcurv)) deallocate(dx6%dcurv)
+        allocate (dx6%dcurv(nparams, ncp))
+        if (allocated(dxiup%dcurv)) deallocate(dxiup%dcurv)
+        allocate (dxiup%dcurv(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                ! x1
+                temp1                   = du3%dcurv(j_thr, i, j)
+                temp2                   = dv1_top%dcurv(j_thr, i, j) - dp_line%dcurv(j_thr, i, j)
+                dx1%dcurv(i, j)         = (temp1 * (yb - ya)) + (xa * temp2)
+
+                ! x2
+                temp1                   = dyb_upper%dcurv(i_up, i, j)
+                temp2                   = du1_top%dcurv(j_thr, i, j) - du3%dcurv(j_thr, i, j)
+                dx2%dcurv(i, j)         = (temp1 * (xb - xa)) + (yc * temp2)
+
+                ! x3
+                temp1                   = dyb_upper%dcurv(i_up + 1, i, j) - dyb_upper%dcurv(i_up, i, j)
+                temp2                   = dm%dcurv(i_up + 1, i, j) - dm%dcurv(i_up, i, j)
+                temp3                   = du1_top%dcurv(j_thr, i, j) - du3%dcurv(j_thr, i, j)
+                temp4                   = dm%dcurv(i_up, i, j)
+                dx3%dcurv(i, j)         = (((temp1/(xd - xc)) - (((yd - yc)/((xd - xc)**2)) * temp2)) * (xb - xa) * &
+                                           xc) + (((yd - yc)/(xd - xc)) * temp3 * xc) + (((yd - yc)/(xd - xc)) *    &
+                                           (xb - xa) * temp4)
+
+                ! x4
+                temp1                   = dp_line%dcurv(j_thr, i, j)
+                temp2                   = du1_top%dcurv(j_thr, i, j) - du3%dcurv(j_thr, i, j)
+                dx4%dcurv(i, j)         = (temp1 * (xb - xa)) + (ya * temp2)
+
+                ! x5
+                dx5%dcurv(i, j)         = dv1_top%dcurv(j_thr, i, j) - dp_line%dcurv(j_thr, i, j)
+
+                ! x6
+                temp1                   = dyb_upper%dcurv(i_up + 1, i, j) - dyb_upper%dcurv(i_up, i, j)
+                temp2                   = du1_top%dcurv(j_thr, i, j) - du3%dcurv(j_thr, i, j)
+                temp3                   = dm%dcurv(i_up + 1, i, j) - dm%dcurv(i_up, i, j)
+                dx6%dcurv(i, j)         = (((temp1 * (xb - xa)) + ((yd - yc) * temp2))/(xd - xc)) - &
+                                          (((yd - yc) * (xb - xa) * temp3)/((xd - xc)**2))
+
+                ! xint
+                temp1                   = dx1%dcurv(i, j) + dx2%dcurv(i, j) - dx3%dcurv(i, j) - &
+                                          dx4%dcurv(i, j)
+                temp2                   = dx5%dcurv(i, j) - dx6%dcurv(i, j)
+                dxiup%dcurv(i, j)       = (temp1/(x5 - x6)) - (((x1 + x2 - x3 - x4)/((x5 - x6)**2)) * temp2)
+
+            end do
+        end do
+
+
+        !
+        ! NACA thickness distribution control points
+        !
+        nparams                         = size(thk_ycp_ders, 1)
+        ncp                             = size(thk_ycp_ders, 3)
+        if (allocated(dx1%dt)) deallocate(dx1%dt)
+        allocate (dx1%dt(nparams, ncp))
+        if (allocated(dx2%dt)) deallocate(dx2%dt)
+        allocate (dx2%dt(nparams, ncp))
+        if (allocated(dx3%dt)) deallocate(dx3%dt)
+        allocate (dx3%dt(nparams, ncp))
+        if (allocated(dx4%dt)) deallocate(dx4%dt)
+        allocate (dx4%dt(nparams, ncp))
+        if (allocated(dx5%dt)) deallocate(dx5%dt)
+        allocate (dx5%dt(nparams, ncp))
+        if (allocated(dx6%dt)) deallocate(dx6%dt)
+        allocate (dx6%dt(nparams, ncp))
+        if (allocated(dxiup%dt)) deallocate(dxiup%dt)
+        allocate (dxiup%dt(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                ! x1
+                temp1                   = du3%dt(j_thr, i, j)
+                temp2                   = dv1_top%dt(j_thr, i, j) - dp_line%dt(j_thr, i, j)
+                dx1%dt(i, j)            = (temp1 * (yb - ya)) + (xa * temp2)
+
+                ! x2
+                temp1                   = dyb_upper%dt(i_up, i, j)
+                temp2                   = du1_top%dt(j_thr, i, j) - du3%dt(j_thr, i, j)
+                dx2%dt(i, j)            = (temp1 * (xb - xa)) + (yc * temp2)
+
+                ! x3
+                temp1                   = dyb_upper%dt(i_up + 1, i, j) - dyb_upper%dt(i_up, i, j)
+                temp2                   = dm%dt(i_up + 1, i, j) - dm%dt(i_up, i, j)
+                temp3                   = du1_top%dt(j_thr, i, j) - du3%dt(j_thr, i, j)
+                temp4                   = dm%dt(i_up, i, j)
+                dx3%dt(i, j)            = (((temp1/(xd - xc)) - (((yd - yc)/((xd - xc)**2)) * temp2)) * (xb - xa) * &
+                                           xc) + (((yd - yc)/(xd - xc)) * temp3 * xc) + (((yd - yc)/(xd - xc)) *    &
+                                           (xb - xa) * temp4)
+
+                ! x4
+                temp1                   = dp_line%dt(j_thr, i, j)
+                temp2                   = du1_top%dt(j_thr, i, j) - du3%dt(j_thr, i, j)
+                dx4%dt(i, j)            = (temp1 * (xb - xa)) + (ya * temp2)
+
+                ! x5
+                dx5%dt(i, j)            = dv1_top%dt(j_thr, i, j) - dp_line%dt(j_thr, i, j)
+
+                ! x6
+                temp1                   = dyb_upper%dt(i_up + 1, i, j) - dyb_upper%dt(i_up, i, j)
+                temp2                   = du1_top%dt(j_thr, i, j) - du3%dt(j_thr, i, j)
+                temp3                   = dm%dt(i_up + 1, i, j) - dm%dt(i_up, i, j)
+                dx6%dt(i, j)            = (((temp1 * (xb - xa)) + ((yd - yc) * temp2))/(xd - xc)) - &
+                                          (((yd - yc) * (xb - xa) * temp3)/((xd - xc)**2))
+
+                ! xint
+                temp1                   = dx1%dt(i, j) + dx2%dt(i, j) - dx3%dt(i, j) - &
+                                          dx4%dt(i, j)
+                temp2                   = dx5%dt(i, j) - dx6%dt(i, j)
+                dxiup%dt(i, j)          = (temp1/(x5 - x6)) - (((x1 + x2 - x3 - x4)/((x5 - x6)**2)) * temp2)
+
+            end do
+        end do
+
+
+
+        !
+        ! Derivatives of y1, y2 and y3
+        !
+        ! in_beta control points
+        !
+        nparams                         = 2
+        ncp                             = cpinbeta
+        if (allocated(dy1%dinbeta)) deallocate(dy1%dinbeta)
+        allocate (dy1%dinbeta(nparams, ncp))
+        if (allocated(dy2%dinbeta)) deallocate(dy2%dinbeta)
+        allocate (dy2%dinbeta(nparams, ncp))
+        if (allocated(dy3%dinbeta)) deallocate(dy3%dinbeta)
+        allocate (dy3%dinbeta(nparams, ncp))
+        if (allocated(dyiup%dinbeta)) deallocate(dyiup%dinbeta)
+        allocate (dyiup%dinbeta(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                !y1
+                dy1%dinbeta(i, j)       = dyb_upper%dinbeta(i_up, i, j)
+
+                ! y2
+                temp1                   = dxiup%dinbeta(i, j) - dm%dinbeta(i_up, i, j)
+                temp2                   = dm%dinbeta(i_up + 1, i, j) - dm%dinbeta(i_up, i, j)
+                dy2%dinbeta(i, j)       = (temp1/(xd - xc)) - (((xint - xc)/((xd - xc)**2)) * temp2)
+
+                ! y3
+                dy3%dinbeta(i, j)       = dyb_upper%dinbeta(i_up + 1, i, j) - dyb_upper%dinbeta(i_up, i, j)
+
+                ! yint
+                dyiup%dinbeta(i, j)     = dy1%dinbeta(i, j) + ((y3 * dy2%dinbeta(i, j)) + (y2 * dy3%dinbeta(i, j)))
+
+            end do
+        end do
+
+
+        !
+        ! out_beta control points
+        !
+        nparams                         = 2
+        ncp                             = cpoutbeta
+        if (allocated(dy1%doutbeta)) deallocate(dy1%doutbeta)
+        allocate (dy1%doutbeta(nparams, ncp))
+        if (allocated(dy2%doutbeta)) deallocate(dy2%doutbeta)
+        allocate (dy2%doutbeta(nparams, ncp))
+        if (allocated(dy3%doutbeta)) deallocate(dy3%doutbeta)
+        allocate (dy3%doutbeta(nparams, ncp))
+        if (allocated(dyiup%doutbeta)) deallocate(dyiup%doutbeta)
+        allocate (dyiup%doutbeta(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                !y1
+                dy1%doutbeta(i, j)      = dyb_upper%doutbeta(i_up, i, j)
+
+                ! y2
+                temp1                   = dxiup%doutbeta(i, j) - dm%doutbeta(i_up, i, j)
+                temp2                   = dm%doutbeta(i_up + 1, i, j) - dm%doutbeta(i_up, i, j)
+                dy2%doutbeta(i, j)      = (temp1/(xd - xc)) - (((xint - xc)/((xd - xc)**2)) * temp2)
+
+                ! y3
+                dy3%doutbeta(i, j)      = dyb_upper%doutbeta(i_up + 1, i, j) - dyb_upper%doutbeta(i_up, i, j)
+
+                ! yint
+                dyiup%doutbeta(i, j)    = dy1%doutbeta(i, j) + ((y3 * dy2%doutbeta(i, j)) + (y2 * dy3%doutbeta(i, j)))
+
+            end do
+        end do
+
+
+        !
+        ! Chord multiplier control points
+        !
+        nparams                         = 2
+        ncp                             = cpchord
+        if (allocated(dy1%dcm)) deallocate(dy1%dcm)
+        allocate (dy1%dcm(nparams, ncp))
+        if (allocated(dy2%dcm)) deallocate(dy2%dcm)
+        allocate (dy2%dcm(nparams, ncp))
+        if (allocated(dy3%dcm)) deallocate(dy3%dcm)
+        allocate (dy3%dcm(nparams, ncp))
+        if (allocated(dyiup%dcm)) deallocate(dyiup%dcm)
+        allocate (dyiup%dcm(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                !y1
+                dy1%dcm(i, j)           = dyb_upper%dcm(i_up, i, j)
+
+                ! y2
+                temp1                   = dxiup%dcm(i, j) - dm%dcm(i_up, i, j)
+                temp2                   = dm%dcm(i_up + 1, i, j) - dm%dcm(i_up, i, j)
+                dy2%dcm(i, j)           = (temp1/(xd - xc)) - (((xint - xc)/((xd - xc)**2)) * temp2)
+
+                ! y3
+                dy3%dcm(i, j)           = dyb_upper%dcm(i_up + 1, i, j) - dyb_upper%dcm(i_up, i, j)
+
+                ! yint
+                dyiup%dcm(i, j)         = dy1%dcm(i, j) + ((y3 * dy2%dcm(i, j)) + (y2 * dy3%dcm(i, j)))
+
+            end do
+        end do
+
+
+        !
+        ! Mean-line second derivative control points
+        !
+        nparams                         = size(curv_ycp_ders, 1)
+        ncp                             = size(curv_ycp_ders, 3)
+        if (allocated(dy1%dcurv)) deallocate(dy1%dcurv)
+        allocate (dy1%dcurv(nparams, ncp))
+        if (allocated(dy2%dcurv)) deallocate(dy2%dcurv)
+        allocate (dy2%dcurv(nparams, ncp))
+        if (allocated(dy3%dcurv)) deallocate(dy3%dcurv)
+        allocate (dy3%dcurv(nparams, ncp))
+        if (allocated(dyiup%dcurv)) deallocate(dyiup%dcurv)
+        allocate (dyiup%dcurv(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                !y1
+                dy1%dcurv(i, j)         = dyb_upper%dcurv(i_up, i, j)
+
+                ! y2
+                temp1                   = dxiup%dcurv(i, j) - dm%dcurv(i_up, i, j)
+                temp2                   = dm%dcurv(i_up + 1, i, j) - dm%dcurv(i_up, i, j)
+                dy2%dcurv(i, j)         = (temp1/(xd - xc)) - (((xint - xc)/((xd - xc)**2)) * temp2)
+
+                ! y3
+                dy3%dcurv(i, j)         = dyb_upper%dcurv(i_up + 1, i, j) - dyb_upper%dcurv(i_up, i, j)
+
+                ! yint
+                dyiup%dcurv(i, j)       = dy1%dcurv(i, j) + ((y3 * dy2%dcurv(i, j)) + (y2 * dy3%dcurv(i, j)))
+
+            end do
+        end do
+
+
+        !
+        ! NACA thickness distribution control points
+        !
+        nparams                         = size(thk_ycp_ders, 1)
+        ncp                             = size(thk_ycp_ders, 3)
+        if (allocated(dy1%dt)) deallocate(dy1%dt)
+        allocate (dy1%dt(nparams, ncp))
+        if (allocated(dy2%dt)) deallocate(dy2%dt)
+        allocate (dy2%dt(nparams, ncp))
+        if (allocated(dy3%dt)) deallocate(dy3%dt)
+        allocate (dy3%dt(nparams, ncp))
+        if (allocated(dyiup%dt)) deallocate(dyiup%dt)
+        allocate (dyiup%dt(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                !y1
+                dy1%dt(i, j)            = dyb_upper%dt(i_up, i, j)
+
+                ! y2
+                temp1                   = dxiup%dt(i, j) - dm%dt(i_up, i, j)
+                temp2                   = dm%dt(i_up + 1, i, j) - dm%dt(i_up, i, j)
+                dy2%dt(i, j)            = (temp1/(xd - xc)) - (((xint - xc)/((xd - xc)**2)) * temp2)
+
+                ! y3
+                dy3%dt(i, j)            = dyb_upper%dt(i_up + 1, i, j) - dyb_upper%dt(i_up, i, j)
+
+                ! yint
+                dyiup%dt(i, j)          = dy1%dt(i, j) + ((y3 * dy2%dt(i, j)) + (y2 * dy3%dt(i, j)))
+
+            end do
+        end do
+
+
+    end subroutine interup_ders
+    !-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Compute the derivatives of throat_coord(3) and
+    ! throat_coord(4). The derivatives are stored in
+    ! module global arrays.
+    !
+    ! Input parameters: j_thr   - index used in intersection point computation
+    !                             (for u, pitch_line, u2_bot and v2_bot)
+    !                   i_dwn   - index used in intersection point computation
+    !                             (for xb and yb)
+    !
+    !-----------------------------------------------------------------------------------------------
+    subroutine interdwn_ders (j_thr, i_dwn)
+        use globvar,    only: cpinbeta, cpoutbeta, cpchord, curv_ycp_ders, thk_ycp_ders!, js
+        use funcNsubs,  only: interdwn_pts
+
+        integer,                intent(in)      :: j_thr
+        integer,                intent(in)      :: i_dwn
+
+        ! Local variables
+        real                                    :: xa, ya, xb, yb, xc, yc, xd, yd
+        real                                    :: x1, x2, x3, x4, x5, x6, xint, y1, y2, y3
+        real                                    :: temp1, temp2, temp3, temp4
+        integer                                 :: nparams, ncp, i, j
+        type(throat_ders_1)                     :: dx1, dx2, dx3, dx4, dx5, dx6, dy1, dy2, dy3
+
+
+        !
+        ! Shorthands for points used to compute
+        ! intersection points
+        !
+        xa                              = interdwn_pts(1)   ! u(j_thr)
+        ya                              = interdwn_pts(2)   ! pitch_line(j_thr)
+        xb                              = interdwn_pts(3)   ! u2_bot(j_thr)
+        yb                              = interdwn_pts(4)   ! v2_bot(j_thr)
+        xc                              = interdwn_pts(5)   ! xb(i_dwn)
+        yc                              = interdwn_pts(6)   ! yb(i_dwn)
+        xd                              = interdwn_pts(7)   ! xb(i_dwn + 1)
+        yd                              = interdwn_pts(8)   ! yb(i_dwn + 1)
+
+        ! Groupings of terms used to compute x_int
+        x1                              = xa * (yb - ya)
+        x2                              = yc * (xb - xa)
+        x3                              = ((yd - yc)/(xd - xc)) * (xb - xa) * xc
+        x4                              = ya * (xb - xa)
+        x5                              = yb - ya
+        x6                              = ((yd - yc) * (xb - xa))/(xd - xc)
+        xint                            = (x1 + x2 - x3 - x4)/(x5 - x6)
+
+        ! Groupings of terms used to compute y_int
+        y1                              = yc
+        y2                              = (xint - xc)/(xd - xc)
+        y3                              = yd - yc
+
+
+        !
+        ! Derivatives of x_{i} with i = 1, 6
+        !
+        ! in_beta control points
+        !
+        nparams                         = 2
+        ncp                             = cpinbeta
+        if (allocated(dx1%dinbeta)) deallocate(dx1%dinbeta)
+        allocate (dx1%dinbeta(nparams, ncp))
+        if (allocated(dx2%dinbeta)) deallocate(dx2%dinbeta)
+        allocate (dx2%dinbeta(nparams, ncp))
+        if (allocated(dx3%dinbeta)) deallocate(dx3%dinbeta)
+        allocate (dx3%dinbeta(nparams, ncp))
+        if (allocated(dx4%dinbeta)) deallocate(dx4%dinbeta)
+        allocate (dx4%dinbeta(nparams, ncp))
+        if (allocated(dx5%dinbeta)) deallocate(dx5%dinbeta)
+        allocate (dx5%dinbeta(nparams, ncp))
+        if (allocated(dx6%dinbeta)) deallocate(dx6%dinbeta)
+        allocate (dx6%dinbeta(nparams, ncp))
+        if (allocated(dxidwn%dinbeta)) deallocate(dxidwn%dinbeta)
+        allocate (dxidwn%dinbeta(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                ! x1
+                temp1                   = du3%dinbeta(j_thr, i, j)
+                temp2                   = dv2_bot%dinbeta(j_thr, i, j) - dp_line%dinbeta(j_thr, i, j)
+                dx1%dinbeta(i, j)       = (temp1 * (yb - ya)) + (xa * temp2)
+
+                ! x2
+                temp1                   = dth%dinbeta(i_dwn, i, j)
+                temp2                   = du2_bot%dinbeta(j_thr, i, j) - du3%dinbeta(j_thr, i, j)
+                dx2%dinbeta(i, j)       = (temp1 * (xb - xa)) + (yc * temp2)
+
+                ! x3
+                temp1                   = dth%dinbeta(i_dwn + 1, i, j) - dth%dinbeta(i_dwn, i, j)
+                temp2                   = dm%dinbeta(i_dwn + 1, i, j) - dm%dinbeta(i_dwn, i, j)
+                temp3                   = du2_bot%dinbeta(j_thr, i, j) - du3%dinbeta(j_thr, i, j)
+                temp4                   = dm%dinbeta(i_dwn, i, j)
+                dx3%dinbeta(i, j)       = (((temp1/(xd - xc)) - (((yd - yc)/((xd - xc)**2)) * temp2)) * (xb - xa) * &
+                                           xc) + (((yd - yc)/(xd - xc)) * temp3 * xc) + (((yd - yc)/(xd - xc)) *    &
+                                           (xb - xa) * temp4)
+
+                ! x4
+                temp1                   = dp_line%dinbeta(j_thr, i, j)
+                temp2                   = du2_bot%dinbeta(j_thr, i, j) - du3%dinbeta(j_thr, i, j)
+                dx4%dinbeta(i, j)       = (temp1 * (xb - xa)) + (ya * temp2)
+
+                ! x5
+                dx5%dinbeta(i, j)       = dv2_bot%dinbeta(j_thr, i, j) - dp_line%dinbeta(j_thr, i, j)
+
+                ! x6
+                temp1                   = dth%dinbeta(i_dwn + 1, i, j) - dth%dinbeta(i_dwn, i, j)
+                temp2                   = du2_bot%dinbeta(j_thr, i, j) - du3%dinbeta(j_thr, i, j)
+                temp3                   = dm%dinbeta(i_dwn + 1, i, j) - dm%dinbeta(i_dwn, i, j)
+                dx6%dinbeta(i, j)       = (((temp1 * (xb - xa)) + ((yd - yc) * temp2))/(xd - xc)) - &
+                                          (((yd - yc) * (xb - xa) * temp3)/((xd - xc)**2))
+
+                ! xint
+                temp1                   = dx1%dinbeta(i, j) + dx2%dinbeta(i, j) - dx3%dinbeta(i, j) - &
+                                          dx4%dinbeta(i, j)
+                temp2                   = dx5%dinbeta(i, j) - dx6%dinbeta(i, j)
+                dxidwn%dinbeta(i, j)    = (temp1/(x5 - x6)) - (((x1 + x2 - x3 - x4)/((x5 - x6)**2)) * temp2)
+
+            end do
+        end do
+
+
+        !
+        ! out_beta control points
+        !
+        nparams                         = 2
+        ncp                             = cpoutbeta
+        if (allocated(dx1%doutbeta)) deallocate(dx1%doutbeta)
+        allocate (dx1%doutbeta(nparams, ncp))
+        if (allocated(dx2%doutbeta)) deallocate(dx2%doutbeta)
+        allocate (dx2%doutbeta(nparams, ncp))
+        if (allocated(dx3%doutbeta)) deallocate(dx3%doutbeta)
+        allocate (dx3%doutbeta(nparams, ncp))
+        if (allocated(dx4%doutbeta)) deallocate(dx4%doutbeta)
+        allocate (dx4%doutbeta(nparams, ncp))
+        if (allocated(dx5%doutbeta)) deallocate(dx5%doutbeta)
+        allocate (dx5%doutbeta(nparams, ncp))
+        if (allocated(dx6%doutbeta)) deallocate(dx6%doutbeta)
+        allocate (dx6%doutbeta(nparams, ncp))
+        if (allocated(dxidwn%doutbeta)) deallocate(dxidwn%doutbeta)
+        allocate (dxidwn%doutbeta(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                ! x1
+                temp1                   = du3%doutbeta(j_thr, i, j)
+                temp2                   = dv2_bot%doutbeta(j_thr, i, j) - dp_line%doutbeta(j_thr, i, j)
+                dx1%doutbeta(i, j)      = (temp1 * (yb - ya)) + (xa * temp2)
+
+                ! x2
+                temp1                   = dth%doutbeta(i_dwn, i, j)
+                temp2                   = du2_bot%doutbeta(j_thr, i, j) - du3%doutbeta(j_thr, i, j)
+                dx2%doutbeta(i, j)      = (temp1 * (xb - xa)) + (yc * temp2)
+
+                ! x3
+                temp1                   = dth%doutbeta(i_dwn + 1, i, j) - dth%doutbeta(i_dwn, i, j)
+                temp2                   = dm%doutbeta(i_dwn + 1, i, j) - dm%doutbeta(i_dwn, i, j)
+                temp3                   = du2_bot%doutbeta(j_thr, i, j) - du3%doutbeta(j_thr, i, j)
+                temp4                   = dm%doutbeta(i_dwn, i, j)
+                dx3%doutbeta(i, j)      = (((temp1/(xd - xc)) - (((yd - yc)/((xd - xc)**2)) * temp2)) * (xb - xa) * &
+                                           xc) + (((yd - yc)/(xd - xc)) * temp3 * xc) + (((yd - yc)/(xd - xc)) *    &
+                                           (xb - xa) * temp4)
+
+                ! x4
+                temp1                   = dp_line%doutbeta(j_thr, i, j)
+                temp2                   = du2_bot%doutbeta(j_thr, i, j) - du3%doutbeta(j_thr, i, j)
+                dx4%doutbeta(i, j)      = (temp1 * (xb - xa)) + (ya * temp2)
+
+                ! x5
+                dx5%doutbeta(i, j)      = dv2_bot%doutbeta(j_thr, i, j) - dp_line%doutbeta(j_thr, i, j)
+
+                ! x6
+                temp1                   = dth%doutbeta(i_dwn + 1, i, j) - dth%doutbeta(i_dwn, i, j)
+                temp2                   = du2_bot%doutbeta(j_thr, i, j) - du3%doutbeta(j_thr, i, j)
+                temp3                   = dm%doutbeta(i_dwn + 1, i, j) - dm%doutbeta(i_dwn, i, j)
+                dx6%doutbeta(i, j)      = (((temp1 * (xb - xa)) + ((yd - yc) * temp2))/(xd - xc)) - &
+                                          (((yd - yc) * (xb - xa) * temp3)/((xd - xc)**2))
+
+                ! xint
+                temp1                   = dx1%doutbeta(i, j) + dx2%doutbeta(i, j) - dx3%doutbeta(i, j) - &
+                                          dx4%doutbeta(i, j)
+                temp2                   = dx5%doutbeta(i, j) - dx6%doutbeta(i, j)
+                dxidwn%doutbeta(i, j)   = (temp1/(x5 - x6)) - (((x1 + x2 - x3 - x4)/((x5 - x6)**2)) * temp2)
+
+            end do
+        end do
+
+
+        !
+        ! Chord multiplier control points
+        !
+        nparams                         = 2
+        ncp                             = cpchord
+        if (allocated(dx1%dcm)) deallocate(dx1%dcm)
+        allocate (dx1%dcm(nparams, ncp))
+        if (allocated(dx2%dcm)) deallocate(dx2%dcm)
+        allocate (dx2%dcm(nparams, ncp))
+        if (allocated(dx3%dcm)) deallocate(dx3%dcm)
+        allocate (dx3%dcm(nparams, ncp))
+        if (allocated(dx4%dcm)) deallocate(dx4%dcm)
+        allocate (dx4%dcm(nparams, ncp))
+        if (allocated(dx5%dcm)) deallocate(dx5%dcm)
+        allocate (dx5%dcm(nparams, ncp))
+        if (allocated(dx6%dcm)) deallocate(dx6%dcm)
+        allocate (dx6%dcm(nparams, ncp))
+        if (allocated(dxidwn%dcm)) deallocate(dxidwn%dcm)
+        allocate (dxidwn%dcm(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                ! x1
+                temp1                   = du3%dcm(j_thr, i, j)
+                temp2                   = dv2_bot%dcm(j_thr, i, j) - dp_line%dcm(j_thr, i, j)
+                dx1%dcm(i, j)           = (temp1 * (yb - ya)) + (xa * temp2)
+
+                ! x2
+                temp1                   = dth%dcm(i_dwn, i, j)
+                temp2                   = du2_bot%dcm(j_thr, i, j) - du3%dcm(j_thr, i, j)
+                dx2%dcm(i, j)           = (temp1 * (xb - xa)) + (yc * temp2)
+
+                ! x3
+                temp1                   = dth%dcm(i_dwn + 1, i, j) - dth%dcm(i_dwn, i, j)
+                temp2                   = dm%dcm(i_dwn + 1, i, j) - dm%dcm(i_dwn, i, j)
+                temp3                   = du2_bot%dcm(j_thr, i, j) - du3%dcm(j_thr, i, j)
+                temp4                   = dm%dcm(i_dwn, i, j)
+                dx3%dcm(i, j)           = (((temp1/(xd - xc)) - (((yd - yc)/((xd - xc)**2)) * temp2)) * (xb - xa) * &
+                                           xc) + (((yd - yc)/(xd - xc)) * temp3 * xc) + (((yd - yc)/(xd - xc)) *    &
+                                           (xb - xa) * temp4)
+
+                ! x4
+                temp1                   = dp_line%dcm(j_thr, i, j)
+                temp2                   = du2_bot%dcm(j_thr, i, j) - du3%dcm(j_thr, i, j)
+                dx4%dcm(i, j)           = (temp1 * (xb - xa)) + (ya * temp2)
+
+                ! x5
+                dx5%dcm(i, j)           = dv2_bot%dcm(j_thr, i, j) - dp_line%dcm(j_thr, i, j)
+
+                ! x6
+                temp1                   = dth%dcm(i_dwn + 1, i, j) - dth%dcm(i_dwn, i, j)
+                temp2                   = du2_bot%dcm(j_thr, i, j) - du3%dcm(j_thr, i, j)
+                temp3                   = dm%dcm(i_dwn + 1, i, j) - dm%dcm(i_dwn, i, j)
+                dx6%dcm(i, j)           = (((temp1 * (xb - xa)) + ((yd - yc) * temp2))/(xd - xc)) - &
+                                          (((yd - yc) * (xb - xa) * temp3)/((xd - xc)**2))
+
+                ! xint
+                temp1                   = dx1%dcm(i, j) + dx2%dcm(i, j) - dx3%dcm(i, j) - &
+                                          dx4%dcm(i, j)
+                temp2                   = dx5%dcm(i, j) - dx6%dcm(i, j)
+                dxidwn%dcm(i, j)        = (temp1/(x5 - x6)) - (((x1 + x2 - x3 - x4)/((x5 - x6)**2)) * temp2)
+
+            end do
+        end do
+
+
+        !
+        ! Mean-line second derivative control points
+        !
+        nparams                         = size(curv_ycp_ders, 1)
+        ncp                             = size(curv_ycp_ders, 3)
+        if (allocated(dx1%dcurv)) deallocate(dx1%dcurv)
+        allocate (dx1%dcurv(nparams, ncp))
+        if (allocated(dx2%dcurv)) deallocate(dx2%dcurv)
+        allocate (dx2%dcurv(nparams, ncp))
+        if (allocated(dx3%dcurv)) deallocate(dx3%dcurv)
+        allocate (dx3%dcurv(nparams, ncp))
+        if (allocated(dx4%dcurv)) deallocate(dx4%dcurv)
+        allocate (dx4%dcurv(nparams, ncp))
+        if (allocated(dx5%dcurv)) deallocate(dx5%dcurv)
+        allocate (dx5%dcurv(nparams, ncp))
+        if (allocated(dx6%dcurv)) deallocate(dx6%dcurv)
+        allocate (dx6%dcurv(nparams, ncp))
+        if (allocated(dxidwn%dcurv)) deallocate(dxidwn%dcurv)
+        allocate (dxidwn%dcurv(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                ! x1
+                temp1                   = du3%dcurv(j_thr, i, j)
+                temp2                   = dv2_bot%dcurv(j_thr, i, j) - dp_line%dcurv(j_thr, i, j)
+                dx1%dcurv(i, j)         = (temp1 * (yb - ya)) + (xa * temp2)
+
+                ! x2
+                temp1                   = dth%dcurv(i_dwn, i, j)
+                temp2                   = du2_bot%dcurv(j_thr, i, j) - du3%dcurv(j_thr, i, j)
+                dx2%dcurv(i, j)         = (temp1 * (xb - xa)) + (yc * temp2)
+
+                ! x3
+                temp1                   = dth%dcurv(i_dwn + 1, i, j) - dth%dcurv(i_dwn, i, j)
+                temp2                   = dm%dcurv(i_dwn + 1, i, j) - dm%dcurv(i_dwn, i, j)
+                temp3                   = du2_bot%dcurv(j_thr, i, j) - du3%dcurv(j_thr, i, j)
+                temp4                   = dm%dcurv(i_dwn, i, j)
+                dx3%dcurv(i, j)         = (((temp1/(xd - xc)) - (((yd - yc)/((xd - xc)**2)) * temp2)) * (xb - xa) * &
+                                           xc) + (((yd - yc)/(xd - xc)) * temp3 * xc) + (((yd - yc)/(xd - xc)) *    &
+                                           (xb - xa) * temp4)
+
+                ! x4
+                temp1                   = dp_line%dcurv(j_thr, i, j)
+                temp2                   = du2_bot%dcurv(j_thr, i, j) - du3%dcurv(j_thr, i, j)
+                dx4%dcurv(i, j)         = (temp1 * (xb - xa)) + (ya * temp2)
+
+                ! x5
+                dx5%dcurv(i, j)         = dv2_bot%dcurv(j_thr, i, j) - dp_line%dcurv(j_thr, i, j)
+
+                ! x6
+                temp1                   = dth%dcurv(i_dwn + 1, i, j) - dth%dcurv(i_dwn, i, j)
+                temp2                   = du2_bot%dcurv(j_thr, i, j) - du3%dcurv(j_thr, i, j)
+                temp3                   = dm%dcurv(i_dwn + 1, i, j) - dm%dcurv(i_dwn, i, j)
+                dx6%dcurv(i, j)         = (((temp1 * (xb - xa)) + ((yd - yc) * temp2))/(xd - xc)) - &
+                                          (((yd - yc) * (xb - xa) * temp3)/((xd - xc)**2))
+
+                ! xint
+                temp1                   = dx1%dcurv(i, j) + dx2%dcurv(i, j) - dx3%dcurv(i, j) - &
+                                          dx4%dcurv(i, j)
+                temp2                   = dx5%dcurv(i, j) - dx6%dcurv(i, j)
+                dxidwn%dcurv(i, j)      = (temp1/(x5 - x6)) - (((x1 + x2 - x3 - x4)/((x5 - x6)**2)) * temp2)
+
+            end do
+        end do
+
+
+        !
+        ! NACA thickness distribution control points
+        !
+        nparams                         = size(thk_ycp_ders, 1)
+        ncp                             = size(thk_ycp_ders, 3)
+        if (allocated(dx1%dt)) deallocate(dx1%dt)
+        allocate (dx1%dt(nparams, ncp))
+        if (allocated(dx2%dt)) deallocate(dx2%dt)
+        allocate (dx2%dt(nparams, ncp))
+        if (allocated(dx3%dt)) deallocate(dx3%dt)
+        allocate (dx3%dt(nparams, ncp))
+        if (allocated(dx4%dt)) deallocate(dx4%dt)
+        allocate (dx4%dt(nparams, ncp))
+        if (allocated(dx5%dt)) deallocate(dx5%dt)
+        allocate (dx5%dt(nparams, ncp))
+        if (allocated(dx6%dt)) deallocate(dx6%dt)
+        allocate (dx6%dt(nparams, ncp))
+        if (allocated(dxidwn%dt)) deallocate(dxidwn%dt)
+        allocate (dxidwn%dt(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                ! x1
+                temp1                   = du3%dt(j_thr, i, j)
+                temp2                   = dv2_bot%dt(j_thr, i, j) - dp_line%dt(j_thr, i, j)
+                dx1%dt(i, j)            = (temp1 * (yb - ya)) + (xa * temp2)
+
+                ! x2
+                temp1                   = dth%dt(i_dwn, i, j)
+                temp2                   = du2_bot%dt(j_thr, i, j) - du3%dt(j_thr, i, j)
+                dx2%dt(i, j)            = (temp1 * (xb - xa)) + (yc * temp2)
+
+                ! x3
+                temp1                   = dth%dt(i_dwn + 1, i, j) - dth%dt(i_dwn, i, j)
+                temp2                   = dm%dt(i_dwn + 1, i, j) - dm%dt(i_dwn, i, j)
+                temp3                   = du2_bot%dt(j_thr, i, j) - du3%dt(j_thr, i, j)
+                temp4                   = dm%dt(i_dwn, i, j)
+                dx3%dt(i, j)            = (((temp1/(xd - xc)) - (((yd - yc)/((xd - xc)**2)) * temp2)) * (xb - xa) * &
+                                           xc) + (((yd - yc)/(xd - xc)) * temp3 * xc) + (((yd - yc)/(xd - xc)) *    &
+                                           (xb - xa) * temp4)
+
+                ! x4
+                temp1                   = dp_line%dt(j_thr, i, j)
+                temp2                   = du2_bot%dt(j_thr, i, j) - du3%dt(j_thr, i, j)
+                dx4%dt(i, j)            = (temp1 * (xb - xa)) + (ya * temp2)
+
+                ! x5
+                dx5%dt(i, j)            = dv2_bot%dt(j_thr, i, j) - dp_line%dt(j_thr, i, j)
+
+                ! x6
+                temp1                   = dth%dt(i_dwn + 1, i, j) - dth%dt(i_dwn, i, j)
+                temp2                   = du2_bot%dt(j_thr, i, j) - du3%dt(j_thr, i, j)
+                temp3                   = dm%dt(i_dwn + 1, i, j) - dm%dt(i_dwn, i, j)
+                dx6%dt(i, j)            = (((temp1 * (xb - xa)) + ((yd - yc) * temp2))/(xd - xc)) - &
+                                          (((yd - yc) * (xb - xa) * temp3)/((xd - xc)**2))
+
+                ! xint
+                temp1                   = dx1%dt(i, j) + dx2%dt(i, j) - dx3%dt(i, j) - &
+                                          dx4%dt(i, j)
+                temp2                   = dx5%dt(i, j) - dx6%dt(i, j)
+                dxidwn%dt(i, j)         = (temp1/(x5 - x6)) - (((x1 + x2 - x3 - x4)/((x5 - x6)**2)) * temp2)
+
+            end do
+        end do
+
+
+
+        !
+        ! Derivatives of y1, y2 and y3
+        !
+        ! in_beta control points
+        !
+        nparams                         = 2
+        ncp                             = cpinbeta
+        if (allocated(dy1%dinbeta)) deallocate(dy1%dinbeta)
+        allocate (dy1%dinbeta(nparams, ncp))
+        if (allocated(dy2%dinbeta)) deallocate(dy2%dinbeta)
+        allocate (dy2%dinbeta(nparams, ncp))
+        if (allocated(dy3%dinbeta)) deallocate(dy3%dinbeta)
+        allocate (dy3%dinbeta(nparams, ncp))
+        if (allocated(dyidwn%dinbeta)) deallocate(dyidwn%dinbeta)
+        allocate (dyidwn%dinbeta(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                !y1
+                dy1%dinbeta(i, j)       = dth%dinbeta(i_dwn, i, j)
+
+                ! y2
+                temp1                   = dxidwn%dinbeta(i, j) - dm%dinbeta(i_dwn, i, j)
+                temp2                   = dm%dinbeta(i_dwn + 1, i, j) - dm%dinbeta(i_dwn, i, j)
+                dy2%dinbeta(i, j)       = (temp1/(xd - xc)) - (((xint - xc)/((xd - xc)**2)) * temp2)
+
+                ! y3
+                dy3%dinbeta(i, j)       = dth%dinbeta(i_dwn + 1, i, j) - dth%dinbeta(i_dwn, i, j)
+
+                ! yint
+                dyidwn%dinbeta(i, j)    = dy1%dinbeta(i, j) + ((y3 * dy2%dinbeta(i, j)) + (y2 * dy3%dinbeta(i, j)))
+
+            end do
+        end do
+
+
+        !
+        ! out_beta control points
+        !
+        nparams                         = 2
+        ncp                             = cpoutbeta
+        if (allocated(dy1%doutbeta)) deallocate(dy1%doutbeta)
+        allocate (dy1%doutbeta(nparams, ncp))
+        if (allocated(dy2%doutbeta)) deallocate(dy2%doutbeta)
+        allocate (dy2%doutbeta(nparams, ncp))
+        if (allocated(dy3%doutbeta)) deallocate(dy3%doutbeta)
+        allocate (dy3%doutbeta(nparams, ncp))
+        if (allocated(dyidwn%doutbeta)) deallocate(dyidwn%doutbeta)
+        allocate (dyidwn%doutbeta(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                !y1
+                dy1%doutbeta(i, j)      = dth%doutbeta(i_dwn, i, j)
+
+                ! y2
+                temp1                   = dxidwn%doutbeta(i, j) - dm%doutbeta(i_dwn, i, j)
+                temp2                   = dm%doutbeta(i_dwn + 1, i, j) - dm%doutbeta(i_dwn, i, j)
+                dy2%doutbeta(i, j)      = (temp1/(xd - xc)) - (((xint - xc)/((xd - xc)**2)) * temp2)
+
+                ! y3
+                dy3%doutbeta(i, j)      = dth%doutbeta(i_dwn + 1, i, j) - dth%doutbeta(i_dwn, i, j)
+
+                ! yint
+                dyidwn%doutbeta(i, j)   = dy1%doutbeta(i, j) + ((y3 * dy2%doutbeta(i, j)) + (y2 * dy3%doutbeta(i, j)))
+
+            end do
+        end do
+
+
+        !
+        ! Chord multiplier control points
+        !
+        nparams                         = 2
+        ncp                             = cpchord
+        if (allocated(dy1%dcm)) deallocate(dy1%dcm)
+        allocate (dy1%dcm(nparams, ncp))
+        if (allocated(dy2%dcm)) deallocate(dy2%dcm)
+        allocate (dy2%dcm(nparams, ncp))
+        if (allocated(dy3%dcm)) deallocate(dy3%dcm)
+        allocate (dy3%dcm(nparams, ncp))
+        if (allocated(dyidwn%dcm)) deallocate(dyidwn%dcm)
+        allocate (dyidwn%dcm(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                !y1
+                dy1%dcm(i, j)           = dth%dcm(i_dwn, i, j)
+
+                ! y2
+                temp1                   = dxidwn%dcm(i, j) - dm%dcm(i_dwn, i, j)
+                temp2                   = dm%dcm(i_dwn + 1, i, j) - dm%dcm(i_dwn, i, j)
+                dy2%dcm(i, j)           = (temp1/(xd - xc)) - (((xint - xc)/((xd - xc)**2)) * temp2)
+
+                ! y3
+                dy3%dcm(i, j)           = dth%dcm(i_dwn + 1, i, j) - dth%dcm(i_dwn, i, j)
+
+                ! yint
+                dyidwn%dcm(i, j)        = dy1%dcm(i, j) + ((y3 * dy2%dcm(i, j)) + (y2 * dy3%dcm(i, j)))
+
+            end do
+        end do
+
+
+        !
+        ! Mean-line second derivative control points
+        !
+        nparams                         = size(curv_ycp_ders, 1)
+        ncp                             = size(curv_ycp_ders, 3)
+        if (allocated(dy1%dcurv)) deallocate(dy1%dcurv)
+        allocate (dy1%dcurv(nparams, ncp))
+        if (allocated(dy2%dcurv)) deallocate(dy2%dcurv)
+        allocate (dy2%dcurv(nparams, ncp))
+        if (allocated(dy3%dcurv)) deallocate(dy3%dcurv)
+        allocate (dy3%dcurv(nparams, ncp))
+        if (allocated(dyidwn%dcurv)) deallocate(dyidwn%dcurv)
+        allocate (dyidwn%dcurv(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                !y1
+                dy1%dcurv(i, j)         = dth%dcurv(i_dwn, i, j)
+
+                ! y2
+                temp1                   = dxidwn%dcurv(i, j) - dm%dcurv(i_dwn, i, j)
+                temp2                   = dm%dcurv(i_dwn + 1, i, j) - dm%dcurv(i_dwn, i, j)
+                dy2%dcurv(i, j)         = (temp1/(xd - xc)) - (((xint - xc)/((xd - xc)**2)) * temp2)
+
+                ! y3
+                dy3%dcurv(i, j)         = dth%dcurv(i_dwn + 1, i, j) - dth%dcurv(i_dwn, i, j)
+
+                ! yint
+                dyidwn%dcurv(i, j)      = dy1%dcurv(i, j) + ((y3 * dy2%dcurv(i, j)) + (y2 * dy3%dcurv(i, j)))
+
+            end do
+        end do
+
+
+        !
+        ! NACA thickness distribution control points
+        !
+        nparams                         = size(thk_ycp_ders, 1)
+        ncp                             = size(thk_ycp_ders, 3)
+        if (allocated(dy1%dt)) deallocate(dy1%dt)
+        allocate (dy1%dt(nparams, ncp))
+        if (allocated(dy2%dt)) deallocate(dy2%dt)
+        allocate (dy2%dt(nparams, ncp))
+        if (allocated(dy3%dt)) deallocate(dy3%dt)
+        allocate (dy3%dt(nparams, ncp))
+        if (allocated(dyidwn%dt)) deallocate(dyidwn%dt)
+        allocate (dyidwn%dt(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+
+                !y1
+                dy1%dt(i, j)            = dth%dt(i_dwn, i, j)
+
+                ! y2
+                temp1                   = dxidwn%dt(i, j) - dm%dt(i_dwn, i, j)
+                temp2                   = dm%dt(i_dwn + 1, i, j) - dm%dt(i_dwn, i, j)
+                dy2%dt(i, j)            = (temp1/(xd - xc)) - (((xint - xc)/((xd - xc)**2)) * temp2)
+
+                ! y3
+                dy3%dt(i, j)            = dth%dt(i_dwn + 1, i, j) - dth%dt(i_dwn, i, j)
+
+                ! yint
+                dyidwn%dt(i, j)         = dy1%dt(i, j) + ((y3 * dy2%dt(i, j)) + (y2 * dy3%dt(i, j)))
+
+            end do
+        end do
+
+
+    end subroutine interdwn_ders
+    !-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    !
+    ! Compute derivatives of the (m', theta) minimum throat
+    ! wrt the spanwise control points of in_beta, out_beta,
+    ! chord multiplier, mean-line second derivative and
+    ! NACA thickness distribution. Derivatives are stored in
+    ! module global arrays.
+    !
+    ! Input parameters: pitch           - pitch (= 2pi/nbls) for the current bladerow
+    !                   angle           - array containing values of arctan(v'_m(u))
+    !                   sang            - stagger for the current spanwise section
+    !                   j_thr           - index used in intersection point computation
+    !                   i_up            - index used in intersection point computation
+    !                   i_dwn           - index used in intersection point computation
+    !                   throat_coord    - coordinates of the point defining the minimum throat
+    !                   min_thr         - minimum throat value
+    !
+    !-----------------------------------------------------------------------------------------------
+    subroutine min_throat_ders (pitch, angle, sang, j_thr, i_up, i_dwn, throat_coord, min_thr)
+        use globvar,            only: cpinbeta, cpoutbeta, cpchord, curv_ycp_ders, thk_ycp_ders, js
+        use file_operations,    only: write_physical_ders
+
+        real,                   intent(in)      :: pitch
+        real,                   intent(in)      :: angle(:)
+        real,                   intent(in)      :: sang
+        integer,                intent(in)      :: j_thr
+        integer,                intent(in)      :: i_up
+        integer,                intent(in)      :: i_dwn
+        real,                   intent(in)      :: throat_coord(4)
+        real,                   intent(in)      :: min_thr
+
+        ! Local variables
+        integer                                 :: nparams, ncp, i, j
+        real                                    :: temp1, temp2
+
+
+        ! Compute derivatives of throat computation quantities
+        call throat_ders (pitch, angle, sang)
+
+        ! Compute derivatives of throat_coord(1) and throat_coord(2)
+        call interup_ders (j_thr, i_up)
+
+        ! Compute derivatives of throat_coord(3) and throat_coord(4)
+        call interdwn_ders (j_thr, i_dwn)
+
+
+        !
+        ! Derivatives of 2D min_throat
+        !
+        ! in_beta control points
+        !
+        nparams                         = 2
+        ncp                             = cpinbeta
+        if (allocated(dthr%dinbeta)) deallocate(dthr%dinbeta)
+        allocate (dthr%dinbeta(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+                temp1                   = dxiup%dinbeta(i, j) - dxidwn%dinbeta(i, j)
+                temp2                   = dyiup%dinbeta(i, j) - dyidwn%dinbeta(i, j)
+                dthr%dinbeta(i, j)      = (ONE/min_thr) * (((throat_coord(1) - throat_coord(3)) * temp1) + &
+                                          ((throat_coord(2) - throat_coord(4)) * temp2))
+            end do
+
+            ! Write derivatives to file
+            if (js == 1) then
+                call write_physical_ders (2, .false., 3, i, dthr%dinbeta(i, :))
+            else
+                call write_physical_ders (2, .true., 3, i, dthr%dinbeta(i, :))
+            end if
+        end do
+
+
+        !
+        ! out_beta control points
+        !
+        nparams                         = 2
+        ncp                             = cpoutbeta
+        if (allocated(dthr%doutbeta)) deallocate(dthr%doutbeta)
+        allocate (dthr%doutbeta(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+                temp1                   = dxiup%doutbeta(i, j) - dxidwn%doutbeta(i, j)
+                temp2                   = dyiup%doutbeta(i, j) - dyidwn%doutbeta(i, j)
+                dthr%doutbeta(i, j)     = (ONE/min_thr) * (((throat_coord(1) - throat_coord(3)) * temp1) + &
+                                          ((throat_coord(2) - throat_coord(4)) * temp2))
+            end do
+
+            ! Write derivatives to file
+            if (js == 1) then
+                call write_physical_ders (2, .false., 4, i, dthr%doutbeta(i, :))
+            else
+                call write_physical_ders (2, .true., 4, i, dthr%doutbeta(i, :))
+            end if
+        end do
+
+
+        !
+        ! Chord multiplier control points
+        !
+        nparams                         = 2
+        ncp                             = cpchord
+        if (allocated(dthr%dcm)) deallocate(dthr%dcm)
+        allocate (dthr%dcm(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+                temp1                   = dxiup%dcm(i, j) - dxidwn%dcm(i, j)
+                temp2                   = dyiup%dcm(i, j) - dyidwn%dcm(i, j)
+                dthr%dcm(i, j)          = (ONE/min_thr) * (((throat_coord(1) - throat_coord(3)) * temp1) + &
+                                          ((throat_coord(2) - throat_coord(4)) * temp2))
+            end do
+
+            ! Write derivatives to file
+            if (js == 1) then
+                call write_physical_ders (2, .false., 5, i, dthr%dcm(i, :))
+            else
+                call write_physical_ders (2, .true., 5, i, dthr%dcm(i, :))
+            end if
+        end do
+
+
+        !
+        ! Mean-line second derivative control points
+        !
+        nparams                         = size(curv_ycp_ders, 1)
+        ncp                             = size(curv_ycp_ders, 3)
+        if (allocated(dthr%dcurv)) deallocate(dthr%dcurv)
+        allocate (dthr%dcurv(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+                temp1                   = dxiup%dcurv(i, j) - dxidwn%dcurv(i, j)
+                temp2                   = dyiup%dcurv(i, j) - dyidwn%dcurv(i, j)
+                dthr%dcurv(i, j)        = (ONE/min_thr) * (((throat_coord(1) - throat_coord(3)) * temp1) + &
+                                          ((throat_coord(2) - throat_coord(4)) * temp2))
+            end do
+
+            ! Write derivatives to file
+            if (js == 1) then
+                call write_physical_ders (2, .false., 6, i, dthr%dcurv(i, :))
+            else
+                call write_physical_ders (2, .true., 6, i, dthr%dcurv(i, :))
+            end if
+        end do
+
+
+        !
+        ! NACA thickness distribution control points
+        !
+        nparams                         = size(thk_ycp_ders, 1)
+        ncp                             = size(thk_ycp_ders, 3)
+        if (allocated(dthr%dt)) deallocate(dthr%dt)
+        allocate (dthr%dt(nparams, ncp))
+
+        do i = 1, nparams
+            do j = 1, ncp
+                temp1                   = dxiup%dt(i, j) - dxidwn%dt(i, j)
+                temp2                   = dyiup%dt(i, j) - dyidwn%dt(i, j)
+                dthr%dt(i, j)           = (ONE/min_thr) * (((throat_coord(1) - throat_coord(3)) * temp1) + &
+                                          ((throat_coord(2) - throat_coord(4)) * temp2))
+            end do
+
+            ! Write derivatives to file
+            if (js == 1) then
+                call write_physical_ders (2, .false., 7, i, dthr%dt(i, :))
+            else
+                call write_physical_ders (2, .true., 7, i, dthr%dt(i, :))
+            end if
+        end do
+
+
+    end subroutine min_throat_ders
     !-----------------------------------------------------------------------------------------------
 
 
