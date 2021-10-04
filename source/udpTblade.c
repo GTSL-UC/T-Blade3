@@ -705,7 +705,7 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     }
 
     /* create the blade surface */
-    status = EG_skinning(context, nsec, ecurves, 3, &esurf);
+    status = EG_skinning(nsec, ecurves, 3, &esurf);
     DPRINT1("EG_skinning -> status=%d\n", status);
 
 #ifdef DEBUG
