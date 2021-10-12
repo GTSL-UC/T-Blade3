@@ -69,7 +69,8 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                                                    dsang_dy_inbeta(:), dchrd_dx_inbeta(:), dchrd_dy_inbeta(:),                  &
                                                    dslope_dx_inbeta(:,:), dslope_dy_inbeta(:,:), dcam_dx_inbeta(:,:),           &
                                                    dcam_dy_inbeta(:,:), dslope_doutbeta(:,:,:), dcam_doutbeta(:,:,:),           &
-                                                   dsang_doutbeta(:,:), dchrd_doutbeta(:,:), dchrd_dcm(:,:), surf_curv(:,:)
+                                                   dsang_doutbeta(:,:), dchrd_doutbeta(:,:), dchrd_dcm(:,:), surf_curv(:,:),    &
+                                                   phi(:,:)
     real,                   allocatable         :: dxbot_dt(:,:,:), dybot_dt(:,:,:), dxtop_dt(:,:,:), dytop_dt(:,:,:),          &
                                                    dxbot_dcurv(:,:,:), dybot_dcurv(:,:,:), dxtop_dcurv(:,:,:),                  &
                                                    dytop_dcurv(:,:,:), du_dt(:,:,:), dv_dt(:,:,:), du_dcurv(:,:,:),             &
@@ -313,7 +314,9 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     allocate(dcur_du(np))
 
     if (allocated(surf_curv)) deallocate(surf_curv)
-    allocate(surf_curv(4, np))
+    allocate(surf_curv(2, np))
+    if (allocated(phi)) deallocate(phi)
+    allocate(phi(2, np))
 
 
 
@@ -755,7 +758,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
             ! Writing a file in developer mode for debugging.
             if (isdev) then
 
-                ! write_thick_multi_cp in file_operations               
+               ! write_thick_multi_cp in file_operations
                 call write_thick_multi_cp(sec,casename,ncp,xcp_thk,ycp_thk) 
 
             end if 
@@ -963,7 +966,8 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
         end if
 
 
-        call blade_surface_curvatures(np, splinedata(1:4,:), dcur_du, thickness_data, surf_curv)
+        call blade_surface_curvatures(np, xbot, ybot, xtop, ytop, splinedata(1:4,:), &
+                                      dcur_du, thickness_data, phi, surf_curv)
 
         !
         ! Compute sensitivities of the (u, v) blade sections

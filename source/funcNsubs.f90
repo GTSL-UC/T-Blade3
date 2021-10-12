@@ -4843,24 +4843,58 @@ module funcNsubs
 
 
 
+    !
+    ! Subroutine to compute the curvature of the
+    ! non-dimensional blade section. The suction
+    ! and pressure sides of the blade can be
+    ! viewed as being parametric in u and this
+    ! is used to compute the curvature of the blade
+    ! section - separately for the suction and pressure
+    ! sides
+    !
+    ! Input parameters: np              - number of points along the mean-line
+    !                   ubot            - x coordinate of the pressure side (used to compute arclength)
+    !                   vbot            - y coordinate of the pressure side (used to compute arclength)
+    !                   utop            - x coordinate of the suction side (used to compute arclength)
+    !                   vtop            - y coordinate of the suction side (used to compute arclength)
+    !                   splinedata      - array containing the camber line coordinates and
+    !                                     its 1st and 2nd derivatives wrt u
+    !                   d3v             - 3rd derivative of the camber-line wrt u (computed
+    !                                     in bsplinecam.f90)
+    !                   thk_data        - array containing the NACA thickness distribution
+    !                                     and its derivatives wrt u
+    !
     !------------------------------------------------------------------------------------------------------
-    subroutine blade_surface_curvatures (np, splinedata, d3v, thk_data, curv)
+    subroutine blade_surface_curvatures (np, ubot, vbot, utop, vtop, splinedata, d3v, thk_data, phi, curv)
         !use globvar,    only: js
 
         integer,                    intent(in)          :: np
+        real,                       intent(in)          :: ubot(np)
+        real,                       intent(in)          :: vbot(np)
+        real,                       intent(in)          :: utop(np)
+        real,                       intent(in)          :: vtop(np)
         real,                       intent(in)          :: splinedata(4, np)
         real,                       intent(in)          :: d3v(np)
         real,                       intent(in)          :: thk_data(np, 3)
-        real,                       intent(inout)       :: curv(4, np)
+        real,                       intent(inout)       :: phi(2, np)
+        real,                       intent(inout)       :: curv(2, np)
 
         ! Local variables
+        real                                            :: s_top(np), s_bot(np)
         real                                            :: u(np), v(np), dv(np), d2v(np), t(np), dt(np), d2t(np)
+        real                                            :: df(np), dg(np), d2f(np), d2g(np)
         real                                            :: dutop(np), dvtop(np), d2utop(np), d2vtop(np)
         real                                            :: dubot(np), dvbot(np), d2ubot(np), d2vbot(np)
         integer                                         :: i
         real                                            :: temp, temp_1, temp_2, temp_3
 
 
+        ! Compute arclength of top and bottom surfaces
+        call arclength(np, utop, vtop, s_top)
+        call arclength(np, ubot, vbot, s_bot)
+
+
+        ! Initialize curvature array
         curv                        = 0.0
 
         ! Array shorthands for derivatives of mean-line and
@@ -4880,49 +4914,81 @@ module funcNsubs
         !
         do i = 1, np
 
-            ! First derivatives of top and bottom u_b
+            !
+            ! f = t * sin(atan(v')) is used to compute the
+            ! top and bottom surface u_b coordinates
+            !
+            ! u_b, top = u - f
+            ! u_b, bot = u + f
+            !
+            ! First derivative of f
+            !
             temp                    = sqrt(1.0 + (dv(i)**2))
             temp_1                  = dt(i) * dv(i)
             temp_2                  = t(i) * d2v(i)
-            dutop(i)                = 1.0 - (temp_1/temp) - (temp_2/(temp**3))
-            dubot(i)                = 1.0 + (temp_1/temp) + (temp_2/(temp**3))
+            df(i)                   = (temp_1/temp) + (temp_2/(temp**3))
 
-            ! First derivatives of top and bottom v_b
+            ! Second derivative of f
+            temp                    = sqrt(1.0 + (dv(i)**2))
+            temp_1                  = (d2t(i) * dv(i)) + (dt(i) * d2v(i))
+            temp_2                  = (dt(i) * d2v(i)) + (t(i) * d3v(i)) - (dt(i) * (dv(i)**2) * d2v(i))
+            temp_3                  = 3.0 * t(i) * dv(i) * (d2v(i)**2)
+            d2f(i)                  = (temp_1/temp) + (temp_2/(temp**3)) - (temp_3/(temp**5))
+
+
+            !
+            ! g = t * cos(atan(v')) is used to compute the
+            ! top and bottom surface v_b coordinates
+            !
+            ! v_b, top = v' + g
+            ! v_b, bot = v' - g
+            !
+            ! First derivative of g
+            !
             temp                    = sqrt(1.0 + (dv(i)**2))
             temp_1                  = dt(i)
             temp_2                  = t(i) * dv(i) * d2v(i)
-            dvtop(i)                = 1.0 + (temp_1/temp) - (temp_2/(temp**3))
-            dvbot(i)                = 1.0 - (temp_1/temp) + (temp_2/(temp**3))
+            dg(i)                   = (temp_1/temp) - (temp_2/(temp**3))
 
-            ! Second derivatives of top and bottom u_b
+            ! Second derivative of g
             temp                    = sqrt(1.0 + (dv(i)**2))
-            temp_1                  = (d2t(i) * dv(i)) + (dt(i) * d2v(i))
-            temp_2                  = (dt(i) * (dv(i)**2) * d2v(i)) - (dt(i) * d2v(i)) - (t(i) * d3v(i))
-            temp_3                  = 3.0 * t(i) * dv(i) * (d2v(i)**2)
-            d2utop(i)               = (-temp_1/temp) + (temp_2/(temp**3)) + (temp_3/(temp**5))
-            d2ubot(i)               = -d2utop(i)
-
-            ! Second derivatives of top and bottom v_b
             temp_1                  = d2t(i)
-            temp_2                  = (2.0 * dt(i) * dv(i) * d2v(i)) + (t(i) * (d2v(i)**2)) + &
-                                      (t(i) * dv(i) * d2v(i))
-            temp_3                  = (3.0 * t(i) * (dv(i)**2) * (d2v(i)**2))
-            d2vtop(i)               = (temp_1/temp) - (temp_2/(temp**3)) + (temp_3/(temp**5))
-            d2vbot(i)               = -d2vtop(i)
+            temp_2                  = (2.0 * dt(i) * dv(i) * d2v(i)) + (dt(i) * (d2v(i)**2)) + (t(i) * dv(i) * d3v(i))
+            temp_3                  = 3.0 * t(i) * ((dv(i) * d2v(i))**2)
+            d2g(i)                  = (temp_1/temp) - (temp_2/(temp**3)) + (temp_3/(temp**5))
+
+
+            ! Derivatives of u_b, top
+            dutop(i)                = 1.0 - df(i)
+            d2utop(i)               = -d2f(i)
+
+            ! Derivatives of v_b, top
+            dvtop(i)                = dv(i) + dg(i)
+            d2vtop(i)               = d2v(i) + d2g(i)
+
+            ! Derivatives of u_b, bot
+            dubot(i)                = 1.0 + df(i)
+            d2ubot(i)               = d2f(i)
+
+            ! Derivatives of v_b, bot
+            dvbot(i)                = dv(i) - dg(i)
+            d2vbot(i)               = d2v(i) - d2g(i)
+
+
+            ! Tangential angle for top and bottom surface
+            phi(1, i)               = atan(dvtop(i)/dutop(i))
+            phi(2, i)               = atan(dvbot(i)/dubot(i))
+
 
             ! Curvature of top surface
-            temp_1                  = (dutop(i) * d2vtop(i)) - (dvtop(i) * d2utop(i))
-            temp_2                  = sqrt((dutop(i))**2 + (dvtop(i))**2)
-            curv(1, i)              = (abs(temp_1))/(temp_2**3)
+            temp                    = sqrt((dutop(i))**2 + (dvtop(i))**2)
+            curv(1, i)              = ((dutop(i) * d2vtop(i)) - (dvtop(i) * d2utop(i)))/(temp**3)
 
-            ! Curvature of bottom surface
-            temp_1                  = (dubot(i) * d2vbot(i)) - (dvbot(i) * d2ubot(i))
-            temp_2                  = sqrt((dubot(i))**2 + (dvbot(i))**2)
-            curv(3, i)              = (abs(temp_1))/(temp_2**3)
+            ! Curvature of top surface
+            temp                    = sqrt((dubot(i))**2 + (dvbot(i))**2)
+            curv(2, i)              = ((dubot(i) * d2vbot(i)) - (dvbot(i) * d2ubot(i)))/(temp**3)
 
-            !if (js == 11) print *, u(i), curv(1, i), curv(3, i)
         end do
-
 
 
     end subroutine blade_surface_curvatures

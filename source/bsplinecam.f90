@@ -650,7 +650,7 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
                 curv(i)                 = knew*bspline(ycp_seg, t)
                 cam_u(i)                = d1v_end(ncp - 2)
                 cam(i)                  = v_end(ncp - 2)
-                dcur_du(i)              = knew * d_bspline(ycp_seg, t) * dt_dx(t, xcp(j:j + 3))
+                dcur_du(i)              = knew * d_bspline(ycp_seg, t) * dt_dx(t, xcp(ncp - 3:ncp))
 
                 dslope_dxcp(i, :)       = d1v_end_xcp(ncp - 2, :) ! Derivatives of v'_m(u) wrt
                 dslope_dycp(i, :)       = d1v_end_ycp(ncp - 2, :) ! control points of u and v''_m(u)
