@@ -54,7 +54,7 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
     real,           allocatable                         :: xa(:,:), ya(:,:), xb(:,:), rb(:,:), yb(:,:), zb(:,:), xposlean(:,:), &
                                                            yposlean(:,:), zposlean(:,:), xneglean(:,:), yneglean(:,:),          &
                                                            zneglean(:,:), spline_params(:), dcpall(:,:)
-    real                                                :: chord_actual(100), mps(nxx,nax), demp, spl_eval, xxa, yya, pi, dtor, &
+    real                                                :: chord_actual(100), mps(nxx,nax), demp, spl_eval, pi, dtor,           &
                                                            dmp(nspan), mp_stack(nspan), xm_slope, rm_slope, mps_inter,          &
                                                            inter_xb(6,nspn), inter_rb(6,nspn), inter_yb(6,nspn),                &
                                                            inter_zb(6,nspn), lref, delmp(nspan), span(nspan), mpxc(nspan),      &
@@ -88,7 +88,7 @@ subroutine bladestack(nspn,X_le,X_te,R_le,R_te,nsec,scf,msle,np,stack,cpdeltam,s
                                                            dz_dlean(nspn, np, 2, cpdeltheta)
     character(:),   allocatable                         :: log_file, msg_1, msg_2, msg_3
     logical                                             :: file_open, isquiet
-    common / BladeSectionPoints /xxa(nxx,nax),yya(nxx,nax)
+    !common / BladeSectionPoints /xxa(nxx,nax),yya(nxx,nax)
 
 
 

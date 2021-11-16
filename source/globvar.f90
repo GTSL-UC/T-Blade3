@@ -46,7 +46,8 @@ module globvar
     real                            :: sinl, sext, thkc, chrdx, mr1, stak_u, stak_v, x1hub, x1tip, r1hub, r1tip
     real                            :: xb(nx), yb(nx), mp(nx,nax), xstk, xstk1, abs_zero
     real                            :: xa(nx,nax), ya(nx,nax), xms(nx,nax), rms(nx,nax)
-    real                            :: xxa, yya, scf, lref
+    real                            :: xxa(nx, nax), yya(nx, nax)
+    real                            :: scf, lref
     real                            :: tempr, xstck
     real                            :: xmsle(nspan), rmsle(nspan), xmste(nspan), rmste(nspan)
     real                            :: span(nspan), del_out_beta(nspan), out_beta_new(nspan)
@@ -132,7 +133,7 @@ module globvar
 
     
     ! Common memory block
-    common / bladesectionpoints /xxa(nx,nax),yya(nx,nax)
+    !common / bladesectionpoints /xxa(nx,nax),yya(nx,nax)
 
 
 

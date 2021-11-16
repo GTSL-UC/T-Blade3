@@ -11,7 +11,8 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                     dmprime_dt,dtheta_dt,dmprime_dinbeta,dtheta_dinbeta,dmprime_doutbeta,dtheta_doutbeta, &
                     dmprime_dcm,dtheta_dcm)
 
-    use globvar,                only: ncp_span_curv, ncp_chord_curv, ncp_span_thk, ncp_chord_thk, cpinbeta, cpoutbeta, cpchord
+    use globvar,                only: ncp_span_curv, ncp_chord_curv, ncp_span_thk, ncp_chord_thk, cpinbeta, &
+                                      cpoutbeta, cpchord, xxa, yya
     use file_operations
     use errors
     use funcNsubs
@@ -52,7 +53,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
                                                    spline_data = 6, interval = 6, pt2 = 1, TE_del = 0
     real                                        :: chrd, pitch, radius_pitch, scaling, lethk, thkmultip, aext, ainl, area, cam, &
                                                    cam_u, dtor, pi, flex, flin, fmxthk, rr1, rr2, sang, sexts, sinls, tethk,    &
-                                                   thk, ui, umxthk, xi, yi, xxa, yya, u_le, uin_le, Zweifel(nsl), ucp_top(11),  &
+                                                   thk, ui, umxthk, xi, yi, u_le, uin_le, Zweifel(nsl), ucp_top(11),            &
                                                    vcp_top(11), ucp_bot(11), vcp_bot(11), xcp_LE, ycp_LE, xcp_TE, ycp_TE,       &
                                                    cp_LE(4,2), cp_TE(4,2), a_NACA(4), d_NACA(4), t_max, u_max, t_TE, dy_dx_TE,  &
                                                    LE_round, min_throat_2D, u_translation, camber_trans, u_rot, camber_rot,     &
@@ -84,7 +85,7 @@ subroutine bladegen(nspn,thkc,mr1,sinl,sext,chrdx,js,fext,xcen,ycen,airfoil, sta
     character(:),           allocatable         :: log_file, error_msg, dev_msg, stagger_file, msg_1, msg_2
     logical                                     :: ellip, file_open, isdev, isquiet, monotonic = .true., write_to_file = .true.,&
                                                    exist
-    common / BladeSectionPoints /xxa(nxx, nax), yya(nxx, nax) 
+    !common / BladeSectionPoints /xxa(nxx, nax), yya(nxx, nax)
 
 
     !

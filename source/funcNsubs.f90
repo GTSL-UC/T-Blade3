@@ -1488,6 +1488,7 @@ module funcNsubs
     !
     !------------------------------------------------------------------------------------------------------
     subroutine get_extended_meanlines_2D (n_ext, nmean, xmean, ymean, x_ext_mean, y_ext_mean)
+        !use globvar,    only: js
 
         integer,                        intent(in)      :: n_ext, nmean
         real,                           intent(in)      :: xmean(nmean), ymean(nmean)
