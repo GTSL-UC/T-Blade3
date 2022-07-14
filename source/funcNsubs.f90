@@ -4698,9 +4698,11 @@ module funcNsubs
         ! Local variables
         real                                            :: mprime(np), mprime_periodic(np + 1), dmprime(np), &
                                                            theta(np), theta_periodic(np + 1), dtheta(np)
-        real                                            :: magnitude(np), unit_normal(np,2)
+        real                                            :: magnitude(np), unit_normal(np,2), t, pi_local, func
         real                                            :: inf_offset
 
+
+        pi_local                        = 4.0 * atan(1.0)
 
         ! 
         ! Store (m',theta) sections in local arrays
@@ -4739,11 +4741,13 @@ module funcNsubs
             inf_offset                  = tip_inf_offset
 
         do i = 1, np
+            t                           = (pi_local * (real(i - 1)/real(np - 1))) + (pi_local/2.0)
+            func                        = inf_offset!(abs(sin(t)) * inf_offset) + 0.005
             magnitude(i)                = sqrt(dmprime(i)**2 + dtheta(i)**2)
             unit_normal(i,1)            = -dtheta(i)/magnitude(i)
             unit_normal(i,2)            = dmprime(i)/magnitude(i)
-            mprime_inf(i)               = mprime(i) - (inf_offset*unit_normal(i,1))
-            theta_inf(i)                = theta(i)  - (inf_offset*unit_normal(i,2))
+            mprime_inf(i)               = mprime(i) - (func * unit_normal(i,1))
+            theta_inf(i)                = theta(i)  - (func * unit_normal(i,2))
         end do
 
 
