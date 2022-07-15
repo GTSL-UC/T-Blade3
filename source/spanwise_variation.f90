@@ -357,17 +357,17 @@ subroutine span_variation()
     !
     ! Write curvature spanwise spline data to a file, if command line option "dev" is used
     !
-    if (isdev) then
+    !if (isdev) then
 
-        if (.not. isquiet_local) print *, 'Writing spanwise curvature variation data to file'
-        call log_file_exists(log_file, nopen, file_open)
-        write(nopen,*) 'Writing spanwise curvature variation data to file'
-        call close_log_file(nopen, file_open)
-        
-        ! write_span_curv in file_operations
-        call write_span_curv(nsl,ncp_chord_curv,casename,bspline_chord_curv)
+    !    if (.not. isquiet_local) print *, 'Writing spanwise curvature variation data to file'
+    !    call log_file_exists(log_file, nopen, file_open)
+    !    write(nopen,*) 'Writing spanwise curvature variation data to file'
+    !    call close_log_file(nopen, file_open)
+    !
+    !    ! write_span_curv in file_operations
+    !    call write_span_curv(nsl,ncp_chord_curv,casename,bspline_chord_curv)
 
-    end if  ! isdev
+    !end if  ! isdev
 
 
 

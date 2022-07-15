@@ -203,7 +203,7 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
                                            dchrdx_dcm(2, cpchord), dchrd_dcm(2, cpchord)
 
     ! Local variables    
-    integer                             :: i, j, l, nopen, js
+    integer                             :: i, j, l, nopen, js, funit = 982
     real                                :: P, knew, det, k1, k2, curv(np), cam(np), cam_u(np),    &
                                            tot_cam, d1v_end(ncp - 2), v_end(ncp - 2), xcp_seg(4), &
                                            ycp_seg(4), t, angle0, camber0, intg_d2v_end(ncp - 2), &
@@ -214,9 +214,9 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
                                            dk_dx_inbeta(:), dk_dy_inbeta(:), d1v_end_dx_inbeta(:,:),                  &
                                            d1v_end_dy_inbeta(:,:), dv_end_dx_inbeta(:,:), dv_end_dy_inbeta(:,:),      &
                                            dk_doutbeta(:,:), d1v_end_doutbeta(:,:,:), dv_end_doutbeta(:,:,:)
-    character(:),   allocatable         :: log_file, error_msg, dev_msg
+    character(:),   allocatable         :: log_file, error_msg, dev_msg, curv_filename
     character(10)                       :: error_arg
-    logical                             :: file_open, isquiet
+    logical                             :: file_open, isquiet, exist
     
     ! Functions used by this subroutine
     ! bspline_t_newton in bspline3.f90
@@ -590,6 +590,21 @@ subroutine camline(casename, isdev, ncp, np, xcp, ycp, u, ainl, aext, chrdx, win
 
     end if
 
+
+
+    curv_filename                       = 'curvature_span_variation.'//trim(casename)//'.dat'
+    if (js == 1) then
+        inquire (file = curv_filename, exist = exist)
+        if (exist) then
+            open (funit, file = curv_filename, status = 'old', action = 'write')
+        else
+            open (funit, file = curv_filename, status = 'new', action = 'write')
+        end if
+    else
+        open (funit, file = curv_filename, status = 'old', position = 'append', action = 'write')
+    end if
+    write (funit, '(20F20.16)') xcp(2:ncp - 1), ycp(2:ncp - 1), knew
+    close (funit)
 
 
     !
