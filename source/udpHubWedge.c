@@ -314,7 +314,7 @@ udpExecute(ego  context,                /* (in)  EGADS context */
     }
 
     /* cache copy of arguments for future use */
-    status = cacheUdp();
+    status = cacheUdp(NULL);
     if (status < 0) {
         printf(" udpExecute: problem caching arguments\n");
     }
